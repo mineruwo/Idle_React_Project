@@ -1,4 +1,4 @@
-import '../../../CustomCss.css';
+import '../../../../CustomCSS/CustomCss.css'
 
 const NaviTap = () => {
   return (
