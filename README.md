@@ -68,6 +68,10 @@
    # Frontend (e.g., npm)
    cd frontend
    npm install
+   cd frontend_idle
+   yarn init -y          # 또는 npm init -y
+   yarn add react react-dom
+   yarn add react-scripts
    ```
 
 <br>
