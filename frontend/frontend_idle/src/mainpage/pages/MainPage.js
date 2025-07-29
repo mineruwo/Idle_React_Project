@@ -1,8 +1,17 @@
+import Footer from "../layouts/components/Footer";
+import GNB from "../layouts/components/GNB"
+import IntroComponent from "../layouts/components/IntroComponent";
+import NoticeComponent from "../layouts/components/NoticeComponent";
+
 const MainPage = () => {
     return (
-        <div>
-            Main
-        </div>
+        <>
+            <GNB />
+
+            <IntroComponent />
+            <NoticeComponent />
+            <Footer />
+        </>
     );
 }
 
