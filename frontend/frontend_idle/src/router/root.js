@@ -7,14 +7,21 @@ const Loading = <div>Loading 중...</div>
 const Main = lazy(()=> import("../mainpage/pages/MainPage"));
 const DashPage = lazy(()=> import("../Car_owner/pages/DashBoard"));
 
+const Admin = lazy(()=> import("../../src/mainpage/admin/AdminPage"))
+
 const root = createBrowserRouter([
     {
         path:"",
         element:<Suspense fallback={Loading}><Main/></Suspense>
     },
     {
+
         path:"carPage",
         element:<Suspense fallback={Loading}><DashPage/></Suspense>
+    },
+    {
+        path:"admin_PinkTruck",
+        element: <Suspense fallback={Loading}><Admin/></Suspense>
     }
 ]);
 
