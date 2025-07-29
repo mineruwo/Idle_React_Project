@@ -3,8 +3,13 @@
   margin-right: 3%;
 }
 
+#semiDiv{
+     display: flex;
+
+}
+
 #firstCardDiv{
-    display: flex;
+   
     
 }
 #secounddiv{
