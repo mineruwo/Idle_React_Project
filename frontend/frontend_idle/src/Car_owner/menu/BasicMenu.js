@@ -1,3 +1,4 @@
+const BasicMenu = () =>{
  <div class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark">
       <div class="container">
         <a href="../" class="navbar-brand">Bootswatch</a>
@@ -105,3 +106,6 @@
         </div>
       </div>
     </div>
+}
+
+export default BasicMenu

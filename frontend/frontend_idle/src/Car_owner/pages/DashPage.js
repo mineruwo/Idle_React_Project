@@ -1,4 +1,5 @@
-import BasicMenu from ""
+import BasicMenu from "../menu/BasicMenu";
+
 
 const Dashpage = ()  => {
     return(
