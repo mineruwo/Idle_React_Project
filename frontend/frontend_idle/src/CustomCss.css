@@ -1,0 +1,12 @@
+#navi-div{
+ margin-left: 3%;
+  margin-right: 3%;
+}
+
+#firstCardDiv{
+    display: flex;
+    
+}
+#secounddiv{
+    justify-content: flex-end;
+}
