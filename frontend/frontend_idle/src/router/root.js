@@ -3,7 +3,7 @@ import { createBrowserRouter } from "react-router-dom";
 
 const Loading = <div>Loading 중...</div>
 
-const Main = lazy(()=> import("../pages/MainPage"));
+const Main = lazy(()=> import("../mainpage/pages/MainPage"));
 
 const root = createBrowserRouter([
     {
