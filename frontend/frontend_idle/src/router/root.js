@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
+import shipperRouter from "./shipperRouter";
 
 const Loading = <div>Loading 중...</div>;
 
@@ -78,6 +79,7 @@ const root = createBrowserRouter([
                 <Shipper />
             </Suspense>
         ),
+        children: shipperRouter(),
     },
 ]);
 

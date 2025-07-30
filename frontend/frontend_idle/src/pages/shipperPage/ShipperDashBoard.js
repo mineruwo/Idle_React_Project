@@ -14,9 +14,7 @@ const ShipperDashBoard = () => {
             </div>
             <Footer />
         </div>
-
-
     );
-}
+};
 
 export default ShipperDashBoard;
