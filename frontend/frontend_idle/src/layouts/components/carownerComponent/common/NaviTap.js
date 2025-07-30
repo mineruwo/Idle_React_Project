@@ -1,8 +1,9 @@
-import { useNavigate } from 'react-router-dom';
+
 import '../../../../theme/CustomCss.css'
+import useCustomMove from '../../../../Car_owner/hooks/UseCustomMove';
 
 const NaviTap = () => {
-  const navigate = useNavigate();
+  const {moveToDashboard, moveToEditProfile, moveToOrders, moveToProfile, moveToSettlement, moveToVehucles} = useCustomMove();
   return (
     <div className="bs-docs-section clearfix " >
       <div className="row">
@@ -18,21 +19,21 @@ const NaviTap = () => {
 
                 <div className="collapse navbar-collapse" id="navbarColor01">
                   <ul className="navbar-nav me-auto">
-                    <li className="nav-item" onClick={()=>navigate("/carPage")}>
+                    <li className="nav-item" onClick={moveToDashboard}>
                       <a className="nav-link active" href="#">DashBoard
                         <span className="visually-hidden">(current)</span>
                       </a>
                     </li>
-                    <li className="nav-item" onClick={()=>navigate("/carPage/profile")}>
+                    <li className="nav-item" onClick={moveToProfile}>
                       <a className="nav-link" href="#"> Profile</a>
                     </li>
-                    <li className="nav-item" onClick={()=>navigate("/carPage/orders")}>
+                    <li className="nav-item" onClick={moveToOrders}>
                       <a className="nav-link" href="#">Order</a>
                     </li>
-                    <li className="nav-item" onClick={()=>navigate("/carPage/settlement")}>
+                    <li className="nav-item" onClick={moveToSettlement}>
                       <a className="nav-link" href="#">MyCars</a>
                     </li>
-                    <li className="nav-item" onClick={()=>navigate("/carPage/vehucles")}>
+                    <li className="nav-item" onClick={moveToVehucles}>
                       <a className="nav-link" href="#">Vehucles</a>
                     </li>
                   </ul>
