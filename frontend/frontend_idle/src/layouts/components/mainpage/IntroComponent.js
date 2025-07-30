@@ -5,7 +5,7 @@ const IntroComponent = () => {
     return (
         <div className="position-relative text-white">
             <img
-                src="/img/main/MainImage.png"
+                src={process.env.PUBLIC_URL + "/img/main/MainImage.png"} 
                 alt="소개 이미지"
                 className="img-fluid w-100"
             />
