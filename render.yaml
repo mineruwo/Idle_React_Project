@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: frontend-idle
+    env: static
+    rootDir: frontend/frontend_idle
+    buildCommand: yarn install && yarn build
+    staticPublishPath: build
