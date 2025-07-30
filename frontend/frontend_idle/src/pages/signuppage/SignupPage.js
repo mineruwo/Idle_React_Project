@@ -1,12 +1,13 @@
+import Footer from "../../layouts/components/common/Footer";
 import GNB from "../../layouts/components/common/GNB"
+import SignupComponent from "../../layouts/components/signup/SignupComponent"
 
 const LoginPage = () => {
     return (
         <>
             <GNB />
-
-            <p>여기는 회원가입 페이지</p>
-
+            <SignupComponent />
+            <Footer />
         </>
     );
 }

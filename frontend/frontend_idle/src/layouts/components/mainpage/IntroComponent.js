@@ -1,4 +1,5 @@
 import { Button } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
 const IntroComponent = () => {
 
@@ -12,25 +13,32 @@ const IntroComponent = () => {
 
             <div
                 className="position-absolute "
-                style={{ top: "35%", left: "15%"}}
+                style={{ top: "30%", left: "15%" }}
             >
-                <h1 className="fw-bold display-5 mb-3 text-dark">
+                <h1
+                    className="fw-bold mb-3 text-dark"
+                    style={{
+                        fontSize: "clamp(1rem, 4vw, 3rem)"
+                    }}
+                >
                     화물운송을 간편하게 연결합니다
                 </h1>
-                <p className="lead mb-4 text-dark">
+                <p
+                    className="lead mb-4 text-dark"
+                    style={{
+                        fontSize: "clamp(0.5rem, 2.5vw, 2rem)", 
+                    }}
+                >
                     화물운송을 손쉽게 연결하는 플랫폼입니다
                 </p>
                 <div className="d-flex justify-content-start gap-3 flex-wrap">
-                    <Button size="lg"
-                        style={{ backgroundColor: "#eb6864", borderColor: "#eb6864" }}
-                        className="text-white px-4">
-                        화물주로 시작하기
-                    </Button>
-                <Button variant="dark" size="lg">
-                    차주로 시작하기
-                </Button>
+                    <Link to="/login">
+                        <Button variant="dark" size="lg">
+                            시작하기
+                        </Button>
+                    </Link>
+                </div>
             </div>
-        </div>
         </div >
     );
 }
