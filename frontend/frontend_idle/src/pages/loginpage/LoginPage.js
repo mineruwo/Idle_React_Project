@@ -1,4 +1,4 @@
-import GNB from "../../mainpage/layouts/components/GNB"
+import GNB from "../../layouts/components/common/GNB"
 
 const LoginPage = () => {
     return (
