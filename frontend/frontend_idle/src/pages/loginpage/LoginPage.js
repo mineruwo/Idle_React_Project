@@ -1,13 +1,15 @@
 import GNB from "../../layouts/components/common/GNB"
+import LoginComponent from "../../layouts/components/login/LoginComponent"
 
 const LoginPage = () => {
     return (
         <>
             <GNB />
 
-            <p>여기는 로그인 페이지</p>
+            <LoginComponent />
+        
         </>
     );
 }
 
-export default LoginPage;
+            export default LoginPage;
