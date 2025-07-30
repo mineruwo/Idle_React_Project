@@ -2,12 +2,9 @@ import '../../../../CustomCSS/CustomCss.css'
 
 const NaviTap = () => {
   return (
-    <div className="bs-docs-section clearfix" id="navi-div">
+    <div className="bs-docs-section clearfix " >
       <div className="row">
         <div className="col-lg-12">
-          <div className="page-header">
-            <h1 id="navbars">Navbars</h1>
-          </div>
 
           <div className="bs-component">
             <nav className="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">

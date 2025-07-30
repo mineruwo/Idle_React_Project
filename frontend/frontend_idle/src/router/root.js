@@ -1,17 +1,25 @@
 import { lazy, Suspense } from "react";
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 
 const Loading = <div>Loading 중...</div>;
-
+//Main
 const Main = lazy(() => import("../pages/mainpage/MainPage"));
-const DashPage = lazy(() => import("../pages/carOwnerPage/DashBoard"));
 
+//CarOwner
+const CarPage = lazy(() => import("../pages/carOwnerPage/CarPage"));
+const CarDashPage = lazy(() => import("../pages/carOwnerPage/DashBoard"));
+const Order = lazy(() => import("../pages/carOwnerPage/Orders"));
+const Profile = lazy(() => import("../pages/carOwnerPage/Profile"));
+const Settlement = lazy(() => import("../pages/carOwnerPage/Settlement"));
+const Vehucles = lazy(() => import("../pages/carOwnerPage/Vehucles"));
+//Admin
 const Admin = lazy(() => import("../pages/adminPage/AdminPage"));
 
 const OrderForm = lazy(() => import("../pages/orderPage/OrderForm"));
 const Login = lazy(() => import("../pages/loginpage/LoginPage"));
 const Signup = lazy(() => import("../pages/signuppage/SignupPage"));
 const Dstest = lazy(() => import("../pages/mainpage/TestPage"));
+
 
 const root = createBrowserRouter([
     {
@@ -23,12 +31,58 @@ const root = createBrowserRouter([
         ),
     },
     {
-        path: "carPage",
+        path: 'carPage',
         element: (
             <Suspense fallback={Loading}>
-                <DashPage />
+                <CarPage />
             </Suspense>
         ),
+        children: [
+            {
+                index: true,
+                element: <Navigate to="DashBoard" replace />,
+            },
+            {
+                path: 'DashBoard',
+                element: (
+                    <Suspense fallback={Loading}>
+                        <CarDashPage />
+                    </Suspense>
+                ),
+            },
+            {
+                path: 'profile',
+                element: (
+                    <Suspense fallback={Loading}>
+                        <Profile />
+                    </Suspense>
+                ),
+            },
+            {
+                path: 'orders',
+                element: (
+                    <Suspense fallback={Loading}>
+                        <Order />
+                    </Suspense>
+                ),
+            },
+            {
+                path: 'settlement',
+                element: (
+                    <Suspense fallback={Loading}>
+                        <Settlement/>
+                    </Suspense>
+                ),
+            },
+            {
+                path: 'vehucles',
+                element: (
+                    <Suspense fallback={Loading}>
+                        <Vehucles />
+                    </Suspense>
+                ),
+            },
+        ],
     },
     {
         path: "admin_PinkTruck",
