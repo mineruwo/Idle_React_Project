@@ -1,5 +1,5 @@
-import App from "../../layouts/carownerComponent/common/DashCard";
-import NaviTap from "../../layouts/carownerComponent/common/NaviTap";
+import App from "../../layouts/components/carownerComponent/common/DashCard";
+import NaviTap from "../../layouts/components/carownerComponent/common/NaviTap";
 
 
 const Dashpage = ()  => {
