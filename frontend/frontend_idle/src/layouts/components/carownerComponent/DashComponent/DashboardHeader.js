@@ -1,5 +1,5 @@
 import React from "react";
-import "../DashComponent/styles/dashboard.css";
+import "../../../../theme/CarOwner/dashboard.css";
 
 const DashboardHeader = ({ name, completed, inProgress, scheduled, total, revenue, commission, settlement }) => {
   return (

@@ -1,6 +1,8 @@
+import { useNavigate } from 'react-router-dom';
 import '../../../../theme/CustomCss.css'
 
 const NaviTap = () => {
+  const navigate = useNavigate();
   return (
     <div className="bs-docs-section clearfix " >
       <div className="row">
@@ -16,21 +18,21 @@ const NaviTap = () => {
 
                 <div className="collapse navbar-collapse" id="navbarColor01">
                   <ul className="navbar-nav me-auto">
-                    <li className="nav-item">
+                    <li className="nav-item" onClick={()=>navigate("/carPage")}>
                       <a className="nav-link active" href="#">DashBoard
                         <span className="visually-hidden">(current)</span>
                       </a>
                     </li>
-                    <li className="nav-item">
+                    <li className="nav-item" onClick={()=>navigate("/carPage/profile")}>
                       <a className="nav-link" href="#"> Profile</a>
                     </li>
-                    <li className="nav-item">
+                    <li className="nav-item" onClick={()=>navigate("/carPage/orders")}>
                       <a className="nav-link" href="#">Order</a>
                     </li>
-                    <li className="nav-item">
+                    <li className="nav-item" onClick={()=>navigate("/carPage/settlement")}>
                       <a className="nav-link" href="#">MyCars</a>
                     </li>
-                    <li className="nav-item">
+                    <li className="nav-item" onClick={()=>navigate("/carPage/vehucles")}>
                       <a className="nav-link" href="#">Vehucles</a>
                     </li>
                   </ul>
