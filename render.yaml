@@ -3,5 +3,5 @@ services:
     name: frontend-idle
     env: static
     rootDir: frontend/frontend_idle
-    buildCommand: yarn install && yarn build
+    buildCommand: echo '--- render.yaml build started ---' && yarn install && GENERATE_SOURCEMAP=false yarn build
     staticPublishPath: build
