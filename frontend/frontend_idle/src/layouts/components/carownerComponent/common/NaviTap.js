@@ -1,6 +1,6 @@
 
 import '../../../../theme/CustomCss.css'
-import useCustomMove from '../../../../Car_owner/hooks/UseCustomMove';
+import useCustomMove from '../../../../Car_owner/hooks/useCustomMove';
 
 const NaviTap = () => {
   const {moveToDashboard, moveToEditProfile, moveToOrders, moveToProfile, moveToSettlement, moveToVehucles} = useCustomMove();
