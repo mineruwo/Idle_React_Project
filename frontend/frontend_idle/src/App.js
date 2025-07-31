@@ -5,7 +5,8 @@ import store from "./store";
 
 // bootstrap 
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
-import "bootswatch/dist/journal/bootstrap.min.css";
+import "./theme/bootStrap.css"
+import "./theme/custom.css"; // 덮어쓸 스타일 파일
 
 export default function App() {
   return (
