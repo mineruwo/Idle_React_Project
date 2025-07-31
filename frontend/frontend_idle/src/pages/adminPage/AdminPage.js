@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import AdminHeaderComponent from "../../layouts/components/admin/AdminHeaderComponent";
 import SidebarComponent from '../../layouts/components/admin/SidebarComponent';
 import MainContentComponent from '../../layouts/components/admin/MainContentComponent';
+import LoginComponent from '../../layouts/components/admin/LoginComponent';
 
 const AdminPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 767);
@@ -31,7 +32,7 @@ const AdminPage = () => {
             <AdminHeaderComponent />
             <SidebarComponent isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
             <MainContentComponent isSidebarOpen={isSidebarOpen}>
-                admin Page 접속 ㅋㅋ
+                <LoginComponent/>
             </MainContentComponent>
         </div>
     );

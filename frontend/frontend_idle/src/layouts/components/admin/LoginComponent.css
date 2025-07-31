@@ -1,0 +1,24 @@
+.login-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh; /* 부모 영역의 전체 높이 상속 */
+}
+
+.login-container {
+  max-width: 500px;
+  min-width: 400px;
+  margin: auto; /* 수평 중앙 정렬 */
+  padding: 2rem;
+  border-radius: 30px;
+  color: white;
+}
+
+.login-container h2 {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.login-container .form-label {
+    color: white;
+}
