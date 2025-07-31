@@ -1,13 +1,13 @@
+
 import '../../../../theme/CustomCss.css'
+import useCustomMove from '../../../../Car_owner/hooks/UseCustomMove';
 
 const NaviTap = () => {
+  const {moveToDashboard, moveToEditProfile, moveToOrders, moveToProfile, moveToSettlement, moveToVehucles} = useCustomMove();
   return (
-    <div className="bs-docs-section clearfix" id="navi-div">
+    <div className="bs-docs-section clearfix " >
       <div className="row">
         <div className="col-lg-12">
-          <div className="page-header">
-            <h1 id="navbars">Navbars</h1>
-          </div>
 
           <div className="bs-component">
             <nav className="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
@@ -19,22 +19,22 @@ const NaviTap = () => {
 
                 <div className="collapse navbar-collapse" id="navbarColor01">
                   <ul className="navbar-nav me-auto">
-                    <li className="nav-item">
-                      <a className="nav-link active" href="#">DashBoard
+                    <li className="nav-item" onClick={moveToDashboard}>
+                      <a className="nav-link active" href="#">대시보드
                         <span className="visually-hidden">(current)</span>
                       </a>
                     </li>
-                    <li className="nav-item">
-                      <a className="nav-link" href="#"> Profile</a>
+                    <li className="nav-item" onClick={moveToProfile}>
+                      <a className="nav-link" href="#"> 프로필</a>
                     </li>
-                    <li className="nav-item">
-                      <a className="nav-link" href="#">Order</a>
+                    <li className="nav-item" onClick={moveToOrders}>
+                      <a className="nav-link" href="#">내 운송</a>
                     </li>
-                    <li className="nav-item">
-                      <a className="nav-link" href="#">MyCars</a>
+                    <li className="nav-item" onClick={moveToSettlement}>
+                      <a className="nav-link" href="#">정산</a>
                     </li>
-                    <li className="nav-item">
-                      <a className="nav-link" href="#">Vehucles</a>
+                    <li className="nav-item" onClick={moveToVehucles}>
+                      <a className="nav-link" href="#">내 차량</a>
                     </li>
                   </ul>
                   <form className="d-flex">
