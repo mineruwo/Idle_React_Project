@@ -2,7 +2,8 @@ import { createSlice } from "@reduxjs/toolkit"
 
 // 구조는 id와 password를 받아서 쓸거임;
 const initState = {
-    id:''
+    id:'',
+    adminName : '',
 }
 
 const adminLoginSlice = createSlice({
@@ -15,7 +16,7 @@ const adminLoginSlice = createSlice({
 
             const data = action.payload;
 
-            return {id: data.id};
+            return {id: data.id , adminName: data.adminName};
         },
         logout: (state, action) => {
             console.log("로그 아웃 함");
