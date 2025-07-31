@@ -8,10 +8,33 @@ const useCustomMove = () => {
     };
 
     const moveToDetails = () => {
-        navigate({ pathname: `../details` });
+        navigate({ pathname: `../shipper/details` });
     };
 
-    return { moveToDashBoard, moveToDetails };
+    const moveToOrder = () => {
+        navigate({ pathname: `../shipper/order` });
+    };
+
+    const moveToPayment = () => {
+        navigate({ pathname: `../shipper/payment` });
+    };
+
+    const moveToReview = () => {
+        navigate({ pathname: `../shipper/review` });
+    };
+
+    const moveToStatus = () => {
+        navigate({ pathname: `../shipper/status` });
+    };
+
+    return {
+        moveToDashBoard,
+        moveToDetails,
+        moveToOrder,
+        moveToPayment,
+        moveToReview,
+        moveToStatus,
+    };
 };
 
 export default useCustomMove;

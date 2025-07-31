@@ -1,15 +1,14 @@
-import Footer from "../../layouts/components/common/Footer";
-import GNB from "../../layouts/components/common/GNB";
-import ShipperNavBarComponent from "../../layouts/components/shipperComponent/common/ShipperNavBarComponent";
+import ShipperDetailsComponent from "../../layouts/components/shipperComponent/ShipperDetailsComponent";
 
 const ShipperDetailsPage = () => {
     return (
-        <div className="sticky sticky-top">
-            <GNB />
-            <ShipperNavBarComponent />
-
-            <div>Body</div>
-            <Footer />
+        <div>
+            <h2>배송 상세 정보</h2>
+            <div>
+                <ShipperDetailsComponent />
+                <ShipperDetailsComponent />
+                <ShipperDetailsComponent />
+            </div>
         </div>
     );
 };

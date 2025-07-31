@@ -1,7 +1,14 @@
 import useCustomMove from "../../../../hooks/useCustomMove";
 
 const ShipperNavBarComponent = () => {
-    const { moveToDashBoard, moveToDetails } = useCustomMove();
+    const {
+        moveToDashBoard,
+        moveToDetails,
+        moveToOrder,
+        moveToPayment,
+        moveToReview,
+        moveToStatus,
+    } = useCustomMove();
 
     return (
         <div className="bs-component">
@@ -10,40 +17,59 @@ const ShipperNavBarComponent = () => {
                 data-bs-theme="dark"
             >
                 <div className="container-fluid">
-                    <div className="collapse navbar-collapse">
-                        <ul className="navbar-nav me-auto">
+                    <div className="navbar-brand">화주 페이지</div>
+                    <button
+                        className="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#shipperNavbar"
+                        aria-controls="shipperNavbar"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation"
+                    >
+                        <span className="navbar-toggler-icon" />
+                    </button>
+
+                    <div
+                        className="collapse navbar-collapse"
+                        id="shipperNavbar"
+                    >
+                        <ul className="navbar-nav mx-auto">
                             <li
-                                className="nav-item"
+                                className="nav-item py-2 border-bottom border-light border-opacity-25"
                                 onClick={() => moveToDashBoard()}
                             >
-                                <a className="nav-link" href="#">
-                                    대시보드
-                                </a>
+                                <div className="nav-link">대시보드</div>
                             </li>
-                            <li className="nav-item">
-                                <a className="nav-link" href="#">
-                                    오더신청
-                                </a>
+                            <li
+                                className="nav-item py-2 border-bottom border-light border-opacity-25"
+                                onClick={() => moveToOrder()}
+                            >
+                                <div className="nav-link">오더신청</div>
                             </li>
-                            <li className="nav-item" onClick={moveToDetails}>
-                                <a className="nav-link" href="#">
-                                    오더상세
-                                </a>
+                            <li
+                                className="nav-item py-2 border-bottom border-light border-opacity-25"
+                                onClick={moveToDetails}
+                            >
+                                <div className="nav-link">오더상세</div>
                             </li>
-                            <li className="nav-item">
-                                <a className="nav-link" href="#">
-                                    배송현황
-                                </a>
+                            <li
+                                className="nav-item py-2 border-bottom border-light border-opacity-25"
+                                onClick={() => moveToStatus()}
+                            >
+                                <div className="nav-link">배송현황</div>
                             </li>
-                            <li className="nav-item">
-                                <a className="nav-link" href="#">
-                                    포인트
-                                </a>
+                            <li
+                                className="nav-item py-2 border-bottom border-light border-opacity-25"
+                                onClick={() => moveToPayment()}
+                            >
+                                <div className="nav-link">포인트</div>
                             </li>
-                            <li className="nav-item">
-                                <a className="nav-link" href="#">
-                                    후기작성
-                                </a>
+                            <li
+                                className="nav-item py-2 border-bottom border-light border-opacity-25"
+                                onClick={() => moveToReview()}
+                            >
+                                <div className="nav-link">후기작성</div>
                             </li>
                         </ul>
                     </div>

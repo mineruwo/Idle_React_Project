@@ -18,9 +18,7 @@ const ShipperDashBoardComponent = () => {
             <div class="card">
                 <div class="card-title">포인트</div>
                 <div class="card-content">175,000P</div>
-                <div class="card-desc">
-                    최근 적립: +2,000P / 소멸예정: 5,000P
-                </div>
+                <div class="card-desc">최근 충전: +20,000P</div>
                 <div class="card-action">포인트 내역</div>
             </div>
             <div class="card">

@@ -4,6 +4,11 @@ import { Navigate } from "react-router-dom";
 const shipperRouter = () => {
     const Loading = <div>Loading 중...</div>;
 
+    const ShipperDashBoard = lazy(() =>
+        import(
+            "../layouts/components/shipperComponent/ShipperDashBoardComponent"
+        )
+    );
     const ShipperOrder = lazy(() =>
         import("../pages/shipperPage/ShipperOrderPage")
     );
@@ -14,7 +19,7 @@ const shipperRouter = () => {
         import("../pages/shipperPage/ShipperPaymentPage")
     );
     const ShipperReview = lazy(() =>
-        import("../pages/shipperPage/ShipperPaymentPage")
+        import("../pages/shipperPage/ShipperReviewPage")
     );
     const ShippingStatus = lazy(() =>
         import("../pages/shipperPage/ShippingStatusPage")
@@ -22,8 +27,12 @@ const shipperRouter = () => {
 
     return [
         {
-            path: "",
-            element: <Navigate replace to="/shipper" />,
+            index: true,
+            element: (
+                <Suspense fallback={Loading}>
+                    <ShipperDashBoard />
+                </Suspense>
+            ),
         },
         {
             path: "order",
