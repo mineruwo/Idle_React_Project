@@ -16,7 +16,7 @@ const useCustomMove = () => {
         navigate("/carPage/profile")
     }
     const moveToEditProfile = () =>{
-        navigate("../editProfile")
+        navigate("/carpage/editProfile")
     }
     const moveToOrders = () =>{
         navigate("/carPage/orders")
@@ -27,6 +27,10 @@ const useCustomMove = () => {
     const moveToVehucles = () =>{
         navigate("/carPage/vehucles")
     }
-    return {moveToDashboard, moveToProfile, moveToEditProfile, moveToOrders, moveToSettlement, moveToVehucles}
+    
+    const moveToLisense= () =>{
+        navigate("/carPage/submitDOC")
+    }
+    return {moveToDashboard, moveToProfile, moveToEditProfile, moveToOrders, moveToSettlement, moveToVehucles, moveToLisense}
 }
 export default useCustomMove;

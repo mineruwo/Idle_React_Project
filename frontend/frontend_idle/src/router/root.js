@@ -11,6 +11,7 @@ const CarDashPage = lazy(() => import("../pages/carOwnerPage/DashBoard"));
 const Order = lazy(() => import("../pages/carOwnerPage/Orders"));
 const Profile = lazy(() => import("../pages/carOwnerPage/Profile"));
 const EditProfile = lazy(() => import("../pages/carOwnerPage/EditProfile"));
+const SubmitDOC = lazy(() => import("../pages/carOwnerPage/SubmitDOC"));
 const Settlement = lazy(() => import("../pages/carOwnerPage/Settlement"));
 const Vehucles = lazy(() => import("../pages/carOwnerPage/Vehucles"));
 //Admin
@@ -89,6 +90,14 @@ const root = createBrowserRouter([
                 element: (
                     <Suspense fallback={Loading}>
                         <Vehucles />
+                    </Suspense>
+                ),
+            },
+             {
+                path: 'submitDOC',
+                element: (
+                    <Suspense fallback={Loading}>
+                        <SubmitDOC />
                     </Suspense>
                 ),
             },

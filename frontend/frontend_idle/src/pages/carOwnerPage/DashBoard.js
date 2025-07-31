@@ -2,7 +2,7 @@
 import NaviTap from "../../layouts/components/carownerComponent/common/NaviTap";
 import DashboardHeader from "../../layouts/components/carownerComponent/DashComponent/DashboardHeader";
 import DeliveryList from "../../layouts/components/carownerComponent/DashComponent/DeliveryList";
-import SalesChart from "../../layouts/components/carownerComponent/DashComponent/SalesChart";
+import SalesChart from "../../layouts/components/carownerComponent/DashComponent/SalesChart"
 import Footer from "../../layouts/components/common/Footer";
 import GNB from "../../layouts/components/common/GNB";
 
@@ -27,6 +27,7 @@ const CarDashpage = () => {
         { status: "배송 예정", from: "광주", s_date: "2024-05-06", to: "인천", date: "2024-05-07" },
         { status: "배송 예정", from: "인천", s_date: "2024-05-07", to: "대전", date: "2024-05-08" },
     ];
+    
 
     return (
         <div>
