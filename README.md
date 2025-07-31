@@ -92,7 +92,15 @@
 │   ├── src/
 │   └── build.gradle
 ├── frontend/         # React 소스 코드
+│   ├── public/
+│   │   ├── img/      # Image 관리 폴더  
 │   ├── src/
+│   │   ├── layouts   
+│   │   ├── pages
+│   │   ├── router
+│   │   ├── theme
+│   │   ├── slices
+│   │   └── store.js
 │   └── package.json
 ├── docs/             # 프로젝트 관련 문서
 └── README.md
@@ -120,3 +128,6 @@
 ## Command
 
 - npm install @mui/material @emotion/react @emotion/styled @mui/icons-material
+- npm i redux react-redux
+- npm install redux
+- npm install @reduxjs/toolkit react-redux 
