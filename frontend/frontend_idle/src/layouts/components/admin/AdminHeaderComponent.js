@@ -1,9 +1,22 @@
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { adminLogin, adminLogout } from "../../../slices/adminLoginSlice";
 
-const GNB = () => {
+const AdminHeaderComponent = () => {
+    const adminLoginState = useSelector((state) => state.adminLogin);
+    const dispatch = useDispatch();
+
     const [hideHeader, setHideHeader] = useState(false);
     const [lastScrollY, setLastScrollY] = useState(0);
+
+    const handleLogout = () => {
+        dispatch(adminLogout());
+    };
+
+    const handleLogin = () => {
+        dispatch(adminLogin());
+    };
 
     useEffect(() => {
         const handleScroll = () => {
@@ -37,19 +50,18 @@ const GNB = () => {
                 <div className="collapse navbar-collapse" id="navbarResponsive">
                     <ul className="navbar-nav ms-md-auto">
                         <li className="nav-item">
-                            <Link to="/" className="nav-link">
-                                고객센터(미정)
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link to="/login/" className="nav-link">
+                            <Link to="/admin/login/" className="nav-link">
                                 로그인
                             </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link to="/signup/" className="nav-link">
-                                회원가입
-                            </Link>
+                            {!adminLoginState.id ? (
+                                <button type="button" onClick={handleLogin}>
+                                    로그인
+                                </button>
+                            ) : (
+                                <button type="button" onClick={handleLogout}>
+                                    로그아웃
+                                </button>
+                            )}
                         </li>
                     </ul>
                 </div>
@@ -57,5 +69,4 @@ const GNB = () => {
         </div>
     );
 };
-
-export default GNB;
+export default AdminHeaderComponent;

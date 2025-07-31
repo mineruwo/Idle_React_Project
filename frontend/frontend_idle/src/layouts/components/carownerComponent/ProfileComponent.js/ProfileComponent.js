@@ -1,6 +1,6 @@
 
 import "../../../../theme/CarOwner/profile.css";
-import useCustomMove from "../../../../Car_owner/hooks/UseCustomMove";
+import useCustomMove from "../../../../Car_owner/hooks/useCustomMove"
 
 const ProfileComponent = () => {
     const { moveToEditProfile } = useCustomMove();

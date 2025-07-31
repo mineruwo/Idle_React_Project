@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "../../theme/CarOwner/profile.css"
 
 import { useNavigate } from "react-router-dom";
-import useCustomMove from "../../Car_owner/hooks/UseCustomMove";
+import useCustomMove from "../../Car_owner/hooks/useCustomMove";
 
 
 

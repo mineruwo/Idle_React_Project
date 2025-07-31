@@ -1,0 +1,7 @@
+/* custom.css */
+/* Bootswatch 테마를 덮어쓰기 위한 커스텀 스타일 파일입니다. */
+
+:root {
+  --bs-primary: #f08e8b !important;
+  --bs-primary-rgb: 240, 142, 139 !important;
+}

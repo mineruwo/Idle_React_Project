@@ -92,7 +92,15 @@
 │   ├── src/
 │   └── build.gradle
 ├── frontend/         # React 소스 코드
+│   ├── public/
+│   │   ├── img/      # Image 관리 폴더  
 │   ├── src/
+│   │   ├── layouts   
+│   │   ├── pages
+│   │   ├── router
+│   │   ├── theme
+│   │   ├── slices
+│   │   └── store.js
 │   └── package.json
 ├── docs/             # 프로젝트 관련 문서
 └── README.md
@@ -121,6 +129,9 @@
 
 - npm install @mui/material @emotion/react @emotion/styled @mui/icons-material
 
+- npm i redux react-redux
+- npm install redux
+- npm install @reduxjs/toolkit react-redux 
 -npm install recharts : 리차트 인스톨 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"; : 임포트 형식 
 https://recharts.org/en-US : doc웹주소 

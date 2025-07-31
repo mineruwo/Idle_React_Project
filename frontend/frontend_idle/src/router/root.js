@@ -1,5 +1,7 @@
 import { lazy, Suspense } from "react";
+
 import { createBrowserRouter, Navigate } from "react-router-dom";
+import shipperRouter from "./shipperRouter";
 
 const Loading = <div>Loading 중...</div>;
 //Main
@@ -21,7 +23,7 @@ const OrderForm = lazy(() => import("../pages/orderPage/OrderForm"));
 const Login = lazy(() => import("../pages/loginpage/LoginPage"));
 const Signup = lazy(() => import("../pages/signuppage/SignupPage"));
 const Dstest = lazy(() => import("../pages/mainpage/TestPage"));
-
+const Shipper = lazy(() => import("../pages/shipperPage/ShipperDashBoard"));
 
 const root = createBrowserRouter([
     {
@@ -33,7 +35,7 @@ const root = createBrowserRouter([
         ),
     },
     {
-        path: 'carPage',
+        path: "carPage",
         element: (
             <Suspense fallback={Loading}>
                 <CarPage />
@@ -45,7 +47,7 @@ const root = createBrowserRouter([
                 element: <Navigate to="DashBoard" replace />,
             },
             {
-                path: 'DashBoard',
+                path: "DashBoard",
                 element: (
                     <Suspense fallback={Loading}>
                         <CarDashPage />
@@ -53,24 +55,23 @@ const root = createBrowserRouter([
                 ),
             },
             {
-                path: 'profile',
+                path: "profile",
                 element: (
                     <Suspense fallback={Loading}>
                         <Profile />
                     </Suspense>
                 ),
-
             },
             {
-                path: 'editProfile',
+                path: "editProfile",
                 element: (
                     <Suspense fallback={Loading}>
                         <EditProfile />
                     </Suspense>
-                )
+                ),
             },
             {
-                path: 'orders',
+                path: "orders",
                 element: (
                     <Suspense fallback={Loading}>
                         <Order />
@@ -78,7 +79,7 @@ const root = createBrowserRouter([
                 ),
             },
             {
-                path: 'settlement',
+                path: "settlement",
                 element: (
                     <Suspense fallback={Loading}>
                         <Settlement />
@@ -86,15 +87,15 @@ const root = createBrowserRouter([
                 ),
             },
             {
-                path: 'vehucles',
+                path: "vehucles",
                 element: (
                     <Suspense fallback={Loading}>
                         <Vehicles />
                     </Suspense>
                 ),
             },
-             {
-                path: 'submitDOC',
+            {
+                path: "submitDOC",
                 element: (
                     <Suspense fallback={Loading}>
                         <SubmitDOC />
@@ -104,7 +105,7 @@ const root = createBrowserRouter([
         ],
     },
     {
-        path: "admin_PinkTruck",
+        path: "admin",
         element: (
             <Suspense fallback={Loading}>
                 <Admin />
@@ -142,6 +143,15 @@ const root = createBrowserRouter([
                 <Dstest />
             </Suspense>
         ),
+    },
+    {
+        path: "shipper",
+        element: (
+            <Suspense fallback={Loading}>
+                <Shipper />
+            </Suspense>
+        ),
+        children: shipperRouter(),
     },
 ]);
 
