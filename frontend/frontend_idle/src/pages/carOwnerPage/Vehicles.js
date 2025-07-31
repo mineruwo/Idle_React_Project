@@ -1,4 +1,5 @@
 import NaviTap from "../../layouts/components/carownerComponent/common/NaviTap";
+import VehicleListRegister from "../../layouts/components/carownerComponent/VehuclesComponent/VehiclesComponent";
 import Footer from "../../layouts/components/common/Footer";
 import GNB from "../../layouts/components/common/GNB";
 
@@ -10,7 +11,7 @@ const Vehucles = ()  => {
             <NaviTap />
             </div>
             <div>
-                정산페이지 
+                <VehicleListRegister/>
             </div>
             <Footer />
         </div>

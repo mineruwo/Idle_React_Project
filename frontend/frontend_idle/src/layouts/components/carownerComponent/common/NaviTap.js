@@ -20,21 +20,21 @@ const NaviTap = () => {
                 <div className="collapse navbar-collapse" id="navbarColor01">
                   <ul className="navbar-nav me-auto">
                     <li className="nav-item" onClick={moveToDashboard}>
-                      <a className="nav-link active" href="#">DashBoard
+                      <a className="nav-link active" href="#">대시보드
                         <span className="visually-hidden">(current)</span>
                       </a>
                     </li>
                     <li className="nav-item" onClick={moveToProfile}>
-                      <a className="nav-link" href="#"> Profile</a>
+                      <a className="nav-link" href="#"> 프로필</a>
                     </li>
                     <li className="nav-item" onClick={moveToOrders}>
-                      <a className="nav-link" href="#">Order</a>
+                      <a className="nav-link" href="#">내 운송</a>
                     </li>
                     <li className="nav-item" onClick={moveToSettlement}>
-                      <a className="nav-link" href="#">MyCars</a>
+                      <a className="nav-link" href="#">정산</a>
                     </li>
                     <li className="nav-item" onClick={moveToVehucles}>
-                      <a className="nav-link" href="#">Vehucles</a>
+                      <a className="nav-link" href="#">내 차량</a>
                     </li>
                   </ul>
                   <form className="d-flex">
