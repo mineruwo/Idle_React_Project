@@ -1,0 +1,66 @@
+.request-number {
+    margin-right: 10px;
+    color: #999; /* 연한 회색 */
+    font-size: 0.9em; /* 작은 폰트 사이즈 */
+}
+
+.delivery-detail-container {
+    padding: 1.5em;
+    border-radius: 10px;
+    background-color: #f8fafd;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.08);
+    font-family: "Noto Sans KR", sans-serif;
+    margin-left: 50px;
+}
+.delivery-section {
+    margin-bottom: 1.1em;
+}
+.delivery-label {
+    display: inline-block;
+    min-width: 80px;
+    font-weight: bold;
+    color: #0a3069;
+}
+.status-complete {
+    color: white;
+    background-color: #197d34;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+.status-waiting {
+    color: white;
+    background-color: #e84c3d;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+.status {
+    border-top: 1px solid #e3e9f0;
+    padding-top: 1em;
+}
+
+.date-filter-section {
+    margin-bottom: 1.2em;
+    display: flex;
+    align-items: center;
+    gap: 0.8em;
+}
+
+.status-display {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.card {
+    background: #fff;
+    padding: 32px 24px;
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 200px;
+    position: relative;
+}
