@@ -25,6 +25,7 @@
   justify-content: center;
   background: #ddd;
   height: 320px;
+  border-radius: 1500px;
 }
 .avatar-info{
   margin-top: 50px;

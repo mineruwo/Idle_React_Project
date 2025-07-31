@@ -1,0 +1,90 @@
+.settlement-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 30px;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: #333;
+  background-color: #fff;
+}
+
+.settlement-page h1 {
+  font-size: 1.8rem;
+  color: #1a237e;
+  margin-bottom: 5px;
+}
+
+.settlement-page p {
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+  color: #666;
+}
+
+.summary-section {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+  gap: 20px;
+}
+
+.box {
+  flex: 1;
+  min-width: 280px;
+  background-color: #f7f9fc;
+  border: 1px solid #dfe4ea;
+  border-radius: 8px;
+  padding: 15px 20px;
+}
+
+.box h3 {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+
+.box .total {
+  font-weight: bold;
+  color: #0d47a1;
+  margin-top: 10px;
+}
+
+.actions {
+  align-self: flex-end;
+  display: flex;
+  justify-content: space-between;
+}
+
+.actions button {
+  background-color: #1a73e8;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.actions button:hover {
+  background-color: #0f5ad0;
+}
+
+.delivery-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.delivery-table th,
+.delivery-table td {
+  border: 1px solid #e0e0e0;
+  padding: 10px;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.delivery-table th {
+  background-color: #f1f3f5;
+  font-weight: 600;
+}
+
+.delivery-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}

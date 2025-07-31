@@ -1,7 +1,9 @@
 import React from "react";
 import "../../../../theme/CarOwner/dashboard.css";
+import useCustomMove from "../../../../Car_owner/hooks/UseCustomMove";
 
 const DashboardHeader = ({ name, completed, inProgress, scheduled, total, revenue, commission, settlement }) => {
+ const {moveToSettlement} = useCustomMove();
   return (
     <div className="header-box">
       <h2>👤 {name}님 운송 현황</h2>
@@ -16,7 +18,7 @@ const DashboardHeader = ({ name, completed, inProgress, scheduled, total, revenu
       <p>총 매출액: {revenue.toLocaleString()}원</p>
       <p>수수료율: {commission}%</p>
       <p>정산예정금액: {settlement.toLocaleString()}원</p>
-      <button>정산하기</button>
+      <button onClick={moveToSettlement}>정산하기</button>
     </div>
   );
 };
