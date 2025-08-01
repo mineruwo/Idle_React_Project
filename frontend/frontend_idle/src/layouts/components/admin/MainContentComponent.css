@@ -1,0 +1,20 @@
+.main-content {
+  transition: margin-left 0.3s ease-in-out;
+  padding: 20px;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* 큰 화면일 때 */
+@media (min-width: 768px) {
+  .main-content {
+    margin-left: 300px;
+  }
+}
+
+/* 작은 화면일 때 */
+@media (max-width: 767px) {
+  .main-content {
+    margin-left: 60px; /* 햄버거 버튼 너비만큼 여백 추가 */
+  }
+}

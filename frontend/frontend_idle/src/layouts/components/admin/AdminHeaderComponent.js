@@ -14,7 +14,7 @@ const AdminHeaderComponent = () => {
         dispatch(adminLogout());
     };
 
-    const handleLogin = () => {
+     const handleLogin = () => {
         dispatch(adminLogin());
     };
 
@@ -23,9 +23,9 @@ const AdminHeaderComponent = () => {
             const currentY = window.scrollY;
 
             if (currentY > lastScrollY && currentY > 80) {
-                setHideHeader(true); // 아래로 스크롤하면 숨김
+                setHideHeader(true);
             } else {
-                setHideHeader(false); // 위로 스크롤하면 보임
+                setHideHeader(false);
             }
 
             setLastScrollY(currentY);
@@ -37,7 +37,7 @@ const AdminHeaderComponent = () => {
     }, [lastScrollY]);
 
     return (
-        <div
+        <nav
             className={`navbar navbar-expand-lg sticky-top bg-primary 
                 transition-top ${hideHeader ? "hide" : ""}`}
             data-bs-theme="light"
@@ -47,26 +47,23 @@ const AdminHeaderComponent = () => {
                     핑크 성남운송
                 </a>
 
-                <div className="collapse navbar-collapse" id="navbarResponsive">
-                    <ul className="navbar-nav ms-md-auto">
+                <div className="d-flex ms-auto">
+                    <ul className="navbar-nav">
                         <li className="nav-item">
-                            <Link to="/admin/login/" className="nav-link">
-                                로그인
-                            </Link>
-                            {!adminLoginState.id ? (
-                                <button type="button" onClick={handleLogin}>
-                                    로그인
-                                </button>
-                            ) : (
-                                <button type="button" onClick={handleLogout}>
+                            {adminLoginState.id ? (
+                                <button className="nav-link" onClick={handleLogout}>
                                     로그아웃
                                 </button>
+                            ) : (
+                                <Link to="/admin/login/" className="nav-link">
+                                    로그인
+                                </Link>
                             )}
                         </li>
                     </ul>
                 </div>
             </div>
-        </div>
+        </nav>
     );
 };
 export default AdminHeaderComponent;

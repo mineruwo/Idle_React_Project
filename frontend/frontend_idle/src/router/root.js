@@ -23,6 +23,7 @@ const OrderForm = lazy(() => import("../pages/orderPage/OrderForm"));
 const Login = lazy(() => import("../pages/loginpage/LoginPage"));
 const Signup = lazy(() => import("../pages/signuppage/SignupPage"));
 const Dstest = lazy(() => import("../pages/mainpage/TestPage"));
+const WebSocketTest = lazy(() => import("../pages/websocket/WebSocketTestPage"));
 const Shipper = lazy(() => import("../pages/shipperPage/ShipperDashBoard"));
 
 const root = createBrowserRouter([
@@ -141,6 +142,14 @@ const root = createBrowserRouter([
         element: (
             <Suspense fallback={Loading}>
                 <Dstest />
+            </Suspense>
+        ),
+    },
+    {
+        path: "websocket",
+        element: (
+            <Suspense fallback={Loading}>
+                <WebSocketTest />
             </Suspense>
         ),
     },

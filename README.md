@@ -135,4 +135,5 @@
 -npm install recharts : 리차트 인스톨 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"; : 임포트 형식 
 https://recharts.org/en-US : doc웹주소 
+- npm install @stomp/stompjs sockjs-client 
 

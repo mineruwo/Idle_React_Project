@@ -27,7 +27,9 @@
     "recharts": "^3.1.0",
     "scripts": "^0.1.0",
     "styled-components": "^6.1.19",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "sockjs-client": "^1.5.2",
+    "@stomp/stompjs": "^7.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -55,6 +57,10 @@
   },
   "main": "index.js",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "yarn": ">=1.22.0"
+  },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
