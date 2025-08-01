@@ -2,10 +2,8 @@ import ShipperPaymentComponent from "../../layouts/components/shipperComponent/S
 
 const ShipperPaymentPage = () => {
     return (
-        <div className="sticky sticky-top">
-            <div>
-                <ShipperPaymentComponent />
-            </div>
+        <div>
+            <ShipperPaymentComponent />
         </div>
     );
 };

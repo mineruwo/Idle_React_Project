@@ -4,6 +4,7 @@ import "../../../theme/ShipperCustomCss/ShipperDetails.css";
 const ShipperDetailsComponent = ({ delivery }) => {
     return (
         <div className="delivery-detail-container">
+            <h2 className="page-title">오더 상세 정보</h2>
             <div className="card">
                 <div className="status-display">
                     <span
@@ -13,7 +14,7 @@ const ShipperDetailsComponent = ({ delivery }) => {
                                 : "status-waiting"
                         }
                     >
-                        배송중
+                        운송중
                         {delivery && delivery.assignmentStatus}
                     </span>
                 </div>

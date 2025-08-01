@@ -2,10 +2,8 @@ import ShipperOrderComponent from "../../layouts/components/shipperComponent/Shi
 
 const ShipperOrderPage = () => {
     return (
-        <div className="sticky sticky-top">
-            <div>
-                <ShipperOrderComponent />
-            </div>
+        <div>
+            <ShipperOrderComponent />
         </div>
     );
 };

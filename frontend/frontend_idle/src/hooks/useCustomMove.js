@@ -3,37 +3,62 @@ import { useNavigate } from "react-router-dom";
 const useCustomMove = () => {
     const navigate = useNavigate();
 
-    const moveToDashBoard = () => {
+    const shipperMoveToDashBoard = () => {
         navigate({ pathname: `../shipper` });
     };
 
-    const moveToDetails = () => {
+    const shipperMoveToDetails = () => {
         navigate({ pathname: `../shipper/details` });
     };
 
-    const moveToOrder = () => {
+    const shipperMoveToOrder = () => {
         navigate({ pathname: `../shipper/order` });
     };
 
-    const moveToPayment = () => {
+    const shipperMoveToPayment = () => {
         navigate({ pathname: `../shipper/payment` });
     };
 
-    const moveToReview = () => {
+    const shipperMoveToReview = () => {
         navigate({ pathname: `../shipper/review` });
     };
 
-    const moveToStatus = () => {
-        navigate({ pathname: `../shipper/status` });
-    };
+    const carOwnerMoveToDashboard = () =>{
+        navigate("/carPage")
+    }
+    const carOwnerMoveToProfile = () =>{
+        navigate("/carPage/profile")
+    }
+    const carOwnerMoveToEditProfile = () =>{
+        navigate("/carpage/editProfile")
+    }
+    const carOwnerMoveToOrders = () =>{
+        navigate("/carPage/orders")
+    }
+    const carOwnerMoveToSettlement = () =>{
+        navigate("/carPage/settlement")
+    }
+    const carOwnerMoveToVehucles = () =>{
+        navigate("/carPage/vehucles")
+    }
+    
+    const carOwnerMoveToLisense= () =>{
+        navigate("/carPage/submitDOC")
+    }
 
     return {
-        moveToDashBoard,
-        moveToDetails,
-        moveToOrder,
-        moveToPayment,
-        moveToReview,
-        moveToStatus,
+        shipperMoveToDashBoard,
+        shipperMoveToDetails,
+        shipperMoveToOrder,
+        shipperMoveToPayment,
+        shipperMoveToReview,
+        carOwnerMoveToDashboard,
+        carOwnerMoveToProfile,
+        carOwnerMoveToEditProfile,
+        carOwnerMoveToOrders,
+        carOwnerMoveToSettlement,
+        carOwnerMoveToVehucles,
+        carOwnerMoveToLisense
     };
 };
 
