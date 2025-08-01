@@ -3,8 +3,7 @@ import "../../theme/ShipperCustomCss/ShipperDetails.css";
 
 const ShipperDetailsPage = () => {
     return (
-        <div className="delivery-detail-container">
-            <h2 className="page-title">배송 상세 정보</h2>
+        <div>
             <ShipperDetailsComponent />
             <ShipperDetailsComponent />
             <ShipperDetailsComponent />

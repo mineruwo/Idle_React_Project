@@ -5,17 +5,17 @@ import ShipperNavBarComponent from "../../layouts/components/shipperComponent/co
 
 const ShipperDashBoard = () => {
     return (
-        <>
-            <div className="sticky sticky-top">
+        <div>
+            <div>
                 <GNB />
                 <ShipperNavBarComponent />
             </div>
-            <div>
+            <div style={{ paddingTop: "30px" }}>
                 <Outlet />
 
                 <Footer />
             </div>
-        </>
+        </div>
     );
 };
 

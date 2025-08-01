@@ -7,17 +7,26 @@ const ShipperNavBarComponent = () => {
         moveToOrder,
         moveToPayment,
         moveToReview,
-        moveToStatus,
     } = useCustomMove();
 
     return (
         <div className="bs-component">
             <nav
-                className="navbar navbar-expand-lg bg-primary bg-opacity-75"
+                className="navbar navbar-expand-lg sticky-top"
                 data-bs-theme="dark"
+                style={{
+                    backgroundColor: "rgb(244, 170, 168)",
+                    zIndex: 1000,
+                    top: 0,
+                }}
             >
                 <div className="container-fluid">
-                    <div className="navbar-brand">화주 페이지</div>
+                    <div
+                        className="navbar-brand"
+                        onClick={() => moveToDashBoard()}
+                    >
+                        화주 페이지
+                    </div>
                     <button
                         className="navbar-toggler"
                         type="button"
@@ -52,12 +61,6 @@ const ShipperNavBarComponent = () => {
                                 onClick={moveToDetails}
                             >
                                 <div className="nav-link">오더상세</div>
-                            </li>
-                            <li
-                                className="nav-item py-2 border-bottom border-light border-opacity-25"
-                                onClick={() => moveToStatus()}
-                            >
-                                <div className="nav-link">배송현황</div>
                             </li>
                             <li
                                 className="nav-item py-2 border-bottom border-light border-opacity-25"

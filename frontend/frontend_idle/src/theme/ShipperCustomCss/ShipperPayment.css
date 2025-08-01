@@ -1,12 +1,13 @@
 .point-layout-container {
     display: flex;
-    gap: 2em; /* 두 섹션 사이의 간격 */
-    max-width: 860px; /* 전체 컨테이너의 최대 너비 조정 */
+    gap: 2em;
+    max-width: 860px;
     margin: 0 auto;
 }
 
-.point-management-section, .point-payment-section {
-    flex: 1; /* 두 섹션이 동일한 너비를 가지도록 설정 */
+.point-management-section,
+.point-payment-section {
+    flex: 1;
     background: #f9fbff;
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(30, 60, 140, 0.07);
@@ -48,9 +49,14 @@
 
 .point-charge-section {
     display: flex;
-    align-items: center;
+    flex-direction: column; /* 세로 정렬로 변경 */
     gap: 0.7em;
     margin-bottom: 2em;
+}
+
+.charge-input-group {
+    display: flex;
+    gap: 0.7em;
 }
 
 .point-charge-section label {
@@ -174,4 +180,22 @@
     margin-top: 1em;
     text-align: center;
     color: #167d43; /* 성공 메시지 색상 */
+}
+
+.page-title {
+    font-size: 1.5em; /* 글자 크기 조정 */
+    font-weight: bold; /* 굵은 글씨 */
+    color: #0a3069; /* 카드 제목과 동일한 색상 */
+    margin-bottom: 1.5em; /* 아래쪽 여백 추가 */
+    text-align: left; /* 왼쪽 정렬 */
+}
+
+@media (max-width: 880px) {
+    .point-layout-container {
+        flex-direction: column;
+    }
+    .point-payment-section {
+        border-top: 1px solid #d8e2f0; /* A light border for separation */
+        margin-top: 2em; /* Add some margin for extra spacing */
+    }
 }

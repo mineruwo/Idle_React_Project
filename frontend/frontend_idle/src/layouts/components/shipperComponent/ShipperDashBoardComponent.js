@@ -1,4 +1,5 @@
 import "../../../theme/ShipperCustomCss/ShipperDashBoard.css";
+import ShippingStatusComponent from "./ShippingStatusComponent";
 
 const ShipperDashBoardComponent = () => {
     return (
@@ -13,9 +14,7 @@ const ShipperDashBoardComponent = () => {
             </div>
             <div className="card">
                 <div className="card-title">배송현황</div>
-                <div className="card-content">2건 진행중</div>
-                <div className="card-desc">실시간 위치 확인, 지연건 0건</div>
-                <div className="card-action">배송현황 바로가기</div>
+                <ShippingStatusComponent />
             </div>
             <div className="card">
                 <div className="card-title">포인트</div>

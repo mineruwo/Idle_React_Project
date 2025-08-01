@@ -1,12 +1,14 @@
 .dashboard {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     grid-gap: 24px;
-    max-width: 900px;
+    /* max-width: 900px; */ /* Remove max-width to allow full width */
     margin-top: 25px;
     margin-right: auto;
     margin-left: auto;
     margin-bottom: 25px;
+    padding-right: 30px;
+    padding-left: 30px;
 }
 .card {
     background: #fff;

@@ -21,9 +21,6 @@ const shipperRouter = () => {
     const ShipperReview = lazy(() =>
         import("../pages/shipperPage/ShipperReviewPage")
     );
-    const ShippingStatus = lazy(() =>
-        import("../pages/shipperPage/ShippingStatusPage")
-    );
 
     return [
         {
@@ -63,14 +60,6 @@ const shipperRouter = () => {
             element: (
                 <Suspense fallback={Loading}>
                     <ShipperReview />
-                </Suspense>
-            ),
-        },
-        {
-            path: "status",
-            element: (
-                <Suspense fallback={Loading}>
-                    <ShippingStatus />
                 </Suspense>
             ),
         },

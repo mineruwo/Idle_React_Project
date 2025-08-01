@@ -58,7 +58,7 @@ const ShipperPaymentComponent = () => {
         <div className="point-layout-container">
             {/* 왼쪽: 포인트 관리 섹션 */}
             <div className="point-management-section">
-                <h2>포인트 관리</h2>
+                <h2 className="page-title">포인트 관리</h2>
                 <div className="point-balance-section">
                     <span className="point-balance-label">내 포인트</span>
                     <span className="point-balance-amount">
@@ -68,17 +68,19 @@ const ShipperPaymentComponent = () => {
 
                 <div className="point-charge-section">
                     <label htmlFor="charge-amount">충전할 금액</label>
-                    <input
-                        id="charge-amount"
-                        type="number"
-                        placeholder="포인트 금액 입력"
-                        min="1000"
-                        value={chargeAmount}
-                        onChange={(e) => setChargeAmount(e.target.value)}
-                    />
-                    <button className="charge-btn" onClick={handleCharge}>
-                        충전하기
-                    </button>
+                    <div className="charge-input-group">
+                        <input
+                            id="charge-amount"
+                            type="number"
+                            placeholder="포인트 금액 입력"
+                            min="1000"
+                            value={chargeAmount}
+                            onChange={(e) => setChargeAmount(e.target.value)}
+                        />
+                        <button className="charge-btn" onClick={handleCharge}>
+                            충전하기
+                        </button>
+                    </div>
                 </div>
 
                 <div className="point-history-section">
@@ -109,7 +111,7 @@ const ShipperPaymentComponent = () => {
             {/* 오른쪽: 포인트 결제 섹션 */}
             <div className="point-payment-section">
                 <div className="point-payment-container">
-                    <h2>포인트 결제하기</h2>
+                    <h2 className="page-title">포인트 결제하기</h2>
                     <div className="current-points">
                         현재 사용 가능 포인트:{" "}
                         <strong>{currentPoints.toLocaleString()}P</strong>
