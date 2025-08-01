@@ -27,7 +27,9 @@
     "recharts": "^3.1.0",
     "scripts": "^0.1.0",
     "styled-components": "^6.1.19",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "sockjs-client": "^1.5.2",
+    "@stomp/stompjs": "^7.0.0"
   },
   "scripts": {
     "start": "react-scripts start",

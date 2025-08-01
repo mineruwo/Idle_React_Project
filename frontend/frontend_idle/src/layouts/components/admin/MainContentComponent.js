@@ -3,7 +3,7 @@ import './MainContentComponent.css';
 
 const MainContentComponent = ({ isSidebarOpen, children }) => {
   return (
-    <div className={`main-content ${isSidebarOpen ? 'open' : ''} bg-secondary`}>
+    <div className={`main-content ${isSidebarOpen ? 'open' : ''}`}>
       {children}
     </div>
   );

@@ -14,6 +14,10 @@ const AdminHeaderComponent = () => {
         dispatch(adminLogout());
     };
 
+     const handleLogin = () => {
+        dispatch(adminLogin());
+    };
+
     useEffect(() => {
         const handleScroll = () => {
             const currentY = window.scrollY;
