@@ -1,0 +1,113 @@
+.steps {
+    display: flex;
+    text-align: center;
+    font-size: 1.5rem;
+    list-style: none;
+}
+.steps .steps-segment {
+    position: relative;
+}
+.steps .steps-segment:after {
+    background-color: #1560d4;
+}
+.steps .steps-segment {
+    flex-basis: 1rem;
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+.steps .steps-segment:not(:last-child):after {
+    content: " ";
+    display: block;
+    position: absolute;
+    height: 0.1em;
+    top: calc(25px - 0.1em);
+    left: 50%;
+    right: -50%;
+}
+.steps .steps-segment .steps-marker {
+    position: absolute;
+    left: calc(50% - 25px);
+    align-items: center;
+    display: flex;
+    border-radius: 50%;
+    box-sizing: border-box;
+    justify-content: center;
+    position: relative;
+    z-index: 5;
+    height: 50px;
+    width: 50px;
+    overflow: hidden;
+    border: 0.1em solid #1560d4;
+    background-color: #fff;
+    color: #1560d4;
+}
+.steps .steps-segment .steps-marker svg path {
+    stroke: #1560d4;
+}
+.steps .steps-segment .steps-marker .icon {
+    display: flex;
+}
+.steps .steps-segment .steps-content {
+    margin-top: 0.4rem;
+}
+.steps .steps-segment .steps-content .heading {
+    font-size: 0.9em;
+    color: #1560d4;
+    font-family: "Noto Sans KR", sans-serif;
+    letter-spacing: 0;
+}
+.steps .steps-segment.is-active:after {
+    background-color: #d8e2f0;
+}
+.steps .steps-segment.is-active ~ .steps-segment:after {
+    background-color: #d8e2f0;
+}
+.steps .steps-segment.is-active .steps-marker {
+    background-color: #1560d4;
+    color: #fff;
+}
+.steps .steps-segment.is-active .steps-marker svg path {
+    stroke: #fff;
+}
+.steps .steps-segment.is-active ~ .steps-segment .steps-marker {
+    background-color: #d8e2f0;
+    color: rgba(0, 0, 0, 0.7);
+}
+.steps .steps-segment.is-active .steps-marker.is-hollow {
+    border-color: #1560d4;
+}
+.steps .steps-segment.is-active ~ .steps-segment .steps-marker.is-hollow {
+    border-color: #d8e2f0;
+    background-color: #fff;
+    color: #d8e2f0;
+}
+.steps
+    .steps-segment.is-active
+    ~ .steps-segment
+    .steps-marker.is-hollow
+    + .steps-content
+    .heading {
+    color: #849bb7;
+}
+.steps .steps-segment .steps-marker.is-hollow {
+    border: 0.1em solid #1560d4;
+}
+.steps .steps-segment .steps-marker.is-hollow svg path {
+    stroke: #849bb7;
+}
+
+.page-title {
+    font-size: 1.5em; /* 글자 크기 조정 */
+    font-weight: bold; /* 굵은 글씨 */
+    color: #0a3069; /* 카드 제목과 동일한 색상 */
+    margin-bottom: 1.5em; /* 아래쪽 여백 추가 */
+    text-align: left; /* 왼쪽 정렬 */
+}
+
+.shipping-status {
+    padding: 1.5em;
+    border-radius: 10px;
+    background-color: #f8fafd;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.08);
+    font-family: "Noto Sans KR", sans-serif;
+}

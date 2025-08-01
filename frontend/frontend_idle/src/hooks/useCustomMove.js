@@ -23,17 +23,12 @@ const useCustomMove = () => {
         navigate({ pathname: `../shipper/review` });
     };
 
-    const moveToStatus = () => {
-        navigate({ pathname: `../shipper/status` });
-    };
-
     return {
         moveToDashBoard,
         moveToDetails,
         moveToOrder,
         moveToPayment,
         moveToReview,
-        moveToStatus,
     };
 };
 

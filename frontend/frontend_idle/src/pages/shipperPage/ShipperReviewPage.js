@@ -2,10 +2,8 @@ import ShipperReviewComponent from "../../layouts/components/shipperComponent/Sh
 
 const ShipperReviewPage = () => {
     return (
-        <div className="sticky sticky-top">
-            <div>
-                <ShipperReviewComponent />
-            </div>
+        <div>
+            <ShipperReviewComponent />
         </div>
     );
 };

@@ -1,3 +1,11 @@
+.page-title {
+    font-size: 1.5em; /* 글자 크기 조정 */
+    font-weight: bold; /* 굵은 글씨 */
+    color: #0a3069; /* 카드 제목과 동일한 색상 */
+    margin-bottom: 1.5em; /* 아래쪽 여백 추가 */
+    text-align: left; /* 왼쪽 정렬 */
+}
+
 .request-number {
     margin-right: 10px;
     color: #999; /* 연한 회색 */
@@ -10,7 +18,6 @@
     background-color: #f8fafd;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.08);
     font-family: "Noto Sans KR", sans-serif;
-    margin-left: 50px;
 }
 .delivery-section {
     margin-bottom: 1.1em;
