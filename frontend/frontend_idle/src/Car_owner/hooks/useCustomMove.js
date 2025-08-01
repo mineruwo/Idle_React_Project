@@ -1,7 +1,7 @@
 //넘겨지는 파라미터를 get..
 
-import { createSearchParams, useNavigate, useSearchParams } from "react-router-dom"
-import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+
 
 
 //특정 page 로 넘어가는 공통 모듈 작성..

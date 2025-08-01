@@ -3,6 +3,9 @@
   margin: 0 auto;
   padding: 20px;
   font-family: 'Noto Sans KR', sans-serif;
+  background-color: #fef8f8;
+  border: 1px solid #f3c7d3;
+  border-radius: 8px;
 }
 
 .vehicle-list {
@@ -28,7 +31,7 @@ th, td {
 
 .edit-btn,
 .submit-btn {
-  background-color: #1f66ff;
+  background-color: #f3c7d3;
   color: white;
   border: none;
   padding: 6px 12px;

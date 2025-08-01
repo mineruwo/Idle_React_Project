@@ -1,0 +1,30 @@
+.chart-wrapper {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  border: 2px solid #f8c5d0;
+  border-radius: 12px;
+  padding: 10px;
+  background-color: #fffafa;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.center-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-family: sans-serif;
+}
+
+.score {
+  font-size: 28px;
+  font-weight: bold;
+  color: #ff6699;
+}
+
+.label {
+  font-size: 14px;
+  color: #666;
+}

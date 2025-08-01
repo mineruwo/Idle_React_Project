@@ -1,4 +1,6 @@
 
+
+import BubbleAnimation from "../../layouts/components/carownerComponent/common/BubbleAnimation";
 import NaviTap from "../../layouts/components/carownerComponent/common/NaviTap";
 import DashboardHeader from "../../layouts/components/carownerComponent/DashComponent/DashboardHeader";
 import DeliveryList from "../../layouts/components/carownerComponent/DashComponent/DeliveryList";
@@ -27,14 +29,17 @@ const CarDashpage = () => {
         { status: "배송 예정", from: "광주", s_date: "2024-05-06", to: "인천", date: "2024-05-07" },
         { status: "배송 예정", from: "인천", s_date: "2024-05-07", to: "대전", date: "2024-05-08" },
     ];
-    
+
 
     return (
         <div>
+            
             <div className="topmenu sticky-top">
-            <GNB />
-            <NaviTap />
+                
+                <GNB />
+                <NaviTap />
             </div>
+            
             <div className="dashboard-container">
                 <div className="dashborad-firstcontainer">
                     <DashboardHeader
@@ -49,9 +54,7 @@ const CarDashpage = () => {
                     />
                     <SalesChart data={chartData} />
                 </div>
-                <div className="dashboard-secoundcontainer">
-
-                </div>
+                
             </div>
             <div>
                 <DeliveryList deliveries={deliveries} />

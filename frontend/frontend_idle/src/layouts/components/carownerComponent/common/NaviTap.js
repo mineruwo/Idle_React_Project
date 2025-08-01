@@ -1,54 +1,75 @@
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import useCustomMove from "../../../../Car_owner/hooks/UseCustomMove";
+import "../../../../theme/CarOwner/navbar.css";
 
-import '../../../../theme/CustomCss.css'
-import useCustomMove from '../../../../Car_owner/hooks/useCustomMove';
+const ShipperNavBarComponent = () => {
+  const location = useLocation(); // 현재 경로 감지
+  const [activeMenu, setActiveMenu] = useState("dashboard");
 
-const NaviTap = () => {
-  const {moveToDashboard, moveToEditProfile, moveToOrders, moveToProfile, moveToSettlement, moveToVehucles} = useCustomMove();
+  const {
+    moveToDashboard,
+    moveToOrders,
+    moveToProfile,
+    moveToSettlement,
+    moveToVehucles,
+  } = useCustomMove();
+
+  useEffect(() => {
+    // URL path 기준으로 active 상태 설정
+    if (location.pathname.includes("dashboard")) setActiveMenu("dashboard");
+    else if (location.pathname.includes("profile")) setActiveMenu("profile");
+    else if (location.pathname.includes("orders")) setActiveMenu("orders");
+    else if (location.pathname.includes("settlement")) setActiveMenu("settlement");
+    else if (location.pathname.includes("vehucles")) setActiveMenu("vehucles");
+  }, [location.pathname]);
+
   return (
-    <div className="bs-docs-section clearfix " >
-      <div className="row">
-        <div className="col-lg-12">
+    <div className="bs-component">
+      <nav className="navbar navbar-expand-lg bg-primary bg-opacity-75" data-bs-theme="dark">
+        <div className="container-fluid">
+          <div className="navbar-brand">차주 페이지</div>
+          <button
+            className="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#shipperNavbar"
+            aria-controls="shipperNavbar"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon" />
+          </button>
 
-          <div className="bs-component">
-            <nav className="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
-              <div className="container-fluid">
-                <a className="navbar-brand" href="#">Idle</a>
-                <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
-                  <span className="navbar-toggler-icon"></span>
-                </button>
+          <div className="collapse navbar-collapse" id="shipperNavbar">
+            <ul className="navbar-nav mx-auto">
 
-                <div className="collapse navbar-collapse" id="navbarColor01">
-                  <ul className="navbar-nav me-auto">
-                    <li className="nav-item" onClick={moveToDashboard}>
-                      <a className="nav-link active" href="#">대시보드
-                        <span className="visually-hidden">(current)</span>
-                      </a>
-                    </li>
-                    <li className="nav-item" onClick={moveToProfile}>
-                      <a className="nav-link" href="#"> 프로필</a>
-                    </li>
-                    <li className="nav-item" onClick={moveToOrders}>
-                      <a className="nav-link" href="#">내 운송</a>
-                    </li>
-                    <li className="nav-item" onClick={moveToSettlement}>
-                      <a className="nav-link" href="#">정산</a>
-                    </li>
-                    <li className="nav-item" onClick={moveToVehucles}>
-                      <a className="nav-link" href="#">내 차량</a>
-                    </li>
-                  </ul>
-                  <form className="d-flex">
-                    <input className="form-control me-sm-2" type="search" placeholder="Search" />
-                    <button className="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
-                  </form>
-                </div>
-              </div>
-            </nav>
+              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "dashboard" ? "active" : ""}`} onClick={moveToDashboard}>
+                <div className="nav-link">대시보드</div>
+              </li>
+
+              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "profile" ? "active" : ""}`} onClick={moveToProfile}>
+                <div className="nav-link">프로필</div>
+              </li>
+
+              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "orders" ? "active" : ""}`} onClick={moveToOrders}>
+                <div className="nav-link">내 운송</div>
+              </li>
+
+              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "settlement" ? "active" : ""}`} onClick={moveToSettlement}>
+                <div className="nav-link">정산</div>
+              </li>
+
+              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "vehucles" ? "active" : ""}`} onClick={moveToVehucles}>
+                <div className="nav-link">내 차량</div>
+              </li>
+
+            </ul>
           </div>
         </div>
-      </div>
+      </nav>
     </div>
   );
 };
 
-export default NaviTap;
+export default ShipperNavBarComponent;

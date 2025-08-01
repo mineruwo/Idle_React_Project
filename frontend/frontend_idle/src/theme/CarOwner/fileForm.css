@@ -6,6 +6,9 @@
   border-radius: 10px;
   box-shadow: 0 0 12px rgba(0,0,0,0.1);
   font-family: sans-serif;
+  background-color: #fef8f8;
+  border: 1px solid #f3c7d3;
+  border-radius: 12px;
 }
 
 .file-form h2 {
