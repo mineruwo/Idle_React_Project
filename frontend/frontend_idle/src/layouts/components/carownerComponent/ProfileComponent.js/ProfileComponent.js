@@ -1,6 +1,6 @@
 
 import "../../../../theme/CarOwner/profile.css";
-import useCustomMove from "../../../../Car_owner/hooks/useCustomMove"
+import useCustomMove from "../../../../Car_owner/hooks/UseCustomMove"
 
 const ProfileComponent = () => {
     const { moveToEditProfile } = useCustomMove();
@@ -17,7 +17,7 @@ const ProfileComponent = () => {
                 
                 <div className="profile-avatar">
                     <div className="imgdiv">
-                    <img src="../../../public/img/tungtung.PNG"/>
+                    <img src="/img/main/tungtung.PNG"/>
                     </div>
                 </div>
                 <div className="avatar-info">

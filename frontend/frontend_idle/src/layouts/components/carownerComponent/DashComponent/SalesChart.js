@@ -1,6 +1,6 @@
 import React from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-
+import "../../../../theme/CarOwner/cardashboard.css";
 const SalesChart = ({ data }) => {
   return (
     <div className="chart-box">

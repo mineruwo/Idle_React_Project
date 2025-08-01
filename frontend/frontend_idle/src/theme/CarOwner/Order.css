@@ -19,6 +19,7 @@
   border-radius: 12px;
   margin-bottom: 2rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f3c7d3;
 }
 
 .delivery-summary div {
@@ -26,7 +27,9 @@
   font-weight: 500;
   color: #333;
 }
-
+.tablediv{
+  border: 1px solid #f3c7d3;
+}
 .delivery-table {
   width: 100%;
   border-collapse: collapse;

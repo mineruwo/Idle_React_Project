@@ -1,6 +1,5 @@
 import React from "react";
-import "../../../../theme/CarOwner/dashboard.css";
-
+import "../../../../theme/CarOwner/cardashboard.css";
 const DeliveryList = ({ deliveries }) => {
   return (
     <div className="delivery-box">

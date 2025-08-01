@@ -1,4 +1,6 @@
 
+
+import BubbleAnimation from "../../layouts/components/carownerComponent/common/BubbleAnimation";
 import NaviTap from "../../layouts/components/carownerComponent/common/NaviTap";
 import DashboardHeader from "../../layouts/components/carownerComponent/DashComponent/DashboardHeader";
 import DeliveryList from "../../layouts/components/carownerComponent/DashComponent/DeliveryList";
@@ -31,10 +33,13 @@ const CarDashpage = () => {
 
     return (
         <div>
+            
             <div className="topmenu sticky-top">
+                
                 <GNB />
                 <NaviTap />
             </div>
+            
             <div className="dashboard-container">
                 <div className="dashborad-firstcontainer">
                     <DashboardHeader
@@ -49,12 +54,7 @@ const CarDashpage = () => {
                     />
                     <SalesChart data={chartData} />
                 </div>
-                <div className="dashboard-secoundcontainer">
-                    <div className="warmth-alert">
-                        <p><strong>홍길동님</strong>, 따뜻함 온도 💗 <strong>100</strong></p>
-                        <p>🕒와우! 완벽 합니다! </p>
-                    </div>
-                </div>
+                
             </div>
             <div>
                 <DeliveryList deliveries={deliveries} />
