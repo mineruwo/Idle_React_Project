@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import "../../theme/CarOwner/profile.css"
 
 import { useNavigate } from "react-router-dom";
-import useCustomMove from "../../Car_owner/hooks/UseCustomMove";
+import useCustomMove from "../../hooks/useCustomMove";
 
 
 
 const EditProfilePage = () => {
-  const { moveToLisense } = useCustomMove();
+  const { carOwnerMoveToLisense } = useCustomMove();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "hong123",
@@ -54,7 +54,7 @@ const EditProfilePage = () => {
             <label>
               DriverLisense
               <input name="DriverLisense" value={formData.driverLisense} onChange={handleChange} />
-              <button className="driverbtn" onClick={moveToLisense}>증서 제출</button>
+              <button className="driverbtn" onClick={carOwnerMoveToLisense}>증서 제출</button>
             </label>
             <button type="button" className="btn" onClick={handleSave}>Save</button>
           </form>
