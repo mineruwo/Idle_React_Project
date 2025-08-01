@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AdminHeaderComponent from "../../layouts/components/admin/AdminHeaderComponent";
-import SidebarComponent from '../../layouts/components/admin/SidebarComponent';
+import SideBarComponent from '../../layouts/components/admin/SideBarComponent';
 import MainContentComponent from '../../layouts/components/admin/MainContentComponent';
 import LoginComponent from '../../layouts/components/admin/LoginComponent';
 
@@ -30,7 +30,7 @@ const AdminPage = () => {
     return (
         <div>
             <AdminHeaderComponent />
-            <SidebarComponent isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+            <SideBarComponent isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
             <MainContentComponent isSidebarOpen={isSidebarOpen}>
                 <LoginComponent/>
             </MainContentComponent>
