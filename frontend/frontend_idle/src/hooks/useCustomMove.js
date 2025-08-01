@@ -23,28 +23,28 @@ const useCustomMove = () => {
         navigate({ pathname: `../shipper/review` });
     };
 
-    const carOwnerMoveToDashboard = () =>{
-        navigate("/carPage")
-    }
-    const carOwnerMoveToProfile = () =>{
-        navigate("/carPage/profile")
-    }
-    const carOwnerMoveToEditProfile = () =>{
-        navigate("/carpage/editProfile")
-    }
-    const carOwnerMoveToOrders = () =>{
-        navigate("/carPage/orders")
-    }
-    const carOwnerMoveToSettlement = () =>{
-        navigate("/carPage/settlement")
-    }
-    const carOwnerMoveToVehucles = () =>{
-        navigate("/carPage/vehucles")
-    }
-    
-    const carOwnerMoveToLisense= () =>{
-        navigate("/carPage/submitDOC")
-    }
+    const carOwnerMoveToDashboard = () => {
+        navigate("/carPage");
+    };
+    const carOwnerMoveToProfile = () => {
+        navigate("/carPage/profile");
+    };
+    const carOwnerMoveToEditProfile = () => {
+        navigate("/carpage/editProfile");
+    };
+    const carOwnerMoveToOrders = () => {
+        navigate("/carPage/orders");
+    };
+    const carOwnerMoveToSettlement = () => {
+        navigate("/carPage/settlement");
+    };
+    const carOwnerMoveToVehucles = () => {
+        navigate("/carPage/vehucles");
+    };
+
+    const carOwnerMoveToLisense = () => {
+        navigate("/carPage/submitDOC");
+    };
 
     return {
         shipperMoveToDashBoard,
@@ -58,7 +58,7 @@ const useCustomMove = () => {
         carOwnerMoveToOrders,
         carOwnerMoveToSettlement,
         carOwnerMoveToVehucles,
-        carOwnerMoveToLisense
+        carOwnerMoveToLisense,
     };
 };
 

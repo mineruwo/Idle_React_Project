@@ -1,9 +1,9 @@
-import ShipperOrderComponent from "../../layouts/components/shipperComponent/ShipperOrderComponent";
+import OrderForm from "../orderPage/OrderForm";
 
 const ShipperOrderPage = () => {
     return (
         <div>
-            <ShipperOrderComponent />
+            <OrderForm />
         </div>
     );
 };

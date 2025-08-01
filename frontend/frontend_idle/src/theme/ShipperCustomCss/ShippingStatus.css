@@ -1,8 +1,10 @@
 .steps {
     display: flex;
     text-align: center;
-    font-size: 1.5rem;
+    font-size: 1rem;
     list-style: none;
+    margin: 0;
+    padding: 0;
 }
 .steps .steps-segment {
     position: relative;
@@ -97,11 +99,11 @@
 }
 
 .page-title {
-    font-size: 1.5em; /* 글자 크기 조정 */
-    font-weight: bold; /* 굵은 글씨 */
-    color: #0a3069; /* 카드 제목과 동일한 색상 */
-    margin-bottom: 1.5em; /* 아래쪽 여백 추가 */
-    text-align: left; /* 왼쪽 정렬 */
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #0a3069;
+    margin-bottom: 1.5em;
+    text-align: left;
 }
 
 .shipping-status {
@@ -110,4 +112,46 @@
     background-color: #f8fafd;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.08);
     font-family: "Noto Sans KR", sans-serif;
+}
+
+@media (max-width: 600px) {
+    .steps {
+        flex-direction: column;
+        align-items: flex-start;
+        padding-left: 0;
+    }
+
+    .steps .steps-segment {
+        width: 100%;
+        flex-basis: auto;
+        margin-bottom: 25px;
+        text-align: left;
+        display: flex;
+        align-items: center;
+    }
+
+    .steps .steps-segment:not(:last-child):after {
+        height: 75px;
+        width: 0.1em;
+        top: 25px;
+        left: calc(25px - 0.05em);
+        right: auto;
+        transform: none;
+        z-index: 4;
+    }
+
+    .steps .steps-segment .steps-marker {
+        position: relative;
+        left: 0;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+
+    .steps .steps-segment .steps-content {
+        margin-top: 0;
+        flex-grow: 1;
+    }
+    .steps .steps-segment .steps-content .heading {
+        font-size: 1em;
+    }
 }

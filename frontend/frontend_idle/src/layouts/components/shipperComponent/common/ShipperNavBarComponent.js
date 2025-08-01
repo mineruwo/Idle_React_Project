@@ -2,11 +2,11 @@ import useCustomMove from "../../../../hooks/useCustomMove";
 
 const ShipperNavBarComponent = () => {
     const {
-        moveToDashBoard,
-        moveToDetails,
-        moveToOrder,
-        moveToPayment,
-        moveToReview,
+        shipperMoveToDashBoard,
+        shipperMoveToDetails,
+        shipperMoveToOrder,
+        shipperMoveToPayment,
+        shipperMoveToReview,
     } = useCustomMove();
 
     return (
@@ -23,7 +23,7 @@ const ShipperNavBarComponent = () => {
                 <div className="container-fluid">
                     <div
                         className="navbar-brand"
-                        onClick={() => moveToDashBoard()}
+                        onClick={shipperMoveToDashBoard}
                     >
                         화주 페이지
                     </div>
@@ -46,31 +46,31 @@ const ShipperNavBarComponent = () => {
                         <ul className="navbar-nav mx-auto">
                             <li
                                 className="nav-item py-2 border-bottom border-light border-opacity-25"
-                                onClick={() => moveToDashBoard()}
+                                onClick={shipperMoveToDashBoard}
                             >
                                 <div className="nav-link">대시보드</div>
                             </li>
                             <li
                                 className="nav-item py-2 border-bottom border-light border-opacity-25"
-                                onClick={() => moveToOrder()}
+                                onClick={shipperMoveToOrder}
                             >
                                 <div className="nav-link">오더신청</div>
                             </li>
                             <li
                                 className="nav-item py-2 border-bottom border-light border-opacity-25"
-                                onClick={moveToDetails}
+                                onClick={shipperMoveToDetails}
                             >
                                 <div className="nav-link">오더상세</div>
                             </li>
                             <li
                                 className="nav-item py-2 border-bottom border-light border-opacity-25"
-                                onClick={() => moveToPayment()}
+                                onClick={shipperMoveToPayment}
                             >
                                 <div className="nav-link">포인트</div>
                             </li>
                             <li
                                 className="nav-item py-2 border-bottom border-light border-opacity-25"
-                                onClick={() => moveToReview()}
+                                onClick={shipperMoveToReview}
                             >
                                 <div className="nav-link">후기작성</div>
                             </li>
