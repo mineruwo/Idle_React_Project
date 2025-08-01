@@ -16,12 +16,11 @@ COPY src src
 
 # Give execution rights to the Gradle wrapper
 RUN chmod +x gradlew
+RUN echo "Dockerfile is executing!"
 
 # Build the Spring Boot application
 # This will create the JAR file in build/libs/
 RUN ./gradlew bootJar
-RUN ls -l build/libs/
-RUN ls -l /app
 
 # Expose the port your Spring Boot application listens on (default is 8080)
 EXPOSE 8080
