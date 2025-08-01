@@ -1,9 +1,9 @@
 
 import "../../../../theme/CarOwner/profile.css";
-import useCustomMove from "../../../../hooks/useCustomMove";
+import useCustomMove from"../../../../hooks/useCustomMove";
 
 const ProfileComponent = () => {
-    const { moveToEditProfile } = useCustomMove();
+    const { carOwnerMoveToEditProfile } = useCustomMove();
     const user = {
         username: "hong123",
         fullName: "Hong Gil-dong",
@@ -12,6 +12,7 @@ const ProfileComponent = () => {
         insurance: "0000-000-00000-00"
     };
     return (
+        <div className="profilewrapper">
         <div className="infodiv">
             <div className="profile-card " >
                 
@@ -35,9 +36,10 @@ const ProfileComponent = () => {
                         <p><strong>Insurance:</strong> {user.insurance}</p>
                     </div>
                     <div className="navbutton">
-                    <button className="btn" onClick={moveToEditProfile}>Edit Profile</button>
+                    <button className="btn" onClick={carOwnerMoveToEditProfile}>Edit Profile</button>
                     </div>
                 </div>
+            </div>
             </div>
     );
 }
