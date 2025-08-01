@@ -9,7 +9,7 @@ const WebSocketTestPage = () => {
 
     useEffect(() => {
         const client = new Client({
-            webSocketFactory: () => new SockJS('http://localhost:8080/ws'), // 백엔드 웹소켓 엔드포인트
+            webSocketFactory: () => new SockJS('https://idle-react-project-backend.onrender.com/ws'), // 백엔드 웹소켓 엔드포인트
             debug: function (str) {
                 console.log(str);
             },
