@@ -12,4 +12,15 @@ public class SecurityConfig {
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
+	
+	// 인증 제외 경로 허용
+//    @Bean
+//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        http
+//            .csrf().disable()
+//            .authorizeHttpRequests()
+//                .requestMatchers("/api/auth/signup").permitAll()
+//                .anyRequest().authenticated();
+//        return http.build();
+//    }
 }

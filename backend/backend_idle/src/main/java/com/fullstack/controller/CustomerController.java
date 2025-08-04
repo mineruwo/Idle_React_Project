@@ -1,6 +1,6 @@
 package com.fullstack.controller;
 
-import com.fullstack.model.Customer;
+import com.fullstack.model.CustomerDTO;
 import com.fullstack.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,26 +17,26 @@ public class CustomerController {
     private CustomerService customerService;
 
     @GetMapping
-    public List<Customer> getAllCustomers() {
+    public List<CustomerDTO> getAllCustomers() {
         return customerService.getAllCustomers();
     }
 
     @GetMapping("/{idNum}")
-    public ResponseEntity<Customer> getCustomerByIdNum(@PathVariable Integer idNum) {
-        Optional<Customer> customer = customerService.getCustomerByIdNum(idNum);
+    public ResponseEntity<CustomerDTO> getCustomerByIdNum(@PathVariable Integer idNum) {
+        Optional<CustomerDTO> customer = customerService.getCustomerByIdNum(idNum);
         return customer.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public Customer createCustomer(@RequestBody Customer customer) {
+    public CustomerDTO createCustomer(@RequestBody CustomerDTO customer) {
         return customerService.createCustomer(customer);
     }
 
     @PutMapping("/{idNum}")
-    public ResponseEntity<Customer> updateCustomer(@PathVariable Integer idNum, @RequestBody Customer customerDetails) {
+    public ResponseEntity<CustomerDTO> updateCustomer(@PathVariable Integer idNum, @RequestBody CustomerDTO customerDetails) {
         try {
-            Customer updatedCustomer = customerService.updateCustomer(idNum, customerDetails);
+            CustomerDTO updatedCustomer = customerService.updateCustomer(idNum, customerDetails);
             return ResponseEntity.ok(updatedCustomer);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
@@ -54,8 +54,8 @@ public class CustomerController {
     }
 
     @GetMapping("/by-id/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable String id) {
-        Customer customer = customerService.getCustomerById(id);
+    public ResponseEntity<CustomerDTO> getCustomerById(@PathVariable String id) {
+        CustomerDTO customer = customerService.getCustomerById(id);
         if (customer != null) {
             return ResponseEntity.ok(customer);
         } else {
