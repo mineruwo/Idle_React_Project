@@ -2,10 +2,7 @@ import { Button } from "react-bootstrap";
 import useCustomMove from './../../../hooks/useCustomMove';
 
 const IntroComponent = () => {
-    const {
-        shipperMoveToDashBoard,
-        carOwnerMoveToDashboard
-    } = useCustomMove();
+    const { shipperMoveToDashBoard, carOwnerMoveToDashboard } = useCustomMove();
 
     return (
         <div className="position-relative text-white">
@@ -22,7 +19,7 @@ const IntroComponent = () => {
                 <h1
                     className="fw-bold mb-3 text-dark"
                     style={{
-                        fontSize: "clamp(1rem, 4vw, 3rem)"
+                        fontSize: "clamp(1rem, 4vw, 3rem)",
                     }}
                 >
                     화물운송을 간편하게 연결합니다
@@ -30,7 +27,7 @@ const IntroComponent = () => {
                 <p
                     className="lead mb-4 text-dark"
                     style={{
-                        fontSize: "clamp(0.5rem, 2.5vw, 2rem)", 
+                        fontSize: "clamp(0.5rem, 2.5vw, 2rem)",
                     }}
                 >
                     화물운송을 손쉽게 연결하는 플랫폼입니다

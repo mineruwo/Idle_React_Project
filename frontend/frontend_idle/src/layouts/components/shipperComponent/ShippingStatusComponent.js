@@ -4,7 +4,7 @@ const ShippingStatusComponent = ({ currentStep }) => {
     const steps = [
         {
             id: 1,
-            name: "화주(오더신청)",
+            name: "오더신청",
             icon: (
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
