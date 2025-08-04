@@ -1,23 +1,23 @@
 package com.fullstack.config;
 
-import org.springframework.context.ApplicationListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
+import org.springframework.context.event.EventListener; // Added this import
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 @Component
-public class WebSocketEventListener implements ApplicationListener<SessionConnectedEvent>, ApplicationListener<SessionDisconnectEvent> {
+public class WebSocketEventListener {
 
     // chatRoomId -> Set<sessionId>
     private final ConcurrentMap<String, Set<String>> activeChatRooms = new ConcurrentHashMap<>();
 
-    @Override
-    public void onApplicationEvent(SessionConnectedEvent event) {
+    @EventListener // Added this annotation
+    public void handleSessionConnected(SessionConnectedEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         String sessionId = headerAccessor.getSessionId();
         String chatRoomId = headerAccessor.getFirstNativeHeader("chatRoomId");
@@ -29,8 +29,8 @@ public class WebSocketEventListener implements ApplicationListener<SessionConnec
         }
     }
 
-    @Override
-    public void onApplicationEvent(SessionDisconnectEvent event) {
+    @EventListener // Added this annotation
+    public void handleSessionDisconnect(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         String sessionId = headerAccessor.getSessionId();
 
