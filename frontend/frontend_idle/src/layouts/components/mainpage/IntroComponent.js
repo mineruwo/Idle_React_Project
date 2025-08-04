@@ -3,6 +3,11 @@ import useCustomMove from './../../../hooks/useCustomMove';
 
 const IntroComponent = () => {
 
+    const {
+        shipperMoveToDashBoard,
+        carOwnerMoveToDashboard
+    } = useCustomMove();
+
     return (
         <div className="position-relative text-white">
             <img
@@ -44,7 +49,7 @@ const IntroComponent = () => {
                         화물주로 시작하기
                     </Button>
                     <Button variant="dark" size="lg"
-                    onClick={carOwnerMoveToDashboard}>
+                        onClick={carOwnerMoveToDashboard}>
                         차주로 시작하기
                     </Button>
                 </div>

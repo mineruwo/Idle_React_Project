@@ -10,12 +10,13 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/customers")
+@RequestMapping("/api/customer")
 public class CustomerController {
 
     @Autowired
     private CustomerService customerService;
-
+    
+    /*
     @GetMapping
     public List<CustomerDTO> getAllCustomers() {
         return customerService.getAllCustomers();
@@ -61,5 +62,12 @@ public class CustomerController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+    
+    */
+    @PostMapping("/signup")
+    public ResponseEntity<String> signup(@RequestBody CustomerDTO customerDTO) {
+    	customerService.register(customerDTO);
+    	return ResponseEntity.ok("회원가입 성공");
     }
 }

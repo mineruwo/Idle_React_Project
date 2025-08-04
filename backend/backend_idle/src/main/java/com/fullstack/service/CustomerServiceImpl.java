@@ -1,5 +1,6 @@
 package com.fullstack.service;
 
+import com.fullstack.entity.CustomerEntity;
 import com.fullstack.model.CustomerDTO;
 import com.fullstack.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private CustomerRepository customerRepository;
 
+    /*
     public List<CustomerDTO> getAllCustomers() {
         return customerRepository.findAll();
     }
@@ -53,7 +55,30 @@ public class CustomerServiceImpl implements CustomerService {
         customerRepository.delete(customer);
     }
 
+
     public CustomerDTO getCustomerById(String id) {
         return customerRepository.findById(id);
     }
+    */
+    
+    @Override
+    public void register(CustomerDTO dto) {
+        CustomerEntity entity = dtoToEntity(dto);
+        customerRepository.save(entity);
+    }
+    
+    private CustomerEntity dtoToEntity(CustomerDTO dto) {
+    	return CustomerEntity.builder()
+    	        .id(dto.getId())
+    	        .passwordEnc(dto.getPasswordEnc())
+    	        .customName(dto.getCustomName())
+    	        .phone(dto.getPhone())
+    	        .nickname(dto.getNickname())
+    	        .role(dto.getRole())
+    	        .createdAt(LocalDateTime.now())
+    	        .isLefted(false)
+    	        .userPoint(0)
+    	        .build();
+    }
+    
 }
