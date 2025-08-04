@@ -2,7 +2,6 @@ import { Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
 const IntroComponent = () => {
-    const { shipperMoveToDashBoard, carOwnerMoveToDashboard } = useCustomMove();
 
     return (
         <div className="position-relative text-white">
