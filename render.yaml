@@ -1,6 +1,8 @@
 services:
   - type: static
     name: frontend-idle
+    env: node
+    nodeVersion: "18.17.1"
     rootDir: frontend/frontend_idle
     buildCache: yarn
     buildCommand: echo '--- render.yaml build started ---' && yarn install && GENERATE_SOURCEMAP=false yarn build

@@ -2,11 +2,15 @@ import { Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
 const IntroComponent = () => {
+    const {
+        shipperMoveToDashBoard,
+        carOwnerMoveToDashboard
+    } = useCustomMove();
 
     return (
         <div className="position-relative text-white">
             <img
-                src={process.env.PUBLIC_URL + "/img/main/MainImage.PNG"} 
+                src={process.env.PUBLIC_URL + "/img/main/MainImage.PNG"}
                 alt="소개 이미지"
                 className="img-fluid w-100"
             />
@@ -41,6 +45,6 @@ const IntroComponent = () => {
             </div>
         </div >
     );
-}
+};
 
 export default IntroComponent;

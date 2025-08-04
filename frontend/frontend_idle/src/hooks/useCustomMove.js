@@ -46,6 +46,10 @@ const useCustomMove = () => {
         navigate("/carPage/submitDOC");
     };
 
+    const moveToAdminPage = () =>{
+        navigate("/admin")
+    }
+
     return {
         shipperMoveToDashBoard,
         shipperMoveToDetails,
@@ -59,6 +63,7 @@ const useCustomMove = () => {
         carOwnerMoveToSettlement,
         carOwnerMoveToVehucles,
         carOwnerMoveToLisense,
+        moveToAdminPage
     };
 };
 
