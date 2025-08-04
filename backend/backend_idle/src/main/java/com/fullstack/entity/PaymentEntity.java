@@ -1,6 +1,6 @@
 package com.fullstack.entity;
 
-import com.fullstack.model.PaymentDto;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,7 +16,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table
+@Table(name = "payments")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,33 +24,18 @@ public class PaymentEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private String ORDER_ID;
-
-	private Long ID_NUM;
-
-	private String FK_ORDER_ID;
-
-	private String PAYMENT_RESULT_LOG;
-
-	private Boolean PAYMENT_SUCCESS_STATUS;
-
-	private Long amount;
-
-	private String paid_type;
+	private Long id;
+    private String merchantUid; // 상점 주문 번호
+    private String itemName;    // 상품명
+    private Long amount;  // 결제 금액 (정확한 금액 계산을 위해 BigDecimal 사용)
+    private String buyerName;   // 구매자 이름
+    private String buyerEmail;  // 구매자 이메일
+    private String paymentStatus; // 결제 상태 (예: "READY", "PAID", "CANCELLED")
+    private LocalDateTime requestedAt; // 요청 시간
+    private LocalDateTime paidAt; // 결제 완료 시간
+    private LocalDateTime cancelledAt; // 결제 취소 시간
+    private String impUid; // 아임포트(포트원)에서 발급하는 고유 ID (결제 완료 후 저장)
 	
-	private String product_type;
-	
-
-	public void PaymentDtoToEntity(PaymentDto dto)
-	{
-		this.ORDER_ID = dto.getORDER_ID();
-		this.FK_ORDER_ID = dto.getFK_ORDER_ID();
-		this.PAYMENT_RESULT_LOG = dto.getPAYMENT_RESULT_LOG();
-		this.PAYMENT_SUCCESS_STATUS = dto.getPAYMENT_SUCCESS_STATUS();
-		this.amount = dto.getAmount();
-		this.paid_type = dto.getPaid_type();
-		this.product_type = dto.getProduct_type();
-	}
 	
 }
 
