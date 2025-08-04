@@ -69,6 +69,20 @@ export const red = {
   900: 'hsl(0, 93%, 6%)',
 };
 
+// 테마 색상
+export const custom = {
+  50:  'hsl(1, 97%, 97%)',
+  100: 'hsl(1, 97%, 90%)',
+  200: 'hsl(1, 97%, 80%)',
+  300: 'hsl(1, 97%, 75%)',
+  400: 'hsl(1, 97%, 70%)', 
+  500: 'hsl(1, 97%, 60%)',
+  600: 'hsl(1, 97%, 50%)',
+  700: 'hsl(1, 97%, 40%)',
+  800: 'hsl(1, 97%, 30%)',
+  900: 'hsl(1, 97%, 20%)',
+};
+
 export const getDesignTokens = (mode) => {
   customShadows[1] =
     mode === 'dark'
@@ -215,19 +229,20 @@ export const getDesignTokens = (mode) => {
   };
 };
 
+// 테마 설정
 export const colorSchemes = {
   light: {
     palette: {
       primary: {
-        light: brand[200],
-        main: brand[400],
-        dark: brand[700],
-        contrastText: brand[50],
+        light: custom[200],
+        main: custom[400],
+        dark: custom[700],
+        contrastText: custom[50],
       },
       info: {
-        light: brand[100],
-        main: brand[300],
-        dark: brand[600],
+        light: custom[100],
+        main: custom[300],
+        dark: custom[600],
         contrastText: gray[50],
       },
       warning: {

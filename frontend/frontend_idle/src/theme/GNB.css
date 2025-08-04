@@ -1,0 +1,12 @@
+.transition-top {
+    transition: top 0.3s ease, opacity 0.3s ease;
+    top: 0;
+    opacity: 1;
+}
+
+/* 숨겨질 때 top 값을 음수로 설정하여 화면 위로 올림 */
+.hide {
+    top: -80px; /* 헤더 높이만큼 숨김 */
+    opacity: 0;
+    pointer-events: none;
+}
