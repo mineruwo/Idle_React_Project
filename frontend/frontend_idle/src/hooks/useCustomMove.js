@@ -50,10 +50,6 @@ const useCustomMove = () => {
         navigate("/admin")
     }
 
-    const moveToWebSocketTestPage = () =>{
-        navigate("/websocket")
-    }
-
     return {
         shipperMoveToDashBoard,
         shipperMoveToDetails,
@@ -67,8 +63,7 @@ const useCustomMove = () => {
         carOwnerMoveToSettlement,
         carOwnerMoveToVehucles,
         carOwnerMoveToLisense,
-        moveToAdminPage,
-        moveToWebSocketTestPage
+        moveToAdminPage
     };
 };
 
