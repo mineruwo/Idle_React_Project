@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
+import { apiConfig } from '../../config/apiConfig';
+
 const WebSocketTestPage = () => {
     const [stompClient, setStompClient] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -9,7 +11,7 @@ const WebSocketTestPage = () => {
 
     useEffect(() => {
         const client = new Client({
-            webSocketFactory: () => new SockJS('https://idle-react-project-backend.onrender.com/ws'), // 백엔드 웹소켓 엔드포인트
+            webSocketFactory: () => new SockJS(apiConfig.webSocketUrl), // 백엔드 웹소켓 엔드포인트
             debug: function (str) {
                 console.log(str);
             },
