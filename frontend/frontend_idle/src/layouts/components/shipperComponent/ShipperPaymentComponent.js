@@ -12,12 +12,51 @@ const ShipperPaymentComponent = () => {
         { type: "충전", amount: "+5,000", date: "2025-07-30" },
     ];
 
-    const handleCharge = () => {
-        if (chargeAmount && !isNaN(chargeAmount)) {
-            setPoints(points + parseInt(chargeAmount, 10));
-            setChargeAmount("");
-            alert(`${chargeAmount}P가 충전되었습니다.`);
+    // const handleCharge = () => {
+    //     if (chargeAmount && !isNaN(chargeAmount)) {
+    //         setPoints(points + parseInt(chargeAmount, 10));
+    //         setChargeAmount("");
+    //         alert(`${chargeAmount}P가 충전되었습니다.`);
+    //     }
+    // };
+
+    const ClickChargeBtn = (
+        pg_method,
+        chargeAmount,
+        nickname,
+        redirect_url
+    ) => {
+        if (parseInt(chargeAmount, 10) < 1000) {
+            alert("충전 금액은 1,000원 이상이어야 합니다.");
+            return;
         }
+
+        const { IMP } = window;
+        IMP.init("imp16058080"); // 가맹점 번호 지정
+        IMP.request_pay(
+            {
+                pg: "kakaopay", // 결제 방식 지정
+                pay_method: "card",
+                merchant_uid: `mid_${new Date().getTime()}`, // 현재 시간
+                name: "포인트 충전",
+                amount: `${chargeAmount}`, // 충전할 금액
+                buyer_email: "구매자 이메일",
+                buyer_name: `${nickname}`, // 충전 요청한 유저의 닉네임
+                buyer_tel: "010-1222-2222",
+                buyer_addr: "서울특별시 강남구 삼성동",
+                buyer_postcode: "123-456",
+                m_redirect_url: "http://localhost:3000/shipper/payment", // 만약 새창에서 열린다면 결제 완료 후 리다이렉션할 주소
+            },
+            function (rsp) {
+                // callback
+                if (rsp.success) {
+                    // 만약 결제가 성공적으로 이루어졌다면
+                    alert("결제 성공");
+                } else {
+                    alert(`결제 실패: ${rsp.error_msg}`);
+                }
+            }
+        );
     };
 
     // 포인트 결제 관련 상태 (디자인 확인용)
@@ -77,8 +116,18 @@ const ShipperPaymentComponent = () => {
                             value={chargeAmount}
                             onChange={(e) => setChargeAmount(e.target.value)}
                         />
-                        <button className="charge-btn" onClick={handleCharge}>
-                            충전하기
+                        <button
+                            className="charge-btn"
+                            onClick={() =>
+                                ClickChargeBtn(
+                                    "kakaopay",
+                                    chargeAmount,
+                                    "nickname",
+                                    "http://localhost:3000/redirect"
+                                )
+                            }
+                        >
+                            카카오페이
                         </button>
                     </div>
                 </div>

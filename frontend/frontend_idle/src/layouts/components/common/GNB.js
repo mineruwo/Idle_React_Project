@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import '../../../theme/GNB.css';
 
 const GNB = () => {
     const [hideHeader, setHideHeader] = useState(false);
