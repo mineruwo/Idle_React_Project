@@ -1,10 +1,10 @@
-
 import React, { useEffect, useRef, useState, forwardRef } from "react";
 import styled from "styled-components"; // 스타일 컴포넌트 사용
 import DatePicker from "react-datepicker"; // 날짜 선택 컴포넌트
 import "react-datepicker/dist/react-datepicker.css";
 import CalendarInput from "./CalendarInput";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const OrderForm = () => {
   // 지도 참조를 위한 ref
@@ -24,7 +24,7 @@ const OrderForm = () => {
     special: false,
     normal: false,
     expensive: false,
-    fragile: false,
+    fragile: false
   });
 
 
@@ -159,10 +159,30 @@ const OrderForm = () => {
     setPackingOptions((prev) => ({ ...prev, [type]: !prev[type] }));
   };
 
-  const handleSubmit = () => {
+const handleSubmit = async () => {
+  try {
+    const requestData = {
+      departure,
+      arrival,
+      cargoType,
+      cargoSize,
+      weight,
+      vehicle,
+      isImmediate,
+      reservedDate: selectedDate ? selectedDate.toISOString() : null,
+      distance: distance?.toString() || null,
+    };
+
+    await axios.post("http://localhost:8080/api/orders", requestData);
+
     alert("운송이 등록되었습니다\n(게시판에서 확인가능)");
     navigate("/board");
-  };
+  } catch (error) {
+    console.error("오더 등록 실패:", error);
+    alert("오더 등록 중 오류가 발생했습니다.");
+  }
+};
+
 
   // UI 반환 부분 (JSX)
   return (
