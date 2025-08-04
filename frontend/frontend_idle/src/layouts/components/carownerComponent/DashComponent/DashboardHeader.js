@@ -1,6 +1,6 @@
 import React from "react";
 import "../../../../theme/CarOwner/cardashboard.css";
-import useCustomMove from "../../../../Car_owner/hooks/UseCustomMove";
+import useCustomMove from "../../../../hooks/useCustomMove";
 import WarmthPieChart from "./WarmPieChart";
 
 const DashboardHeader = ({ name, completed, inProgress, scheduled, total, revenue, commission, settlement }) => {

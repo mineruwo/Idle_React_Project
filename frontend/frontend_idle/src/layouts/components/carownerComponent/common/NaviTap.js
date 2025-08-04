@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import useCustomMove from "../../../../Car_owner/hooks/UseCustomMove";
+import useCustomMove from "../../../../hooks/useCustomMove";
 import "../../../../theme/CarOwner/navbar.css";
 
 const ShipperNavBarComponent = () => {
