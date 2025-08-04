@@ -1,5 +1,6 @@
 package com.fullstack.service;
 
+import com.fullstack.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
 
 import com.siot.IamportRestClient.IamportClient;

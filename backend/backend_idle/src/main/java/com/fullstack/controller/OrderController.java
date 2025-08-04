@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*")
 public class OrderController {
 
-    private final OrderService orderService = new OrderService();
+    private final OrderService orderService;
 
     @PostMapping
     public Order save(@RequestBody OrderDto dto) {

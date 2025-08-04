@@ -1,6 +1,5 @@
 package com.fullstack.service;
 
-
 import com.fullstack.entity.Order;
 import com.fullstack.model.OrderDto;
 import com.fullstack.repository.OrderRepository;
@@ -11,7 +10,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class OrderService {
 
-    private final OrderRepository orderRepository = null;
+    private final OrderRepository orderRepository;
 
     public Order saveOrder(OrderDto dto) {
         Order order = Order.builder()

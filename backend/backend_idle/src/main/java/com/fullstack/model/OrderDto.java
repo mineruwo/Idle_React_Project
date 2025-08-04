@@ -1,13 +1,16 @@
 package com.fullstack.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-
+@Builder 
 public class OrderDto {
 	 private String departure;
 	    private String arrival;

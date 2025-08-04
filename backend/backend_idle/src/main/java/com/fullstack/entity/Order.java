@@ -25,10 +25,7 @@ public class Order {
 	    private boolean isImmediate;
 	    private String reservedDate;
 	    private String distance;
-		public static Object builder() {
-			// TODO Auto-generated method stub
-			return null;
-		}
+		
 
     // 생성자, Getter/Setter 생략
 }
