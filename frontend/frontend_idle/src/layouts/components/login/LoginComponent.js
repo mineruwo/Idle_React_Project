@@ -15,8 +15,7 @@ import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import ForgotPasswordComponent from './ForgotPasswordComponent';
 import AppTheme from '../../../theme/muitheme/AppTheme';
-import ColorModeSelect from '../../../theme/muitheme/ColorModeSelect';
-import { GoogleIcon, FacebookIcon, SitemarkIcon } from './IconComponent';
+import { GoogleIcon, KakaoIcon, PinkTruckIcon } from './IconComponent';
 
 const Card = styled(MuiCard)(({ theme }) => ({
     display: 'flex',
@@ -119,7 +118,7 @@ export default function SignIn(props) {
             <CssBaseline enableColorScheme />
             <SignInContainer direction="column" justifyContent="space-between">
                 <Card variant="outlined">
-                    <SitemarkIcon />
+                    <PinkTruckIcon />
                     <Typography
                         component="h1"
                         variant="h4"
@@ -174,7 +173,7 @@ export default function SignIn(props) {
                         </FormControl>
                         <FormControlLabel
                             control={<Checkbox value="remember" color="primary" />}
-                            label="Remember me"
+                            label="자동 로그인"
                         />
                         <ForgotPasswordComponent open={open} handleClose={handleClose} />
                         <Button
@@ -192,7 +191,7 @@ export default function SignIn(props) {
                             variant="body2"
                             sx={{ alignSelf: 'center' }}
                         >
-                            Forgot your password?
+                            비밀번호 찾기
                         </Link>
                     </Box>
                     <Divider>or</Divider>
@@ -203,24 +202,24 @@ export default function SignIn(props) {
                             onClick={() => alert('Sign in with Google')}
                             startIcon={<GoogleIcon />}
                         >
-                            Sign in with Google
+                            구글 로그인
                         </Button>
                         <Button
                             fullWidth
                             variant="outlined"
-                            onClick={() => alert('Sign in with Facebook')}
-                            startIcon={<FacebookIcon />}
+                            onClick={() => alert('Sign in with Kakao')}
+                            startIcon={<KakaoIcon />}
                         >
-                            Sign in with Facebook
+                            카카오 로그인
                         </Button>
                         <Typography sx={{ textAlign: 'center' }}>
-                            Don&apos;t have an account?{' '}
+                            회원이 아니신가요?{' '}
                             <Link
                                 href="/material-ui/getting-started/templates/sign-in/"
                                 variant="body2"
                                 sx={{ alignSelf: 'center' }}
                             >
-                                Sign up
+                                회원가입
                             </Link>
                         </Typography>
                     </Box>
