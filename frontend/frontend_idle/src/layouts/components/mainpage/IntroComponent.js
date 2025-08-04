@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import useCustomMove from "../../../hooks/useCustomMove";
 
 const IntroComponent = () => {
-    const { shipperMoveToDashBoard, carOwnerMoveToDashboard } = useCustomMove();
 
     return (
         <div className="position-relative text-white">
