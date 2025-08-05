@@ -161,25 +161,26 @@ const OrderForm = () => {
 
 const handleSubmit = async () => {
   try {
-    const requestData = {
+    const orderData = {
       departure,
       arrival,
-      cargoType,
-      cargoSize,
+      distance,
+      date: selectedDate,
+      isImmediate,
       weight,
       vehicle,
-      isImmediate,
-      reservedDate: selectedDate ? selectedDate.toISOString() : null,
-      distance: distance?.toString() || null,
+      cargoType,
+      cargoSize,
+      packingOptions,
     };
 
-    await axios.post("http://localhost:8080/api/orders", requestData);
+    await axios.post("http://localhost:8080/api/orders", orderData);
 
     alert("운송이 등록되었습니다\n(게시판에서 확인가능)");
     navigate("/board");
   } catch (error) {
-    console.error("오더 등록 실패:", error);
-    alert("오더 등록 중 오류가 발생했습니다.");
+    console.error("오더 등록 오류:", error);
+    alert("오더 등록에 실패했습니다.");
   }
 };
 
