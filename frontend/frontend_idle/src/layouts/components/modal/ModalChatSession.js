@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 
 import { apiConfig } from '../../../config/apiConfig';
 
-const WebSocketTestModal = ({ isOpen, onClose }) => {
+const ModalChatSession = ({ isOpen, onClose }) => {
     const [stompClient, setStompClient] = useState(null);
     const [messages, setMessages] = useState([]);
     const [messageInput, setMessageInput] = useState('');
@@ -172,7 +172,7 @@ const WebSocketTestModal = ({ isOpen, onClose }) => {
         maxWidth: content.length < 11 ? 'fit-content' : '70%', // 11글자 미만이면 내용에 맞게, 이상이면 70%
         marginBottom: '10px',
         textAlign: 'left',
-        wordBreak: 'keep-all', // 한글 단어 단위 줄바꿈
+        wordBreak: 'break-word', // 한글 단어 단위 줄바꿈
         overflowWrap: 'break-word', // fallback
     });
 
@@ -225,4 +225,4 @@ const WebSocketTestModal = ({ isOpen, onClose }) => {
     );
 };
 
-export default WebSocketTestModal;
+export default ModalChatSession;

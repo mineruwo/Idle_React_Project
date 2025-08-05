@@ -113,8 +113,8 @@ const ActiveChatSessionChat = ({ sessionId, chatRoomId, onClose }) => {
         maxWidth: content.length < 11 ? 'fit-content' : '70%',
         marginBottom: '10px',
         textAlign: 'left',
-        wordBreak: 'keep-all',
-        overflowWrap: 'break-word',
+        wordBreak: 'break-word', // 'keep-all'에서 'break-word'로 변경
+        overflowWrap: 'break-word', // 유지
     });
 
     const inputAreaStyle = {

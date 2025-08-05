@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import WebSocketTestModal from '../modal/WebSocketTestModal';
+import ModalChatSession from '../modal/ModalChatSession';
 
 const FloatingChatButton = () => {
     const [isModalOpen, setModalOpen] = useState(false);
@@ -34,7 +34,7 @@ const FloatingChatButton = () => {
                     💬
                 </button>
             )}
-            <WebSocketTestModal isOpen={isModalOpen} onClose={closeModal} />
+            <ModalChatSession isOpen={isModalOpen} onClose={closeModal} />
         </>
     );
 };
