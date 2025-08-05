@@ -69,10 +69,26 @@ public class CustomerController {
     }
     
     */
-    // 
+    // 회원가입
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody CustomerDTO customerDTO) {
     	customerService.register(customerDTO);
     	return ResponseEntity.ok("회원가입 성공");
+    }
+    
+    // 아이디 중복 확인
+    @GetMapping("/check-id")
+    public ResponseEntity<Boolean> checkId(@RequestParam String id) {
+    	boolean isDuplicate = customerService.isIdDuplicate(id);
+    	
+    	return ResponseEntity.ok(isDuplicate);
+    }
+    
+    // 닉네임 중복 확인
+    @GetMapping("/check-nickname")
+    public ResponseEntity<Boolean> checkNickname(@RequestParam String nickname) {
+    	boolean isDuplicate = customerService.isNicknameDuplicate(nickname);
+    	
+    	return ResponseEntity.ok(isDuplicate);
     }
 }

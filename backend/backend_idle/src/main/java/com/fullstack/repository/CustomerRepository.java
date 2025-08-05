@@ -13,7 +13,7 @@ public interface CustomerRepository extends JpaRepository<CustomerEntity, Intege
     
 	Optional<CustomerEntity> findById(String id);
 	
-	Optional<CustomerEntity> findByNickName(String nickname);
+	Optional<CustomerEntity> findByNickname(String nickname);
 	
 	boolean existsById(String id);
 
