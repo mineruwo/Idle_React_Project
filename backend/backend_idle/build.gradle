@@ -48,6 +48,10 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
+bootJar {
+    mainClass = 'com.fullstack.BackendIdleApplication'
+}
+
 tasks.named('compileJava') {
     options.compilerArgs.add('-parameters')
 }
