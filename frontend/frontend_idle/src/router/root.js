@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
+import shipperRouter from "./shipperRouter";
 
 const Loading = <div>Loading 중...</div>;
 
@@ -12,6 +13,7 @@ const OrderForm = lazy(() => import("../pages/orderPage/OrderForm"));
 const Login = lazy(() => import("../pages/loginpage/LoginPage"));
 const Singup = lazy(() => import("../pages/signuppage/SignupPage"));
 const Dstest = lazy(() => import("../pages/mainpage/TestPage"));
+const Shipper = lazy(() => import("../pages/shipperPage/ShipperDashBoard"));
 
 const root = createBrowserRouter([
     {
@@ -69,6 +71,15 @@ const root = createBrowserRouter([
                 <Dstest />
             </Suspense>
         ),
+    },
+    {
+        path: "shipper",
+        element: (
+            <Suspense fallback={Loading}>
+                <Shipper />
+            </Suspense>
+        ),
+        children: shipperRouter(),
     },
 ]);
 

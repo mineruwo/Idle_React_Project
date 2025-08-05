@@ -1,26 +1,24 @@
 import React, { useState } from "react";
 import "../../../theme/ShipperCustomCss/ShipperPayment.css";
+import { payWithPoints, preparePayment, verifyPayment } from "../../../api/paymentApi";
 
-// props를 제거하고, 디자인 확인을 위해 currentPoints를 내부 상태로 관리합니다.
-const ShipperPaymentComponent = () => {
+// props를 적용하여 컴포넌트를 동적으로 만듭니다.
+const ShipperPaymentComponent = ({
+    currentPoints,
+    nickname,
+    onPaymentSuccess,
+    onChargeSuccess, // 충전 성공 시 호출될 콜백 함수
+    userId, // userId prop 추가
+}) => {
     // 포인트 충전 관련 상태
     const [chargeAmount, setChargeAmount] = useState("");
-    const [points, setPoints] = useState(15000); // 충전된 포인트 (기존 로직 유지)
-    const recentHistory = [
+    const [recentHistory, setRecentHistory] = useState([
         { type: "충전", amount: "+10,000", date: "2025-07-25" },
         { type: "사용", amount: "-3,500", date: "2025-07-27" },
         { type: "충전", amount: "+5,000", date: "2025-07-30" },
-    ];
+    ]);
 
-    // const handleCharge = () => {
-    //     if (chargeAmount && !isNaN(chargeAmount)) {
-    //         setPoints(points + parseInt(chargeAmount, 10));
-    //         setChargeAmount("");
-    //         alert(`${chargeAmount}P가 충전되었습니다.`);
-    //     }
-    // };
-
-    const ClickChargeBtn = (
+    const ClickChargeBtn = async (
         pg_method,
         chargeAmount,
         nickname,
@@ -31,50 +29,95 @@ const ShipperPaymentComponent = () => {
             return;
         }
 
-        const { IMP } = window;
-        IMP.init("imp16058080"); // 가맹점 번호 지정
-        IMP.request_pay(
-            {
-                pg: "kakaopay", // 결제 방식 지정
-                pay_method: "card",
-                merchant_uid: `mid_${new Date().getTime()}`, // 현재 시간
-                name: "포인트 충전",
-                amount: `${chargeAmount}`, // 충전할 금액
-                buyer_email: "구매자 이메일",
-                buyer_name: `${nickname}`, // 충전 요청한 유저의 닉네임
-                buyer_tel: "010-1222-2222",
-                buyer_addr: "서울특별시 강남구 삼성동",
-                buyer_postcode: "123-456",
-                m_redirect_url: "http://localhost:3000/shipper/payment", // 만약 새창에서 열린다면 결제 완료 후 리다이렉션할 주소
-            },
-            function (rsp) {
-                // callback
-                if (rsp.success) {
-                    // 만약 결제가 성공적으로 이루어졌다면
-                    alert("결제 성공");
-                } else {
-                    alert(`결제 실패: ${rsp.error_msg}`);
-                }
+        const merchantUid = `mid_${new Date().getTime()}`;
+        const amount = parseInt(chargeAmount, 10);
+
+        try {
+            // 1. 백엔드에 결제 준비 요청
+            const prepareResponse = await preparePayment({
+                merchantUid: merchantUid,
+                itemName: "포인트 충전",
+                amount: amount,
+                buyerName: nickname,
+                buyerEmail: "buyer@example.com", // 실제 사용자 이메일로 변경 필요
+                userId: userId, // 백엔드에 userId 전달
+            });
+
+            if (!prepareResponse.success) {
+                alert(`결제 준비 실패: ${prepareResponse.message}`);
+                return;
             }
-        );
+
+            // 2. 포트원(아임포트) 결제창 호출
+            const { IMP } = window;
+            IMP.init("imp16058080"); // 가맹점 번호 지정
+            IMP.request_pay(
+                {
+                    pg: "kakaopay", // 결제 방식 지정
+                    pay_method: "card",
+                    merchant_uid: merchantUid,
+                    name: "포인트 충전",
+                    amount: amount,
+                    buyer_email: "buyer@example.com", // 실제 사용자 이메일로 변경 필요
+                    buyer_name: nickname,
+                    buyer_tel: "010-1222-2222", // 실제 사용자 전화번호로 변경 필요
+                    buyer_addr: "서울특별시 강남구 삼성동", // 실제 사용자 주소로 변경 필요
+                    buyer_postcode: "123-456", // 실제 사용자 우편번호로 변경 필요
+                    m_redirect_url: "http://localhost:3000/shipper/payment",
+                },
+                async (rsp) => {
+                    if (rsp.success) {
+                        // 3. 백엔드에 결제 검증 요청
+                        try {
+                            const verifyResponse = await verifyPayment({
+                                impUid: rsp.imp_uid,
+                                merchantUid: rsp.merchant_uid,
+                            });
+
+                            if (verifyResponse.success) {
+                                alert("결제 성공 및 검증 완료");
+                                const newChargeAmount = parseInt(chargeAmount, 10);
+                                if (onChargeSuccess) {
+                                    onChargeSuccess(newChargeAmount);
+                                }
+                                const newHistory = {
+                                    type: "충전",
+                                    amount: `+${newChargeAmount.toLocaleString()}`,
+                                    date: new Date().toISOString().split("T")[0],
+                                };
+                                setRecentHistory((prevHistory) =>
+                                    [newHistory, ...prevHistory].slice(0, 3)
+                                );
+                                setChargeAmount("");
+                            } else {
+                                alert(`결제 검증 실패: ${verifyResponse.message}`);
+                            }
+                        } catch (error) {
+                            alert(`결제 검증 중 오류 발생: ${error.message}`);
+                        }
+                    } else {
+                        alert(`결제 실패: ${rsp.error_msg}`);
+                    }
+                }
+            );
+        } catch (error) {
+            alert(`결제 준비 중 오류 발생: ${error.message}`);
+        }
     };
 
-    // 포인트 결제 관련 상태 (디자인 확인용)
+    // 포인트 결제 관련 상태
     const [usePoints, setUsePoints] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState("");
-    // props 대신 임시로 사용할 내부 상태
-    const [currentPoints, setCurrentPoints] = useState(50000);
 
-    // 백엔드 로직을 제거하고 UI 동작만 확인하도록 수정한 핸들러
-    const handlePointPayment = () => {
+    const handlePointPayment = async () => {
         const pointsToUse = parseInt(usePoints, 10);
 
         if (isNaN(pointsToUse) || pointsToUse <= 0) {
             setMessage("결제할 포인트를 올바르게 입력해주세요.");
             return;
         }
-        if (pointsToUse > currentPoints) {
+        if (pointsToUse > (currentPoints || 0)) {
             setMessage("사용 가능한 포인트보다 많은 금액입니다.");
             return;
         }
@@ -82,15 +125,37 @@ const ShipperPaymentComponent = () => {
         setIsLoading(true);
         setMessage("결제 처리중...");
 
-        // 1.5초 후 결제가 완료되었다는 메시지를 보여주는 시뮬레이션
-        setTimeout(() => {
-            setIsLoading(false);
+        try {
+            // API 호출
+            await payWithPoints(userId, pointsToUse); // userId prop 사용
+
+            // API 호출 성공
             setMessage(
                 `${pointsToUse.toLocaleString()}P 결제가 완료되었습니다.`
             );
-            setCurrentPoints(currentPoints - pointsToUse); // 결제 후 포인트 차감
+
+            // 부모 컴포넌트 상태 업데이트
+            if (onPaymentSuccess) {
+                onPaymentSuccess(pointsToUse);
+            }
+
+            // 최근 내역에 추가하고 3개로 제한
+            const newHistory = {
+                type: "사용",
+                amount: `-${pointsToUse.toLocaleString()}`,
+                date: new Date().toISOString().split("T")[0],
+            };
+            setRecentHistory((prevHistory) =>
+                [newHistory, ...prevHistory].slice(0, 3)
+            );
+
             setUsePoints(""); // 입력 필드 초기화
-        }, 1500);
+        } catch (error) {
+            // 네트워크 오류 또는 API 에러 처리
+            setMessage(error.message);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -101,7 +166,7 @@ const ShipperPaymentComponent = () => {
                 <div className="point-balance-section">
                     <span className="point-balance-label">내 포인트</span>
                     <span className="point-balance-amount">
-                        {points.toLocaleString()}P
+                        {(currentPoints || 0).toLocaleString()}P
                     </span>
                 </div>
 
@@ -122,12 +187,12 @@ const ShipperPaymentComponent = () => {
                                 ClickChargeBtn(
                                     "kakaopay",
                                     chargeAmount,
-                                    "nickname",
+                                    nickname,
                                     "http://localhost:3000/redirect"
                                 )
                             }
                         >
-                            카카오페이
+                            포인트 충전
                         </button>
                     </div>
                 </div>
@@ -163,7 +228,9 @@ const ShipperPaymentComponent = () => {
                     <h2 className="page-title">포인트 결제하기</h2>
                     <div className="current-points">
                         현재 사용 가능 포인트:{" "}
-                        <strong>{currentPoints.toLocaleString()}P</strong>
+                        <strong>
+                            {(currentPoints || 0).toLocaleString()}P
+                        </strong>
                     </div>
                     <div className="input-section">
                         <label htmlFor="usePoints">사용할 포인트</label>
@@ -171,7 +238,7 @@ const ShipperPaymentComponent = () => {
                             id="usePoints"
                             type="number"
                             min="1"
-                            max={currentPoints}
+                            max={currentPoints || 0}
                             value={usePoints}
                             onChange={(e) => setUsePoints(e.target.value)}
                             placeholder="결제에 사용할 포인트 입력"

@@ -1,5 +1,12 @@
 package com.fullstack.controller;
 
+import com.fullstack.model.PaymentRequestDto;
+import com.fullstack.model.PaymentResponseDto;
+import com.fullstack.model.PaymentVerificationDto;
+import com.fullstack.model.PointUsageRequestDto;
+import com.fullstack.service.PaymentService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -7,13 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fullstack.model.PaymentRequestDto;
-import com.fullstack.model.PaymentResponseDto;
-import com.fullstack.model.PaymentVerificationDto;
-import com.fullstack.service.PaymentService;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/payment")
@@ -59,4 +60,19 @@ public class PaymentController {
 		}
 	}
 
+	@PostMapping("/use")
+	public ResponseEntity<?> usePoints(@RequestBody PointUsageRequestDto requestDto) {
+		log.info("포인트 사용 요청: {}", requestDto);
+		try {
+			paymentService.usePoints(requestDto);
+			return ResponseEntity.ok().body(Map.of("success", true, "message", "포인트가 성공적으로 사용되었습니다."));
+		} catch (IllegalArgumentException | IllegalStateException e) {
+			log.warn("포인트 사용 실패: {}", e.getMessage());
+			return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+		} catch (Exception e) {
+			log.error("포인트 사용 중 서버 오류 발생", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Map.of("success", false, "message", "서버 오류로 인해 포인트 사용에 실패했습니다."));
+		}
+	}
 }
