@@ -28,7 +28,7 @@ const VehicleListRegister = () => {
   return (
     <div className="vehicle-wrapper">
       <div className="vehicle-list">
-        <h2>차량 등록 및 차량 리스트</h2>
+        <h2>차량 리스트</h2>
         <table>
           <thead>
             <tr>

@@ -8,11 +8,11 @@ const ShipperNavBarComponent = () => {
   const [activeMenu, setActiveMenu] = useState("dashboard");
 
   const {
-    moveToDashboard,
-    moveToOrders,
-    moveToProfile,
-    moveToSettlement,
-    moveToVehucles,
+    carOwnerMoveToDashboard,
+    carOwnerMoveToOrders,
+    carOwnerMoveToProfile,
+    carOwnerMoveToSettlement,
+    carOwnerMoveToVehucles,
   } = useCustomMove();
 
   useEffect(() => {
@@ -44,23 +44,23 @@ const ShipperNavBarComponent = () => {
           <div className="collapse navbar-collapse" id="shipperNavbar">
             <ul className="navbar-nav mx-auto">
 
-              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "dashboard" ? "active" : ""}`} onClick={moveToDashboard}>
+              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "dashboard" ? "active" : ""}`} onClick={carOwnerMoveToDashboard}>
                 <div className="nav-link">대시보드</div>
               </li>
 
-              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "profile" ? "active" : ""}`} onClick={moveToProfile}>
+              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "profile" ? "active" : ""}`} onClick={carOwnerMoveToProfile}>
                 <div className="nav-link">프로필</div>
               </li>
 
-              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "orders" ? "active" : ""}`} onClick={moveToOrders}>
+              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "orders" ? "active" : ""}`} onClick={carOwnerMoveToOrders}>
                 <div className="nav-link">내 운송</div>
               </li>
 
-              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "settlement" ? "active" : ""}`} onClick={moveToSettlement}>
+              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "settlement" ? "active" : ""}`} onClick={carOwnerMoveToSettlement}>
                 <div className="nav-link">정산</div>
               </li>
 
-              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "vehucles" ? "active" : ""}`} onClick={moveToVehucles}>
+              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "vehucles" ? "active" : ""}`} onClick={carOwnerMoveToVehucles}>
                 <div className="nav-link">내 차량</div>
               </li>
 
