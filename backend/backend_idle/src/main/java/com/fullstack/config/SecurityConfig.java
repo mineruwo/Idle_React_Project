@@ -48,11 +48,13 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
 
-        @Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
+   
         
 	}
+    
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+	return new BCryptPasswordEncoder();
 
     	// 인증 제외 경로 허용
 //    @Bean
