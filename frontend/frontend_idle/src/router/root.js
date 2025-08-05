@@ -31,7 +31,7 @@ const root = createBrowserRouter([
         ),
     },
     {
-        path: "admin",
+        path: "admin/*",
         element: (
             <Suspense fallback={Loading}>
                 <Admin />
