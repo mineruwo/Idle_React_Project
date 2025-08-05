@@ -7,6 +7,7 @@ import com.fullstack.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,9 +18,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
 
-    @Autowired
     private final CustomerRepository customerRepository;
-
+    private final PasswordEncoder passwordEncoder;
+    
     /*
     public List<CustomerDTO> getAllCustomers() {
         return customerRepository.findAll();
@@ -67,6 +68,12 @@ public class CustomerServiceImpl implements CustomerService {
     
     @Override
     public void register(CustomerDTO dto) {
+    	
+    	// 비밀번호 암호화
+    	String rawPassword = dto.getPasswordEnc();
+    	String encodedPassword = passwordEncoder.encode(rawPassword);
+    	dto.setPasswordEnc(encodedPassword);
+    	
         CustomerEntity entity = dtoToEntity(dto);
         customerRepository.save(entity);
     }

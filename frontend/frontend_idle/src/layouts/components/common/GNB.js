@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import '../../../theme/GNB.css';
 
+
 const GNB = () => {
     const [hideHeader, setHideHeader] = useState(false);
     const [lastScrollY, setLastScrollY] = useState(0);
@@ -33,7 +34,7 @@ const GNB = () => {
         >
             <div className="container-fluid">
                 <a href="../" className="navbar-brand">
-                    핑크 성남운송
+                    idle
                 </a>
 
                 <button

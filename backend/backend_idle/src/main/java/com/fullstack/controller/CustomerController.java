@@ -78,7 +78,7 @@ public class CustomerController {
     
     // 아이디 중복 확인
     @GetMapping("/check-id")
-    public ResponseEntity<Boolean> checkId(@RequestParam String id) {
+    public ResponseEntity<Boolean> checkId(@RequestParam("id") String id) {
     	boolean isDuplicate = customerService.isIdDuplicate(id);
     	
     	return ResponseEntity.ok(isDuplicate);
@@ -86,7 +86,7 @@ public class CustomerController {
     
     // 닉네임 중복 확인
     @GetMapping("/check-nickname")
-    public ResponseEntity<Boolean> checkNickname(@RequestParam String nickname) {
+    public ResponseEntity<Boolean> checkNickname(@RequestParam("nickname") String nickname) {
     	boolean isDuplicate = customerService.isNicknameDuplicate(nickname);
     	
     	return ResponseEntity.ok(isDuplicate);
