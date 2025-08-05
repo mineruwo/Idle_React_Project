@@ -7,6 +7,7 @@ function ActiveChatSessions() {
 
   useEffect(() => {
     const fetchSessions = async () => {
+      console.log('Fetching active chat sessions...');
       try {
         // 백엔드 API 엔드포인트에 맞게 URL을 조정하세요.
         // 개발 환경에서는 프록시 설정이 되어있지 않다면 전체 URL을 사용해야 할 수 있습니다.
@@ -14,11 +15,14 @@ function ActiveChatSessions() {
         if (!response.ok) {
           // 서버 응답이 2xx가 아닐 경우
           const errorText = await response.text(); // 응답 본문을 텍스트로 읽음
+          console.error(`HTTP error! status: ${response.status}, message: ${errorText}`);
           throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
         }
         const data = await response.json();
+        console.log('Received active chat sessions data:', data);
         setSessions(data);
       } catch (e) {
+        console.error('Error fetching active chat sessions:', e);
         setError(e);
       } finally {
         setLoading(false);

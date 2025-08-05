@@ -4,7 +4,7 @@ import DatePicker from "react-datepicker"; // 날짜 선택 컴포넌트
 import "react-datepicker/dist/react-datepicker.css";
 import CalendarInput from "./CalendarInput";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { default as axios } from "axios";
 
 const OrderForm = () => {
   // 지도 참조를 위한 ref
