@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { apiConfig } from '../../../config/apiConfig';
+import ActiveChatSessionChat from './ActiveChatSessionChat'; // 새로 생성할 컴포넌트 임포트
 
 const ActiveChatSessionsList = () => {
     const [sessions, setSessions] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [activeChat, setActiveChat] = useState(null); // { sessionId, chatRoomId }
 
     const fetchSessions = async () => {
         try {
@@ -29,9 +31,11 @@ const ActiveChatSessionsList = () => {
     }, []);
 
     const handleConnectClick = (sessionId, chatRoomId) => {
-        console.log(`Connecting to session: ${sessionId}, chatRoomId: ${chatRoomId}`);
-        // 여기에 실제 채팅방 접속 로직을 추가합니다.
-        // 예: 채팅 모달 열기, 특정 채팅방으로 라우팅 등
+        setActiveChat({ sessionId, chatRoomId });
+    };
+
+    const handleCloseChat = () => {
+        setActiveChat(null);
     };
 
     if (loading) {
@@ -97,6 +101,14 @@ const ActiveChatSessionsList = () => {
                         ))}
                     </tbody>
                 </table>
+            )}
+
+            {activeChat && (
+                <ActiveChatSessionChat
+                    sessionId={activeChat.sessionId}
+                    chatRoomId={activeChat.chatRoomId}
+                    onClose={handleCloseChat}
+                />
             )}
         </div>
     );
