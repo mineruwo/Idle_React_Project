@@ -5,15 +5,11 @@ import SideBarComponent from "../../layouts/components/admin/SideBarComponent";
 import MainContentComponent from "../../layouts/components/admin/MainContentComponent";
 import LoginComponent from "../../layouts/components/admin/LoginComponent";
 import ActiveChatSessionsList from "../../layouts/components/chat/ActiveChatSessionsList";
-
-// 기존 컴포넌트 이름 변경 후 임포트
 import DashboardComponent from "../../layouts/components/admin/pages/DashboardComponent";
 import AdminAccountListComponent from "../../layouts/components/admin/pages/AdminAccountListComponent";
 import CustomerAccountListComponent from "../../layouts/components/admin/pages/CustomerAccountListComponent";
 import InquiryListComponent from "../../layouts/components/admin/pages/InquiryListComponent";
 import NoticeListComponent from "../../layouts/components/admin/pages/NoticeListComponent";
-
-// 새로 생성한 서브메뉴 컴포넌트들 임포트
 import AdminAccountCreateComponent from "../../layouts/components/admin/pages/AdminAccountCreateComponent";
 import CustomerAccountCreateComponent from "../../layouts/components/admin/pages/CustomerAccountCreateComponent";
 import SalesDetailComponent from "../../layouts/components/admin/pages/SalesDetailComponent";
