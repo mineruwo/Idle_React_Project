@@ -7,17 +7,21 @@ const DeliveryList = ({ deliveries }) => {
       <table>
         <thead>
           <tr>
+            <th>운송번호</th>
             <th>배송 상태</th>
+            <th>화물 종류</th>
             <th>출발지</th>
-            <th>출발 예정일 </th>
+            <th>출발 예정일</th>
             <th>도착지</th>
-            <th>예정일</th>
+            <th>도착 예정일</th>
           </tr>
         </thead>
         <tbody>
           {deliveries.map((d, i) => (
             <tr key={i}>
+              <td>{d.deliveryNum}</td>
               <td>{d.status}</td>
+              <td>{d.transport_type}</td>
               <td>{d.from}</td>
               <td>{d.s_date}</td>
               <td>{d.to}</td>

@@ -1,30 +1,17 @@
 import { lazy, Suspense } from "react";
-
-import { createBrowserRouter, Navigate } from "react-router-dom";
-import shipperRouter from "./shipperRouter";
+import { createBrowserRouter } from "react-router-dom";
 
 const Loading = <div>Loading 중...</div>;
-//Main
-const Main = lazy(() => import("../pages/mainpage/MainPage"));
 
-//CarOwner
-const CarPage = lazy(() => import("../pages/carOwnerPage/CarPage"));
-const CarDashPage = lazy(() => import("../pages/carOwnerPage/DashBoard"));
-const Order = lazy(() => import("../pages/carOwnerPage/Orders"));
-const Profile = lazy(() => import("../pages/carOwnerPage/Profile"));
-const EditProfile = lazy(() => import("../pages/carOwnerPage/EditProfile"));
-const SubmitDOC = lazy(() => import("../pages/carOwnerPage/SubmitDOC"));
-const Settlement = lazy(() => import("../pages/carOwnerPage/Settlement"));
-const Vehicles = lazy(() => import("../pages/carOwnerPage/Vehicles"));
-//Admin
-const Admin = lazy(() => import("../pages/adminPage/AdminPage"));
+const Main = lazy(() => import("../mainpage/pages/MainPage"));
+const DashPage = lazy(() => import("../Car_owner/pages/DashBoard"));
 
-const OrderForm = lazy(() => import("../pages/orderPage/OrderForm"));
-const Login = lazy(() => import("../pages/loginpage/LoginPage"));
-const Signup = lazy(() => import("../pages/signuppage/SignupPage"));
-const Dstest = lazy(() => import("../pages/mainpage/TestPage"));
-const WebSocketTest = lazy(() => import("../pages/websocket/WebSocketTestPage"));
-const Shipper = lazy(() => import("../pages/shipperPage/ShipperDashBoard"));
+const Admin = lazy(() => import("../../src/mainpage/admin/AdminPage"));
+
+const OrderForm = lazy(() => import("../orderPage/OrderForm"));
+const Login = lazy(() => import("../loginpage/pages/LoginPage"));
+const Singup = lazy(() => import("../signuppage/pages/SignupPage"));
+const Dstest = lazy(() => import("../mainpage/pages/TestPage"));
 
 const root = createBrowserRouter([
     {
@@ -39,74 +26,12 @@ const root = createBrowserRouter([
         path: "carPage",
         element: (
             <Suspense fallback={Loading}>
-                <CarPage />
+                <DashPage />
             </Suspense>
         ),
-        children: [
-            {
-                index: true,
-                element: <Navigate to="DashBoard" replace />,
-            },
-            {
-                path: "DashBoard",
-                element: (
-                    <Suspense fallback={Loading}>
-                        <CarDashPage />
-                    </Suspense>
-                ),
-            },
-            {
-                path: "profile",
-                element: (
-                    <Suspense fallback={Loading}>
-                        <Profile />
-                    </Suspense>
-                ),
-            },
-            {
-                path: "editProfile",
-                element: (
-                    <Suspense fallback={Loading}>
-                        <EditProfile />
-                    </Suspense>
-                ),
-            },
-            {
-                path: "orders",
-                element: (
-                    <Suspense fallback={Loading}>
-                        <Order />
-                    </Suspense>
-                ),
-            },
-            {
-                path: "settlement",
-                element: (
-                    <Suspense fallback={Loading}>
-                        <Settlement />
-                    </Suspense>
-                ),
-            },
-            {
-                path: "vehucles",
-                element: (
-                    <Suspense fallback={Loading}>
-                        <Vehicles />
-                    </Suspense>
-                ),
-            },
-            {
-                path: "submitDOC",
-                element: (
-                    <Suspense fallback={Loading}>
-                        <SubmitDOC />
-                    </Suspense>
-                ),
-            },
-        ],
     },
     {
-        path: "admin",
+        path: "admin_PinkTruck",
         element: (
             <Suspense fallback={Loading}>
                 <Admin />
@@ -133,7 +58,7 @@ const root = createBrowserRouter([
         path: "signup",
         element: (
             <Suspense fallback={Loading}>
-                <Signup />
+                <Singup />
             </Suspense>
         ),
     },
@@ -144,23 +69,6 @@ const root = createBrowserRouter([
                 <Dstest />
             </Suspense>
         ),
-    },
-    {
-        path: "websocket",
-        element: (
-            <Suspense fallback={Loading}>
-                <WebSocketTest />
-            </Suspense>
-        ),
-    },
-    {
-        path: "shipper",
-        element: (
-            <Suspense fallback={Loading}>
-                <Shipper />
-            </Suspense>
-        ),
-        children: shipperRouter(),
     },
 ]);
 

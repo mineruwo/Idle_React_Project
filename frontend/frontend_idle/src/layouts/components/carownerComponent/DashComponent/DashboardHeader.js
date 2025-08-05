@@ -4,7 +4,7 @@ import useCustomMove from "../../../../hooks/useCustomMove";
 import WarmthPieChart from "./WarmPieChart";
 
 const DashboardHeader = ({ name, completed, inProgress, scheduled, total, revenue, commission, settlement }) => {
-  const { moveToSettlement } = useCustomMove();
+  const { carOwnerMoveToSettlement } = useCustomMove();
 
   return (
     <div className="dashboard-row"> {/* ✅ 바깥 wrapper로 감싸기 */}
@@ -21,7 +21,7 @@ const DashboardHeader = ({ name, completed, inProgress, scheduled, total, revenu
         <p>총 매출액: {revenue.toLocaleString()}원</p>
         <p>수수료율: {commission}%</p>
         <p>정산예정금액: {settlement.toLocaleString()}원</p>
-        <button onClick={moveToSettlement}>정산하기</button>
+        <button onClick={carOwnerMoveToSettlement}>정산하기</button>
       </div>
 
       {/* ✅ box 바깥으로 이동! */}
