@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import AdminHeaderComponent from "../../layouts/components/admin/AdminHeaderComponent";
 import SideBarComponent from "../../layouts/components/admin/SideBarComponent";
 import MainContentComponent from "../../layouts/components/admin/MainContentComponent";
 import LoginComponent from "../../layouts/components/admin/LoginComponent";
-import ActiveChatSessions from '../../layouts/components/admin/ActiveChatSessions';
+import ActiveChatSessionsList from "../../layouts/components/chat/ActiveChatSessionsList";
 
 const AdminPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 767);
@@ -37,7 +37,7 @@ const AdminPage = () => {
             />
             <MainContentComponent isSidebarOpen={isSidebarOpen}>
                 <LoginComponent />
-                <ActiveChatSessions />
+                <ActiveChatSessionsList />
             </MainContentComponent>
         </div>
     );
