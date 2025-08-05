@@ -14,19 +14,11 @@ COPY settings.gradle .
 # Give execution rights to the Gradle wrapper
 RUN chmod +x gradlew
 
-# Build dependencies and download them. This layer will be cached if build.gradle doesn't change.
-# Use 'dependencies' task to only download dependencies without building the app.
-# Or, if you want to build the app but skip tests, use 'bootJar -x test'.
-# For faster builds, it's often better to just download dependencies here.
-RUN ./gradlew dependencies
-
-# Copy the source code. This will invalidate the cache for subsequent layers if source changes.
-COPY src src/
-
 # Build the Spring Boot application, skipping tests for faster Docker image builds.
+# This command will also download dependencies as part of the build process.
 RUN ./gradlew bootJar -x test
 
-# Add this line to check if the JAR is created
+# Add this line to check if the JAR is created (for debugging, can be removed later)
 RUN ls -l build/libs/
 
 # Expose the port your Spring Boot application listens on (default is 8080)
