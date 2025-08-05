@@ -15,6 +15,8 @@ import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import AppTheme from '../../../theme/muitheme/AppTheme';
 import { GoogleIcon, KakaoIcon, PinkTruckIcon } from '../login/IconComponent';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -36,9 +38,8 @@ const Card = styled(MuiCard)(({ theme }) => ({
 }));
 
 const SignUpContainer = styled(Stack)(({ theme }) => ({
-  height: 'calc((1 - var(--template-frame-height, 0)) * 100dvh)',
-  minHeight: '100%',
   padding: theme.spacing(2),
+  position: 'relative',
   [theme.breakpoints.up('sm')]: {
     padding: theme.spacing(4),
   },
@@ -65,39 +66,75 @@ export default function SignUp(props) {
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [nameError, setNameError] = React.useState(false);
   const [nameErrorMessage, setNameErrorMessage] = React.useState('');
+  const [nicknameError, setNicknameError] = React.useState(false);
+  const [nicknameErrorMessage, setNicknameErrorMessage] = React.useState('');
+  const [phoneError, setPhoneError] = React.useState(false);
+  const [phoneErrorMessage, setPhoneErrorMessage] = React.useState('');
+  const [userType, setUserType] = React.useState('shipper');
+
 
   const validateInputs = () => {
-    const email = document.getElementById('email');
-    const password = document.getElementById('password');
-    const name = document.getElementById('name');
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const name = document.getElementById('name').value.trim();
+    const nickname = document.getElementById('nickname').value.trim();
+    const phone = document.getElementById('phone').value.trim();
 
     let isValid = true;
 
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
+    // 이메일 유효성 검사
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!email || !emailRegex.test(email)) {
       setEmailError(true);
-      setEmailErrorMessage('Please enter a valid email address.');
+      setEmailErrorMessage('이메일 형식에 맞게 입력해주세요');
       isValid = false;
     } else {
       setEmailError(false);
       setEmailErrorMessage('');
     }
 
-    if (!password.value || password.value.length < 6) {
+    // 비밀번호 유효성 검사 (영문, 숫자, 특수문자 포함 8자 이상)
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+    if (!password || !passwordRegex.test(password)) {
       setPasswordError(true);
-      setPasswordErrorMessage('Password must be at least 6 characters long.');
+      setPasswordErrorMessage('비밀번호는 영문, 숫자, 특수문자를 포함한 8자 이상이어야 합니다');
       isValid = false;
     } else {
       setPasswordError(false);
       setPasswordErrorMessage('');
     }
 
-    if (!name.value || name.value.length < 1) {
+    // 이름 유효성 검사 (한글/영문 2자 이상)
+    const nameRegex = /^[가-힣a-zA-Z]{2,20}$/;
+    if (!name || !nameRegex.test(name)) {
       setNameError(true);
-      setNameErrorMessage('Name is required.');
+      setNameErrorMessage('이름은 한글 또는 영문 2자 이상으로 입력해주세요');
       isValid = false;
     } else {
       setNameError(false);
       setNameErrorMessage('');
+    }
+
+    // 닉네임 유효성 검사
+    const nicknameRegex = /^[가-힣a-zA-Z0-9]{2,10}$/;
+    if (!nickname || !nicknameRegex.test(nickname)) {
+      setNicknameError(true);
+      setNicknameErrorMessage('닉네임은 한글, 영문, 숫자로 2자 이상 10자 이하로 입력해주세요');
+      isValid = false;
+    } else {
+      setNicknameError(false);
+      setNicknameErrorMessage('');
+    }
+
+    // 전화번호 유효성 검사 (하이픈 유무와 무관하게 허용)
+    const phoneRegex = /^01[0-9]{1}-?\d{3,4}-?\d{4}$/;
+    if (!phone || !phoneRegex.test(phone)) {
+      setPhoneError(true);
+      setPhoneErrorMessage('전화번호 형식에 맞게 입력해주세요 (예시: 010-1234-5678)');
+      isValid = false;
+    } else {
+      setPhoneError(false);
+      setPhoneErrorMessage('');
     }
 
     return isValid;
@@ -114,6 +151,7 @@ export default function SignUp(props) {
       lastName: data.get('lastName'),
       email: data.get('email'),
       password: data.get('password'),
+      phone: data.get('phone'),
     });
   };
 
@@ -135,12 +173,12 @@ export default function SignUp(props) {
             onSubmit={handleSubmit}
             sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
           >
+            {/* 이름 */}
             <FormControl>
               <FormLabel htmlFor="name">이름</FormLabel>
               <TextField
                 autoComplete="name"
                 name="name"
-                required
                 fullWidth
                 id="name"
                 placeholder="홍길동"
@@ -149,10 +187,10 @@ export default function SignUp(props) {
                 color={nameError ? 'error' : 'primary'}
               />
             </FormControl>
+            {/* 이메일 */}
             <FormControl>
               <FormLabel htmlFor="email">이메일</FormLabel>
               <TextField
-                required
                 fullWidth
                 id="email"
                 placeholder="your@email.com"
@@ -164,10 +202,10 @@ export default function SignUp(props) {
                 color={passwordError ? 'error' : 'primary'}
               />
             </FormControl>
+            {/* 비밀번호 */}
             <FormControl>
               <FormLabel htmlFor="password">비밀번호</FormLabel>
               <TextField
-                required
                 fullWidth
                 name="password"
                 placeholder="••••••"
@@ -180,10 +218,59 @@ export default function SignUp(props) {
                 color={passwordError ? 'error' : 'primary'}
               />
             </FormControl>
-            <FormControlLabel
-              control={<Checkbox value="allowExtraEmails" color="primary" />}
-              label="이메일로 소식 받을게요"
-            />
+            {/* 닉네임 */}
+            <FormControl>
+              <FormLabel htmlFor="nickname">닉네임</FormLabel>
+              <TextField
+                fullWidth
+                name="nickname"
+                placeholder="idle"
+                type="nickname"
+                id="nickname"
+                autoComplete="nickname"
+                variant="outlined"
+                error={nicknameError}
+                helperText={nicknameErrorMessage}
+                color={passwordError ? 'error' : 'primary'}
+              />
+            </FormControl>
+            {/* 전화번호 */}
+            <FormControl>
+              <FormLabel htmlFor="phone">전화번호</FormLabel>
+              <TextField
+                fullWidth
+                id="phone"
+                name="phone"
+                placeholder="010-1234-5678"
+                autoComplete="tel"
+                variant="outlined"
+                error={phoneError}
+                helperText={phoneErrorMessage}
+                color={phoneError ? 'error' : 'primary'}
+              />
+            </FormControl>
+            {/* 회원 유형 */}
+            <FormControl component="fieldset">
+              <FormLabel component="legend"
+                sx={{
+                  color: 'grey.800',
+                  '&.Mui-focused': {
+                    color: 'grey.800', // 포커스 되어도 색 유지
+                  }
+                }}>
+                회원 유형
+              </FormLabel>
+              <RadioGroup
+                row
+                name="userType"
+                defaultValue="shipper"
+                onChange={(e) => setUserType(e.target.value)}
+              >
+                <FormControlLabel value="shipper" control={<Radio />} label="화주" />
+                <FormControlLabel value="carrier" control={<Radio />} label="차주" />
+              </RadioGroup>
+            </FormControl>
+
             <Button
               type="submit"
               fullWidth
