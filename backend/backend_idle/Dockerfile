@@ -4,26 +4,27 @@ FROM openjdk:21-jdk-slim
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy Gradle wrapper and configuration files first to leverage Docker layer caching
-# These files change less frequently than source code
+# Copy the Gradle wrapper and build files
 COPY gradlew .
-COPY gradle gradle/
+COPY gradle gradle
 COPY build.gradle .
 COPY settings.gradle .
 
+# Copy the source code
+COPY src src
+
 # Give execution rights to the Gradle wrapper
 RUN chmod +x gradlew
+RUN echo "Dockerfile is executing!"
 
-# Build the Spring Boot application, skipping tests for faster Docker image builds.
-# This command will also download dependencies as part of the build process.
-RUN ./gradlew bootJar -x test
-
-# Add this line to check if the JAR is created (for debugging, can be removed later)
-RUN ls -l build/libs/
+# Build the Spring Boot application
+# This will create the JAR file in build/libs/
+RUN ./gradlew bootJar
 
 # Expose the port your Spring Boot application listens on (default is 8080)
 EXPOSE 8080
 
 # Command to run the application
-# Find the JAR file dynamically and run it
-ENTRYPOINT ["/bin/bash", "-c", "java -jar $(find build/libs -name '*.jar')"]
+# Replace 'backend_idle-0.0.1-SNAPSHOT.jar' with your actual JAR file name
+# You can find the exact JAR name in your build/libs/ directory after a successful local build.
+ENTRYPOINT ["java", "-jar", "build/libs/backend_idle-0.0.1-SNAPSHOT.jar"]
