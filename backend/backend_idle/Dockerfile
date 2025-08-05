@@ -8,7 +8,7 @@ WORKDIR /app
 # These files change less frequently than source code
 COPY gradlew .
 COPY gradle gradle/
-COPY COPY build.gradle .
+COPY build.gradle .
 COPY settings.gradle .
 
 # Give execution rights to the Gradle wrapper
