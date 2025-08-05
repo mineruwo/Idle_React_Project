@@ -29,7 +29,7 @@ public class SecurityConfig {
 
         http
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/api/**").permitAll() // /api/** 경로는 인증 없이 허용
+                .requestMatchers("/api/**", "/ws/**", "/ws-chat/**").permitAll() // /api/**, /ws/**, /ws-chat/** 경로는 인증 없이 허용
                 .anyRequest().authenticated() // 나머지 요청은 인증 필요
             );
 
