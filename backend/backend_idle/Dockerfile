@@ -24,9 +24,10 @@ RUN ./gradlew dependencies
 COPY src src/
 
 # Build the Spring Boot application, skipping tests for faster Docker image builds.
-# If you have critical unit tests that run during CI/CD, consider running them in a separate CI step
-# or in a multi-stage build before this final stage.
 RUN ./gradlew bootJar -x test
+
+# Add this line to check if the JAR is created
+RUN ls -l build/libs/
 
 # Expose the port your Spring Boot application listens on (default is 8080)
 EXPOSE 8080
