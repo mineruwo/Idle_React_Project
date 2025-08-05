@@ -2,6 +2,9 @@ package com.fullstack.controller;
 
 import com.fullstack.model.CustomerDTO;
 import com.fullstack.service.CustomerService;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,11 +13,12 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/customer")
 public class CustomerController {
 
     @Autowired
-    private CustomerService customerService;
+    private final CustomerService customerService;
     
     /*
     @GetMapping
@@ -65,6 +69,7 @@ public class CustomerController {
     }
     
     */
+    // 
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody CustomerDTO customerDTO) {
     	customerService.register(customerDTO);
