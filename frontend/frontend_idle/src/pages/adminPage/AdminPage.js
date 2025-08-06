@@ -45,14 +45,18 @@ const AdminPage = () => {
         }
     }, [adminLoginState.id, navigate, location.pathname]);
 
+    const isLoginPage = location.pathname === '/admin/login';
+
     return (
         <div>
             <AdminHeaderComponent toggleSidebar={toggleSidebar} />
-            <SideBarComponent
-                isOpen={isSidebarOpen}
-                toggleSidebar={toggleSidebar}
-            />
-            <MainContentComponent isSidebarOpen={isSidebarOpen}>
+            {!isLoginPage && (
+                <SideBarComponent
+                    isOpen={isSidebarOpen}
+                    toggleSidebar={toggleSidebar}
+                />
+            )}
+            <MainContentComponent isSidebarOpen={!isLoginPage ? isSidebarOpen : false}>
                 <Outlet />
             </MainContentComponent>
         </div>
