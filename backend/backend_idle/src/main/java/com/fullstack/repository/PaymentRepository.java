@@ -17,6 +17,7 @@ public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
 	Optional<PaymentEntity> findByImpUid(String impUid);
 
 	// carowner page
-	@Query("SELECT COALESCE(SUM(p.amount), 0) FROM PaymentEntity p WHERE p.carNum = :carNum AND MONTH(p.date) = MONTH(CURRENT_DATE)")
-	long getRevenueThisMonth(@Param("carNum") String carNum);
+	@Query("SELECT COALESCE(SUM(p.amount), 0) FROM PaymentEntity p WHERE p.transportAuth.carNum = :carNum  AND FUNCTION('MONTH', p.paidAt) = FUNCTION('MONTH', CURRENT_DATE)")
+	        		
+	        long getRevenueThisMonth(@Param("carNum") String carNum);
 }

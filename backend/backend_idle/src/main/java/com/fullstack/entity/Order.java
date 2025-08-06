@@ -25,4 +25,5 @@ public class Order {
     private String cargoType;
     private String cargoSize;
     private String packingOptions;
+    private String status;
 }

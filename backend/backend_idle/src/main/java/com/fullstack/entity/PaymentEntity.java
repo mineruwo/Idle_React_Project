@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,6 +37,11 @@ public class PaymentEntity {
     private LocalDateTime paidAt; // 결제 완료 시간
     private LocalDateTime cancelledAt; // 결제 취소 시간
     private String impUid; // 아임포트(포트원)에서 발급하는 고유 ID (결제 완료 후 저장)
+    
+    //차주페이지 관련 entity column
+    @ManyToOne
+    @JoinColumn(name = "auth_id") // FK 칼럼명 (예시)
+    private TransportAuth transportAuth;
 	
 	
 }
