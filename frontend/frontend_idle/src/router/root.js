@@ -1,17 +1,17 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
+import adminRoutes from "./adminRouter"; // adminRoutes import
 
 const Loading = <div>Loading 중...</div>;
 
+// 페이지 컴포넌트 import
 const Main = lazy(() => import("../pages/mainpage/MainPage"));
 const DashPage = lazy(() => import("../pages/carOwnerPage/DashBoard"));
-
-const Admin = lazy(() => import("../pages/adminPage/AdminPage"));
-
 const OrderForm = lazy(() => import("../pages/orderPage/OrderForm"));
 const Login = lazy(() => import("../pages/loginpage/LoginPage"));
 const Singup = lazy(() => import("../pages/signuppage/SignupPage"));
 const Dstest = lazy(() => import("../pages/mainpage/TestPage"));
+const AdminPage = lazy(() => import("../pages/adminPage/AdminPage"));
 
 const root = createBrowserRouter([
     {
@@ -34,9 +34,10 @@ const root = createBrowserRouter([
         path: "admin",
         element: (
             <Suspense fallback={Loading}>
-                <Admin />
+                <AdminPage />
             </Suspense>
         ),
+        children: adminRoutes, 
     },
     {
         path: "/order",

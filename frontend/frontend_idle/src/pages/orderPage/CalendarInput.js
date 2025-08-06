@@ -1,4 +1,4 @@
-import React, { forwardRef } from "react";
+import { forwardRef } from "react";
 
 const CalendarInput = forwardRef(({ value, onClick }, ref) => {
   const isSelected = value && value.trim() !== "";

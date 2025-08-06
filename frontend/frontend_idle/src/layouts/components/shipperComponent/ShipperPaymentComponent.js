@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "../../../theme/ShipperCustomCss/ShipperPayment.css";
 
 // props를 제거하고, 디자인 확인을 위해 currentPoints를 내부 상태로 관리합니다.

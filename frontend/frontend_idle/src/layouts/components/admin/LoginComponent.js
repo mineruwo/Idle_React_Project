@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { adminLogin } from "../../../slices/adminLoginSlice";
 
@@ -9,9 +9,8 @@ const LoginComponent = () => {
     const dispatch = useDispatch();
     
     const handleLogin = () => {
-        // 로그인 로직 구현
         console.log("ID:", id, "Password:", password);
-        dispatch(adminLogin()); // adminLogin 액션 호출
+        dispatch(adminLogin()); 
     };
 
     return (

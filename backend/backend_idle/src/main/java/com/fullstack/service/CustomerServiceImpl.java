@@ -16,7 +16,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class CustomerServiceImpl implements CustomerService {
+public class CustomerServiceImpl implements CustomerService  {
 
     private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;

@@ -15,8 +15,6 @@ import lombok.AllArgsConstructor; // 추가
 
 @Entity
 @Table(name = "CUSTOMER")
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class CustomerEntity {
 

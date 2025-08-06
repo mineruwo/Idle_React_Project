@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import AdminHeaderComponent from "../../layouts/components/admin/AdminHeaderComponent";
-import SideBarComponent from "../../layouts/components/admin/SideBarComponent";
-import MainContentComponent from "../../layouts/components/admin/MainContentComponent";
-import LoginComponent from "../../layouts/components/admin/LoginComponent";
-import ActiveChatSessionsList from "../../layouts/components/chat/ActiveChatSessionsList";
+import { Outlet } from "react-router-dom";
+import {
+    AdminHeaderComponent,
+    SideBarComponent,
+    MainContentComponent,
+} from "../../layouts/components/admin";
 
 const AdminPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 767);
@@ -30,14 +31,13 @@ const AdminPage = () => {
 
     return (
         <div>
-            <AdminHeaderComponent />
+            <AdminHeaderComponent toggleSidebar={toggleSidebar} />
             <SideBarComponent
                 isOpen={isSidebarOpen}
                 toggleSidebar={toggleSidebar}
             />
             <MainContentComponent isSidebarOpen={isSidebarOpen}>
-                <LoginComponent />
-                <ActiveChatSessionsList />
+                <Outlet />
             </MainContentComponent>
         </div>
     );
