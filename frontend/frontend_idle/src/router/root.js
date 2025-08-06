@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { createBrowserRouter, Outlet, useLocation, Navigate } from "react-router-dom";
 import adminRoutes from "./adminRouter";
 import FloatingChatButton from "../layouts/components/common/FloatingChatButton";
+import OrderBoard from "../pages/orderPage/OrderBoard";
 
 const Loading = <div>Loading 중...</div>;
 
@@ -65,6 +66,10 @@ const root = createBrowserRouter([
                 path: "dstest",
                 element: <Dstest />,
             },
+            {
+                path: "board",
+                element: <OrderBoard/>
+            }
         ],
     },
 ]);
