@@ -2,13 +2,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh; /* 부모 영역의 전체 높이 상속 */
+  min-height: 100vh; 
 }
 
 .login-container {
-  max-width: 500px;
-  min-width: 400px;
-  margin: auto; /* 수평 중앙 정렬 */
+  width: 90%; /* 화면 너비에 따라 유동적으로 */
+  max-width: 500px; /* 최대 너비 설정 */
+  margin: auto; 
   padding: 2rem;
   border-radius: 30px;
   color: white;
@@ -21,4 +21,19 @@
 
 .login-container .form-label {
     color: white;
+}
+
+/* 모바일 화면 (예: 768px 이하) */
+@media (max-width: 768px) {
+  .login-container {
+    width: 95%; /* 더 작은 화면에서는 너비를 더 늘림 */
+    padding: 1.5rem; /* 패딩 조정 */
+  }
+}
+
+/* 더 작은 모바일 화면 (예: 480px 이하) */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 1rem; /* 패딩 더 줄임 */
+  }
 }

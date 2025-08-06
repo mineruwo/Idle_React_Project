@@ -1,4 +1,3 @@
-import React from 'react';
 import './MainContentComponent.css';
 
 const MainContentComponent = ({ isSidebarOpen, children }) => {

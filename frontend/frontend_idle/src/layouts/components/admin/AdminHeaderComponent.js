@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { adminLogin, adminLogout } from "../../../slices/adminLoginSlice";
+import './AdminHeaderComponent.css'; // 새로 만든 CSS 파일 import
 
-const AdminHeaderComponent = () => {
+const AdminHeaderComponent = ({ toggleSidebar }) => {
     const adminLoginState = useSelector((state) => state.adminLogin);
     const dispatch = useDispatch();
 
@@ -42,7 +43,10 @@ const AdminHeaderComponent = () => {
                 transition-top ${hideHeader ? "hide" : ""}`}
             data-bs-theme="light"
         >
-            <div className="container">
+            <div className="container admin-header-container">
+                <button className="admin-header-hamburger" onClick={toggleSidebar}>
+                    &#9776;
+                </button>
                 <a href="../" className="navbar-brand">
                     핑크 성남운송
                 </a>
@@ -55,7 +59,7 @@ const AdminHeaderComponent = () => {
                                     로그아웃
                                 </button>
                             ) : (
-                                <Link to="/admin/login/" className="nav-link">
+                                <Link to="/admin/login/" className="nav-link" onClick={handleLogin}>
                                     로그인
                                 </Link>
                             )}

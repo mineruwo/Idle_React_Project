@@ -1,7 +1,6 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
 import CssBaseline from '@mui/material/CssBaseline';
 import Divider from '@mui/material/Divider';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -17,6 +16,8 @@ import AppTheme from '../../../theme/muitheme/AppTheme';
 import { GoogleIcon, KakaoIcon, PinkTruckIcon } from '../login/IconComponent';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
+import useCustomMove from '../../../hooks/useCustomMove';
+import { checkIdDuplicate, checkNicknameDuplicate, signUp } from '../../../api/signupApi';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -70,13 +71,40 @@ export default function SignUp(props) {
   const [nicknameErrorMessage, setNicknameErrorMessage] = React.useState('');
   const [phoneError, setPhoneError] = React.useState(false);
   const [phoneErrorMessage, setPhoneErrorMessage] = React.useState('');
-  const [userType, setUserType] = React.useState('shipper');
+  const [customerName, setCustomerName] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [nickname, setNickname] = React.useState("");
+  const [id, setId] = React.useState("");
+  const [phone, setPhone] = React.useState("");
+  const [role, setRole] = React.useState('shipper');
 
+  const {
+    moveToLoginPage,
+  } = useCustomMove();
 
+  // 회원가입 API 호출
+  const signUpApi = async () => {
+    try {
+      await signUp({
+        customerName,
+        passwordEnc: password,
+        nickname,
+        id,
+        phone,
+        role
+      });
+      alert("회원가입 성공");
+      moveToLoginPage();
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
+  // 유효성 검사
   const validateInputs = () => {
-    const email = document.getElementById('email').value.trim();
+    const email = document.getElementById('id').value.trim();
     const password = document.getElementById('password').value.trim();
-    const name = document.getElementById('name').value.trim();
+    const customerName = document.getElementById('customerName').value.trim();
     const nickname = document.getElementById('nickname').value.trim();
     const phone = document.getElementById('phone').value.trim();
 
@@ -106,7 +134,7 @@ export default function SignUp(props) {
 
     // 이름 유효성 검사 (한글/영문 2자 이상)
     const nameRegex = /^[가-힣a-zA-Z]{2,20}$/;
-    if (!name || !nameRegex.test(name)) {
+    if (!customerName || !nameRegex.test(customerName)) {
       setNameError(true);
       setNameErrorMessage('이름은 한글 또는 영문 2자 이상으로 입력해주세요');
       isValid = false;
@@ -140,19 +168,24 @@ export default function SignUp(props) {
     return isValid;
   };
 
-  const handleSubmit = (event) => {
-    if (nameError || emailError || passwordError) {
-      event.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    // 유효성 검사
+    if (!validateInputs()) return;
+
+    // 중복 검사
+    const isIdDuplicate = await checkIdDuplicate(id); // ID
+    if (isIdDuplicate === true) {
+      alert("이미 사용 중인 ID 입니다");
       return;
     }
-    const data = new FormData(event.currentTarget);
-    console.log({
-      name: data.get('name'),
-      lastName: data.get('lastName'),
-      email: data.get('email'),
-      password: data.get('password'),
-      phone: data.get('phone'),
-    });
+    const isNicknameDuplicate = await checkNicknameDuplicate(nickname); // 닉네임
+    if (isNicknameDuplicate === true) {
+      alert("이미 사용 중인 닉네임 입니다");
+      return;
+    }
+
+    signUpApi();
   };
 
   return (
@@ -175,31 +208,33 @@ export default function SignUp(props) {
           >
             {/* 이름 */}
             <FormControl>
-              <FormLabel htmlFor="name">이름</FormLabel>
+              <FormLabel htmlFor="customerName">이름</FormLabel>
               <TextField
-                autoComplete="name"
-                name="name"
+                autoComplete="customerName"
+                name="customerName"
                 fullWidth
-                id="name"
+                id="customerName"
                 placeholder="홍길동"
                 error={nameError}
                 helperText={nameErrorMessage}
                 color={nameError ? 'error' : 'primary'}
+                onChange={(e) => setCustomerName(e.target.value)}
               />
             </FormControl>
             {/* 이메일 */}
             <FormControl>
-              <FormLabel htmlFor="email">이메일</FormLabel>
+              <FormLabel htmlFor="id">ID</FormLabel>
               <TextField
                 fullWidth
-                id="email"
+                id="id"
                 placeholder="your@email.com"
-                name="email"
-                autoComplete="email"
+                name="id"
+                autoComplete="id"
                 variant="outlined"
                 error={emailError}
                 helperText={emailErrorMessage}
                 color={passwordError ? 'error' : 'primary'}
+                onChange={(e) => setId(e.target.value)}
               />
             </FormControl>
             {/* 비밀번호 */}
@@ -216,6 +251,7 @@ export default function SignUp(props) {
                 error={passwordError}
                 helperText={passwordErrorMessage}
                 color={passwordError ? 'error' : 'primary'}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </FormControl>
             {/* 닉네임 */}
@@ -232,6 +268,7 @@ export default function SignUp(props) {
                 error={nicknameError}
                 helperText={nicknameErrorMessage}
                 color={passwordError ? 'error' : 'primary'}
+                onChange={(e) => setNickname(e.target.value)}
               />
             </FormControl>
             {/* 전화번호 */}
@@ -247,6 +284,7 @@ export default function SignUp(props) {
                 error={phoneError}
                 helperText={phoneErrorMessage}
                 color={phoneError ? 'error' : 'primary'}
+                onChange={(e) => setPhone(e.target.value)}
               />
             </FormControl>
             {/* 회원 유형 */}
@@ -263,8 +301,8 @@ export default function SignUp(props) {
               <RadioGroup
                 row
                 name="userType"
-                defaultValue="shipper"
-                onChange={(e) => setUserType(e.target.value)}
+                value={role || "shipper"}
+                onChange={(e) => setRole(e.target.value)}
               >
                 <FormControlLabel value="shipper" control={<Radio />} label="화주" />
                 <FormControlLabel value="carrier" control={<Radio />} label="차주" />
@@ -275,7 +313,6 @@ export default function SignUp(props) {
               type="submit"
               fullWidth
               variant="contained"
-              onClick={validateInputs}
             >
               회원가입
             </Button>

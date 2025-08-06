@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "../common/BubbleAnimation.css";
 import cherryImg from "../common/cherry.png";
 

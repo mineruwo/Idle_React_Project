@@ -20,4 +20,8 @@ public interface CustomerService {
     public CustomerDTO getCustomerById(String id);
     */
     public void register(CustomerDTO dto);
+    
+    boolean isIdDuplicate(String id);
+    
+    boolean isNicknameDuplicate(String id);
 }

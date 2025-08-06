@@ -2,6 +2,9 @@ package com.fullstack.repository;
 
 import com.fullstack.entity.CustomerEntity;
 import com.fullstack.model.CustomerDTO;
+
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,4 +27,12 @@ public interface CustomerRepository extends JpaRepository<CustomerEntity, Intege
 
     @Query("SELECT c.nickname FROM CustomerEntity c WHERE c.nickname = :nickname")
     String findNickname(@Param("nickname") String nickname);
+    
+	Optional<CustomerEntity> findById(String id);
+	
+	Optional<CustomerEntity> findByNickname(String nickname);
+	
+	boolean existsById(String id);
+
+    boolean existsByNickname(String nickname);
 }

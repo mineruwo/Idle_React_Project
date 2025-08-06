@@ -1,0 +1,95 @@
+.chat-list-container {
+    padding: 20px;
+}
+
+.chat-list-title {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.chat-list-empty {
+    text-align: center;
+    padding: 50px;
+    font-size: 1.2em;
+    color: #555;
+}
+
+.table-responsive {
+    overflow-x: auto; /* Enable horizontal scrolling for tables on small screens */
+}
+
+.chat-list-table {
+    width: 100%;
+    border-collapse: collapse;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    min-width: 600px; /* Ensure table doesn't shrink too much */
+}
+
+.chat-list-table th, .chat-list-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.chat-list-table th {
+    background-color: #f2f2f2;
+}
+
+.chat-list-table tr:last-child td {
+    border-bottom: none;
+}
+
+.chat-list-table tr:hover {
+    background-color: #f5f5f5;
+}
+
+.chat-list-button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.chat-list-button:hover {
+    background-color: #0056b3;
+}
+
+.loading-message, .error-message {
+    text-align: center;
+    padding: 20px;
+}
+
+.error-message {
+    color: red;
+}
+
+/* Responsive adjustments for table */
+@media (max-width: 768px) {
+    .chat-list-container {
+        padding: 15px;
+    }
+    .chat-list-table th, .chat-list-table td {
+        padding: 10px 12px; /* Reduce padding */
+        font-size: 0.9em; /* Smaller font size */
+    }
+    .chat-list-button {
+        padding: 6px 10px;
+        font-size: 0.8em;
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-list-container {
+        padding: 10px;
+    }
+    .chat-list-table {
+        min-width: 450px; /* Further reduce min-width for very small screens */
+    }
+    .chat-list-table th, .chat-list-table td {
+        padding: 8px 10px;
+        font-size: 0.8em;
+    }
+}
