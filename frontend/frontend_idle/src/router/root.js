@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
-import { createBrowserRouter } from "react-router-dom";
-import adminRoutes from "./adminRouter"; // adminRoutes import
+import { createBrowserRouter, Outlet, useLocation, Navigate } from "react-router-dom";
+import adminRoutes from "./adminRouter";
+import FloatingChatButton from "../layouts/components/common/FloatingChatButton";
 
 const Loading = <div>Loading 중...</div>;
 
@@ -13,63 +14,60 @@ const Singup = lazy(() => import("../pages/signuppage/SignupPage"));
 const Dstest = lazy(() => import("../pages/mainpage/TestPage"));
 const AdminPage = lazy(() => import("../pages/adminPage/AdminPage"));
 
+// 최상위 레이아웃 컴포넌트
+const RootLayout = () => {
+  const location = useLocation();
+  const isAdminPage = location.pathname.startsWith('/admin');
+
+  console.log('RootLayout rendered', 'Current Pathname:', location.pathname, 'Is Admin Page:', isAdminPage); // 디버깅용 로그
+
+  return (
+    <Suspense fallback={Loading}>
+      <Outlet /> {/* 자식 라우트가 렌더링될 위치 */}
+      {!isAdminPage && <FloatingChatButton />} {/* 관리자 페이지가 아닐 때만 렌더링 */}
+    </Suspense>
+  );
+};
+
 const root = createBrowserRouter([
     {
-        path: "",
-        element: (
-            <Suspense fallback={Loading}>
-                <Main />
-            </Suspense>
-        ),
-    },
-    {
-        path: "carPage",
-        element: (
-            <Suspense fallback={Loading}>
-                <DashPage />
-            </Suspense>
-        ),
-    },
-    {
-        path: "admin",
-        element: (
-            <Suspense fallback={Loading}>
-                <AdminPage />
-            </Suspense>
-        ),
-        children: adminRoutes, 
-    },
-    {
-        path: "/order",
-        element: (
-            <Suspense fallback={Loading}>
-                <OrderForm />
-            </Suspense>
-        ),
-    },
-    {
-        path: "login",
-        element: (
-            <Suspense fallback={Loading}>
-                <Login />
-            </Suspense>
-        ),
-    },
-    {
-        path: "signup",
-        element: (
-            <Suspense fallback={Loading}>
-                <Singup />
-            </Suspense>
-        ),
-    },
-    {
-        path: "dstest",
-        element: (
-            <Suspense fallback={Loading}>
-                <Dstest />
-            </Suspense>
-        ),
+        path: "/",
+        element: <RootLayout />, // RootLayout을 최상위 element로 사용
+        children: [
+            {
+                index: true,
+                element: <Main />,
+            },
+            {
+                path: "carPage",
+                element: <DashPage />,
+            },
+            {
+                path: "admin",
+                element: (
+                    <Suspense fallback={Loading}>
+                        <AdminPage />
+                    </Suspense>
+                ),
+                children: adminRoutes,
+            },
+            {
+                path: "order",
+                element: <OrderForm />,
+            },
+            {
+                path: "login",
+                element: <Login />,
+            },
+            {
+                path: "signup",
+                element: <Singup />,
+            },
+            {
+                path: "dstest",
+                element: <Dstest />,
+            },
+        ],
     },
 ]);
 
