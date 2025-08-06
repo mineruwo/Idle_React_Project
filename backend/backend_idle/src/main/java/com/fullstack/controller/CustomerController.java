@@ -86,6 +86,10 @@ public class CustomerController {
     // 로그인 검사
     @PostMapping("/check-account")
     public ResponseEntity<Boolean> checkAccount(@RequestBody CustomerDTO customerDTO) {
+    	System.out.println(">>> 컨트롤러 도착");
+        System.out.println(">>> ID: " + customerDTO.getId());
+        System.out.println(">>> Password: " + customerDTO.getPasswordEnc());
+    	
     	boolean result = customerService.isAccountValid(customerDTO.getId(), customerDTO.getPasswordEnc());
     	
     	return ResponseEntity.ok(result);

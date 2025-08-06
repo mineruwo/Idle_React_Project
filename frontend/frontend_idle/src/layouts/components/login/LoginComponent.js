@@ -17,7 +17,7 @@ import ForgotPasswordComponent from './ForgotPasswordComponent';
 import AppTheme from '../../../theme/muitheme/AppTheme';
 import { GoogleIcon, KakaoIcon, PinkTruckIcon } from './IconComponent';
 import useCustomMove from '../../../hooks/useCustomMove';
-import { checkAccountOk, login } from '../../../api/loginApi';
+import { checkAccount, login } from '../../../api/loginApi';
 
 const Card = styled(MuiCard)(({ theme }) => ({
     display: 'flex',
@@ -137,8 +137,8 @@ export default function SignIn(props) {
         event.preventDefault();
 
         // ID & 암호 체크
-        const isAccountOk = await checkAccountOk(id, password); // ID
-        if (isAccountOk === false) {
+        const isValidAccount = await checkAccount(id, password); // ID
+        if (isValidAccount === false) {
             alert("존재하지 않는 ID 입니다");
             return;
         }
@@ -175,6 +175,8 @@ export default function SignIn(props) {
                             <TextField
                                 error={emailError}
                                 helperText={emailErrorMessage}
+                                value={id}
+                                onChange={(e) => setId(e.target.value)}
                                 id="id"
                                 type="id"
                                 name="id"
@@ -191,6 +193,8 @@ export default function SignIn(props) {
                             <TextField
                                 error={passwordError}
                                 helperText={passwordErrorMessage}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                                 name="password"
                                 placeholder="••••••"
                                 type="password"

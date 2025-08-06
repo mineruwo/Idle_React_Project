@@ -19,11 +19,11 @@ export const login = async (customer) => {
 }
 
 // ID & 비밀번호 체크
-export const checkAccountOk = async (id, password) => {
+export const checkAccount = async (id, password) => {
     try {
         const res = await axios.post(`${host}/check-account`, {
             id,
-            password
+            passwordEnc: password
         });
         return res.data;
     } catch (err) {
