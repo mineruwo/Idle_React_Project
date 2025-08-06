@@ -13,6 +13,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.NoArgsConstructor; // 추가
+import lombok.AllArgsConstructor; // 추가
 
 @Entity
 @Table(name = "customer")
@@ -21,6 +23,8 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor // 추가
+@AllArgsConstructor // 추가
 public class CustomerEntity {
 
 	@Id

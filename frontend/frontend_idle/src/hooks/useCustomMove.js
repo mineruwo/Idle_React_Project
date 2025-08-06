@@ -54,6 +54,10 @@ const useCustomMove = () => {
         navigate("/websocket");
     };
 
+    const moveToLoginPage = () => {
+        navigate("/login");
+    }
+
     return {
         shipperMoveToDashBoard,
         shipperMoveToDetails,
@@ -69,6 +73,7 @@ const useCustomMove = () => {
         carOwnerMoveToLisense,
         moveToAdminPage,
         moveToWebSocketTestPage,
+        moveToLoginPage,
     };
 };
 
