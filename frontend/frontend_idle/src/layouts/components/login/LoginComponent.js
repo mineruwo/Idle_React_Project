@@ -37,8 +37,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
 }));
 
 const SignInContainer = styled(Stack)(({ theme }) => ({
-    height: 'calc((1 - var(--template-frame-height, 0)) * 100dvh)',
-    minHeight: '100%',
+    position: 'relative',
     padding: theme.spacing(2),
     [theme.breakpoints.up('sm')]: {
         padding: theme.spacing(4),
@@ -65,6 +64,8 @@ export default function SignIn(props) {
     const [passwordError, setPasswordError] = React.useState(false);
     const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
     const [open, setOpen] = React.useState(false);
+    const [password, setPassword] = React.useState("");
+    const [id, setId] = React.useState("");
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -92,18 +93,22 @@ export default function SignIn(props) {
 
         let isValid = true;
 
-        if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
+        // 이메일 유효성 검사
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+        if (!email || !emailRegex.test(email)) {
             setEmailError(true);
-            setEmailErrorMessage('Please enter a valid email address.');
+            setEmailErrorMessage('이메일 형식에 맞게 입력해주세요');
             isValid = false;
         } else {
             setEmailError(false);
             setEmailErrorMessage('');
         }
 
-        if (!password.value || password.value.length < 6) {
+        // 비밀번호 유효성 검사 (영문, 숫자, 특수문자 포함 8자 이상)
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+        if (!password || !passwordRegex.test(password)) {
             setPasswordError(true);
-            setPasswordErrorMessage('Password must be at least 6 characters long.');
+            setPasswordErrorMessage('비밀번호는 영문, 숫자, 특수문자를 포함한 8자 이상이어야 합니다');
             isValid = false;
         } else {
             setPasswordError(false);
@@ -147,7 +152,6 @@ export default function SignIn(props) {
                                 name="email"
                                 placeholder="your@email.com"
                                 autoComplete="email"
-                                autoFocus
                                 required
                                 fullWidth
                                 variant="outlined"
@@ -164,7 +168,6 @@ export default function SignIn(props) {
                                 type="password"
                                 id="password"
                                 autoComplete="current-password"
-                                autoFocus
                                 required
                                 fullWidth
                                 variant="outlined"
@@ -194,7 +197,9 @@ export default function SignIn(props) {
                             비밀번호 찾기
                         </Link>
                     </Box>
-                    <Divider>or</Divider>
+                    <Divider>
+                        <Typography sx={{ color: 'text.secondary' }}>SNS 로그인</Typography>
+                    </Divider>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                         <Button
                             fullWidth

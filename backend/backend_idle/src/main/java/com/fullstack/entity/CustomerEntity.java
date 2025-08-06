@@ -18,8 +18,6 @@ import lombok.AllArgsConstructor; // 추가
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@NoArgsConstructor // 추가
-@AllArgsConstructor // 추가
 public class CustomerEntity {
 
 	@Id
