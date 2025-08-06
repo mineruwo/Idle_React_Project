@@ -25,7 +25,7 @@ public class Order {
 	    private String vehicle;
 	    private boolean isImmediate;
 	    private String reservedDate;
-	    private String distance;
+	    private Double distance;
 		
 
     // 생성자, Getter/Setter 생략

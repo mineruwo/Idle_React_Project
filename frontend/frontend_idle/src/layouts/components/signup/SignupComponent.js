@@ -83,10 +83,8 @@ export default function SignUp(props) {
   } = useCustomMove();
 
   // 회원가입 API 호출
-  const handleSignUp = async () => {
+  const signUpApi = async () => {
     try {
-      alert("회원가입 요청: " + role);
-
       await signUp({
         customerName,
         passwordEnc: password,
@@ -102,33 +100,7 @@ export default function SignUp(props) {
     }
   }
 
-
-  // 회원가입 클릭 이벤트 
-  const handleClick = async () => {
-    // 유효성 검사
-    if (!validateInputs()) return;
-    // 중복 검사
-    // 아이디
-    alert("1. 현재 id: " + id);
-    const isIdDuplicate = await checkIdDuplicate(id);
-    alert("✅ 중복 확인 결과: " + isIdDuplicate);
-    if (isIdDuplicate === true) {
-      alert("이미 사용 중인 ID 입니다");
-      return;
-    }
-    alert("2");
-    // 닉네임
-    const isNicknameDuplicate = await checkNicknameDuplicate(nickname);
-    if (isNicknameDuplicate === true) {
-      alert("이미 사용 중인 닉네임 입니다");
-      return;
-    }
-    alert("3");
-    // 회원가입
-    alert("4");
-    handleSignUp();
-  };
-
+  // 유효성 검사
   const validateInputs = () => {
     const email = document.getElementById('id').value.trim();
     const password = document.getElementById('password').value.trim();
@@ -196,18 +168,24 @@ export default function SignUp(props) {
     return isValid;
   };
 
-  const handleSubmit = (event) => {
-    if (nameError || emailError || passwordError) {
-      event.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    // 유효성 검사
+    if (!validateInputs()) return;
+
+    // 중복 검사
+    const isIdDuplicate = await checkIdDuplicate(id); // ID
+    if (isIdDuplicate === true) {
+      alert("이미 사용 중인 ID 입니다");
       return;
     }
-    const data = new FormData(event.currentTarget);
-    console.log({
-      name: data.get('customerName'),
-      id: data.get('id'),
-      password: data.get('password'),
-      phone: data.get('phone'),
-    });
+    const isNicknameDuplicate = await checkNicknameDuplicate(nickname); // 닉네임
+    if (isNicknameDuplicate === true) {
+      alert("이미 사용 중인 닉네임 입니다");
+      return;
+    }
+
+    signUpApi();
   };
 
   return (
@@ -335,7 +313,6 @@ export default function SignUp(props) {
               type="submit"
               fullWidth
               variant="contained"
-              onClick={handleClick}
             >
               회원가입
             </Button>
