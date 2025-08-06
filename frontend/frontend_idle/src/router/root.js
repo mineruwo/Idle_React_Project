@@ -19,8 +19,6 @@ const RootLayout = () => {
   const location = useLocation();
   const isAdminPage = location.pathname.startsWith('/admin');
 
-  console.log('RootLayout rendered', 'Current Pathname:', location.pathname, 'Is Admin Page:', isAdminPage); // 디버깅용 로그
-
   return (
     <Suspense fallback={Loading}>
       <Outlet /> {/* 자식 라우트가 렌더링될 위치 */}
