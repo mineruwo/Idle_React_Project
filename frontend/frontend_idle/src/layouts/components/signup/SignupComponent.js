@@ -71,7 +71,7 @@ export default function SignUp(props) {
   const [nicknameErrorMessage, setNicknameErrorMessage] = React.useState('');
   const [phoneError, setPhoneError] = React.useState(false);
   const [phoneErrorMessage, setPhoneErrorMessage] = React.useState('');
-  const [customerName, setCustomerName] = React.useState("");
+  const [customName, setCustomName] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [nickname, setNickname] = React.useState("");
   const [id, setId] = React.useState("");
@@ -86,7 +86,7 @@ export default function SignUp(props) {
   const validateInputs = () => {
     const email = document.getElementById('id').value.trim();
     const password = document.getElementById('password').value.trim();
-    const customerName = document.getElementById('customerName').value.trim();
+    const customName = document.getElementById('customName').value.trim();
     const nickname = document.getElementById('nickname').value.trim();
     const phone = document.getElementById('phone').value.trim();
 
@@ -116,7 +116,7 @@ export default function SignUp(props) {
 
     // 이름 유효성 검사 (한글/영문 2자 이상)
     const nameRegex = /^[가-힣a-zA-Z]{2,20}$/;
-    if (!customerName || !nameRegex.test(customerName)) {
+    if (!customName || !nameRegex.test(customName)) {
       setNameError(true);
       setNameErrorMessage('이름은 한글 또는 영문 2자 이상으로 입력해주세요');
       isValid = false;
@@ -154,7 +154,7 @@ export default function SignUp(props) {
   const signUpApi = async () => {
     try {
       await signUp({
-        customerName,
+        customName,
         passwordEnc: password,
         nickname,
         id,
@@ -208,17 +208,17 @@ export default function SignUp(props) {
           >
             {/* 이름 */}
             <FormControl>
-              <FormLabel htmlFor="customerName">이름</FormLabel>
+              <FormLabel htmlFor="customName">이름</FormLabel>
               <TextField
-                autoComplete="customerName"
-                name="customerName"
+                autoComplete="customName"
+                name="customName"
                 fullWidth
-                id="customerName"
+                id="customName"
                 placeholder="홍길동"
                 error={nameError}
                 helperText={nameErrorMessage}
                 color={nameError ? 'error' : 'primary'}
-                onChange={(e) => setCustomerName(e.target.value)}
+                onChange={(e) => setCustomName(e.target.value)}
               />
             </FormControl>
             {/* 이메일 */}
