@@ -82,24 +82,6 @@ export default function SignUp(props) {
     moveToLoginPage,
   } = useCustomMove();
 
-  // 회원가입 API 호출
-  const signUpApi = async () => {
-    try {
-      await signUp({
-        customerName,
-        passwordEnc: password,
-        nickname,
-        id,
-        phone,
-        role
-      });
-      alert("회원가입 성공");
-      moveToLoginPage();
-    } catch (err) {
-      alert(err.message);
-    }
-  }
-
   // 유효성 검사
   const validateInputs = () => {
     const email = document.getElementById('id').value.trim();
@@ -167,6 +149,24 @@ export default function SignUp(props) {
 
     return isValid;
   };
+
+  // 회원가입 API 호출
+  const signUpApi = async () => {
+    try {
+      await signUp({
+        customerName,
+        passwordEnc: password,
+        nickname,
+        id,
+        phone,
+        role
+      });
+      alert("회원가입 성공");
+      moveToLoginPage();
+    } catch (err) {
+      alert(err.message);
+    }
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault();

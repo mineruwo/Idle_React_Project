@@ -10,12 +10,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor; // 추가
+import lombok.Setter;
 import lombok.AllArgsConstructor; // 추가
 
+@NoArgsConstructor  
+@AllArgsConstructor
 @Entity
-@Table(name = "CUSTOMER")
+@Table(name = "customer")
 @Builder
+@Getter
+@Setter
 public class CustomerEntity {
 
 	@Id
