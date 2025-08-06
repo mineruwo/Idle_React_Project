@@ -1,5 +1,6 @@
 package com.fullstack.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,9 +25,10 @@ import lombok.Setter;
 public class TransportAuth {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 	
-	@Column(name= "CAR_NUM", nullable = false)
+	@Column(name= "CAR_NUM", nullable = true)
 	private String carNum;
 	
 	@Column(name = "ID_NUM", nullable = false)
@@ -38,7 +40,16 @@ public class TransportAuth {
 	@Column(name = "CAR_INSURANCE_STATUS", nullable = false)
 	private Boolean carInsuranceStatus;
 	
+	@Column(name = "GETORDER")
+	private Long getOrder;
+	
 	@OneToOne
 	@JoinColumn(name = "vehicle_id")
 	private TransferVehicle vehicle;
+	
+	@OneToOne(mappedBy = "transportAuth", cascade = CascadeType.ALL)
+	private BusinessLicense businessLicense;
+
+	@OneToOne(mappedBy = "transportAuth", cascade = CascadeType.ALL)
+	private DriverLicense driverLicense;
 }
