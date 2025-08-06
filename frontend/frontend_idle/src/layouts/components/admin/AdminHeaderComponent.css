@@ -1,0 +1,26 @@
+.admin-header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Adjust as needed */
+    width: 100%;
+}
+
+.admin-header-hamburger {
+    display: none; /* Hidden by default on larger screens */
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: white; /* Adjust color to match header */
+    margin-right: 15px; /* Space between hamburger and brand */
+}
+
+@media (max-width: 767px) {
+    .admin-header-hamburger {
+        display: block; /* Show on smaller screens */
+    }
+    /* Adjust other header elements for smaller screens if necessary */
+    .admin-header-container .navbar-brand {
+        margin-left: 0; /* Remove default margin if any */
+    }
+}

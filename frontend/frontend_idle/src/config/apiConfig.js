@@ -3,7 +3,7 @@ const getWebSocketUrl = () => {
 };
 
 const getApiBaseUrl = () => {
-    return process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080/api'; // 기본값 설정
+    return process.env.REACT_APP_API_BASE_URL;
 };
 
 export const apiConfig = {
