@@ -1,6 +1,6 @@
-export const fetchTransportSummary = async (username) => {
+export const fetchTransportSummary = async (nickname) => {
   try {
-    const response = await fetch(`/api/car-owner/dashboard/summary?username=${username}`);
+    const response = await fetch(`/api/car-owner/dashboard/summary?nickname=실제로_있는_닉네임`);
     if (!response.ok) {
       throw new Error("서버 응답 오류");
     }

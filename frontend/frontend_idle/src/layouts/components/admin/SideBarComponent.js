@@ -1,18 +1,28 @@
 import { useState } from 'react';
 import { useNavigate, useMatch } from 'react-router-dom';
+import { useSelector } from 'react-redux'; // useSelector 임포트
 import './SidebarComponent.css';
 
 const SidebarComponent = ({ isOpen, toggleSidebar }) => {
   const navigate = useNavigate();
   const [openSubMenu, setOpenSubMenu] = useState(null);
+  const adminLoginState = useSelector((state) => state.adminLogin); // adminLoginState 가져오기
 
   const handleNavigation = (path, e) => {
     if (e) e.stopPropagation();
+    if (!adminLoginState.id) { // 로그인되어 있지 않으면
+        navigate("/admin/login"); // 로그인 페이지로 리다이렉트
+        return; // 네비게이션 중단
+    }
     navigate(path);
     // toggleSidebar();
   };
 
   const toggleSubMenu = (menuName, path) => {
+    if (!adminLoginState.id) { // 로그인되어 있지 않으면
+        navigate("/admin/login"); // 로그인 페이지로 리다이렉트
+        return; // 네비게이션 중단
+    }
     setOpenSubMenu(openSubMenu === menuName ? null : menuName);
     navigate(path);
   };

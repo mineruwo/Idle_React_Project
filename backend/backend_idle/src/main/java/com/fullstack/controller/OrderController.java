@@ -4,6 +4,9 @@ import com.fullstack.entity.Order;
 import com.fullstack.model.OrderDto;
 import com.fullstack.service.OrderService;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
@@ -17,5 +20,15 @@ public class OrderController {
     @PostMapping
     public Order save(@RequestBody OrderDto dto) {
         return orderService.saveOrder(dto);
+    }
+
+    @GetMapping
+    public List<Order> findAll() {
+        return orderService.getAllOrders(); // 📦 오더 전체 조회용
+    }
+
+    @GetMapping("/{id}")
+    public Order findById(@PathVariable Long id) {
+        return orderService.getOrderById(id); // 🔍 오더 상세 조회
     }
 }

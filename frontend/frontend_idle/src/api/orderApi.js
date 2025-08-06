@@ -23,13 +23,16 @@ export const saveOrder = async (orderData) => {
 // 📋 오더 전체 목록 불러오기
 export const fetchOrders = async () => {
   try {
-    const response = await axios.get(API_BASE_URL);
+    const response = await axios.get("http://localhost:8080/api/orders", {
+      withCredentials: true, // ✅ 이거 꼭 있어야 함!
+    });
     return response.data;
   } catch (error) {
     console.error("오더 목록 불러오기 실패:", error);
     throw error;
   }
 };
+
 
 // 🔍 특정 오더 상세 조회
 export const fetchOrderById = async (orderId) => {
@@ -69,3 +72,4 @@ export const updateOrder = async (orderId, updatedData) => {
     throw error;
   }
 };
+

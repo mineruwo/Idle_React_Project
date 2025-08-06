@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,7 +41,7 @@ public class PaymentEntity {
     
     //차주페이지 관련 entity column
     @ManyToOne
-    @JoinColumn(name = "auth_id") // FK 칼럼명 (예시)
+    @JoinColumn(name = "transport_auth_id", nullable = false)
     private TransportAuth transportAuth;
 	
 	
