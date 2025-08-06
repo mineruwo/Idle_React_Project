@@ -3,7 +3,11 @@ package com.fullstack.service;
 import com.fullstack.entity.CustomerEntity;
 import com.fullstack.model.CustomerDTO;
 import com.fullstack.repository.CustomerRepository;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -11,11 +15,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService  {
 
-    @Autowired
-    private CustomerRepository customerRepository;
-
+    private final CustomerRepository customerRepository;
+    private final PasswordEncoder passwordEncoder;
+    
     /*
     public List<CustomerDTO> getAllCustomers() {
         return customerRepository.findAll();
@@ -63,8 +68,24 @@ public class CustomerServiceImpl implements CustomerService  {
     
     @Override
     public void register(CustomerDTO dto) {
+    	
+    	// 비밀번호 암호화
+    	String rawPassword = dto.getPasswordEnc();
+    	String encodedPassword = passwordEncoder.encode(rawPassword);
+    	dto.setPasswordEnc(encodedPassword);
+    	
         CustomerEntity entity = dtoToEntity(dto);
         customerRepository.save(entity);
+    }
+    
+    @Override
+    public boolean isIdDuplicate(String id) {
+        return customerRepository.existsById(id);
+    }
+
+    @Override
+    public boolean isNicknameDuplicate(String nickname) {
+        return customerRepository.existsByNickname(nickname);
     }
     
     private CustomerEntity dtoToEntity(CustomerDTO dto) {

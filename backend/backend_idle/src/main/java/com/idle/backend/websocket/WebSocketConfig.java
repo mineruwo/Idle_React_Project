@@ -26,7 +26,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // STOMP 엔드포인트 설정
-        registry.addEndpoint("/ws-chat").setAllowedOriginPatterns("*").withSockJS();
+        registry.addEndpoint("/ws-chat").setAllowedOriginPatterns("http://localhost:3000", "https://idle-react-project-front.onrender.com", "http://localhost:8080").withSockJS();
+        registry.addEndpoint("/ws").setAllowedOriginPatterns("http://localhost:3000", "https://idle-react-project-front.onrender.com", "http://localhost:8080").withSockJS();
     }
 
     @Override

@@ -1,5 +1,4 @@
-
-# Use a base image with Java 17 (or your desired Java version)
+# Use a base image with Java 21 (or your desired Java version)
 FROM openjdk:21-jdk-slim
 
 # Set the working directory inside the container

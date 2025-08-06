@@ -7,14 +7,15 @@ import lombok.Setter;
 @Setter
 public class OrderDto {
 
-    private String departure;
-    private String arrival;
-    private double distance;
     private String date;
-    private boolean isImmediate;
-    private String weight;
-    private String vehicle;
-    private String cargoType;
-    private String cargoSize;
     private String packingOptions;
+	private String departure;
+    private String arrival;
+	private String cargoType;
+	private String cargoSize;
+	private String weight;
+	private String vehicle;
+	private boolean isImmediate;
+	private String reservedDate;
+	private Double distance;
 }
