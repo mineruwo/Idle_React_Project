@@ -16,13 +16,14 @@ public class OrderService {
         Order order = Order.builder()
                 .departure(dto.getDeparture())
                 .arrival(dto.getArrival())
-                .cargoType(dto.getCargoType())
-                .cargoSize(dto.getCargoSize())
+                .distance(dto.getDistance())
+                .date(dto.getDate())
+                .isImmediate(dto.isImmediate())
                 .weight(dto.getWeight())
                 .vehicle(dto.getVehicle())
-                .isImmediate(dto.isImmediate())
-                .reservedDate(dto.getReservedDate())
-                .distance(dto.getDistance())
+                .cargoType(dto.getCargoType())
+                .cargoSize(dto.getCargoSize())
+                .packingOptions(dto.getPackingOptions())
                 .build();
 
         return orderRepository.save(order);
