@@ -17,5 +17,5 @@ public class OrderDto {
 	private String vehicle;
 	private boolean isImmediate;
 	private String reservedDate;
-	private Double distance;
+	private double distance;
 }
