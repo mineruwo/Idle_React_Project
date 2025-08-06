@@ -16,6 +16,8 @@ import { styled } from '@mui/material/styles';
 import ForgotPasswordComponent from './ForgotPasswordComponent';
 import AppTheme from '../../../theme/muitheme/AppTheme';
 import { GoogleIcon, KakaoIcon, PinkTruckIcon } from './IconComponent';
+import useCustomMove from '../../../hooks/useCustomMove';
+import { checkAccountOk, login } from '../../../api/loginApi';
 
 const Card = styled(MuiCard)(({ theme }) => ({
     display: 'flex',
@@ -66,30 +68,17 @@ export default function SignIn(props) {
     const [open, setOpen] = React.useState(false);
     const [password, setPassword] = React.useState("");
     const [id, setId] = React.useState("");
+    const [role, setRole] = React.useState("");
 
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
+    const {
+        shipperMoveToDashBoard,
+        carOwnerMoveToDashboard
+    } = useCustomMove();
 
-    const handleClose = () => {
-        setOpen(false);
-    };
-
-    const handleSubmit = (event) => {
-        if (emailError || passwordError) {
-            event.preventDefault();
-            return;
-        }
-        const data = new FormData(event.currentTarget);
-        console.log({
-            email: data.get('email'),
-            password: data.get('password'),
-        });
-    };
 
     const validateInputs = () => {
-        const email = document.getElementById('email');
-        const password = document.getElementById('password');
+        const email = document.getElementById('id').value.trim();
+        const password = document.getElementById('password').value.trim();
 
         let isValid = true;
 
@@ -118,6 +107,45 @@ export default function SignIn(props) {
         return isValid;
     };
 
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
+
+    // 로그인 API 호출
+    const loginApi = async () => {
+        try {
+            await login({
+                passwordEnc: password,
+                id,
+                role
+            });
+            alert("로그인 성공");
+            /*
+            shipperMoveToDashBoard();
+            carOwnerMoveToDashboard();
+            */
+        } catch (err) {
+            alert(err.message);
+        }
+    }
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+
+        // ID & 암호 체크
+        const isAccountOk = await checkAccountOk(id, password); // ID
+        if (isAccountOk === false) {
+            alert("존재하지 않는 ID 입니다");
+            return;
+        }
+
+        loginApi();
+    };
+
     return (
         <AppTheme {...props}>
             <CssBaseline enableColorScheme />
@@ -143,15 +171,15 @@ export default function SignIn(props) {
                         }}
                     >
                         <FormControl>
-                            <FormLabel htmlFor="email">이메일</FormLabel>
+                            <FormLabel htmlFor="id">ID</FormLabel>
                             <TextField
                                 error={emailError}
                                 helperText={emailErrorMessage}
-                                id="email"
-                                type="email"
-                                name="email"
+                                id="id"
+                                type="id"
+                                name="id"
                                 placeholder="your@email.com"
-                                autoComplete="email"
+                                autoComplete="id"
                                 required
                                 fullWidth
                                 variant="outlined"
