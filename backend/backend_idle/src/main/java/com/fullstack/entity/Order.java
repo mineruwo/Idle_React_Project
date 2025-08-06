@@ -21,7 +21,7 @@ public class Order {
     private double distance;
     private String date;
     private boolean isImmediate;
-    private int weight;
+    private String weight;
     private String vehicle;
     private String cargoType;
     private String cargoSize;
