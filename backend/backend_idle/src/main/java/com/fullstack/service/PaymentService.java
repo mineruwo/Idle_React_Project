@@ -75,6 +75,7 @@ public class PaymentService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + requestDto.getUserId()));
         paymentEntity.setCustomer(customer);
         paymentEntity.setPointsUsed(requestDto.getPointsToUse()); // 사용된 포인트 저장
+        paymentEntity.setPgProvider(requestDto.getPgProvider()); // PG사 정보 저장
         log.info("preparePayment: PaymentEntity customer ID set to: {}", paymentEntity.getCustomer().getIdNum());
 
         paymentRepository.save(paymentEntity);

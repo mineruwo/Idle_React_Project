@@ -52,3 +52,14 @@ export const verifyPayment = async (verificationData) => {
         throw new Error(message);
     }
 };
+
+export const fetchUserPoints = async (userId) => {
+    try {
+        const response = await axios.get(`${API_SERVER_HOST}/api/user/${userId}/points`);
+        return response.data;
+    } catch (error) {
+        const message =
+            error.response?.data?.message || "사용자 포인트를 가져오는 데 실패했습니다.";
+        throw new Error(message);
+    }
+};

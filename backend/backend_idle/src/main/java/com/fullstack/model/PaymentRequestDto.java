@@ -28,6 +28,8 @@ public class PaymentRequestDto {
     private Integer userId; // 사용자 ID 추가
     @JsonProperty("pointsToUse")
     private Integer pointsToUse; // 사용할 포인트
+    @JsonProperty("pgProvider")
+    private String pgProvider; // PG사 정보 추가
 	
 }
 

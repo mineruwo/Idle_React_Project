@@ -1,17 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../../theme/ShipperCustomCss/ShipperPayment.css";
-import { payWithPoints, preparePayment, verifyPayment } from "../../../api/paymentApi";
+import { payWithPoints, preparePayment, verifyPayment, fetchUserPoints } from "../../../api/paymentApi";
 
 // props를 적용하여 컴포넌트를 동적으로 만듭니다.
 const ShipperPaymentComponent = ({
-    currentPoints,
     nickname,
-    onPaymentSuccess,
-    onChargeSuccess, // 충전 성공 시 호출될 콜백 함수
     userId, // userId prop 추가
 }) => {
+    const [currentPoints, setCurrentPoints] = useState(0); // 포인트 상태를 컴포넌트 내부에서 관리
+
+    useEffect(() => {
+        const getUserPoints = async () => {
+            try {
+                const response = await fetchUserPoints(userId);
+                setCurrentPoints(response.points); // 백엔드에서 받은 포인트로 업데이트
+            } catch (error) {
+                console.error("Failed to fetch user points:", error);
+                // 에러 처리: 사용자에게 메시지를 표시하거나 기본값 설정 등
+            }
+        };
+
+        getUserPoints();
+    }, [userId]); // userId가 변경될 때마다 실행
+
     // 포인트 충전 관련 상태
     const [chargeAmount, setChargeAmount] = useState("");
+    const [selectedPaymentType, setSelectedPaymentType] = useState("card"); // 기본값 신용카드 일반결제
     const [recentHistory, setRecentHistory] = useState([
         { type: "충전", amount: "+10,000", date: "2025-07-25" },
         { type: "사용", amount: "-3,500", date: "2025-07-27" },
@@ -19,18 +33,48 @@ const ShipperPaymentComponent = ({
     ]);
 
     const ClickChargeBtn = async (
-        pg_method,
         chargeAmount,
         nickname,
-        redirect_url
+        redirect_url,
+        selectedPaymentType // 변경된 파라미터 이름
     ) => {
-        if (parseInt(chargeAmount, 10) < 1000) {
-            alert("충전 금액은 1,000원 이상이어야 합니다.");
+        const amount = parseInt(chargeAmount, 10);
+
+        if (isNaN(amount) || amount < 1000) {
+            alert("충전 금액은 1,000원 이상의 유효한 숫자여야 합니다.");
             return;
         }
 
         const merchantUid = `mid_${new Date().getTime()}`;
-        const amount = parseInt(chargeAmount, 10);
+
+        let pgToUse = "";
+        let payMethodToUse = "";
+        let pgProviderForBackend = ""; // 백엔드에 전달할 실제 PG사
+
+        if (selectedPaymentType === "card") {
+            pgToUse = "html5_inicis"; // 신용카드 일반결제 (KG이니시스 예시)
+            payMethodToUse = "card";
+            pgProviderForBackend = "html5_inicis";
+        } else if (selectedPaymentType === "easy") {
+            pgToUse = "kakaopay"; // 간편결제 (카카오페이 예시)
+            payMethodToUse = "card"; // 카카오페이는 내부적으로 카드 결제 사용
+            pgProviderForBackend = "kakaopay";
+        } else if (selectedPaymentType === "transfer") {
+            pgToUse = "html5_inicis"; // 계좌이체 (KG이니시스 예시)
+            payMethodToUse = "trans"; // 실시간 계좌이체
+            pgProviderForBackend = "html5_inicis";
+        } else if (selectedPaymentType === "tosspay") {
+            pgToUse = "tosspay"; // 토스페이
+            payMethodToUse = "card"; // 토스페이는 카드 결제 방식 사용
+            pgProviderForBackend = "tosspay";
+        } else if (selectedPaymentType === "payco") {
+            pgToUse = "payco"; // 페이코
+            payMethodToUse = "card"; // 페이코는 카드 결제 방식 사용
+            pgProviderForBackend = "payco";
+        } else {
+            alert("결제 수단을 선택해주세요.");
+            return;
+        }
 
         try {
             // 1. 백엔드에 결제 준비 요청
@@ -41,6 +85,7 @@ const ShipperPaymentComponent = ({
                 buyerName: nickname,
                 buyerEmail: "buyer@example.com", // 실제 사용자 이메일로 변경 필요
                 userId: userId, // 백엔드에 userId 전달
+                pgProvider: pgProviderForBackend, // 백엔드에 실제 PG사 정보 전달
             });
 
             if (!prepareResponse.success) {
@@ -53,8 +98,8 @@ const ShipperPaymentComponent = ({
             IMP.init("imp16058080"); // 가맹점 번호 지정
             IMP.request_pay(
                 {
-                    pg: "kakaopay", // 결제 방식 지정
-                    pay_method: "card",
+                    pg: pgToUse, // 선택된 PG사로 설정
+                    pay_method: payMethodToUse, // 선택된 결제 방식으로 설정
                     merchant_uid: merchantUid,
                     name: "포인트 충전",
                     amount: amount,
@@ -77,9 +122,7 @@ const ShipperPaymentComponent = ({
                             if (verifyResponse.success) {
                                 alert("결제 성공 및 검증 완료");
                                 const newChargeAmount = parseInt(chargeAmount, 10);
-                                if (onChargeSuccess) {
-                                    onChargeSuccess(newChargeAmount);
-                                }
+                                setCurrentPoints((prevPoints) => prevPoints + newChargeAmount); // 포인트 업데이트
                                 const newHistory = {
                                     type: "충전",
                                     amount: `+${newChargeAmount.toLocaleString()}`,
@@ -134,10 +177,7 @@ const ShipperPaymentComponent = ({
                 `${pointsToUse.toLocaleString()}P 결제가 완료되었습니다.`
             );
 
-            // 부모 컴포넌트 상태 업데이트
-            if (onPaymentSuccess) {
-                onPaymentSuccess(pointsToUse);
-            }
+            setCurrentPoints((prevPoints) => prevPoints - pointsToUse); // 포인트 업데이트
 
             // 최근 내역에 추가하고 3개로 제한
             const newHistory = {
@@ -185,15 +225,67 @@ const ShipperPaymentComponent = ({
                             className="charge-btn"
                             onClick={() =>
                                 ClickChargeBtn(
-                                    "kakaopay",
                                     chargeAmount,
                                     nickname,
-                                    "http://localhost:3000/redirect"
+                                    "http://localhost:3000/redirect",
+                                    selectedPaymentType // 선택된 결제 타입 전달
                                 )
                             }
                         >
                             포인트 충전
                         </button>
+                    </div>
+                    <div className="payment-method-selection">
+                        <label>
+                            <input
+                                type="radio"
+                                name="paymentType"
+                                value="card"
+                                checked={selectedPaymentType === "card"}
+                                onChange={(e) => setSelectedPaymentType(e.target.value)}
+                            />
+                            신용카드 일반결제
+                        </label>
+                        <label>
+                            <input
+                                type="radio"
+                                name="paymentType"
+                                value="easy"
+                                checked={selectedPaymentType === "easy"}
+                                onChange={(e) => setSelectedPaymentType(e.target.value)}
+                            />
+                            간편결제 (카카오페이)
+                        </label>
+                        <label>
+                            <input
+                                type="radio"
+                                name="paymentType"
+                                value="tosspay"
+                                checked={selectedPaymentType === "tosspay"}
+                                onChange={(e) => setSelectedPaymentType(e.target.value)}
+                            />
+                            간편결제 (토스페이)
+                        </label>
+                        <label>
+                            <input
+                                type="radio"
+                                name="paymentType"
+                                value="payco"
+                                checked={selectedPaymentType === "payco"}
+                                onChange={(e) => setSelectedPaymentType(e.target.value)}
+                            />
+                            간편결제 (페이코)
+                        </label>
+                        <label>
+                            <input
+                                type="radio"
+                                name="paymentType"
+                                value="transfer"
+                                checked={selectedPaymentType === "transfer"}
+                                onChange={(e) => setSelectedPaymentType(e.target.value)}
+                            />
+                            계좌이체
+                        </label>
                     </div>
                 </div>
 

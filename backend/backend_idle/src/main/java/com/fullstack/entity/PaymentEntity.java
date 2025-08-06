@@ -39,6 +39,7 @@ public class PaymentEntity {
     private LocalDateTime cancelledAt; // 결제 취소 시간
     private String impUid; // 아임포트(포트원)에서 발급하는 고유 ID (결제 완료 후 저장)
     private Integer pointsUsed; // 사용된 포인트
+    private String pgProvider; // PG사 정보 추가
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "customer_id", referencedColumnName = "ID_NUM")
