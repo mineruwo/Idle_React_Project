@@ -12,15 +12,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<CustomerEntity, Integer> {
-    CustomerDTO findById(String id);
-    
-    
-    
-    
-    
-    
-    
-    
+
     //차주페이지 꺼임 건들지마셈! 
     @Query("SELECT c.idNum FROM CustomerEntity c WHERE c.nickname = :nickname")
     Integer findIdNumByNickname(@Param("nickname") String nickname);
