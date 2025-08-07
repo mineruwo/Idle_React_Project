@@ -15,7 +15,7 @@ const adminLoginSlice = createSlice({
 
             const data = action.payload;
 
-            return { id: data.id, adminName: data.adminName };
+            return { id: data.adminId, adminName: data.name };
         },
         adminLogout: (state, action) => {
             console.log("로그 아웃 함");

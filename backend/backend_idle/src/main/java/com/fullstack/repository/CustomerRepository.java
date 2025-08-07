@@ -10,16 +10,20 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface CustomerRepository extends JpaRepository<CustomerEntity, Integer> {
 
-    //차주페이지 꺼임 건들지마셈! 
+    //차주페이지
 
     @Query("SELECT c.idNum FROM CustomerEntity c WHERE c.nickname = :nickname")
     Integer findIdNumByNickname(@Param("nickname") String nickname);
 
     @Query("SELECT c.nickname FROM CustomerEntity c WHERE c.nickname = :nickname")
     String findNickname(@Param("nickname") String nickname);
+    
+    Optional<CustomerEntity> findByCustomName(String customName);
 
     
 	Optional<CustomerEntity> findById(String id);
