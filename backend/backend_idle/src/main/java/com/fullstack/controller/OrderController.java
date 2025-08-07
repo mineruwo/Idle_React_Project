@@ -17,6 +17,7 @@ public class OrderController {
 
     private final OrderService orderService;
 
+    // 🔸 가격 제안 포함 저장
     @PostMapping
     public Order save(@RequestBody OrderDto dto) {
         return orderService.saveOrder(dto);
@@ -24,7 +25,7 @@ public class OrderController {
 
     @GetMapping
     public List<Order> findAll() {
-        return orderService.getAllOrders(); // 📦 오더 전체 조회용
+        return orderService.getAllOrders(); // 📦 오더 전체 조회
     }
 
     @GetMapping("/{id}")
