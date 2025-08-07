@@ -13,4 +13,4 @@ const CarPage = ()=>{
     );
 }
 
-export default  CarPage
+export default  CarPage;
