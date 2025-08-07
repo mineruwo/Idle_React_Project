@@ -2,11 +2,16 @@ package com.fullstack.controller;
 
 import com.fullstack.model.CustomerDTO;
 import com.fullstack.model.LoginResponseDTO;
+import com.fullstack.security.JWTUtil;
 import com.fullstack.service.CustomerService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
+import java.time.Duration;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,11 +23,29 @@ public class CustomerController {
 
     @Autowired
     private final CustomerService customerService;
+    @Autowired
+    private final JWTUtil jwtUtil;
+    
     
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody CustomerDTO customerDTO) {
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody CustomerDTO customerDTO,
+    		HttpServletResponse response) {
+    	
     	LoginResponseDTO result = customerService.login(customerDTO);
+    	
+    	String token = jwtUtil.generateToken(result.getId(), result.getRole());
+    	
+    	ResponseCookie cookie = ResponseCookie.from("accessToken", token)
+    			.httpOnly(true)
+    			.secure(true)
+    			.sameSite("None")
+    			.path("/")
+    			.maxAge(Duration.ofDays(1))
+    			.build();
+    	
+    	response.addHeader("Set-Cookie", cookie.toString());
+    	
     	return ResponseEntity.ok(result);
     }
     
