@@ -69,6 +69,13 @@ public class CustomerController {
     }
     
     */
+    // 로그인
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody CustomerDTO customerDTO) {
+    	customerService.login(customerDTO);
+    	return ResponseEntity.ok("로그인 성공");
+    }
+    
     // 회원가입
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody CustomerDTO customerDTO) {
@@ -76,19 +83,31 @@ public class CustomerController {
     	return ResponseEntity.ok("회원가입 성공");
     }
     
+    // 로그인 검사
+    @PostMapping("/check-account")
+    public ResponseEntity<Boolean> checkAccount(@RequestBody CustomerDTO customerDTO) {
+    	System.out.println(">>> 컨트롤러 도착");
+        System.out.println(">>> ID: " + customerDTO.getId());
+        System.out.println(">>> Password: " + customerDTO.getPasswordEnc());
+    	
+    	boolean result = customerService.isAccountValid(customerDTO.getId(), customerDTO.getPasswordEnc());
+    	
+    	return ResponseEntity.ok(result);
+    }
+    
     // 아이디 중복 확인
     @GetMapping("/check-id")
     public ResponseEntity<Boolean> checkId(@RequestParam("id") String id) {
-    	boolean isDuplicate = customerService.isIdDuplicate(id);
+    	boolean result = customerService.isIdDuplicate(id);
     	
-    	return ResponseEntity.ok(isDuplicate);
+    	return ResponseEntity.ok(result);
     }
     
     // 닉네임 중복 확인
     @GetMapping("/check-nickname")
     public ResponseEntity<Boolean> checkNickname(@RequestParam("nickname") String nickname) {
-    	boolean isDuplicate = customerService.isNicknameDuplicate(nickname);
+    	boolean result = customerService.isNicknameDuplicate(nickname);
     	
-    	return ResponseEntity.ok(isDuplicate);
+    	return ResponseEntity.ok(result);
     }
 }

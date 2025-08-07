@@ -19,9 +19,13 @@ public interface CustomerService {
 
     public CustomerDTO getCustomerById(String id);
     */
-    public void register(CustomerDTO dto);
+	public void login(CustomerDTO dto);
+	
+	public void register(CustomerDTO dto);
     
-    boolean isIdDuplicate(String id);
+	public boolean isAccountValid(String id, String passwordEnc);
     
-    boolean isNicknameDuplicate(String id);
+	public boolean isIdDuplicate(String id);
+    
+	public boolean isNicknameDuplicate(String id);
 }

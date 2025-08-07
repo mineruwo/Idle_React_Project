@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import "../../../theme/ShipperCustomCss/ShipperPayment.css";
-import { payWithPoints, preparePayment, verifyPayment, fetchUserPoints } from "../../../api/paymentApi";
+import {
+    payWithPoints,
+    preparePayment,
+    verifyPayment,
+    fetchUserPoints,
+} from "../../../api/paymentApi";
 
 // props를 적용하여 컴포넌트를 동적으로 만듭니다.
 const ShipperPaymentComponent = ({
@@ -121,19 +126,28 @@ const ShipperPaymentComponent = ({
 
                             if (verifyResponse.success) {
                                 alert("결제 성공 및 검증 완료");
-                                const newChargeAmount = parseInt(chargeAmount, 10);
-                                setCurrentPoints((prevPoints) => prevPoints + newChargeAmount); // 포인트 업데이트
+                                const newChargeAmount = parseInt(
+                                    chargeAmount,
+                                    10
+                                );
+                                setCurrentPoints(
+                                    (prevPoints) => prevPoints + newChargeAmount
+                                ); // 포인트 업데이트
                                 const newHistory = {
                                     type: "충전",
                                     amount: `+${newChargeAmount.toLocaleString()}`,
-                                    date: new Date().toISOString().split("T")[0],
+                                    date: new Date()
+                                        .toISOString()
+                                        .split("T")[0],
                                 };
                                 setRecentHistory((prevHistory) =>
                                     [newHistory, ...prevHistory].slice(0, 3)
                                 );
                                 setChargeAmount("");
                             } else {
-                                alert(`결제 검증 실패: ${verifyResponse.message}`);
+                                alert(
+                                    `결제 검증 실패: ${verifyResponse.message}`
+                                );
                             }
                         } catch (error) {
                             alert(`결제 검증 중 오류 발생: ${error.message}`);
@@ -242,7 +256,9 @@ const ShipperPaymentComponent = ({
                                 name="paymentType"
                                 value="card"
                                 checked={selectedPaymentType === "card"}
-                                onChange={(e) => setSelectedPaymentType(e.target.value)}
+                                onChange={(e) =>
+                                    setSelectedPaymentType(e.target.value)
+                                }
                             />
                             신용카드 일반결제
                         </label>
@@ -252,7 +268,9 @@ const ShipperPaymentComponent = ({
                                 name="paymentType"
                                 value="easy"
                                 checked={selectedPaymentType === "easy"}
-                                onChange={(e) => setSelectedPaymentType(e.target.value)}
+                                onChange={(e) =>
+                                    setSelectedPaymentType(e.target.value)
+                                }
                             />
                             간편결제 (카카오페이)
                         </label>
@@ -262,7 +280,9 @@ const ShipperPaymentComponent = ({
                                 name="paymentType"
                                 value="tosspay"
                                 checked={selectedPaymentType === "tosspay"}
-                                onChange={(e) => setSelectedPaymentType(e.target.value)}
+                                onChange={(e) =>
+                                    setSelectedPaymentType(e.target.value)
+                                }
                             />
                             간편결제 (토스페이)
                         </label>
@@ -272,7 +292,9 @@ const ShipperPaymentComponent = ({
                                 name="paymentType"
                                 value="payco"
                                 checked={selectedPaymentType === "payco"}
-                                onChange={(e) => setSelectedPaymentType(e.target.value)}
+                                onChange={(e) =>
+                                    setSelectedPaymentType(e.target.value)
+                                }
                             />
                             간편결제 (페이코)
                         </label>
@@ -282,7 +304,9 @@ const ShipperPaymentComponent = ({
                                 name="paymentType"
                                 value="transfer"
                                 checked={selectedPaymentType === "transfer"}
-                                onChange={(e) => setSelectedPaymentType(e.target.value)}
+                                onChange={(e) =>
+                                    setSelectedPaymentType(e.target.value)
+                                }
                             />
                             계좌이체
                         </label>

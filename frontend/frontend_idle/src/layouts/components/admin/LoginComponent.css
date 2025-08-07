@@ -1,24 +1,38 @@
-.login-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh; /* 부모 영역의 전체 높이 상속 */
-}
-
-.login-container {
-  max-width: 500px;
-  min-width: 400px;
+.login-form-card {
+  width: auto; /* 너비를 자동으로 설정하여 min/max-width에 의해 제한되도록 함 */
+  max-width: 500px; /* 최대 너비 500px */
+  min-width: 350px; /* 최소 너비 350px로 조정 */
+  flex-shrink: 0; /* min-width 이하로 줄어들지 않도록 방지 */
+  height: auto; /* 높이는 내용에 따라 자동 조절 */
+  background-color: #0d6efd; /* Bootstrap primary color */
   margin: auto; /* 수평 중앙 정렬 */
   padding: 2rem;
   border-radius: 30px;
   color: white;
+  box-sizing: border-box; /* 패딩과 보더가 너비 계산에 포함되도록 */
 }
 
-.login-container h2 {
+.login-form-card h2 {
   margin-bottom: 1.5rem;
   text-align: center;
 }
 
-.login-container .form-label {
+.login-form-card .form-label {
     color: white;
+}
+
+/* 모바일 화면 (예: 768px 이하) */
+@media (max-width: 768px) {
+  .login-form-card {
+    width: 95%; /* 더 작은 화면에서는 너비를 더 늘림 */
+    /* min-width: unset; 제거 - 이제 최소 너비는 항상 350px */
+    padding: 1.5rem; /* 패딩 조정 */
+  }
+}
+
+/* 더 작은 모바일 화면 (예: 480px 이하) */
+@media (max-width: 480px) {
+  .login-form-card {
+    padding: 1rem; /* 패딩 더 줄임 */
+  }
 }

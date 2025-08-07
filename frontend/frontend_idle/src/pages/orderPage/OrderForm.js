@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, forwardRef } from "react";
+import { useEffect, useRef, useState, forwardRef } from "react";
 import styled from "styled-components"; // 스타일 컴포넌트 사용
 import DatePicker from "react-datepicker"; // 날짜 선택 컴포넌트
 import "react-datepicker/dist/react-datepicker.css";

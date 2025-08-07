@@ -26,7 +26,6 @@ export const checkIdDuplicate = async (id) => {
         alert("아이디 중복 확인 중 오류 발생");
         return false;
     }
-
 };
 
 // 닉네임 중복검사

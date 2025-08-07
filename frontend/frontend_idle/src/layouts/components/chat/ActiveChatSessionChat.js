@@ -1,14 +1,15 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Client } from '@stomp/stompjs';
+import { useEffect, useState, useRef } from 'react';
 import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
 import { apiConfig } from '../../../config/apiConfig';
+import './ActiveChatSessionChat.css'; // CSS 파일 import
 
 const ActiveChatSessionChat = ({ sessionId, chatRoomId, onClose }) => {
     const [stompClient, setStompClient] = useState(null);
     const [messages, setMessages] = useState([]);
     const [messageInput, setMessageInput] = useState('');
     const bottomRef = useRef(null);
-    const currentUser = "Admin"; // 관리자 페이지에서 접속하므로 Admin으로 고정하거나, 실제 관리자 ID를 가져와야 합니다.
+    const currentUser = "Admin"; 
 
     useEffect(() => {
         if (!sessionId || !chatRoomId) return;
@@ -28,12 +29,7 @@ const ActiveChatSessionChat = ({ sessionId, chatRoomId, onClose }) => {
             client.subscribe(`/topic/messages/${chatRoomId}`, (message) => {
                 showMessage(JSON.parse(message.body));
             });
-            // 관리자 접속 시 해당 세션에 메시지를 보낼 수 있도록 publish
-            client.publish({
-                destination: `/app/chat/${chatRoomId}`,
-                headers: { userId: currentUser },
-                body: JSON.stringify({ sender: currentUser, content: `${currentUser}님이 채팅방에 접속했습니다.`, chatRoomId: chatRoomId }),
-            });
+        
         };
 
         client.onStompError = (frame) => {
@@ -76,91 +72,37 @@ const ActiveChatSessionChat = ({ sessionId, chatRoomId, onClose }) => {
         setTimeout(scrollToBottom, 0);
     }, [messages]);
 
-    const modalStyle = {
-        marginTop: '20px', // 리스트 아래에 공간을 줍니다.
-        width: '100%', // 부모 요소의 너비를 꽉 채우도록 설정
-        height: '500px', // 높이는 고정
-        backgroundColor: 'white',
-        border: '1px solid #ccc',
-        borderRadius: '10px',
-        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-        display: 'flex',
-        flexDirection: 'column',
-    };
-
-    const headerStyle = {
-        padding: '10px',
-        borderBottom: '1px solid #ccc',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    };
-
-    const messageContainerStyle = {
-        flexGrow: 1,
-        overflowY: 'auto',
-        padding: '10px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-    };
-
-    const messageBubbleStyle = (isMe, content) => ({
-        backgroundColor: isMe ? '#007bff' : '#e9e9eb',
-        color: isMe ? 'white' : 'black',
-        borderRadius: '20px',
-        padding: '8px 15px',
-        maxWidth: content.length < 11 ? 'fit-content' : '70%',
-        marginBottom: '10px',
-        textAlign: 'left',
-        wordBreak: 'keep-all',
-        overflowWrap: 'break-word',
-    });
-
-    const inputAreaStyle = {
-        display: 'flex',
-        padding: '10px',
-        borderTop: '1px solid #ccc',
-    };
-
     return (
-        <div style={modalStyle}>
-            <div style={headerStyle}>
-                <h5 style={{ margin: 0 }}>Chat Room: {chatRoomId}</h5>
-                <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
+        <div className="chat-session-container">
+            <div className="chat-session-header">
+                <h5>Chat Room: {chatRoomId}</h5>
+                <button onClick={onClose} className="close-button">&times;</button>
             </div>
-            <div ref={bottomRef} style={messageContainerStyle}>
+            <div ref={bottomRef} className="chat-session-messages">
                 {messages.map((msg, index) => {
                     const isMe = msg.sender === currentUser;
-                    const messageRowStyle = {
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignSelf: isMe ? 'flex-end' : 'flex-start',
-                        alignItems: isMe ? 'flex-end' : 'flex-start',
-                    };
-
                     return (
-                        <div id={`message-row-${index}`} key={index} style={messageRowStyle}>
-                            <div id={`message-sender-${index}`} style={{ fontSize: '0.8rem', color: '#888', marginBottom: '2px' }}>
+                        <div key={index} className={`message-item ${isMe ? 'sent' : 'received'}`}>
+                            <div className="message-sender">
                                 {msg.sender}
                             </div>
-                            <div id={`message-bubble-${index}`} style={messageBubbleStyle(isMe, msg.content)}>
+                            <div className={`message-bubble ${isMe ? 'sent' : 'received'}`}>
                                 {msg.content}
                             </div>
                         </div>
                     );
                 })}
             </div>
-            <div style={inputAreaStyle}>
+            <div className="chat-session-input-area">
                 <input
                     type="text"
                     placeholder="메시지를 입력하세요"
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                    style={{ flexGrow: 1, border: '1px solid #ccc', borderRadius: '20px', padding: '8px 15px', marginRight: '10px' }}
+                    className="chat-session-input"
                 />
-                <button onClick={sendMessage} style={{ padding: '8px 15px', borderRadius: '20px', border: 'none', backgroundColor: '#007bff', color: 'white', cursor: 'pointer' }}>전송</button>
+                <button onClick={sendMessage} className="chat-session-send-button">전송</button>
             </div>
         </div>
     );

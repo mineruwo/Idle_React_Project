@@ -1,12 +1,17 @@
 import { useState, useEffect } from "react";
-import AdminHeaderComponent from "../../layouts/components/admin/AdminHeaderComponent";
-import SideBarComponent from "../../layouts/components/admin/SideBarComponent";
-import MainContentComponent from "../../layouts/components/admin/MainContentComponent";
-import LoginComponent from "../../layouts/components/admin/LoginComponent";
-import ActiveChatSessionsList from "../../layouts/components/chat/ActiveChatSessionsList";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import {
+    AdminHeaderComponent,
+    SideBarComponent,
+    MainContentComponent,
+} from "../../layouts/components/admin";
 
 const AdminPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 767);
+    const navigate = useNavigate();
+    const location = useLocation();
+    const adminLoginState = useSelector((state) => state.adminLogin);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -28,16 +33,27 @@ const AdminPage = () => {
         };
     }, []);
 
+    // 인증 및 리다이렉션 로직
+    useEffect(() => {
+        // 로그인되어 있지 않고, 현재 경로가 /admin/login이 아닐 때만 로그인 페이지로 리다이렉트
+        if (!adminLoginState.id && location.pathname !== '/admin/login') {
+            navigate("/admin/login");
+        } 
+        // 로그인되어 있고, 현재 경로가 정확히 /admin 일 때만 대시보드로 리다이렉트
+        else if (adminLoginState.id && location.pathname === '/admin') {
+            navigate("/admin/dashboard", { replace: true });
+        }
+    }, [adminLoginState.id, navigate, location.pathname]);
+
     return (
         <div>
-            <AdminHeaderComponent />
+            <AdminHeaderComponent toggleSidebar={toggleSidebar} />
             <SideBarComponent
                 isOpen={isSidebarOpen}
                 toggleSidebar={toggleSidebar}
             />
             <MainContentComponent isSidebarOpen={isSidebarOpen}>
-                <LoginComponent />
-                <ActiveChatSessionsList />
+                <Outlet />
             </MainContentComponent>
         </div>
     );

@@ -11,18 +11,23 @@ import lombok.*;
 @Builder
 public class Order {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    private String departure;
-    private String arrival;
-    private double distance;
-    private String date;
-    private boolean isImmediate;
-    private String weight;
-    private String vehicle;
-    private String cargoType;
-    private String cargoSize;
-    private String packingOptions;
+	private String departure;
+	private String arrival;
+	private double distance;
+	private String date;
+	private boolean isImmediate;
+	private String weight;
+	private String vehicle;
+	private String cargoType;
+	private String cargoSize;
+	private String packingOptions;
+	private String status;
+
+	@ManyToOne
+	@JoinColumn(name = "transport_auth_id", nullable = true)
+	private TransportAuth transportAuth;
 }
