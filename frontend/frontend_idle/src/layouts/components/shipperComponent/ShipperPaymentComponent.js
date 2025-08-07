@@ -9,6 +9,8 @@ import {
 
 // props를 적용하여 컴포넌트를 동적으로 만듭니다.
 const ShipperPaymentComponent = ({
+    remainingLimit = 500000,
+    onCharge,
     nickname,
     userId, // userId prop 추가
 }) => {
@@ -212,105 +214,136 @@ const ShipperPaymentComponent = ({
         }
     };
 
+    const CHARGE_PRESETS = [10000, 30000, 50000, 100000, 200000];
+    const handlePresetClick = (amount) => setChargeAmount(amount);
+
     return (
         <div className="point-layout-container">
             {/* 왼쪽: 포인트 관리 섹션 */}
             <div className="point-management-section">
                 <h2 className="page-title">포인트 관리</h2>
-                <div className="point-balance-section">
-                    <span className="point-balance-label">내 포인트</span>
-                    <span className="point-balance-amount">
-                        {(currentPoints || 0).toLocaleString()}P
-                    </span>
-                </div>
+                <div className="point-charge-wrap">
+                    {/* 1. 포인트 잔액 및 잔액 표시 */}
+                    <div className="point-balance-box">
+                        <span className="label">충전포인트 잔액</span>
+                        <span className="amount-highlight">
+                            {currentPoints.toLocaleString()}P
+                        </span>
+                    </div>
 
-                <div className="point-charge-section">
-                    <label htmlFor="charge-amount">충전할 금액</label>
-                    <div className="charge-input-group">
-                        <input
-                            id="charge-amount"
-                            type="number"
-                            placeholder="포인트 금액 입력"
-                            min="1000"
-                            value={chargeAmount}
-                            onChange={(e) => setChargeAmount(e.target.value)}
-                        />
-                        <button
-                            className="charge-btn"
-                            onClick={() =>
-                                ClickChargeBtn(
-                                    chargeAmount,
-                                    nickname,
-                                    "http://localhost:3000/redirect",
-                                    selectedPaymentType // 선택된 결제 타입 전달
-                                )
-                            }
-                        >
-                            포인트 충전
-                        </button>
+                    {/* 2. 충전금액 선택 */}
+                    <div className="charge-amount-select">
+                        <div className="section-title">
+                            충전금액
+                            <span className="remaining-limit">
+                                남은 충전 한도 {remainingLimit.toLocaleString()}
+                                원
+                            </span>
+                        </div>
+                        <div className="preset-list">
+                            {CHARGE_PRESETS.map((amt) => (
+                                <button
+                                    type="button"
+                                    key={amt}
+                                    onClick={() => handlePresetClick(amt)}
+                                    className={`preset-btn${
+                                        chargeAmount == amt ? " selected" : ""
+                                    }`}
+                                >
+                                    {amt / 10000}만원
+                                </button>
+                            ))}
+                        </div>
+                        <div className="explain-box">
+                            <span>
+                                카드/새로운 포인트 충전금액 제한이 있습니다.
+                            </span>
+                        </div>
                     </div>
-                    <div className="payment-method-selection">
-                        <label>
-                            <input
-                                type="radio"
-                                name="paymentType"
-                                value="card"
-                                checked={selectedPaymentType === "card"}
-                                onChange={(e) =>
-                                    setSelectedPaymentType(e.target.value)
-                                }
-                            />
-                            신용카드 일반결제
-                        </label>
-                        <label>
-                            <input
-                                type="radio"
-                                name="paymentType"
-                                value="easy"
-                                checked={selectedPaymentType === "easy"}
-                                onChange={(e) =>
-                                    setSelectedPaymentType(e.target.value)
-                                }
-                            />
-                            간편결제 (카카오페이)
-                        </label>
-                        <label>
-                            <input
-                                type="radio"
-                                name="paymentType"
-                                value="tosspay"
-                                checked={selectedPaymentType === "tosspay"}
-                                onChange={(e) =>
-                                    setSelectedPaymentType(e.target.value)
-                                }
-                            />
-                            간편결제 (토스페이)
-                        </label>
-                        <label>
-                            <input
-                                type="radio"
-                                name="paymentType"
-                                value="payco"
-                                checked={selectedPaymentType === "payco"}
-                                onChange={(e) =>
-                                    setSelectedPaymentType(e.target.value)
-                                }
-                            />
-                            간편결제 (페이코)
-                        </label>
-                        <label>
-                            <input
-                                type="radio"
-                                name="paymentType"
-                                value="transfer"
-                                checked={selectedPaymentType === "transfer"}
-                                onChange={(e) =>
-                                    setSelectedPaymentType(e.target.value)
-                                }
-                            />
-                            계좌이체
-                        </label>
+
+                    {/* 3. 충전 후 포인트 가이드 */}
+                    <ul className="charge-point-table">
+                        <li>
+                            현재 잔액{" "}
+                            <span>{currentPoints.toLocaleString()}P</span>
+                        </li>
+                        <li>
+                            충전할 포인트{" "}
+                            <span className="plus">
+                                +{Number(chargeAmount || 0).toLocaleString()}P
+                            </span>
+                        </li>
+                        <li className="after-charge-pt">
+                            충전 후 예상 포인트{" "}
+                            <span className="final">
+                                {(
+                                    Number(currentPoints) +
+                                    Number(chargeAmount || 0)
+                                ).toLocaleString()}
+                                P
+                            </span>
+                        </li>
+                    </ul>
+
+                    {/* 4. 결제수단 선택 */}
+                    <div className="pay-method-section">
+                        <div className="section-title">결제수단</div>
+                        <div className="pay-method-list">
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="paymentType"
+                                    value="card"
+                                    checked={selectedPaymentType === "card"}
+                                    onChange={(e) =>
+                                        setSelectedPaymentType(e.target.value)
+                                    }
+                                />
+                                신용/체크카드
+                            </label>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="paymentType"
+                                    value="tosspay"
+                                    checked={selectedPaymentType === "tosspay"}
+                                    onChange={(e) =>
+                                        setSelectedPaymentType(e.target.value)
+                                    }
+                                />
+                                토스페이
+                                <span className="tosspay-caption">
+                                    3만원 이상 충전 시 추첨 증정!
+                                </span>
+                            </label>
+                        </div>
                     </div>
+
+                    {/* 5. 안내 유의사항 */}
+                    <details className="guide-detail">
+                        <summary>유의사항</summary>
+                        <ul className="charge-guide-list">
+                            <li>충전포인트 보유 한도는 50만 포인트입니다.</li>
+                            <li>
+                                충전 취소는 충전 후 7일 이내에 한해 가능합니다.
+                            </li>
+                            <li>포인트 유효기간은 적립일로부터 5년입니다.</li>
+                            <li>… (필요한 안내 이어서)</li>
+                        </ul>
+                    </details>
+
+                    {/* 6. 하단 충전 버튼 */}
+                    <button
+                        className="submit-charge-btn"
+                        disabled={!chargeAmount || chargeAmount < 10000}
+                        onClick={onCharge}
+                    >
+                        {chargeAmount
+                            ? `${Number(
+                                  chargeAmount
+                              ).toLocaleString()}원 결제하기`
+                            : "충전 금액을 입력하세요"}
+                    </button>
                 </div>
 
                 <div className="point-history-section">
