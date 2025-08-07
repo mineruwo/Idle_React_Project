@@ -10,7 +10,7 @@
     position: relative;
 }
 .steps .steps-segment:after {
-    background-color: #1560d4;
+    background-color: #f3c7d3;
 }
 .steps .steps-segment {
     flex-basis: 1rem;
@@ -39,12 +39,12 @@
     height: 50px;
     width: 50px;
     overflow: hidden;
-    border: 0.1em solid #1560d4;
+    border: 0.1em solid #f3c7d3;
     background-color: #fff;
-    color: #1560d4;
+    color: #f3c7d3;
 }
 .steps .steps-segment .steps-marker svg path {
-    stroke: #1560d4;
+    stroke: #f3c7d3;
 }
 .steps .steps-segment .steps-marker .icon {
     display: flex;
@@ -54,34 +54,34 @@
 }
 .steps .steps-segment .steps-content .heading {
     font-size: 0.9em;
-    color: #1560d4;
+    color: #f3c7d3;
     font-family: "Noto Sans KR", sans-serif;
     letter-spacing: 0;
 }
 .steps .steps-segment.is-active:after {
-    background-color: #d8e2f0;
+    background-color: #e7eff8;
 }
 .steps .steps-segment.is-active ~ .steps-segment:after {
-    background-color: #d8e2f0;
+    background-color: #e7eff8;
 }
 .steps .steps-segment.is-active .steps-marker {
-    background-color: #1560d4;
+    background-color: #f3c7d3;
     color: #fff;
 }
 .steps .steps-segment.is-active .steps-marker svg path {
     stroke: #fff;
 }
 .steps .steps-segment.is-active ~ .steps-segment .steps-marker {
-    background-color: #d8e2f0;
+    background-color: #e7eff8;
     color: rgba(0, 0, 0, 0.7);
 }
 .steps .steps-segment.is-active .steps-marker.is-hollow {
-    border-color: #1560d4;
+    border-color: #f3c7d3;
 }
 .steps .steps-segment.is-active ~ .steps-segment .steps-marker.is-hollow {
-    border-color: #d8e2f0;
+    border-color: #e7eff8;
     background-color: #fff;
-    color: #d8e2f0;
+    color: #e7eff8;
 }
 .steps
     .steps-segment.is-active
@@ -92,16 +92,16 @@
     color: #849bb7;
 }
 .steps .steps-segment .steps-marker.is-hollow {
-    border: 0.1em solid #1560d4;
+    border: 0.1em solid #f3c7d3;
 }
 .steps .steps-segment .steps-marker.is-hollow svg path {
-    stroke: #849bb7;
+    stroke: #333;
 }
 
 .page-title {
     font-size: 1.5em;
     font-weight: bold;
-    color: #0a3069;
+    color: #333;
     margin-bottom: 1.5em;
     text-align: left;
 }
@@ -109,7 +109,7 @@
 .shipping-status {
     padding: 1.5em;
     border-radius: 10px;
-    background-color: #f8fafd;
+    background-color: #fef8f8;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.08);
     font-family: "Noto Sans KR", sans-serif;
 }

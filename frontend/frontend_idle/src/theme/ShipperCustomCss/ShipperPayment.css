@@ -8,17 +8,18 @@
 .point-management-section,
 .point-payment-section {
     flex: 1;
-    background: #f9fbff;
+    background: #fef8f8;
     border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(30, 60, 140, 0.07);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     padding: 2em 1.4em;
     font-family: "Noto Sans KR", sans-serif;
+    border: 1px solid #f3c7d3;
 }
 
 .point-manage-container {
     max-width: 420px;
     margin: 0 auto;
-    background: #f9fbff;
+    background: #fef8f8;
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(30, 60, 140, 0.07);
     padding: 2em 1.4em 2em 1.4em;
@@ -49,9 +50,9 @@
 
 .point-charge-section {
     display: flex;
-    flex-direction: column; /* 세로 정렬로 변경 */
-    gap: 0.7em;
-    margin-bottom: 2em;
+    flex-direction: column;
+    gap: 1em;
+    margin-bottom: 2.5em;
 }
 
 .charge-input-group {
@@ -60,31 +61,89 @@
 }
 
 .point-charge-section label {
-    font-size: 1.05rem;
-    color: #3c5073;
-    min-width: 78px;
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: #0a3069;
+    margin-bottom: 0.8em;
 }
 
 .point-charge-section input[type="number"] {
     flex: 1 1 100px;
     padding: 0.47em 0.8em;
-    border: 1.4px solid #c7d5ec;
+    border: 1.4px solid #ccc;
     border-radius: 7px;
     font-size: 1rem;
 }
-.charge-btn {
-    background: #1560d4;
-    color: #fff;
-    font-weight: 600;
-    border: none;
-    border-radius: 7px;
-    padding: 0.57em 1.13em;
-    cursor: pointer;
-    font-size: 1.05rem;
-    transition: background 0.2s;
+.preset-list {
+    display: flex;
+    gap: 0.5em;
+    margin-bottom: 1em;
 }
-.charge-btn:hover {
-    background: #1c4290;
+
+.preset-btn {
+    flex: 1;
+    padding: 0.6em 1em;
+    border: 1px solid #f3c7d3;
+    border-radius: 6px;
+    background-color: #fff;
+    color: #333;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.preset-btn:hover {
+    background-color: #f3c7d3;
+    color: #fff;
+}
+
+.preset-btn.selected {
+    background-color: #f3c7d3;
+    color: #fff;
+    border-color: #f3c7d3;
+}
+.submit-charge-btn {
+    width: 100%;
+    padding: 0.9em 1.5em;
+    background: #f3c7d3;
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.15rem;
+    transition: background 0.3s ease, transform 0.1s ease;
+    box-shadow: 0 4px 10px rgba(243, 199, 211, 0.4);
+}
+
+.submit-charge-btn:hover {
+    background: #e0b0c0;
+    transform: translateY(-1px);
+}
+
+.submit-charge-btn:active {
+    transform: translateY(0);
+}
+
+.submit-charge-btn:disabled {
+    background: #f3c7d3;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.explain-box {
+    background-color: #f8f8f8;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 0.8em 1em;
+    font-size: 0.9rem;
+    color: #555;
+    margin-top: 1em;
+}
+
+.explain-box span {
+    display: block;
+    line-height: 1.4;
 }
 .point-history-section {
     margin-top: 2.2em;
@@ -99,6 +158,7 @@
     padding: 0;
     margin: 0;
 }
+
 .history-item {
     display: flex;
     justify-content: space-between;
@@ -106,33 +166,30 @@
     border-bottom: 1px solid #e7eff8;
     font-size: 1rem;
 }
-.history-item.plus .history-amount {
+
+.history-item.plus .history-amount,
+.history-item.plus .history-type {
     color: #167d43;
 }
-.history-item.minus .history-amount {
+
+.history-item.minus .history-amount,
+.history-item.minus .history-type {
     color: #e84c3d;
 }
-.history-type {
-    min-width: 42px;
-    font-weight: 500;
-}
+
 .history-date {
     color: #849bb7;
-    font-size: 0.97rem;
-    min-width: 78px;
-    text-align: right;
 }
 
 /* 포인트 결제 섹션 스타일 */
 .point-payment-container {
-    /* 기존 스타일 유지 */
 }
 
 .current-points {
     text-align: center;
     margin-bottom: 1.5em;
     font-size: 1.1rem;
-    color: #3c5073;
+    color: #333;
 }
 
 .input-section {
@@ -143,51 +200,95 @@
     display: block;
     margin-bottom: 0.5em;
     font-size: 1.05rem;
-    color: #3c5073;
+    color: #333;
 }
 
 .input-section input {
     width: 100%;
     padding: 0.8em;
-    border: 1.4px solid #c7d5ec;
+    border: 1.4px solid #ccc;
     border-radius: 7px;
     font-size: 1rem;
 }
 
 .payment-btn {
     width: 100%;
-    padding: 0.8em;
-    background: #1560d4;
+    padding: 0.9em 1.5em; /* 패딩 증가 */
+    background: #f3c7d3;
     color: #fff;
-    font-weight: 600;
+    font-weight: 700; /* 폰트 굵기 증가 */
     border: none;
-    border-radius: 7px;
+    border-radius: 8px; /* 테두리 반경 증가 */
     cursor: pointer;
-    font-size: 1.1rem;
-    transition: background 0.2s;
+    font-size: 1.15rem; /* 폰트 크기 증가 */
+    transition: background 0.3s ease, transform 0.1s ease; /* 부드러운 전환 효과 */
+    box-shadow: 0 4px 10px rgba(243, 199, 211, 0.4); /* 그림자 추가 */
 }
 
 .payment-btn:hover {
-    background: #1c4290;
+    background: #e0b0c0; /* 호버 시 색상 살짝 어둡게 */
+    transform: translateY(-1px); /* 살짝 위로 올라가는 효과 */
+}
+
+.payment-btn:active {
+    transform: translateY(0); /* 클릭 시 원래 위치로 */
 }
 
 .payment-btn:disabled {
     background: #a0b5d4;
     cursor: not-allowed;
+    box-shadow: none; /* 비활성화 시 그림자 제거 */
 }
 
 .payment-message {
     margin-top: 1em;
     text-align: center;
-    color: #167d43; /* 성공 메시지 색상 */
+    color: #167d43;
 }
 
 .page-title {
-    font-size: 1.5em; /* 글자 크기 조정 */
-    font-weight: bold; /* 굵은 글씨 */
-    color: #0a3069; /* 카드 제목과 동일한 색상 */
-    margin-bottom: 1.5em; /* 아래쪽 여백 추가 */
-    text-align: left; /* 왼쪽 정렬 */
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #0a3069;
+    margin-bottom: 1.5em;
+    text-align: left;
+}
+
+/* New styles for pay-method-section .section-title */
+.pay-method-section .section-title {
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: #0a3069;
+    margin-bottom: 0.8em;
+}
+
+/* New styles for pay-method-list */
+.pay-method-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 1.5em;
+}
+
+.pay-method-list label {
+    display: flex;
+    align-items: center;
+    padding: 0.6em 1em;
+    border: 1px solid #e7eff8;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background-color: #fff;
+    color: #333;
+}
+
+.pay-method-list label:hover {
+    background-color: #f3f3f3;
+}
+
+.pay-method-list input[type="radio"] {
+    margin-right: 8px;
+    accent-color: #f3c7d3; /* Highlight color for radio button */
 }
 
 @media (max-width: 880px) {
@@ -195,7 +296,7 @@
         flex-direction: column;
     }
     .point-payment-section {
-        border-top: 1px solid #d8e2f0; /* A light border for separation */
-        margin-top: 2em; /* Add some margin for extra spacing */
+        border-top: 1px solid #d8e2f0;
+        margin-top: 2em;
     }
 }
