@@ -1,5 +1,6 @@
 package com.fullstack.config;
 
+import com.fullstack.security.JWTFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -8,6 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -17,6 +19,12 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private final JWTFilter jwtFilter;
+
+    SecurityConfig(JWTFilter jwtFilter) {
+        this.jwtFilter = jwtFilter;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -31,10 +39,14 @@ public class SecurityConfig {
                     "/api/orders/**",   // 🚚 오더 등록/조회/삭제 전부 허용
                     "/api/auth/**",     // (선택) 로그인/회원가입 API도 허용
                     "/admin/**",
-                    "/ws/**", "/ws-chat/**" // 웹소켓 경로
+                    "/ws/**", "/ws-chat/**", // 웹소켓 경로
+                    "/api/customer/**" // 고객 관련 API
                 ).permitAll()
                 .anyRequest().authenticated()
-            );
+            )
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+           
 
         return http.build();
     }

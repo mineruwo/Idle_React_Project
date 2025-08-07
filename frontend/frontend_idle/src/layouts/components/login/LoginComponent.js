@@ -33,7 +33,7 @@ export default function SignIn(props) {
         carOwnerMoveToDashboard
     } = useCustomMove();
 
-
+    // 유효성 검사
     const validateInputs = () => {
         const email = document.getElementById('id').value.trim();
         const password = document.getElementById('password').value.trim();
@@ -76,16 +76,24 @@ export default function SignIn(props) {
     // 로그인 API 호출
     const loginApi = async () => {
         try {
-            await login({
+            const result = await login({
                 passwordEnc: password,
-                id,
-                role
+                id
             });
             alert("로그인 성공");
-            /*
-            shipperMoveToDashBoard();
-            carOwnerMoveToDashboard();
-            */
+
+            const customRole = result.role;
+            setRole(customRole);
+
+            alert(customRole);
+
+            if (customRole === "shipper") {
+                shipperMoveToDashBoard();
+            } else if (customRole === "carrier") {
+                carOwnerMoveToDashboard();
+            } else {
+                alert("알 수 없는 사용자입니다");
+            }
         } catch (err) {
             alert(err.message);
         }
