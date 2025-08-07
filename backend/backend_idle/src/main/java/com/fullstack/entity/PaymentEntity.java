@@ -3,14 +3,12 @@ package com.fullstack.entity;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -46,11 +44,7 @@ public class PaymentEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "customer_id", referencedColumnName = "ID_NUM")
     private CustomerEntity customer;
-    
-    //차주페이지 관련 entity column
-    @ManyToOne
-    @JoinColumn(name = "transport_auth_id", nullable = false)
-    private TransportAuth transportAuth;
+  
 	
 	
 }

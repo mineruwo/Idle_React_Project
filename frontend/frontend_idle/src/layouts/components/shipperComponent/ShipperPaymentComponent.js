@@ -7,44 +7,36 @@ import {
     fetchUserPoints,
 } from "../../../api/paymentApi";
 
-// props를 적용하여 컴포넌트를 동적으로 만듭니다.
 const ShipperPaymentComponent = ({
     remainingLimit = 500000,
-    onCharge,
     nickname,
-    userId, // userId prop 추가
+    userId,
 }) => {
-    const [currentPoints, setCurrentPoints] = useState(0); // 포인트 상태를 컴포넌트 내부에서 관리
+    const [currentPoints, setCurrentPoints] = useState(0);
 
     useEffect(() => {
         const getUserPoints = async () => {
             try {
                 const response = await fetchUserPoints(userId);
-                setCurrentPoints(response.points); // 백엔드에서 받은 포인트로 업데이트
+                setCurrentPoints(response.points);
             } catch (error) {
                 console.error("Failed to fetch user points:", error);
-                // 에러 처리: 사용자에게 메시지를 표시하거나 기본값 설정 등
             }
         };
 
         getUserPoints();
-    }, [userId]); // userId가 변경될 때마다 실행
+    }, [userId]);
 
-    // 포인트 충전 관련 상태
+    // 포인트 충전
     const [chargeAmount, setChargeAmount] = useState("");
-    const [selectedPaymentType, setSelectedPaymentType] = useState("card"); // 기본값 신용카드 일반결제
+    const [selectedPaymentType, setSelectedPaymentType] = useState("card");
     const [recentHistory, setRecentHistory] = useState([
         { type: "충전", amount: "+10,000", date: "2025-07-25" },
         { type: "사용", amount: "-3,500", date: "2025-07-27" },
         { type: "충전", amount: "+5,000", date: "2025-07-30" },
     ]);
 
-    const ClickChargeBtn = async (
-        chargeAmount,
-        nickname,
-        redirect_url,
-        selectedPaymentType // 변경된 파라미터 이름
-    ) => {
+    const ClickChargeBtn = async () => {
         const amount = parseInt(chargeAmount, 10);
 
         if (isNaN(amount) || amount < 1000) {
@@ -56,43 +48,46 @@ const ShipperPaymentComponent = ({
 
         let pgToUse = "";
         let payMethodToUse = "";
-        let pgProviderForBackend = ""; // 백엔드에 전달할 실제 PG사
+        let pgProviderForBackend = "";
 
         if (selectedPaymentType === "card") {
-            pgToUse = "html5_inicis"; // 신용카드 일반결제 (KG이니시스 예시)
+            pgToUse = "html5_inicis";
             payMethodToUse = "card";
             pgProviderForBackend = "html5_inicis";
-        } else if (selectedPaymentType === "easy") {
-            pgToUse = "kakaopay"; // 간편결제 (카카오페이 예시)
-            payMethodToUse = "card"; // 카카오페이는 내부적으로 카드 결제 사용
+        } else if (selectedPaymentType === "kakaopay") {
+            pgToUse = "kakaopay";
+            payMethodToUse = "card";
             pgProviderForBackend = "kakaopay";
-        } else if (selectedPaymentType === "transfer") {
-            pgToUse = "html5_inicis"; // 계좌이체 (KG이니시스 예시)
-            payMethodToUse = "trans"; // 실시간 계좌이체
+        } else if (selectedPaymentType === "inicis") {
+            pgToUse = "html5_inicis";
+            payMethodToUse = "card";
             pgProviderForBackend = "html5_inicis";
         } else if (selectedPaymentType === "tosspay") {
-            pgToUse = "tosspay"; // 토스페이
-            payMethodToUse = "card"; // 토스페이는 카드 결제 방식 사용
+            pgToUse = "tosspay";
+            payMethodToUse = "card";
             pgProviderForBackend = "tosspay";
         } else if (selectedPaymentType === "payco") {
-            pgToUse = "payco"; // 페이코
-            payMethodToUse = "card"; // 페이코는 카드 결제 방식 사용
+            pgToUse = "payco";
+            payMethodToUse = "card";
             pgProviderForBackend = "payco";
+        } else if (selectedPaymentType === "mobilians") {
+            pgToUse = "mobilians";
+            payMethodToUse = "card";
+            pgProviderForBackend = "mobilians";
         } else {
             alert("결제 수단을 선택해주세요.");
             return;
         }
 
         try {
-            // 1. 백엔드에 결제 준비 요청
             const prepareResponse = await preparePayment({
                 merchantUid: merchantUid,
                 itemName: "포인트 충전",
                 amount: amount,
                 buyerName: nickname,
                 buyerEmail: "buyer@example.com", // 실제 사용자 이메일로 변경 필요
-                userId: userId, // 백엔드에 userId 전달
-                pgProvider: pgProviderForBackend, // 백엔드에 실제 PG사 정보 전달
+                userId: userId,
+                pgProvider: pgProviderForBackend,
             });
 
             if (!prepareResponse.success) {
@@ -100,13 +95,13 @@ const ShipperPaymentComponent = ({
                 return;
             }
 
-            // 2. 포트원(아임포트) 결제창 호출
+            // 포트원(아임포트) 결제창 호출
             const { IMP } = window;
-            IMP.init("imp16058080"); // 가맹점 번호 지정
+            IMP.init("imp16058080");
             IMP.request_pay(
                 {
-                    pg: pgToUse, // 선택된 PG사로 설정
-                    pay_method: payMethodToUse, // 선택된 결제 방식으로 설정
+                    pg: pgToUse,
+                    pay_method: payMethodToUse,
                     merchant_uid: merchantUid,
                     name: "포인트 충전",
                     amount: amount,
@@ -119,7 +114,6 @@ const ShipperPaymentComponent = ({
                 },
                 async (rsp) => {
                     if (rsp.success) {
-                        // 3. 백엔드에 결제 검증 요청
                         try {
                             const verifyResponse = await verifyPayment({
                                 impUid: rsp.imp_uid,
@@ -134,7 +128,7 @@ const ShipperPaymentComponent = ({
                                 );
                                 setCurrentPoints(
                                     (prevPoints) => prevPoints + newChargeAmount
-                                ); // 포인트 업데이트
+                                );
                                 const newHistory = {
                                     type: "충전",
                                     amount: `+${newChargeAmount.toLocaleString()}`,
@@ -164,7 +158,7 @@ const ShipperPaymentComponent = ({
         }
     };
 
-    // 포인트 결제 관련 상태
+    // 포인트 결제
     const [usePoints, setUsePoints] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState("");
@@ -185,17 +179,14 @@ const ShipperPaymentComponent = ({
         setMessage("결제 처리중...");
 
         try {
-            // API 호출
-            await payWithPoints(userId, pointsToUse); // userId prop 사용
+            await payWithPoints(userId, pointsToUse);
 
-            // API 호출 성공
             setMessage(
                 `${pointsToUse.toLocaleString()}P 결제가 완료되었습니다.`
             );
 
-            setCurrentPoints((prevPoints) => prevPoints - pointsToUse); // 포인트 업데이트
+            setCurrentPoints((prevPoints) => prevPoints - pointsToUse);
 
-            // 최근 내역에 추가하고 3개로 제한
             const newHistory = {
                 type: "사용",
                 amount: `-${pointsToUse.toLocaleString()}`,
@@ -205,9 +196,8 @@ const ShipperPaymentComponent = ({
                 [newHistory, ...prevHistory].slice(0, 3)
             );
 
-            setUsePoints(""); // 입력 필드 초기화
+            setUsePoints("");
         } catch (error) {
-            // 네트워크 오류 또는 API 에러 처리
             setMessage(error.message);
         } finally {
             setIsLoading(false);
@@ -223,7 +213,6 @@ const ShipperPaymentComponent = ({
             <div className="point-management-section">
                 <h2 className="page-title">포인트 관리</h2>
                 <div className="point-charge-wrap">
-                    {/* 1. 포인트 잔액 및 잔액 표시 */}
                     <div className="point-balance-box">
                         <span className="label">충전포인트 잔액</span>
                         <span className="amount-highlight">
@@ -231,7 +220,6 @@ const ShipperPaymentComponent = ({
                         </span>
                     </div>
 
-                    {/* 2. 충전금액 선택 */}
                     <div className="charge-amount-select">
                         <div className="section-title">
                             충전금액
@@ -261,7 +249,6 @@ const ShipperPaymentComponent = ({
                         </div>
                     </div>
 
-                    {/* 3. 충전 후 포인트 가이드 */}
                     <ul className="charge-point-table">
                         <li>
                             현재 잔액{" "}
@@ -285,7 +272,6 @@ const ShipperPaymentComponent = ({
                         </li>
                     </ul>
 
-                    {/* 4. 결제수단 선택 */}
                     <div className="pay-method-section">
                         <div className="section-title">결제수단</div>
                         <div className="pay-method-list">
@@ -299,7 +285,31 @@ const ShipperPaymentComponent = ({
                                         setSelectedPaymentType(e.target.value)
                                     }
                                 />
-                                신용/체크카드
+                                일반결제
+                            </label>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="paymentType"
+                                    value="kakaopay"
+                                    checked={selectedPaymentType === "kakaopay"}
+                                    onChange={(e) =>
+                                        setSelectedPaymentType(e.target.value)
+                                    }
+                                />
+                                카카오페이
+                            </label>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="paymentType"
+                                    value="inicis"
+                                    checked={selectedPaymentType === "inicis"}
+                                    onChange={(e) =>
+                                        setSelectedPaymentType(e.target.value)
+                                    }
+                                />
+                                이니시스
                             </label>
                             <label>
                                 <input
@@ -312,14 +322,36 @@ const ShipperPaymentComponent = ({
                                     }
                                 />
                                 토스페이
-                                <span className="tosspay-caption">
-                                    3만원 이상 충전 시 추첨 증정!
-                                </span>
+                            </label>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="paymentType"
+                                    value="payco"
+                                    checked={selectedPaymentType === "payco"}
+                                    onChange={(e) =>
+                                        setSelectedPaymentType(e.target.value)
+                                    }
+                                />
+                                페이코
+                            </label>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="paymentType"
+                                    value="mobilians"
+                                    checked={
+                                        selectedPaymentType === "mobilians"
+                                    }
+                                    onChange={(e) =>
+                                        setSelectedPaymentType(e.target.value)
+                                    }
+                                />
+                                모빌리언스
                             </label>
                         </div>
                     </div>
 
-                    {/* 5. 안내 유의사항 */}
                     <details className="guide-detail">
                         <summary>유의사항</summary>
                         <ul className="charge-guide-list">
@@ -332,11 +364,10 @@ const ShipperPaymentComponent = ({
                         </ul>
                     </details>
 
-                    {/* 6. 하단 충전 버튼 */}
                     <button
                         className="submit-charge-btn"
                         disabled={!chargeAmount || chargeAmount < 10000}
-                        onClick={onCharge}
+                        onClick={() => ClickChargeBtn()}
                     >
                         {chargeAmount
                             ? `${Number(

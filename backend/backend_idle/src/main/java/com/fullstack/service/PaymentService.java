@@ -155,6 +155,18 @@ public class PaymentService {
                 }
             }
 
+            // 새로운 포인트 충전 로직 추가: 결제 금액이 있고, 사용된 포인트가 없거나 0인 경우 (포인트 충전으로 간주)
+            if (storedPayment.getAmount() != null && storedPayment.getAmount() > 0 &&
+                (storedPayment.getPointsUsed() == null || storedPayment.getPointsUsed() == 0)) {
+                if (storedPayment.getCustomer() == null) {
+                    log.error("verifyPayment: Customer entity is null for merchantUid: {} when trying to add points", merchantUid);
+                } else {
+                    log.info("verifyPayment: Calling addPoints for userId: {} with amount: {}", storedPayment.getCustomer().getIdNum(), storedPayment.getAmount());
+                    addPoints(storedPayment.getCustomer().getIdNum(), storedPayment.getAmount().intValue());
+                    log.info("verifyPayment: addPoints method called successfully.");
+                }
+            }
+
             responseDto.setSuccess(true);
             responseDto.setMessage("결제가 성공적으로 완료되었습니다.");
             responseDto.setAmount(storedPayment.getAmount());
