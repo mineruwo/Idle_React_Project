@@ -1,4 +1,4 @@
-import React from 'react';
+
 import useCustomMove from "../../../hooks/useCustomMove";
 
 const Footer = () => {
