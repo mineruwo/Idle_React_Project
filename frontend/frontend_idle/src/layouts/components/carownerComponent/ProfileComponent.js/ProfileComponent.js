@@ -1,46 +1,50 @@
-
+import { useEffect, useState } from "react";
 import "../../../../theme/CarOwner/profile.css";
-import useCustomMove from"../../../../hooks/useCustomMove";
+import useCustomMove from "../../../../hooks/useCustomMove";
+import { fetchCarOwnerProfile } from "../../../../api/carOwnerApi";
 
 const ProfileComponent = () => {
-    const { carOwnerMoveToEditProfile } = useCustomMove();
-    const user = {
-        username: "hong123",
-        fullName: "Hong Gil-dong",
-        email: "hong@example.com",
-        driverLisenseNum: "000-0000-000",
-        insurance: "0000-000-00000-00"
-    };
-    return (
-        <div className="profilewrapper">
-        <div className="infodiv">
-            <div className="profile-card " >
-                
-                <div className="profile-avatar">
-                    <div className="imgdiv">
-                    <img src="/img/main/tungtung.PNG"/>
-                    </div>
-                </div>
-                <div className="avatar-info">
-                    <h3>{user.fullName}</h3>
-                    <p>{user.email}</p>
-                    </div>
+  const { carOwnerMoveToEditProfile } = useCustomMove();
+  const [user, setUser] = useState(null);
+  const nickname = "hongcha"; // 나중에 로그인 유저 정보로 교체
+
+  useEffect(() => {
+    fetchCarOwnerProfile(customName)
+      .then(setUser)
+      .catch((err) => console.error("프로필 불러오기 실패", err));
+  }, [customName]);
+
+  if (!user) return <div className="profilewrapper">로딩 중...</div>;
+
+  return (
+    <div className="profilewrapper">
+      <div className="infodiv">
+        <div className="profile-card">
+          <div className="profile-avatar">
+            <div className="imgdiv">
+              <img src="/img/main/tungtung.PNG" />
             </div>
-            <div className="profile-main">
-                    
-                    <div className="profile-info">
-                        <p><strong>Username:</strong> {user.username}</p>
-                        <p><strong>Full Name:</strong> {user.fullName}</p>
-                        <p><strong>Email:</strong> {user.email}</p>
-                        <p><strong>DriverLisense:</strong> {user.driverLisenseNum}</p>
-                        <p><strong>Insurance:</strong> {user.insurance}</p>
-                    </div>
-                    <div className="navbutton">
-                    <button className="btn" onClick={carOwnerMoveToEditProfile}>Edit Profile</button>
-                    </div>
-                </div>
-            </div>
-            </div>
-    );
-}
+          </div>
+          <div className="avatar-info">
+            <h3>{user.customName}</h3>
+            <p>{user.nickname}</p>
+          </div>
+        </div>
+        <div className="profile-main">
+          <div className="profile-info">
+            <p><strong>Nickname:</strong> {user.nickname}</p>
+            <p><strong>Name:</strong> {user.customName}</p>
+            <p><strong>Phone:</strong> {user.phone}</p>
+          </div>
+          <div className="navbutton">
+            <button className="btn" onClick={carOwnerMoveToEditProfile}>
+              Edit Profile
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default ProfileComponent;
