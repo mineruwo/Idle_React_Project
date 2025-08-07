@@ -13,13 +13,14 @@ const Loading = <div>Loading 중...</div>;
 
 // 페이지 컴포넌트 import
 const Main = lazy(() => import("../pages/mainpage/MainPage"));
-const DashPage = lazy(() => import("../pages/carOwnerPage/DashBoard"));
+const DashPage = lazy(() => import("../pages/carOwnerPage/CarPage"));
 const OrderForm = lazy(() => import("../pages/orderPage/OrderForm"));
 const Login = lazy(() => import("../pages/loginpage/LoginPage"));
 const Singup = lazy(() => import("../pages/signuppage/SignupPage"));
 const Dstest = lazy(() => import("../pages/mainpage/TestPage"));
 const AdminPage = lazy(() => import("../pages/adminPage/AdminPage"));
 
+const CarPage = lazy(() => import("../pages/carOwnerPage/CarPage"));
 const CarDashPage = lazy(() => import("../pages/carOwnerPage/DashBoard"));
 const Order = lazy(() => import("../pages/carOwnerPage/Orders"));
 const Profile = lazy(() => import("../pages/carOwnerPage/Profile"));
@@ -54,7 +55,7 @@ const root = createBrowserRouter([
             },
             {
                 path: "carPage",
-                element: <DashPage />,
+                element: <CarPage />,
                 children: [
                     {
                         index: true,
@@ -101,7 +102,7 @@ const root = createBrowserRouter([
                         ),
                     },
                     {
-                        path: "vehucles",
+                        path: "vehicles",
                         element: (
                             <Suspense fallback={Loading}>
                                 <Vehicles/>

@@ -23,28 +23,13 @@ const useCustomMove = () => {
         navigate({ pathname: `../shipper/review` });
     };
 
-    const carOwnerMoveToDashboard = () => {
-        navigate("/carPage");
-    };
-    const carOwnerMoveToProfile = () => {
-        navigate("/carPage/profile");
-    };
-    const carOwnerMoveToEditProfile = () => {
-        navigate("/carpage/editProfile");
-    };
-    const carOwnerMoveToOrders = () => {
-        navigate("/carPage/orders");
-    };
-    const carOwnerMoveToSettlement = () => {
-        navigate("/carPage/settlement");
-    };
-    const carOwnerMoveToVehucles = () => {
-        navigate("/carPage/vehucles");
-    };
-
-    const carOwnerMoveToLisense = () => {
-        navigate("/carPage/submitDOC");
-    };
+    const carOwnerMoveToDashboard = () => navigate("/carPage");
+    const carOwnerMoveToProfile = () => navigate("/carPage/profile");
+    const carOwnerMoveToEditProfile = () => navigate("/carPage/editProfile");
+    const carOwnerMoveToOrders = () => navigate("/carPage/orders");
+    const carOwnerMoveToSettlement = () => navigate("/carPage/settlement");
+    const carOwnerMoveToVehicles = () => navigate("/carPage/vehicles"); 
+    const carOwnerMoveToLisense = () => navigate("/carPage/submitDOC");
 
     const moveToAdminPage = () => {
         navigate("/admin");
@@ -69,7 +54,7 @@ const useCustomMove = () => {
         carOwnerMoveToEditProfile,
         carOwnerMoveToOrders,
         carOwnerMoveToSettlement,
-        carOwnerMoveToVehucles,
+        carOwnerMoveToVehicles,
         carOwnerMoveToLisense,
         moveToAdminPage,
         moveToWebSocketTestPage,

@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import "../../../../theme/CarOwner/profile.css";
 import useCustomMove from "../../../../hooks/useCustomMove";
-import { fetchCarOwnerProfile } from "../../../../api/carOwnerApi";
+import { fetchCarOwnerProfile } from "../../../../api/CarOwnertransportApi";
 
 const ProfileComponent = () => {
   const { carOwnerMoveToEditProfile } = useCustomMove();
   const [user, setUser] = useState(null);
-  const nickname = "hongcha"; // 나중에 로그인 유저 정보로 교체
+  const customName = "hongcha"; // 나중에 로그인 유저 정보로 교체
 
   useEffect(() => {
     fetchCarOwnerProfile(customName)

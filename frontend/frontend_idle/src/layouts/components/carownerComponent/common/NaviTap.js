@@ -12,7 +12,7 @@ const ShipperNavBarComponent = () => {
     carOwnerMoveToOrders,
     carOwnerMoveToProfile,
     carOwnerMoveToSettlement,
-    carOwnerMoveToVehucles,
+    carOwnerMoveToVehicles,
   } = useCustomMove();
 
   useEffect(() => {
@@ -60,7 +60,7 @@ const ShipperNavBarComponent = () => {
                 <div className="nav-link">정산</div>
               </li>
 
-              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "vehucles" ? "active" : ""}`} onClick={carOwnerMoveToVehucles}>
+              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "vehucles" ? "active" : ""}`} onClick={carOwnerMoveToVehicles}>
                 <div className="nav-link">내 차량</div>
               </li>
 
