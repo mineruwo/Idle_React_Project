@@ -2,6 +2,7 @@ package com.fullstack.idle;
 
 import com.fullstack.entity.Admin;
 import com.fullstack.model.AdminDTO;
+import com.fullstack.model.enums.Role;
 import com.fullstack.repository.AdminRepository;
 import com.fullstack.service.AdminService;
 
@@ -9,8 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,7 +30,7 @@ class AdminServiceTests {
                 .adminId("admin")
                 .password("pwd1234")
                 .name("개발 관리자")
-                .role("DEV_ADMIN")
+                .role(Role.DEV_ADMIN)	
                 .emplId("001")
                 .build();
 
@@ -52,9 +51,9 @@ class AdminServiceTests {
    // @Test
     void testGetAdminList() {
         // when
-        List<AdminDTO> adminList = adminService.getAdminList();
+       // List<AdminDTO> adminList = adminService.getAdminList();
 
-        System.out.println(adminList);
+       // System.out.println(adminList);
     }
 
    // @Test
@@ -62,7 +61,7 @@ class AdminServiceTests {
 
 
         // when
-        adminService.deleteAdmin("admin");
+       // adminService.deleteAdmin("admin");
 
         // then
         AdminDTO deletedAdmin = adminService.getAdmin("admin");

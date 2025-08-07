@@ -14,3 +14,25 @@ export const loginAdmin = async (adminId, password) => {
         throw error;
     }
 };
+
+export const createAdmin = async (adminData) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/admin/accounts`, adminData);
+        return response.data;
+    } catch (error) {
+        console.error('Admin creation failed:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const getAdminList = async (page = 0, size = 10) => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/admin/accounts`, {
+            params: { page, size }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch admin list:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};

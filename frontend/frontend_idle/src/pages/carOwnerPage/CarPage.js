@@ -6,7 +6,7 @@ const CarPage = ()=>{
     return( 
 
         <div>
-            <div className="bubblediv"><BubbleAnimation warmth={100}/></div>
+            <div className="bubblediv"><BubbleAnimation warmth={90}/></div>
             <div className="componentdiv"><Outlet/></div>
             
         </div>
