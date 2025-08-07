@@ -352,18 +352,6 @@ const ShipperPaymentComponent = ({
                         </div>
                     </div>
 
-                    <details className="guide-detail">
-                        <summary>유의사항</summary>
-                        <ul className="charge-guide-list">
-                            <li>충전포인트 보유 한도는 50만 포인트입니다.</li>
-                            <li>
-                                충전 취소는 충전 후 7일 이내에 한해 가능합니다.
-                            </li>
-                            <li>포인트 유효기간은 적립일로부터 5년입니다.</li>
-                            <li>… (필요한 안내 이어서)</li>
-                        </ul>
-                    </details>
-
                     <button
                         className="submit-charge-btn"
                         disabled={!chargeAmount || chargeAmount < 10000}

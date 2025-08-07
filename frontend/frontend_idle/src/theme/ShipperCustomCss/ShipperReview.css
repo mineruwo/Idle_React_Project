@@ -1,55 +1,56 @@
 .review-rating-page {
-    max-width: 1050px; /* Increased max-width for two columns */
+    max-width: 1050px;
     margin: 0 auto;
     padding: 32px 20px;
-    background: #fff;
+    background: #fef8f8;
     border-radius: 12px;
     box-shadow: 0 4px 28px rgba(0, 0, 0, 0.08);
     font-family: sans-serif;
 }
 .review-rating-page h2 {
     font-size: 24px;
-    margin-bottom: 25px; /* Increased margin-bottom */
+    margin-bottom: 25px;
     text-align: center;
 }
 
 .review-container {
     display: flex;
-    gap: 30px; /* Increased space between the two columns */
-    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    gap: 30px;
+    flex-wrap: wrap;
 }
 
 .write-review {
-    flex: 1; /* Take up available space */
-    min-width: 450px; /* Increased minimum width for the write review section */
+    flex: 1;
+    min-width: 450px;
     margin-bottom: 28px;
-    background: #f8f9fa;
+    background: #fef8f8;
     padding: 20px 14px;
     border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Added shadow */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .review-list {
-    flex: 1; /* Take up equal space as write-review */
-    min-width: 450px; /* Minimum width for the review list */
-    background: #f8f9fa; /* Added background */
-    padding: 20px 14px; /* Added padding */
-    border-radius: 10px; /* Added border-radius */
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Added shadow */
+    flex: 1;
+    min-width: 450px;
+    background: #fef8f8;
+    padding: 20px 14px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 @media (max-width: 768px) {
     .review-container {
-        flex-direction: column; /* Stack columns vertically on smaller screens */
+        flex-direction: column;
     }
-    .write-review, .review-list {
-        min-width: unset; /* Remove min-width constraint */
-        width: 100%; /* Full width on smaller screens */
+    .write-review,
+    .review-list {
+        min-width: unset;
+        width: 100%;
     }
 }
 .write-review h3 {
     font-size: 17px;
-    margin-bottom: 15px; /* Increased margin-bottom */
+    margin-bottom: 15px;
 }
 .write-review form {
     display: flex;
@@ -71,7 +72,7 @@
 }
 .write-review button {
     align-self: flex-end;
-    background: #0074d9;
+    background: #f3c7d3;
     color: #fff;
     border: none;
     border-radius: 6px;
@@ -83,16 +84,16 @@
     transition: background 0.2s;
 }
 .write-review button:hover {
-    background: #005ea3;
+    background: #0056b3;
 }
 
 .review-list h3 {
     font-size: 16px;
     color: #222;
-    margin-bottom: 12px; /* Increased margin-bottom */
+    margin-bottom: 12px;
 }
 .review-item {
-    background: #fafbfc;
+    background: #fef8f8;
     border-radius: 8px;
     padding: 12px 16px;
     margin-bottom: 16px;
@@ -122,9 +123,9 @@
     color: #333;
 }
 .page-title {
-    font-size: 1.5em; /* 글자 크기 조정 */
-    font-weight: bold; /* 굵은 글씨 */
-    color: #0a3069; /* 카드 제목과 동일한 색상 */
-    margin-bottom: 2.5em; /* 아래쪽 여백 추가 */
-    text-align: left; /* 왼쪽 정렬 */
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #0a3069;
+    margin-bottom: 2.5em;
+    text-align: left;
 }

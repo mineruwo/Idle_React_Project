@@ -1,21 +1,21 @@
 .page-title {
-    font-size: 1.5em; /* 글자 크기 조정 */
-    font-weight: bold; /* 굵은 글씨 */
-    color: #0a3069; /* 카드 제목과 동일한 색상 */
-    margin-bottom: 1.5em; /* 아래쪽 여백 추가 */
-    text-align: left; /* 왼쪽 정렬 */
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #0a3069;
+    margin-bottom: 1.5em;
+    text-align: left;
 }
 
 .request-number {
     margin-right: 10px;
-    color: #999; /* 연한 회색 */
-    font-size: 0.9em; /* 작은 폰트 사이즈 */
+    color: #999;
+    font-size: 0.9em;
 }
 
 .delivery-detail-container {
     padding: 1.5em;
     border-radius: 10px;
-    background-color: #f8fafd;
+    background-color: #fef8f8;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.08);
     font-family: "Noto Sans KR", sans-serif;
 }
@@ -61,7 +61,7 @@
 }
 
 .card {
-    background: #fff;
+    background: #fef8f8;
     padding: 32px 24px;
     border-radius: 14px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
