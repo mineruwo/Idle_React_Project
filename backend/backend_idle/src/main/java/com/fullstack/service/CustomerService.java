@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.fullstack.model.CustomerDTO;
+import com.fullstack.model.LoginResponseDTO;
 
 public interface CustomerService {
 	/*
@@ -19,7 +20,7 @@ public interface CustomerService {
 
     public CustomerDTO getCustomerById(String id);
     */
-	public void login(CustomerDTO dto);
+	public LoginResponseDTO login(CustomerDTO dto);
 	
 	public void register(CustomerDTO dto);
     
