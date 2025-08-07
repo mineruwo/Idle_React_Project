@@ -11,38 +11,67 @@
 
 .bubble {
   position: absolute;
-  bottom: -40px;
+  top: -40px;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
-  animation: rise 6s ease-in forwards;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-  z-index: 0;
+  pointer-events: none;
+  animation: fall 8s linear forwards;
 }
 
-/* 색상 단계별 클래스 */
-.bubble-low {
-  background: rgba(14, 143, 223, 0.4); /* light blue */
+.bubble-left {
+  animation-name: fall-left;
 }
 
-.bubble-mid {
-  background: rgba(233, 34, 64, 0.4); /* light pink */
+.bubble-right {
+  animation-name: fall-right;
 }
 
-.bubble-high {
-  background: rgba(247, 247, 25, 0.3); /* light yellow */
-}
-
-@keyframes rise {
+/* 왼쪽으로 출렁이며 회전하며 내려오는 효과 */
+@keyframes fall-left {
   0% {
-    transform: translateY(0);
+    transform: translateX(0) translateY(0) rotate(0deg);
     opacity: 1;
   }
+
+  25% {
+    transform: translateX(-20px) translateY(25vh) rotate(30deg);
+  }
+
+  50% {
+    transform: translateX(-40px) translateY(50vh) rotate(60deg);
+  }
+
+  75% {
+    transform: translateX(-20px) translateY(75vh) rotate(90deg);
+  }
+
   100% {
-    transform: translateY(-100vh);
+    transform: translateX(0px) translateY(100vh) rotate(120deg);
+    opacity: 0;
+  }
+}
+
+/* 오른쪽으로 출렁이며 회전하며 내려오는 효과 */
+@keyframes fall-right {
+  0% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+
+  25% {
+    transform: translateX(20px) translateY(25vh) rotate(30deg);
+  }
+
+  50% {
+    transform: translateX(40px) translateY(50vh) rotate(60deg);
+  }
+
+  75% {
+    transform: translateX(20px) translateY(75vh) rotate(90deg);
+  }
+
+  100% {
+    transform: translateX(0px) translateY(100vh) rotate(120deg);
     opacity: 0;
   }
 }

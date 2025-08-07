@@ -1,37 +1,26 @@
 import { useEffect, useState } from "react";
-import "../common/BubbleAnimation.css";
-import cherryImg from "../common/cherry.png";
+import "./BubbleAnimation.css";
+import cherryImg from "./cherry.png";
 
 const BubbleAnimation = ({ warmth = 60 }) => {
   const [bubbles, setBubbles] = useState([]);
-  const [colorClass, setColorClass] = useState("bubble-low");
 
   useEffect(() => {
-    let bubbleLimit = 0;
-    let createSpeed = 0;
-    let color = "";
+    let bubbleLimit = 40;
+    let createSpeed = 200;
 
     if (warmth < 70) {
       bubbleLimit = 10;
       createSpeed = 800;
-      color = "bubble-low";
     } else if (warmth < 90) {
       bubbleLimit = 20;
       createSpeed = 500;
-      color = "bubble-mid";
-    } else {
-      bubbleLimit = 40;
-      createSpeed = 200;
-      color = "bubble-high";
     }
-
-    setColorClass(color);
 
     const interval = setInterval(() => {
       setBubbles((prev) => {
         const now = Date.now();
-        const filtered = prev.filter(b => now - b.createdAt < 6000);
-        // 지속적으로 생성되도록 항상 하나 추가
+        const filtered = prev.filter((b) => now - b.createdAt < 8000);
         return [...filtered, createBubble()];
       });
     }, createSpeed);
@@ -44,7 +33,7 @@ const BubbleAnimation = ({ warmth = 60 }) => {
     return {
       id,
       left: Math.random() * 100 + "%",
-      animationDuration: `${4 + Math.random() * 3}s`,
+      direction: Math.random() > 0.5 ? "bubble-left" : "bubble-right",
       createdAt: Date.now(),
     };
   };
@@ -54,10 +43,9 @@ const BubbleAnimation = ({ warmth = 60 }) => {
       {bubbles.map((bubble) => (
         <div
           key={bubble.id}
-          className={`bubble ${colorClass}`}
+          className={`bubble ${bubble.direction}`}
           style={{
             left: bubble.left,
-            animationDuration: bubble.animationDuration,
           }}
         >
           <img
@@ -67,7 +55,6 @@ const BubbleAnimation = ({ warmth = 60 }) => {
               width: "100%",
               height: "100%",
               objectFit: "contain",
-              opacity: 1,
             }}
           />
         </div>
