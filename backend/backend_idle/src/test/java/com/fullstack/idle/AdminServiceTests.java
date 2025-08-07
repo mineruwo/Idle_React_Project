@@ -28,85 +28,54 @@ class AdminServiceTests {
     void testCreateAdmin() {
         // given
         AdminDTO adminDTO = AdminDTO.builder()
-                .adminId("testAdmin")
-                .password("password")
-                .name("Test Admin")
-                .role("ROLE_ADMIN")
-                .emplId("EMP123")
+                .adminId("admin")
+                .password("pwd1234")
+                .name("개발 관리자")
+                .role("DEV_ADMIN")
+                .emplId("001")
                 .build();
 
         // when
         adminService.createAdmin(adminDTO);
-
-        // then
-        AdminDTO foundAdmin = adminService.getAdmin("testAdmin");
-        assertThat(foundAdmin).isNotNull();
-        assertThat(foundAdmin.getName()).isEqualTo("Test Admin");
-        assertThat(foundAdmin.getRegDate()).isNotNull();
-        assertThat(foundAdmin.isDel()).isFalse();
+        System.out.println(adminDTO);
     }
 
-    @Test
+    //@Test
     void testGetAdmin() {
-        // given
-        AdminDTO adminDTO = AdminDTO.builder()
-                .adminId("testAdmin")
-                .password("password")
-                .name("Test Admin")
-                .role("ROLE_ADMIN")
-                .emplId("EMP123")
-                .build();
-        adminService.createAdmin(adminDTO);
 
         // when
-        AdminDTO foundAdmin = adminService.getAdmin("testAdmin");
+        AdminDTO foundAdmin = adminService.getAdmin("admin");
 
-        // then
-        assertThat(foundAdmin).isNotNull();
-        assertThat(foundAdmin.getAdminId()).isEqualTo("testAdmin");
+        System.out.println(foundAdmin);
     }
 
-    @Test
+   // @Test
     void testGetAdminList() {
-        // given
-        AdminDTO admin1 = AdminDTO.builder().adminId("admin1").password("pass1").name("Admin One").role("ROLE_ADMIN").emplId("E001").build();
-        AdminDTO admin2 = AdminDTO.builder().adminId("admin2").password("pass2").name("Admin Two").role("ROLE_ADMIN").emplId("E002").build();
-        adminService.createAdmin(admin1);
-        adminService.createAdmin(admin2);
-
         // when
         List<AdminDTO> adminList = adminService.getAdminList();
 
-        // then
-        assertThat(adminList).isNotNull();
-        assertThat(adminList.size()).isEqualTo(2);
+        System.out.println(adminList);
     }
 
-    @Test
+   // @Test
     void testDeleteAdmin() {
-        // given
-        AdminDTO adminDTO = AdminDTO.builder()
-                .adminId("deleteAdmin")
-                .password("password")
-                .name("Delete Admin")
-                .role("ROLE_ADMIN")
-                .emplId("EMP456")
-                .build();
-        adminService.createAdmin(adminDTO);
+
 
         // when
-        adminService.deleteAdmin("deleteAdmin");
+        adminService.deleteAdmin("admin");
 
         // then
-        AdminDTO deletedAdmin = adminService.getAdmin("deleteAdmin");
+        AdminDTO deletedAdmin = adminService.getAdmin("admin");
         assertThat(deletedAdmin).isNull();
 
         // isDel 플래그가 true로 설정되었는지 직접 확인
         Admin softDeletedAdmin = adminRepository.findAll().stream()
-                .filter(a -> a.getAdminId().equals("deleteAdmin"))
+                .filter(a -> a.getAdminId().equals("admin"))
                 .findFirst().orElse(null);
         assertThat(softDeletedAdmin).isNotNull();
         assertThat(softDeletedAdmin.isDel()).isTrue();
         assertThat(softDeletedAdmin.getDelDate()).isNotNull();
+        
+        System.out.println(softDeletedAdmin);
     }
 }

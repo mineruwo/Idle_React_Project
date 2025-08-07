@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { adminLogin } from "../../../slices/adminLoginSlice";
+import { loginAdmin } from "../../../api/adminApi";
+import useCustomMove from "../../../hooks/useCustomMove"; // useCustomMove 임포트
 import './LoginComponent.css'; // CSS 파일 import
 
 const LoginComponent = () => {
@@ -8,10 +10,20 @@ const LoginComponent = () => {
     const [password, setPassword] = useState("");
 
     const dispatch = useDispatch();
+    const { moveToAdminPage } = useCustomMove(); // moveToAdminPage 가져오기
     
-    const handleLogin = () => {
+    const handleLogin = async () => {
         console.log("ID:", id, "Password:", password);
-        dispatch(adminLogin()); 
+        try {
+            const result = await loginAdmin(id, password);
+            console.log("Login successful:", result);
+            dispatch(adminLogin(result)); // Redux 상태 업데이트 시 result 전달
+            alert("관리자 로그인 성공!");
+            moveToAdminPage(); // 관리자 대시보드로 이동
+        } catch (error) {
+            console.error("Login failed:", error);
+            alert("로그인 실패: " + (error.response ? error.response.data : error.message));
+        }
     };
 
     return (

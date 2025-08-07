@@ -25,6 +25,10 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public void createAdmin(AdminDTO adminDTO) {
         Admin admin = dtoToEntity(adminDTO);
+        System.out.println("service start");
+        System.out.println("DTO :: " + adminDTO);
+
+        System.out.println("Entity :: " + admin);
         adminRepository.save(admin);
     }
 
@@ -79,7 +83,7 @@ public class AdminServiceImpl implements AdminService {
                 .idIndex(admin.getIdIndex())
                 .adminId(admin.getAdminId())
                 .role(admin.getRole())
-                //.password(admin.getPassword()) // 비밀번호는 DTO로 변환하지 않음
+                .password(admin.getPassword()) // 비밀번호는 DTO로 변환하지 않음
                 .name(admin.getName())
                 .emplId(admin.getEmplId())
                 .regDate(admin.getRegDate())
