@@ -1,13 +1,13 @@
 .main-content {
   transition: margin-left 0.3s ease-in-out;
   padding: 20px;
-  min-height: 100vh; 
   box-sizing: border-box;
+  margin-left: 0; /* 기본 margin-left를 0으로 설정 */
 }
 
 /* 큰 화면 (데스크톱) */
 @media (min-width: 768px) {
-  .main-content {
+  .main-content.open {
     margin-left: 250px; /* 사이드바 너비에 맞춰 조정 */
   }
 }

@@ -85,9 +85,6 @@ public class CustomerServiceImpl implements CustomerService {
 	public boolean isAccountValid(String id, String rawPassword) {
 		Optional<CustomerEntity> result = customerRepository.findById(id);
 		
-		System.out.println(">>>  " + rawPassword);
-		System.out.println(">>> ID로 조회된 결과: " + result);
-		
 		if (result.isEmpty()) {
 			return false;
 		}
