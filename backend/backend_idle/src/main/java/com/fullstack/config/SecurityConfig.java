@@ -40,7 +40,8 @@ public class SecurityConfig {
                     "/api/auth/**",     // (선택) 로그인/회원가입 API도 허용
                     "/admin/**",
                     "/ws/**", "/ws-chat/**", // 웹소켓 경로
-                    "/api/customer/**" // 고객 관련 API
+                    "/api/customer/**", // 고객 관련 API
+                    "/api/payment/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
