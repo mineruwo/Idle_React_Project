@@ -1,0 +1,146 @@
+.order-payment-container {
+    display: flex;
+    background: #f5f5f7;
+    padding: 30px 0;
+    font-family: "Noto Sans KR", sans-serif;
+}
+
+.order-payment-form {
+    flex: 2;
+    background: #fff;
+    margin-left: 12%;
+    padding: 40px;
+    border-radius: 8px;
+    min-width: 600px;
+    max-width: 720px;
+}
+
+.step-indicator {
+    display: flex;
+    align-items: center;
+    margin-bottom: 36px;
+}
+.step {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #bfbfbf;
+    color: #fff;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.step.active {
+    background: #673ab7;
+}
+.bar {
+    flex: 1;
+    height: 3px;
+    background: #e0e0e0;
+    margin: 0 8px;
+    border-radius: 2px;
+}
+.section {
+    margin-bottom: 36px;
+}
+.section h2 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+.row,
+.coupon-row,
+.point-row,
+.pay-option {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.row label,
+.coupon-row span,
+.point-row span {
+    width: 100px;
+    color: #333;
+    font-size: 14px;
+}
+.row input,
+.point-row input,
+.coupon-row button {
+    margin-right: 15px;
+    font-size: 15px;
+    height: 32px;
+    padding: 2px 10px;
+    border: 1px solid #dcdcdc;
+    border-radius: 4px;
+}
+.coupon-row .amount,
+.point-row .amount {
+    margin-left: auto;
+    color: #8a68d6;
+    font-size: 13px;
+}
+.pay-option {
+    margin-bottom: 5px;
+    gap: 10px;
+}
+.card-add {
+    background: #f4f4f5;
+    border: 1px dashed #c2c2c3;
+    color: #8a68d6;
+    border-radius: 6px;
+    margin-left: 10px;
+    padding: 5px 18px;
+}
+
+.order-payment-summary {
+    flex: 1;
+    max-width: 340px;
+    margin-left: 36px;
+}
+.summary-box {
+    background: #fff;
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 20px rgba(75, 67, 91, 0.07);
+}
+.summary-box h3 {
+    font-size: 1.08rem;
+    margin-bottom: 13px;
+    font-weight: 600;
+    color: #222;
+}
+.summary-box ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px 0;
+}
+.summary-box li {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13.8px;
+    color: #444;
+    margin-bottom: 4px;
+}
+.total {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    font-size: 1.08rem;
+    padding-top: 13px;
+    border-top: 1px solid #eee;
+    color: #673ab7;
+}
+.pay-btn {
+    width: 100%;
+    background: #673ab7;
+    color: #fff;
+    font-size: 1.13rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 7px;
+    padding: 14px 0;
+    cursor: pointer;
+    margin-top: 8px;
+}

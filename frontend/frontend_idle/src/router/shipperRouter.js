@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Navigate } from "react-router-dom";
+import ShipperPointComponent from "../layouts/components/shipperComponent/ShipperPointComponent";
 
 const shipperRouter = () => {
     const Loading = <div>Loading 중...</div>;
@@ -20,6 +21,9 @@ const shipperRouter = () => {
     );
     const ShipperReview = lazy(() =>
         import("../pages/shipperPage/ShipperReviewPage")
+    );
+    const ShipperPoint = lazy(() =>
+        import("../pages/shipperPage/ShipperPointPage")
     );
 
     return [
@@ -60,6 +64,14 @@ const shipperRouter = () => {
             element: (
                 <Suspense fallback={Loading}>
                     <ShipperReview />
+                </Suspense>
+            ),
+        },
+        {
+            path: "point",
+            element: (
+                <Suspense fallback={Loading}>
+                    <ShipperPoint />
                 </Suspense>
             ),
         },

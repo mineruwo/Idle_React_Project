@@ -23,12 +23,16 @@ const useCustomMove = () => {
         navigate({ pathname: `../shipper/review` });
     };
 
+    const shipperMoveToPoint = () => {
+        navigate({ pathname: `../shipper/point` });
+    };
+
     const carOwnerMoveToDashboard = () => navigate("/carPage");
     const carOwnerMoveToProfile = () => navigate("/carPage/profile");
     const carOwnerMoveToEditProfile = () => navigate("/carPage/editProfile");
     const carOwnerMoveToOrders = () => navigate("/carPage/orders");
     const carOwnerMoveToSettlement = () => navigate("/carPage/settlement");
-    const carOwnerMoveToVehicles = () => navigate("/carPage/vehicles"); 
+    const carOwnerMoveToVehicles = () => navigate("/carPage/vehicles");
     const carOwnerMoveToLisense = () => navigate("/carPage/submitDOC");
 
     const moveToAdminPage = () => {
@@ -42,7 +46,7 @@ const useCustomMove = () => {
 
     const moveToLoginPage = () => {
         navigate("/login");
-    }
+    };
 
     return {
         shipperMoveToDashBoard,
@@ -50,6 +54,7 @@ const useCustomMove = () => {
         shipperMoveToOrder,
         shipperMoveToPayment,
         shipperMoveToReview,
+        shipperMoveToPoint,
         carOwnerMoveToDashboard,
         carOwnerMoveToProfile,
         carOwnerMoveToEditProfile,
