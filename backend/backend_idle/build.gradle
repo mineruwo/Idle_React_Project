@@ -31,7 +31,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     
     implementation 'org.springframework.boot:spring-boot-starter-security'
 	
@@ -42,13 +41,15 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	// 결제API(portone)
 	implementation 'com.github.iamport:iamport-rest-client-java:0.2.21'
- 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	
 	// jwt token
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5' 
+
+    // H2 Database (개발용)
+    runtimeOnly 'com.h2database:h2'
 }
 
 tasks.named('test') {

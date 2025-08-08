@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.annotation.Commit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,12 +25,16 @@ class AdminServiceTests {
     @Autowired
     private AdminRepository adminRepository;
 
-    @Test
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+        @Test
     void testCreateAdmin() {
         // given
+        String rawPassword = "pwd1234";
         AdminDTO adminDTO = AdminDTO.builder()
                 .adminId("admin")
-                .password("pwd1234")
+                .password(rawPassword)
                 .name("개발 관리자")
                 .role(Role.DEV_ADMIN)	
                 .emplId("001")
@@ -36,7 +42,16 @@ class AdminServiceTests {
 
         // when
         adminService.createAdmin(adminDTO);
-        System.out.println(adminDTO);
+
+        // then
+        Admin foundAdminEntity = adminRepository.findByAdminIdAndIsDelFalse("admin").orElse(null);
+        assertThat(foundAdminEntity).isNotNull();
+        assertThat(passwordEncoder.matches(rawPassword, foundAdminEntity.getPassword())).isTrue();
+        assertThat(foundAdminEntity.getName()).isEqualTo("개발 관리자");
+        assertThat(foundAdminEntity.getRole()).isEqualTo(Role.DEV_ADMIN);
+        assertThat(foundAdminEntity.getEmplId()).isEqualTo("001");
+
+        System.out.println(foundAdminEntity);
     }
 
     //@Test

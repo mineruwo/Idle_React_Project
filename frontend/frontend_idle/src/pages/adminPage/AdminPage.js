@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { checkAdminAuth } from "../../api/adminAuthAPI";
+import { adminLogin, adminLogout } from "../../slices/adminLoginSlice";
 import {
     AdminHeaderComponent,
     SideBarComponent,
@@ -12,6 +14,27 @@ const AdminPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const adminLoginState = useSelector((state) => state.adminLogin);
+    const dispatch = useDispatch();
+
+    // 초기 로드 시 인증 상태 확인
+    useEffect(() => {
+        const verifyAdminAuth = async () => {
+            try {
+                const userData = await checkAdminAuth();
+                dispatch(adminLogin({ adminId: userData.adminId, name: userData.name }));
+            } catch (error) {
+                dispatch(adminLogout());
+                if (location.pathname !== '/admin/login') {
+                    navigate("/admin/login");
+                }
+            }
+        };
+
+        if (!adminLoginState.isAuthenticated) {
+            verifyAdminAuth();
+        }
+    }, [dispatch, navigate, location.pathname, adminLoginState.isAuthenticated]);
+
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -36,14 +59,15 @@ const AdminPage = () => {
     // 인증 및 리다이렉션 로직
     useEffect(() => {
         // 로그인되어 있지 않고, 현재 경로가 /admin/login이 아닐 때만 로그인 페이지로 리다이렉트
-        if (!adminLoginState.id && location.pathname !== '/admin/login') {
+        if (!adminLoginState.isAuthenticated && location.pathname !== '/admin/login') {
             navigate("/admin/login");
-        } 
-        // 로그인되어 있고, 현재 경로가 정확히 /admin 일 때만 대시보드로 리다이렉트
-        else if (adminLoginState.id && location.pathname === '/admin') {
+        }
+        // 로그인되어 있고, 현재 경로가 /admin/login 일 때만 대시보드로 리다이렉트
+        // 이렇게 하면 로그인 성공 후 로그인 페이지에 머무르지 않고 대시보드로 이동합니다.
+        else if (adminLoginState.isAuthenticated && location.pathname === '/admin/login') {
             navigate("/admin/dashboard", { replace: true });
         }
-    }, [adminLoginState.id, navigate, location.pathname]);
+    }, [adminLoginState.isAuthenticated, navigate, location.pathname]);
 
     const isLoginPage = location.pathname === '/admin/login';
 

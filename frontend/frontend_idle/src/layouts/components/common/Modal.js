@@ -30,7 +30,7 @@ const Modal = ({ show, message, onClose, onConfirm, showCancelButton = false, au
                 <p>{message}</p>
                 {!isAutoClosing && (
                     <div className="modal-buttons">
-                        <button onClick={onConfirm || onClose} className="btn btn-primary">
+                        <button onClick={onConfirm} className="btn btn-primary">
                             확인
                         </button>
                         {showCancelButton && (

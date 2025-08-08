@@ -1,36 +1,87 @@
 package com.fullstack.controller;
 
-import com.fullstack.entity.Admin;
 import com.fullstack.model.AdminDTO;
-import com.fullstack.model.LoginRequestDTO;
+import com.fullstack.model.AdminLoginRequestDTO;
+import com.fullstack.model.AdminLoginResponseDTO;
 import com.fullstack.service.AdminService;
+import com.fullstack.security.JWTUtil;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import java.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/api/admin")
 public class AdminController {
 
     @Autowired
     private AdminService adminService;
 
+    @Autowired
+    private JWTUtil jwtUtil;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequestDTO) {
+    public ResponseEntity<AdminLoginResponseDTO> login(@RequestBody AdminLoginRequestDTO loginRequestDTO, HttpServletResponse response) {
         AdminDTO foundAdmin = adminService.getAdmin(loginRequestDTO.getAdminId());
 
-        if (foundAdmin != null && foundAdmin.getPassword().equals(loginRequestDTO.getPassword())) {
-            // 로그인 성공
-            return ResponseEntity.ok(foundAdmin); // 또는 필요한 정보만 반환
+        if (foundAdmin != null && passwordEncoder.matches(loginRequestDTO.getPassword(), foundAdmin.getPassword())) {
+            String token = jwtUtil.generateToken(foundAdmin.getAdminId(), foundAdmin.getRole().name());
+
+            ResponseCookie cookie = ResponseCookie.from("accessToken", token)
+                    .httpOnly(true)
+                    .secure(true)
+                    .sameSite("Lax")
+                    .path("/")
+                    .maxAge(Duration.ofDays(1))
+                    .build();
+
+            response.addHeader("Set-Cookie", cookie.toString());
+
+            return ResponseEntity.ok(new AdminLoginResponseDTO(foundAdmin));
         } else {
-            // 로그인 실패
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
     }
+
+    @GetMapping("/check-auth")
+    public ResponseEntity<?> checkAuth(Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            String adminId = authentication.getName();
+            AdminDTO adminDTO = adminService.getAdmin(adminId);
+            if (adminDTO != null) {
+                return ResponseEntity.ok(adminDTO);
+            }
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        response.addHeader("Set-Cookie", cookie.toString());
+        return ResponseEntity.ok("Logged out successfully");
+    }
+
 
     @GetMapping("/accounts")
     @PreAuthorize("hasRole('DEV_ADMIN') or hasRole('ADMIN') or hasRole('ALL_PERMISSION')")

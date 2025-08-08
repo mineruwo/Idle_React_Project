@@ -40,7 +40,10 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/api/orders/**",   // 🚚 오더 등록/조회/삭제 전부 허용
                     "/api/auth/**",     // (선택) 로그인/회원가입 API도 허용
-                    "/admin/**",
+                    "/api/admin/login", // 경로 변경
+                    "/api/admin/check-auth", // 추가: 인증 상태 확인 엔드포인트 허용
+                    "/api/admin/logout", // 추가: 로그아웃 엔드포인트 허용
+                    "/api/admin/accounts", // 경로 변경
                     "/ws/**", "/ws-chat/**", // 웹소켓 경로
                     "/api/customer/**", // 고객 관련 API
                     "/api/payment/**"

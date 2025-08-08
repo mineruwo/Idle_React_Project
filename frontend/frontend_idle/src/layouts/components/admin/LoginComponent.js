@@ -53,7 +53,8 @@ const LoginComponent = () => {
     const handleConfirm = () => {
         setShowModal(false);
         if (modalMessage === "관리자 로그인 성공!") {
-            moveToAdminPage(); // 관리자 대시보드로 이동
+            console.log("확인용 로그 confirm");
+            moveToAdminPage(); 
         }
     }
 

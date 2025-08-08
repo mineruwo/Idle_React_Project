@@ -32,6 +32,7 @@ const useCustomMove = () => {
     const carOwnerMoveToLisense = () => navigate("/carPage/submitDOC");
 
     const moveToAdminPage = () => {
+        console.log("hook admin page");
         navigate("/admin");
     };
 
