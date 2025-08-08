@@ -4,9 +4,7 @@ import com.fullstack.model.AdminDTO;
 import com.fullstack.model.AdminLoginRequestDTO;
 import com.fullstack.model.AdminLoginResponseDTO;
 import com.fullstack.service.AdminService;
-import com.fullstack.security.JWTUtil;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import java.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,7 +14,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +25,7 @@ public class AdminController {
     private AdminService adminService;
 
     @Autowired
-    private JWTUtil jwtUtil;
+    private com.fullstack.security.jwt.JWTUtil jwtUtil;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -38,8 +35,8 @@ public class AdminController {
         AdminDTO foundAdmin = adminService.getAdmin(loginRequestDTO.getAdminId());
 
         if (foundAdmin != null && passwordEncoder.matches(loginRequestDTO.getPassword(), foundAdmin.getPassword())) {
-            String token = jwtUtil.generateToken(foundAdmin.getAdminId(), foundAdmin.getRole().name());
 
+        	String token = jwtUtil.generateAccessToken(foundAdmin.getAdminId(),foundAdmin.getRole().name(), Duration.ofDays(1));
             ResponseCookie cookie = ResponseCookie.from("accessToken", token)
                     .httpOnly(true)
                     .secure(true)
