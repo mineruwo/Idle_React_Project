@@ -211,18 +211,6 @@ const handleSubmit = async () => {
     alert("오더 등록에 실패했습니다.");
   }
 };
-const getPackingSummary = (options) => {
-  const labels = {
-    special: "특수포장",
-    normal: "일반포장",
-    expensive: "고가화물",
-    fragile: "파손위험물",
-  };
-  return Object.entries(options)
-    .filter(([_, val]) => val)
-    .map(([key]) => labels[key])
-    .join(", ");
-};
 
 
   const handleProposedPriceChange = (e) => {
