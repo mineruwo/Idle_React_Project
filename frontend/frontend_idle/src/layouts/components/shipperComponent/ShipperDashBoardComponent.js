@@ -4,11 +4,10 @@ import ShippingStatusComponent from "./ShippingStatusComponent";
 
 const ShipperDashBoardComponent = () => {
     const {
-        shipperMoveToDashBoard,
         shipperMoveToDetails,
-        shipperMoveToOrder,
         shipperMoveToPayment,
         shipperMoveToReview,
+        shipperMoveToExample,
     } = useCustomMove();
 
     return (
@@ -43,6 +42,7 @@ const ShipperDashBoardComponent = () => {
                     내 후기 보기
                 </div>
             </div>
+            <div onClick={shipperMoveToExample}>예시</div>
         </div>
     );
 };

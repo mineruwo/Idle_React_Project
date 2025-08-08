@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "../../../theme/ShipperCustomCss/ShipperPayment.css";
 import {
     payWithPoints,
@@ -7,12 +7,12 @@ import {
     fetchUserPoints,
 } from "../../../api/paymentApi";
 
-const ShipperPaymentComponent = ({
-    remainingLimit = 500000,
-    nickname,
-    userId,
-}) => {
+const ShipperPaymentComponent = ({ nickname, userId }) => {
     const [currentPoints, setCurrentPoints] = useState(0);
+    const [usePoints, setUsePoints] = useState(""); // 사용할 포인트 입력 값
+    const [isLoading, setIsLoading] = useState(false);
+    const [message, setMessage] = useState("");
+    const [selectedPaymentType, setSelectedPaymentType] = useState("card");
 
     useEffect(() => {
         const getUserPoints = async () => {
@@ -27,402 +27,372 @@ const ShipperPaymentComponent = ({
         getUserPoints();
     }, [userId]);
 
-    // 포인트 충전
-    const [chargeAmount, setChargeAmount] = useState("");
-    const [selectedPaymentType, setSelectedPaymentType] = useState("card");
-    const [recentHistory, setRecentHistory] = useState([
-        { type: "충전", amount: "+10,000", date: "2025-07-25" },
-        { type: "사용", amount: "-3,500", date: "2025-07-27" },
-        { type: "충전", amount: "+5,000", date: "2025-07-30" },
-    ]);
+    const [orderInfo, setOrderInfo] = useState({
+        orderId: "ORD123456789",
+        itemName: "화물 운송 서비스",
+        amount: 50000, // 주문 금액
+        status: "결제 대기중",
+    });
 
-    const ClickChargeBtn = async () => {
-        const amount = parseInt(chargeAmount, 10);
-
-        if (isNaN(amount) || amount < 1000) {
-            alert("충전 금액은 1,000원 이상의 유효한 숫자여야 합니다.");
-            return;
-        }
-
-        const merchantUid = `mid_${new Date().getTime()}`;
-
-        let pgToUse = "";
-        let payMethodToUse = "";
-        let pgProviderForBackend = "";
-
-        if (selectedPaymentType === "card") {
-            pgToUse = "html5_inicis";
-            payMethodToUse = "card";
-            pgProviderForBackend = "html5_inicis";
-        } else if (selectedPaymentType === "kakaopay") {
-            pgToUse = "kakaopay";
-            payMethodToUse = "card";
-            pgProviderForBackend = "kakaopay";
-        } else if (selectedPaymentType === "inicis") {
-            pgToUse = "html5_inicis";
-            payMethodToUse = "card";
-            pgProviderForBackend = "html5_inicis";
-        } else if (selectedPaymentType === "tosspay") {
-            pgToUse = "tosspay";
-            payMethodToUse = "card";
-            pgProviderForBackend = "tosspay";
-        } else if (selectedPaymentType === "payco") {
-            pgToUse = "payco";
-            payMethodToUse = "card";
-            pgProviderForBackend = "payco";
-        } else if (selectedPaymentType === "mobilians") {
-            pgToUse = "mobilians";
-            payMethodToUse = "card";
-            pgProviderForBackend = "mobilians";
-        } else {
-            alert("결제 수단을 선택해주세요.");
-            return;
-        }
-
-        try {
-            const prepareResponse = await preparePayment({
-                merchantUid: merchantUid,
-                itemName: "포인트 충전",
-                amount: amount,
-                buyerName: nickname,
-                buyerEmail: "buyer@example.com", // 실제 사용자 이메일로 변경 필요
-                userId: userId,
-                pgProvider: pgProviderForBackend,
-            });
-
-            if (!prepareResponse.success) {
-                alert(`결제 준비 실패: ${prepareResponse.message}`);
-                return;
-            }
-
-            // 포트원(아임포트) 결제창 호출
-            const { IMP } = window;
-            IMP.init("imp16058080");
-            IMP.request_pay(
-                {
-                    pg: pgToUse,
-                    pay_method: payMethodToUse,
-                    merchant_uid: merchantUid,
-                    name: "포인트 충전",
-                    amount: amount,
-                    buyer_email: "buyer@example.com", // 실제 사용자 이메일로 변경 필요
-                    buyer_name: nickname,
-                    buyer_tel: "010-1222-2222", // 실제 사용자 전화번호로 변경 필요
-                    buyer_addr: "서울특별시 강남구 삼성동", // 실제 사용자 주소로 변경 필요
-                    buyer_postcode: "123-456", // 실제 사용자 우편번호로 변경 필요
-                    m_redirect_url: "http://localhost:3000/shipper/payment",
-                },
-                async (rsp) => {
-                    if (rsp.success) {
-                        try {
-                            const verifyResponse = await verifyPayment({
-                                impUid: rsp.imp_uid,
-                                merchantUid: rsp.merchant_uid,
-                            });
-
-                            if (verifyResponse.success) {
-                                alert("결제 성공 및 검증 완료");
-                                const newChargeAmount = parseInt(
-                                    chargeAmount,
-                                    10
-                                );
-                                setCurrentPoints(
-                                    (prevPoints) => prevPoints + newChargeAmount
-                                );
-                                const newHistory = {
-                                    type: "충전",
-                                    amount: `+${newChargeAmount.toLocaleString()}`,
-                                    date: new Date()
-                                        .toISOString()
-                                        .split("T")[0],
-                                };
-                                setRecentHistory((prevHistory) =>
-                                    [newHistory, ...prevHistory].slice(0, 3)
-                                );
-                                setChargeAmount("");
-                            } else {
-                                alert(
-                                    `결제 검증 실패: ${verifyResponse.message}`
-                                );
-                            }
-                        } catch (error) {
-                            alert(`결제 검증 중 오류 발생: ${error.message}`);
-                        }
-                    } else {
-                        alert(`결제 실패: ${rsp.error_msg}`);
-                    }
-                }
-            );
-        } catch (error) {
-            alert(`결제 준비 중 오류 발생: ${error.message}`);
-        }
+    const handleMaxPointsClick = () => {
+        const maxUsablePoints = Math.min(orderInfo.amount, currentPoints);
+        setUsePoints(maxUsablePoints.toString());
     };
 
-    // 포인트 결제
-    const [usePoints, setUsePoints] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const [message, setMessage] = useState("");
+    const handlePayment = async () => {
+        const pointsToApply = parseInt(usePoints, 10) || 0;
+        const totalOrderAmount = orderInfo.amount;
 
-    const handlePointPayment = async () => {
-        const pointsToUse = parseInt(usePoints, 10);
-
-        if (isNaN(pointsToUse) || pointsToUse <= 0) {
-            setMessage("결제할 포인트를 올바르게 입력해주세요.");
+        if (pointsToApply < 0) {
+            setMessage("사용할 포인트는 0 이상이어야 합니다.");
             return;
         }
-        if (pointsToUse > (currentPoints || 0)) {
-            setMessage("사용 가능한 포인트보다 많은 금액입니다.");
+        if (pointsToApply > currentPoints) {
+            setMessage("보유 포인트보다 많은 포인트를 사용할 수 없습니다.");
             return;
         }
+
+        const amountToPayExternally = totalOrderAmount - pointsToApply;
 
         setIsLoading(true);
         setMessage("결제 처리중...");
 
         try {
-            await payWithPoints(userId, pointsToUse);
+            if (amountToPayExternally <= 0) {
+                // 전액 포인트로 결제
+                const response = await payWithPoints({
+                    userId: userId,
+                    points: totalOrderAmount, // 주문 금액만큼 포인트 사용
+                });
 
-            setMessage(
-                `${pointsToUse.toLocaleString()}P 결제가 완료되었습니다.`
-            );
+                if (response.success) {
+                    setMessage(`${totalOrderAmount.toLocaleString()}P 포인트로 결제가 완료되었습니다.`);
+                    setCurrentPoints((prevPoints) => prevPoints - totalOrderAmount);
+                    setUsePoints(""); // 사용 포인트 초기화
+                } else {
+                    setMessage(`포인트 결제 실패: ${response.message}`);
+                }
+            } else {
+                // 일부 포인트 사용 후 외부 결제
+                const merchantUid = `mid_${new Date().getTime()}`;
 
-            setCurrentPoints((prevPoints) => prevPoints - pointsToUse);
+                let pgToUse = "";
+                let payMethodToUse = "";
+                let pgProviderForBackend = "";
 
-            const newHistory = {
-                type: "사용",
-                amount: `-${pointsToUse.toLocaleString()}`,
-                date: new Date().toISOString().split("T")[0],
-            };
-            setRecentHistory((prevHistory) =>
-                [newHistory, ...prevHistory].slice(0, 3)
-            );
+                if (selectedPaymentType === "card") {
+                    pgToUse = "html5_inicis";
+                    payMethodToUse = "card";
+                    pgProviderForBackend = "html5_inicis";
+                } else if (selectedPaymentType === "kakaopay") {
+                    pgToUse = "kakaopay";
+                    payMethodToUse = "card";
+                    pgProviderForBackend = "kakaopay";
+                } else if (selectedPaymentType === "inicis") {
+                    pgToUse = "html5_inicis";
+                    payMethodToUse = "card";
+                    pgProviderForBackend = "html5_inicis";
+                } else if (selectedPaymentType === "tosspay") {
+                    pgToUse = "tosspay";
+                    payMethodToUse = "card";
+                    pgProviderForBackend = "tosspay";
+                } else if (selectedPaymentType === "payco") {
+                    pgToUse = "payco";
+                    payMethodToUse = "card";
+                    pgProviderForBackend = "payco";
+                } else if (selectedPaymentType === "mobilians") {
+                    pgToUse = "mobilians";
+                    payMethodToUse = "card";
+                    pgProviderForBackend = "mobilians";
+                } else {
+                    alert("결제 수단을 선택해주세요.");
+                    setIsLoading(false);
+                    return;
+                }
 
-            setUsePoints("");
+                const prepareResponse = await preparePayment({
+                    merchantUid: merchantUid,
+                    itemName: orderInfo.itemName,
+                    amount: amountToPayExternally, // 외부 결제 금액
+                    buyerName: nickname,
+                    buyerEmail: "buyer@example.example.com",
+                    userId: userId,
+                    pgProvider: pgProviderForBackend,
+                });
+
+                if (!prepareResponse.success) {
+                    setMessage(`결제 준비 실패: ${prepareResponse.message}`);
+                    setIsLoading(false);
+                    return;
+                }
+
+                const { IMP } = window;
+                IMP.init("imp16058080");
+                IMP.request_pay(
+                    {
+                        pg: pgToUse,
+                        pay_method: payMethodToUse,
+                        merchant_uid: merchantUid,
+                        name: orderInfo.itemName,
+                        amount: amountToPayExternally, // 외부 결제 금액
+                        buyer_email: "buyer@example.example.com",
+                        buyer_name: nickname,
+                        buyer_tel: "010-1222-2222",
+                        buyer_addr: "서울특별시 강남구 삼성동",
+                        buyer_postcode: "123-456",
+                        m_redirect_url: "http://localhost:3000/shipper/payment",
+                    },
+                    async (rsp) => {
+                        if (rsp.success) {
+                            try {
+                                const verifyResponse = await verifyPayment({
+                                    impUid: rsp.imp_uid,
+                                    merchantUid: rsp.merchant_uid,
+                                });
+
+                                if (verifyResponse.success) {
+                                    setMessage("결제 성공 및 검증 완료");
+                                    // 외부 결제 성공 후 포인트 차감
+                                    if (pointsToApply > 0) {
+                                        const pointDeductionResponse = await payWithPoints({
+                                            userId: userId,
+                                            points: pointsToApply,
+                                        });
+                                        if (pointDeductionResponse.success) {
+                                            setCurrentPoints((prevPoints) => prevPoints - pointsToApply);
+                                            setUsePoints("");
+                                        } else {
+                                            setMessage(`포인트 차감 실패: ${pointDeductionResponse.message}`);
+                                        }
+                                    }
+                                } else {
+                                    setMessage(`결제 검증 실패: ${verifyResponse.message}`);
+                                }
+                            } catch (error) {
+                                setMessage(`결제 검증 중 오류 발생: ${error.message}`);
+                            } finally {
+                                setIsLoading(false);
+                            }
+                        } else {
+                            setMessage(`결제 실패: ${rsp.error_msg}`);
+                            setIsLoading(false);
+                        }
+                    }
+                );
+            }
         } catch (error) {
-            setMessage(error.message);
-        } finally {
+            setMessage(`결제 처리 중 오류 발생: ${error.message}`);
             setIsLoading(false);
         }
     };
 
-    const CHARGE_PRESETS = [10000, 30000, 50000, 100000, 200000];
-    const handlePresetClick = (amount) => setChargeAmount(amount);
+    const finalPaymentAmount = Math.max(0, orderInfo.amount - (parseInt(usePoints, 10) || 0));
+    const supplyAmount = Math.round(finalPaymentAmount / 1.1);
+    const vatAmount = finalPaymentAmount - supplyAmount;
 
     return (
         <div className="point-layout-container">
-            {/* 왼쪽: 포인트 관리 섹션 */}
-            <div className="point-management-section">
-                <h2 className="page-title">포인트 관리</h2>
-                <div className="point-charge-wrap">
-                    <div className="point-balance-box">
-                        <span className="label">충전포인트 잔액</span>
-                        <span className="amount-highlight">
-                            {currentPoints.toLocaleString()}P
-                        </span>
-                    </div>
-
-                    <div className="charge-amount-select">
-                        <div className="section-title">
-                            충전금액
-                            <span className="remaining-limit">
-                                남은 충전 한도 {remainingLimit.toLocaleString()}
-                                원
-                            </span>
-                        </div>
-                        <div className="preset-list">
-                            {CHARGE_PRESETS.map((amt) => (
-                                <button
-                                    type="button"
-                                    key={amt}
-                                    onClick={() => handlePresetClick(amt)}
-                                    className={`preset-btn${
-                                        chargeAmount == amt ? " selected" : ""
-                                    }`}
-                                >
-                                    {amt / 10000}만원
-                                </button>
-                            ))}
-                        </div>
-                        <div className="explain-box">
-                            <span>
-                                카드/새로운 포인트 충전금액 제한이 있습니다.
-                            </span>
-                        </div>
-                    </div>
-
-                    <ul className="charge-point-table">
-                        <li>
-                            현재 잔액{" "}
-                            <span>{currentPoints.toLocaleString()}P</span>
-                        </li>
-                        <li>
-                            충전할 포인트{" "}
-                            <span className="plus">
-                                +{Number(chargeAmount || 0).toLocaleString()}P
-                            </span>
-                        </li>
-                        <li className="after-charge-pt">
-                            충전 후 예상 포인트{" "}
-                            <span className="final">
-                                {(
-                                    Number(currentPoints) +
-                                    Number(chargeAmount || 0)
-                                ).toLocaleString()}
-                                P
-                            </span>
-                        </li>
-                    </ul>
-
-                    <div className="pay-method-section">
-                        <div className="section-title">결제수단</div>
-                        <div className="pay-method-list">
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="paymentType"
-                                    value="card"
-                                    checked={selectedPaymentType === "card"}
-                                    onChange={(e) =>
-                                        setSelectedPaymentType(e.target.value)
-                                    }
-                                />
-                                일반결제
-                            </label>
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="paymentType"
-                                    value="kakaopay"
-                                    checked={selectedPaymentType === "kakaopay"}
-                                    onChange={(e) =>
-                                        setSelectedPaymentType(e.target.value)
-                                    }
-                                />
-                                카카오페이
-                            </label>
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="paymentType"
-                                    value="inicis"
-                                    checked={selectedPaymentType === "inicis"}
-                                    onChange={(e) =>
-                                        setSelectedPaymentType(e.target.value)
-                                    }
-                                />
-                                이니시스
-                            </label>
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="paymentType"
-                                    value="tosspay"
-                                    checked={selectedPaymentType === "tosspay"}
-                                    onChange={(e) =>
-                                        setSelectedPaymentType(e.target.value)
-                                    }
-                                />
-                                토스페이
-                            </label>
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="paymentType"
-                                    value="payco"
-                                    checked={selectedPaymentType === "payco"}
-                                    onChange={(e) =>
-                                        setSelectedPaymentType(e.target.value)
-                                    }
-                                />
-                                페이코
-                            </label>
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="paymentType"
-                                    value="mobilians"
-                                    checked={
-                                        selectedPaymentType === "mobilians"
-                                    }
-                                    onChange={(e) =>
-                                        setSelectedPaymentType(e.target.value)
-                                    }
-                                />
-                                모빌리언스
-                            </label>
-                        </div>
-                    </div>
-
-                    <button
-                        className="submit-charge-btn"
-                        disabled={!chargeAmount || chargeAmount < 10000}
-                        onClick={() => ClickChargeBtn()}
-                    >
-                        {chargeAmount
-                            ? `${Number(
-                                  chargeAmount
-                              ).toLocaleString()}원 결제하기`
-                            : "충전 금액을 입력하세요"}
-                    </button>
-                </div>
-
-                <div className="point-history-section">
-                    <h3>최근 내역</h3>
-                    <ul>
-                        {recentHistory.map((item, idx) => (
-                            <li
-                                key={idx}
-                                className={`history-item ${
-                                    item.type === "충전" ? "plus" : "minus"
-                                }`}
-                            >
-                                <span className="history-type">
-                                    {item.type}
-                                </span>
-                                <span className="history-amount">
-                                    {item.amount}P
-                                </span>
-                                <span className="history-date">
-                                    {item.date}
+            <div className="left-sections-wrapper">
+                {/* 주문 정보 섹션 */}
+                <div className="order-info-section point-management-section">
+                    <h2 className="page-title">주문 정보</h2>
+                    <div className="order-details-wrap point-charge-wrap">
+                        <ul className="charge-point-table">
+                            <li>
+                                주문 번호 <span>{orderInfo.orderId}</span>
+                            </li>
+                            <li>
+                                상품명 <span>{orderInfo.itemName}</span>
+                            </li>
+                            <li>
+                                결제 금액{" "}
+                                <span className="final">
+                                    {orderInfo.amount.toLocaleString()}원
                                 </span>
                             </li>
-                        ))}
-                    </ul>
+                            <li>
+                                상태 <span>{orderInfo.status}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                {/* 포인트 사용 섹션 */}
+                <div className="point-usage-section point-management-section">
+                    <h2 className="page-title">포인트 사용</h2>
+                    <div className="point-usage-details-content">
+                        <div className="current-points">
+                            현재 사용 가능 포인트:{" "}
+                            <strong>
+                                {(currentPoints || 0).toLocaleString()}P
+                            </strong>
+                        </div>
+
+                        <div className="input-section">
+                            <label htmlFor="usePoints">사용할 포인트</label>
+                            <div className="point-input-group">
+                                <input
+                                    id="usePoints"
+                                    type="number"
+                                    min="0"
+                                    max={currentPoints}
+                                    value={usePoints}
+                                    onChange={(e) => setUsePoints(e.target.value)}
+                                    placeholder="사용할 포인트 입력"
+                                />
+                                <button
+                                    type="button"
+                                    className="max-use-btn"
+                                    onClick={handleMaxPointsClick}
+                                >
+                                    최대 사용
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="final-payment-info">
+                            최종 결제 금액:{" "}
+                            <span className="final-amount">
+                                {finalPaymentAmount.toLocaleString()}원
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 결제 수단 섹션 */}
+                <div className="payment-method-section point-management-section">
+                    <h2 className="page-title">결제 수단</h2>
+                    <div className="payment-method-details-content">
+                        <div className="pay-method-section">
+                            <div className="section-title">결제수단</div>
+                            <div className="pay-method-list">
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name="paymentType"
+                                        value="card"
+                                        checked={selectedPaymentType === "card"}
+                                        onChange={(e) =>
+                                            setSelectedPaymentType(e.target.value)
+                                        }
+                                    />
+                                    일반결제
+                                </label>
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name="paymentType"
+                                        value="kakaopay"
+                                        checked={selectedPaymentType === "kakaopay"}
+                                        onChange={(e) =>
+                                            setSelectedPaymentType(e.target.value)
+                                        }
+                                    />
+                                    카카오페이
+                                </label>
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name="paymentType"
+                                        value="inicis"
+                                        checked={selectedPaymentType === "inicis"}
+                                        onChange={(e) =>
+                                            setSelectedPaymentType(e.target.value)
+                                        }
+                                    />
+                                    이니시스
+                                </label>
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name="paymentType"
+                                        value="tosspay"
+                                        checked={selectedPaymentType === "tosspay"}
+                                        onChange={(e) =>
+                                            setSelectedPaymentType(e.target.value)
+                                        }
+                                    />
+                                    토스페이
+                                </label>
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name="paymentType"
+                                        value="payco"
+                                        checked={selectedPaymentType === "payco"}
+                                        onChange={(e) =>
+                                            setSelectedPaymentType(e.target.value)
+                                        }
+                                    />
+                                    페이코
+                                </label>
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name="paymentType"
+                                        value="mobilians"
+                                        checked={
+                                            selectedPaymentType === "mobilians"
+                                        }
+                                        onChange={(e) =>
+                                            setSelectedPaymentType(e.target.value)
+                                        }
+                                    />
+                                    모빌리언스
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {/* 오른쪽: 포인트 결제 섹션 */}
-            <div className="point-payment-section">
-                <div className="point-payment-container">
-                    <h2 className="page-title">포인트 결제하기</h2>
-                    <div className="current-points">
-                        현재 사용 가능 포인트:{" "}
-                        <strong>
-                            {(currentPoints || 0).toLocaleString()}P
-                        </strong>
-                    </div>
-                    <div className="input-section">
-                        <label htmlFor="usePoints">사용할 포인트</label>
-                        <input
-                            id="usePoints"
-                            type="number"
-                            min="1"
-                            max={currentPoints || 0}
-                            value={usePoints}
-                            onChange={(e) => setUsePoints(e.target.value)}
-                            placeholder="결제에 사용할 포인트 입력"
-                        />
-                    </div>
-
-                    <button
-                        className="payment-btn"
-                        onClick={handlePointPayment}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? "결제 처리중..." : "포인트로 결제하기"}
-                    </button>
-
-                    {message && <p className="payment-message">{message}</p>}
+            <div className="summary-section point-management-section">
+                <h2 className="page-title">결제 요약</h2>
+                <div className="summary-details-content">
+                    <ul className="summary-table">
+                        <li>
+                            <span>주문 금액</span>
+                            <span>{orderInfo.amount.toLocaleString()}원</span>
+                        </li>
+                        <li>
+                            <span>사용한 포인트</span>
+                            <span className="point-discount">
+                                -{(parseInt(usePoints, 10) || 0).toLocaleString()}P
+                            </span>
+                        </li>
+                        <li className="summary-subtotal">
+                            <span>합계 금액</span>
+                            <span>{(orderInfo.amount - (parseInt(usePoints, 10) || 0)).toLocaleString()}원</span>
+                        </li>
+                        <li>
+                            <span>과세 물품가액</span>
+                            <span>{supplyAmount.toLocaleString()}원</span>
+                        </li>
+                        <li>
+                            <span>부가세</span>
+                            <span>{vatAmount.toLocaleString()}원</span>
+                        </li>
+                        <li className="final-amount-to-pay">
+                            <span>최종 결제 금액</span>
+                            <span className="final">
+                                {finalPaymentAmount.toLocaleString()}원
+                            </span>
+                        </li>
+                    </ul>
                 </div>
+                <button
+                    className="payment-btn"
+                    onClick={handlePayment}
+                    disabled={isLoading || finalPaymentAmount < 0}
+                >
+                    {isLoading
+                        ? "결제 처리중..."
+                        : finalPaymentAmount <= 0
+                        ? `${orderInfo.amount.toLocaleString()}P 포인트로 결제하기`
+                        : `${finalPaymentAmount.toLocaleString()}원 결제하기`}
+                </button>
+
+                {message && <p className="payment-message">{message}</p>}
             </div>
         </div>
     );
