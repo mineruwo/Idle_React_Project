@@ -1,24 +1,29 @@
 import axios from "axios";
 import { getTokenFromCookie } from "../utils/authCookie";
 
-const instance = axios.create({
+const api = axios.create({
     baseURL: 'http://localhost:8080/api',
     withCredentials: true,
 });
 
 
-instance.interceptors.request.use((config) => {
-    try {
-        const token = getTokenFromCookie();
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-    } catch (err) {
-        console.warn("쿠키에서 토큰을 가져오는 중 오류 발생", err);
-    }
+api.interceptors.request.use((config) => {
+    const token = getAccessToken();
+    
+    if (token) config.headers.Authorization =`Bearer ${token}`;
+    
     return config;
-}, (error) => {
-    return Promise.reject(error);
-})
+});
 
-export default instance;
+let isRefreshing = false;
+let queue = [];
+
+api.interceptors.response.use (
+    (res) => res,
+    async (error) => {
+        const origin = error.config;
+        if (error.response?.status === 401 && !origin._retry) {
+            origin._retry = true;
+        }
+    }
+)

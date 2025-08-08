@@ -2,7 +2,7 @@ package com.fullstack.controller;
 
 import com.fullstack.model.CustomerDTO;
 import com.fullstack.model.LoginResponseDTO;
-import com.fullstack.security.JWTUtil;
+import com.fullstack.security.jwt.JWTUtil;
 import com.fullstack.service.CustomerService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,31 +23,6 @@ public class CustomerController {
 
     @Autowired
     private final CustomerService customerService;
-    @Autowired
-    private final JWTUtil jwtUtil;
-    
-    
-    // 로그인
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody CustomerDTO customerDTO,
-    		HttpServletResponse response) {
-    	
-    	LoginResponseDTO result = customerService.login(customerDTO);
-    	
-    	String token = jwtUtil.generateToken(result.getId(), result.getRole());
-    	
-    	ResponseCookie cookie = ResponseCookie.from("accessToken", token)
-    			.httpOnly(true)
-    			.secure(true)
-    			.sameSite("None")
-    			.path("/")
-    			.maxAge(Duration.ofDays(1))
-    			.build();
-    	
-    	response.addHeader("Set-Cookie", cookie.toString());
-    	
-    	return ResponseEntity.ok(result);
-    }
     
     // 회원가입
     @PostMapping("/signup")

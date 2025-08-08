@@ -1,6 +1,9 @@
-package com.fullstack.security;
+package com.fullstack.security.jwt;
 
 import java.security.Key;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -16,18 +19,26 @@ import io.jsonwebtoken.security.Keys;
 public class JWTUtil {
 
 	private final Key key;
-	private final long expiration = 1000 * 60 * 60; // 1시간
 	
 	public JWTUtil(@Value("${jwt.secret}") String secret) {
 		this.key = Keys.hmacShaKeyFor(secret.getBytes()); 
 	}
 	
-	public String generateToken(String id, String role) {
+	public String generateAccessToken(String id, String role, Duration expire) {
 		return Jwts.builder()
 				.setSubject(id)
 				.claim("role", role)
 				.setIssuedAt(new Date())
-				.setExpiration(new Date(System.currentTimeMillis() + expiration))
+				.setExpiration(new Date(System.currentTimeMillis() + expire.toMillis()))
+				.signWith(key, SignatureAlgorithm.HS256)
+				.compact();
+	}
+	
+	public String generateRefreshToken(String id, Duration expire) {
+		return Jwts.builder()
+				.setSubject(id)
+				.setIssuedAt(new Date())
+				.setExpiration(new Date(System.currentTimeMillis() + expire.toMillis()))
 				.signWith(key, SignatureAlgorithm.HS256)
 				.compact();
 	}
@@ -40,6 +51,15 @@ public class JWTUtil {
 	// 토큰에서 role 추출
 	public String getRole(String token) {
 		return parseClaims(token).get("role", String.class);
+	}
+	
+	// 만료 시간
+	public LocalDateTime getExpiration(String token) {
+	    return parseClaims(token)
+	            .getExpiration()
+	            .toInstant()
+	            .atZone(ZoneId.systemDefault())
+	            .toLocalDateTime();
 	}
 	
 	// 토큰 유효성

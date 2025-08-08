@@ -1,4 +1,4 @@
-package com.fullstack.security;
+package com.fullstack.security.jwt;
 
 import java.io.IOException;
 import java.util.Arrays;
