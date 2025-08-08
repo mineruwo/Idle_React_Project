@@ -3,12 +3,12 @@ import axios from "axios";
 import axiosInstance from "./axiosInstance";
 import { API_SERVER_HOST } from "./paymentApi";
 
-const host = `${API_SERVER_HOST}/api/customer`;
+const prefix = `${API_SERVER_HOST}/api`;
 
 
 export const login = async (customer) => {
     try {
-        const res = await axiosInstance.post(`${host}/login`, customer);
+        const res = await axiosInstance.post(`${prefix}/auth/login`, customer);
 
         return res.data;
     } catch (error) {
@@ -22,10 +22,8 @@ export const login = async (customer) => {
 
 // ID & 비밀번호 체크
 export const checkAccount = async (id, password) => {
-    alert("1");
-    alert(host);
     try {
-        const res = await axios.post(`${host}/check-account`, {
+        const res = await axios.post(`${prefix}/customer/check-account`, {
             id,
             passwordEnc: password
         });

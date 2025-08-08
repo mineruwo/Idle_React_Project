@@ -4,7 +4,7 @@ import com.fullstack.entity.CustomerEntity;
 import com.fullstack.model.CustomerDTO;
 import com.fullstack.model.LoginResponseDTO;
 import com.fullstack.repository.CustomerRepository;
-import com.fullstack.security.JWTUtil;
+import com.fullstack.security.jwt.JWTUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,14 +33,11 @@ public class CustomerServiceImpl implements CustomerService {
 		
 		CustomerEntity entity = customerRepository.findById(dto.getId())
 		        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-		
-		String token = jwtUtil.generateToken(entity.getId(), entity.getRole());
-		
+	
 		return new LoginResponseDTO (
 				entity.getId(),
 				entity.getNickname(),
-				entity.getRole(),
-		        token
+				entity.getRole()
 		    );
 	}
 	
