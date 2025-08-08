@@ -1,17 +1,18 @@
 
 import axios from "axios";
-import axiosInstance from "./axiosInstance";
-import { API_SERVER_HOST } from "./paymentApi";
-
-const prefix = `${API_SERVER_HOST}/api`;
-
+import api from "./authApi";
+import { clearAccessToken, setAccessToken } from "../utils/tokenStore";
 
 export const login = async (customer) => {
     try {
-        const res = await axiosInstance.post(`${prefix}/auth/login`, customer);
+        const { data } = await api.post("/auth/login", customer);
 
-        return res.data;
+        setAccessToken(data.accessToken);
+
+        return data;
     } catch (error) {
+        clearAccessToken();
+
         if (error.response) {
             throw new Error(error.response.data.message || "로그인 실패");
         } else {
@@ -20,14 +21,21 @@ export const login = async (customer) => {
     }
 }
 
+export const logout = async () => {
+    await api.post("/auth/logout");
+    clearAccessToken();
+}
+
 // ID & 비밀번호 체크
 export const checkAccount = async (id, password) => {
+
     try {
-        const res = await axios.post(`${prefix}/customer/check-account`, {
+        const { data } = await api.post("/customer/check-account", {
             id,
             passwordEnc: password
         });
-        return res.data;
+
+        return data;
     } catch (err) {
         alert("로그인 중 오류 발생");
         return false;
