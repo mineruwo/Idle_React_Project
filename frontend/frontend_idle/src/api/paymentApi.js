@@ -63,3 +63,15 @@ export const fetchUserPoints = async (userId) => {
         throw new Error(message);
     }
 };
+
+export const failPayment = async (merchantUid) => {
+    try {
+        const response = await axios.post(
+            `${API_SERVER_HOST}/api/payment/fail`,
+            { merchantUid }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("결제 실패 정보 전송 중 오류 발생:", error);
+    }
+};
