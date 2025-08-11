@@ -54,7 +54,7 @@ const AdminHeaderComponent = ({ toggleSidebar }) => {
                 <div className="d-flex ms-auto">
                     <ul className="navbar-nav">
                         <li className="nav-item">
-                            {adminLoginState.id ? (
+                            {adminLoginState.isAuthenticated ? (
                                 <button className="nav-link" onClick={handleLogout}>
                                     로그아웃
                                 </button>

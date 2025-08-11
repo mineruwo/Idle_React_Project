@@ -2,6 +2,8 @@ package com.fullstack.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -13,6 +15,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+
+import com.fullstack.model.enums.Role;
+
 
 @Entity
 @Table(name = "ADMIN")
@@ -31,8 +36,9 @@ public class Admin {
     @Column(name = "ADMIN_ID", nullable = false, unique = true)
     private String adminId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "ROLE", nullable = false)
-    private String role;
+    private Role role;
 
     @Column(name = "PASSWORD", nullable = false)
     private String password;

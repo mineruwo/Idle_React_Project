@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import '../../../theme/GNB.css';
-
+import "../../../theme/GNB.css";
+import BubbleAnimation from "../carownerComponent/common/BubbleAnimation";
 
 const GNB = () => {
     const [hideHeader, setHideHeader] = useState(false);
@@ -26,7 +26,6 @@ const GNB = () => {
     }, [lastScrollY]);
 
     return (
-
         <div
             className={`navbar navbar-expand-lg sticky-top bg-primary 
                 transition-top ${hideHeader ? "hide" : ""}`}
@@ -68,6 +67,9 @@ const GNB = () => {
                         </li>
                     </ul>
                 </div>
+            </div>
+            <div className="bubblediv">
+                <BubbleAnimation warmth={100} />
             </div>
         </div>
     );

@@ -1,18 +1,16 @@
 package com.fullstack.service;
 
-import java.util.List;
-
 import com.fullstack.model.AdminDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import java.util.Optional;
 
 public interface AdminService {
 
     AdminDTO getAdmin(String adminId);
 
-    void createAdmin(AdminDTO adminDTO);
+    AdminDTO createAdmin(AdminDTO adminDTO);
 
-    void updateAdmin(AdminDTO adminDTO);
-
-    void deleteAdmin(String adminId);
-
-    List<AdminDTO> getAdminList();
+    Page<AdminDTO> getAdminList(Pageable pageable);
 }

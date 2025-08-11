@@ -1,10 +1,10 @@
 package com.fullstack.config;
 
-import com.fullstack.security.JWTFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -14,10 +14,13 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.fullstack.security.jwt.JWTFilter;
+
 import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private final JWTFilter jwtFilter;
@@ -38,9 +41,13 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/api/orders/**",   // 🚚 오더 등록/조회/삭제 전부 허용
                     "/api/auth/**",     // (선택) 로그인/회원가입 API도 허용
-                    "/admin/**",
+                    "/api/admin/login", // 경로 변경
+                    "/api/admin/check-auth", // 추가: 인증 상태 확인 엔드포인트 허용
+                    "/api/admin/logout", // 추가: 로그아웃 엔드포인트 허용
+                    "/api/admin/accounts", // 경로 변경
                     "/ws/**", "/ws-chat/**", // 웹소켓 경로
-                    "/api/customer/**" // 고객 관련 API
+                    "/api/customer/**", // 고객 관련 API
+                    "/api/payment/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )

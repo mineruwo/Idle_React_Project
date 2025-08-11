@@ -7,10 +7,12 @@ import { useNavigate } from "react-router-dom";
 import { default as axios } from "axios";
 import { saveOrder } from "../../api/orderApi";
 
+
 const OrderForm = () => {
   // 지도 참조를 위한 ref
   const mapRef = useRef(null);
   // 기본 상태값들 정의 (출발지, 도착지, 거리, 예약일 등)
+  const [proposedPrice, setProposedPrice] = useState("");
   const navigate = useNavigate();
   const [departure, setDeparture] = useState("");
   const [arrival, setArrival] = useState("");
@@ -162,34 +164,60 @@ const OrderForm = () => {
 
   let orderData;
 
-  const handleSubmit = async () => {
-    try {
-      const orderData = {
-        departure,
-        arrival,
-        distance: distance ?? 0,
-        date: selectedDate,
-        isImmediate,
-        weight,
-        vehicle,
-        cargoType,
-        cargoSize,
-        packingOptions: Object.keys(packingOptions)
-          .filter((key) => packingOptions[key])
-          .join(","), // ✅ "special,fragile" 이런 문자열로 변환ons,
+const handleSubmit = async () => {
+  try {
+    const getPackingSummary = (options) => {
+      const labels = {
+        special: "특수포장",
+        normal: "일반포장",
+        expensive: "고가화물",
+        fragile: "파손위험물",
       };
+      return Object.entries(options)
+        .filter(([_, val]) => val)
+        .map(([key]) => labels[key])
+        .join(", ");
+    };
 
-      await saveOrder(orderData);
+    const orderData = {
+      proposedPrice: proposedPrice ? Number(proposedPrice) : null, // 화주 제안가
+      driverPrice: null,                                           // 기사 제안가 초기 null
+      avgPrice: distance * AVERAGE_PRICE_PER_KM,                   // 평균가
+      packingOptions: JSON.stringify(packingOptions),              // JSON 문자열로 변환
+      packingOption: getPackingSummary(packingOptions),            // 요약 텍스트 (예: "특수포장, 고가화물")
 
-      alert("운송이 등록되었습니다\n(게시판에서 확인가능)");
-      navigate("/board");
-    } catch (error) {
-      console.error("오더 등록 오류:", error);
-      alert("오더 등록에 실패했습니다.");
-    }
+      departure,
+      arrival,
+      distance: distance ?? 0,
+
+      date: new Date().toISOString(),                              // 등록일
+      reservedDate: !isImmediate && selectedDate ? selectedDate.toISOString() : "", // 예약일
+      isImmediate,
+
+      weight,
+      vehicle,
+      cargoType,
+      cargoSize,
+
+      status: "등록완료", // 선택 사항: 백엔드에서 자동 지정해도 무관
+    };
+
+    await saveOrder(orderData);
+
+    alert("운송이 등록되었습니다\n(게시판에서 확인가능)");
+    navigate("/board");
+  } catch (error) {
+    console.error("오더 등록 오류:", error);
+    alert("오더 등록에 실패했습니다.");
+  }
+};
+
+
+  const handleProposedPriceChange = (e) => {
+    const onlyNums = e.target.value.replace(/[^0-9]/g, ""); // 숫자만 추출
+    const formatted = Number(onlyNums).toLocaleString("ko-KR");
+    setProposedPrice(formatted);
   };
-
-
 
 
   // UI 반환 부분 (JSX)
@@ -299,9 +327,29 @@ const OrderForm = () => {
               <LineValue>{distance ? `${distance} km` : "-"}</LineValue>
             </div>
             <div>
+              <LineLabel>평균가:</LineLabel>
+              <LineValue>{`${AVERAGE_PRICE_PER_KM.toLocaleString("ko-KR")}원/km`}</LineValue>
+            </div>
+
+            <Divider /> {/* 여기 줄 추가됨 */}
+
+            <div>
               <LineLabel>총 예상 운임:</LineLabel>
               <LineValue>{distance ? `${(distance * AVERAGE_PRICE_PER_KM).toLocaleString("ko-KR")}원` : "-"}</LineValue>
             </div>
+            {/* 총 예상 운임 밑에 가격 제안 인풋 추가 */}
+            <div>
+              <LineLabel>가격 제안:</LineLabel>
+              <div style={{ marginTop: "8px" }}>
+                <ProposalInput
+                  type="text"
+                  placeholder="직접 제안할 금액 입력"
+                  value={proposedPrice}
+                  onChange={handleProposedPriceChange}
+                />
+              </div>
+            </div>
+
           </SummaryBox>
 
           <ButtonRow>
@@ -485,6 +533,34 @@ const SubmitButton = styled.button`
     background-color: #f48fb1;
   }
 `;
+
+const Divider = styled.hr`
+  border: none;
+  border-top: 2px solid #f48fb1;
+  margin: 12px 0;s
+`;
+const ProposalInput = styled.input`
+  width: 100%;
+  padding: 0.7rem 1rem;
+  font-size: 15px;
+  border: 1px solid #c1c1c1ff;
+  border-radius: 12px;
+  box-sizing: border-box;
+  color: #444;
+  
+
+  &:focus {
+    outline: none;
+    border-color: #e08cab; // 포커스 시 핑크색
+    box-shadow: 0 0 0 2px rgba(224, 140, 171, 0.2);
+  }
+
+  &::placeholder {
+    color: #888;
+  }
+`;
+
+
 
 
 

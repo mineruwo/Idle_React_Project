@@ -2,11 +2,16 @@ package com.fullstack.controller;
 
 import com.fullstack.model.CustomerDTO;
 import com.fullstack.model.LoginResponseDTO;
+import com.fullstack.security.jwt.JWTUtil;
 import com.fullstack.service.CustomerService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
+import java.time.Duration;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,13 +23,6 @@ public class CustomerController {
 
     @Autowired
     private final CustomerService customerService;
-    
-    // 로그인
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody CustomerDTO customerDTO) {
-    	LoginResponseDTO result = customerService.login(customerDTO);
-    	return ResponseEntity.ok(result);
-    }
     
     // 회원가입
     @PostMapping("/signup")

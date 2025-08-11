@@ -2,6 +2,8 @@ package com.fullstack.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,7 +15,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor; // 추가
 import lombok.Setter;
-import lombok.AllArgsConstructor; // 추가
 
 @NoArgsConstructor  
 @AllArgsConstructor
@@ -67,4 +68,11 @@ public class CustomerEntity {
 
 	@Column(name = "USER_POINT", nullable = false)
 	private Integer userPoint;
+	
+	@Column(name="REFRESH_TOKEN", length=128) // 해시 저장 권장
+	private String refreshToken;
+	
+	@Column(name="RT_EXPIRES_AT")
+	private LocalDateTime rtExpiresAt;
+	
 }

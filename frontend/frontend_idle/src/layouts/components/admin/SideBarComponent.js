@@ -10,7 +10,7 @@ const SidebarComponent = ({ isOpen, toggleSidebar }) => {
 
   const handleNavigation = (path, e) => {
     if (e) e.stopPropagation();
-    if (!adminLoginState.id) { // 로그인되어 있지 않으면
+    if (!adminLoginState.isAuthenticated) { // 로그인되어 있지 않으면
         navigate("/admin/login"); // 로그인 페이지로 리다이렉트
         return; // 네비게이션 중단
     }
@@ -19,7 +19,7 @@ const SidebarComponent = ({ isOpen, toggleSidebar }) => {
   };
 
   const toggleSubMenu = (menuName, path) => {
-    if (!adminLoginState.id) { // 로그인되어 있지 않으면
+    if (!adminLoginState.isAuthenticated) { // 로그인되어 있지 않으면
         navigate("/admin/login"); // 로그인 페이지로 리다이렉트
         return; // 네비게이션 중단
     }

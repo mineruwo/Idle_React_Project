@@ -8,6 +8,7 @@ import {
 import adminRoutes from "./adminRouter";
 import FloatingChatButton from "../layouts/components/common/FloatingChatButton";
 import OrderBoard from "../pages/orderPage/OrderBoard";
+import shipperRouter from "./shipperRouter";
 
 const Loading = <div>Loading 중...</div>;
 
@@ -19,6 +20,7 @@ const Login = lazy(() => import("../pages/loginpage/LoginPage"));
 const Singup = lazy(() => import("../pages/signuppage/SignupPage"));
 const Dstest = lazy(() => import("../pages/mainpage/TestPage"));
 const AdminPage = lazy(() => import("../pages/adminPage/AdminPage"));
+const Shipper = lazy(() => import("../pages/shipperPage/ShipperDashBoard"));
 
 const CarPage = lazy(() => import("../pages/carOwnerPage/CarPage"));
 const CarDashPage = lazy(() => import("../pages/carOwnerPage/DashBoard"));
@@ -149,6 +151,15 @@ const root = createBrowserRouter([
                 element: <OrderBoard />,
             },
         ],
+    },
+    {
+        path: "shipper",
+        element: (
+            <Suspense fallback={Loading}>
+                <Shipper />
+            </Suspense>
+        ),
+        children: shipperRouter(),
     },
 ]);
 

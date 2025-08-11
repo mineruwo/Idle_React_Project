@@ -9,12 +9,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
 
     private final AdminRepository adminRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public AdminDTO getAdmin(String adminId) {
@@ -23,46 +27,35 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public void createAdmin(AdminDTO adminDTO) {
+    public AdminDTO createAdmin(AdminDTO adminDTO) {
         Admin admin = dtoToEntity(adminDTO);
-        System.out.println("service start");
-        System.out.println("DTO :: " + adminDTO);
-
-        System.out.println("Entity :: " + admin);
-        adminRepository.save(admin);
+        admin.setPassword(passwordEncoder.encode(admin.getPassword())); // 비밀번호 암호화
+        admin.setRegDate(LocalDateTime.now());
+        Admin savedAdmin = adminRepository.save(admin);
+        return entityToDto(savedAdmin);
     }
 
-    @Override
-    public void updateAdmin(AdminDTO adminDTO) {
-        Optional<Admin> result = adminRepository.findByAdminIdAndIsDelFalse(adminDTO.getAdminId());
-        if (result.isPresent()) {
-            Admin admin = result.get();
-            admin.setName(adminDTO.getName());
-            admin.setRole(adminDTO.getRole());
-            if (adminDTO.getPassword() != null && !adminDTO.getPassword().isEmpty()) {
-                admin.setPassword(adminDTO.getPassword()); // 비밀번호 업데이트 로직 추가
-            }
-            adminRepository.save(admin);
-        }
-    }
-
-    @Override
-    public void deleteAdmin(String adminId) {
-        Optional<Admin> result = adminRepository.findByAdminIdAndIsDelFalse(adminId);
-        if (result.isPresent()) {
-            Admin admin = result.get();
-            admin.setDel(true);
-            admin.setDelDate(LocalDateTime.now());
-            adminRepository.save(admin);
-        }
-    }
+	/*
+	 * @Override public void updateAdmin(AdminDTO adminDTO) { Optional<Admin> result
+	 * = adminRepository.findByAdminIdAndIsDelFalse(adminDTO.getAdminId()); if
+	 * (result.isPresent()) { Admin admin = result.get();
+	 * admin.setName(adminDTO.getName()); admin.setRole(adminDTO.getRole()); if
+	 * (adminDTO.getPassword() != null && !adminDTO.getPassword().isEmpty()) {
+	 * admin.setPassword(passwordEncoder.encode(adminDTO.getPassword())); // 비밀번호
+	 * 업데이트 로직 추가 } adminRepository.save(admin); } }
+	 * 
+	 * @Override public void deleteAdmin(String adminId) { Optional<Admin> result =
+	 * adminRepository.findByAdminIdAndIsDelFalse(adminId); if (result.isPresent())
+	 * { Admin admin = result.get(); admin.setDel(true);
+	 * admin.setDelDate(LocalDateTime.now()); adminRepository.save(admin); } }
+	 */
 
     @Override
-    public List<AdminDTO> getAdminList() {
-        return adminRepository.findAllActiveAdmins().stream()
-                .map(this::entityToDto)
-                .collect(Collectors.toList());
+    public Page<AdminDTO> getAdminList(Pageable pageable) {
+        Page<Admin> adminPage = adminRepository.findAll(pageable);
+        return adminPage.map(this::entityToDto);
     }
+
 
     private Admin dtoToEntity(AdminDTO adminDTO) {
         return Admin.builder()

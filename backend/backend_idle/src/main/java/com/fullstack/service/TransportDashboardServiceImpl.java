@@ -39,9 +39,9 @@ public class TransportDashboardServiceImpl implements TransportDashboardService 
 	    int total = completed + inProgress + scheduled;
 
 	    // 매출 및 정산 계산
-	    long revenue = paymentRepository.getRevenueThisMonth(carNum);
+	    //long revenue = paymentRepository.getRevenueThisMonth(carNum);
 	    int commissionRate = 10;
-	    long settlement = revenue * (100 - commissionRate) / 100;
+	    //long settlement = revenue * (100 - commissionRate) / 100;
 
 	    // 닉네임 그대로 반환
 	    return TransportSummaryDTO.builder()
@@ -50,9 +50,7 @@ public class TransportDashboardServiceImpl implements TransportDashboardService 
 	        .inProgress(inProgress)
 	        .scheduled(scheduled)
 	        .total(total)
-	        .revenue(revenue)
 	        .commission(commissionRate)
-	        .settlement(settlement)
 	        .build();
 	}
 }

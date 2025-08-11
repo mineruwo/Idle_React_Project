@@ -1,7 +1,9 @@
-package com.fullstack.security;
+package com.fullstack.security.jwt;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,6 +13,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -28,11 +31,26 @@ public class JWTFilter extends OncePerRequestFilter {
 			HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		
-		String authHeader = request.getHeader("Authorization");
+		String token = null;
+		// HttpOnly 쿠키에서 토큰 추출
+		if (request.getCookies() != null) {
+			Optional<Cookie> accessTokenCookie = Arrays.stream(request.getCookies())
+					.filter(cookie -> "accessToken".equals(cookie.getName()))
+					.findFirst();
+			if (accessTokenCookie.isPresent()) {
+				token = accessTokenCookie.get().getValue();
+			}
+		}
 		
-		if (authHeader != null && authHeader.startsWith("Bearer ")) {
-			String token = authHeader.substring(7); // Bearer 제거
-			
+		// Authorization 헤더에서도 토큰을 확인 (혹시 모를 경우 대비)
+		if (token == null) {
+			String authHeader = request.getHeader("Authorization");
+			if (authHeader != null && authHeader.startsWith("Bearer ")) {
+				token = authHeader.substring(7);
+			}
+		}
+
+		if (token != null) { // 토큰이 존재하면 유효성 검사
 			if (jwtUtil.validateToken(token)) {
 				String id = jwtUtil.getId(token);
 				String role = jwtUtil.getRole(token);

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { checkAuthStatus } from "../../slices/adminLoginSlice";
 import {
     AdminHeaderComponent,
     SideBarComponent,
@@ -11,11 +12,24 @@ const AdminPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 767);
     const navigate = useNavigate();
     const location = useLocation();
-    const adminLoginState = useSelector((state) => state.adminLogin);
+    const { isAuthenticated, status } = useSelector((state) => state.adminLogin);
+    const dispatch = useDispatch();
 
-    const toggleSidebar = () => {
-        setIsSidebarOpen(!isSidebarOpen);
-    };
+    useEffect(() => {
+        // Only check auth status if it hasn't been checked yet
+        if (status === 'idle') {
+            dispatch(checkAuthStatus());
+        }
+    }, [status, dispatch]);
+
+    useEffect(() => {
+        // Redirect logic based on authentication status
+        if (status === 'succeeded' && isAuthenticated && location.pathname === '/admin/login') {
+            navigate("/admin/dashboard", { replace: true });
+        } else if (status === 'failed' && !isAuthenticated && location.pathname !== '/admin/login') {
+            navigate("/admin/login");
+        }
+    }, [isAuthenticated, status, navigate, location.pathname]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -25,25 +39,20 @@ const AdminPage = () => {
                 setIsSidebarOpen(false);
             }
         };
-
         window.addEventListener("resize", handleResize);
-
         return () => {
             window.removeEventListener("resize", handleResize);
         };
     }, []);
 
-    // 인증 및 리다이렉션 로직
-    useEffect(() => {
-        // 로그인되어 있지 않고, 현재 경로가 /admin/login이 아닐 때만 로그인 페이지로 리다이렉트
-        if (!adminLoginState.id && location.pathname !== '/admin/login') {
-            navigate("/admin/login");
-        } 
-        // 로그인되어 있고, 현재 경로가 정확히 /admin 일 때만 대시보드로 리다이렉트
-        else if (adminLoginState.id && location.pathname === '/admin') {
-            navigate("/admin/dashboard", { replace: true });
-        }
-    }, [adminLoginState.id, navigate, location.pathname]);
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
+
+    // Render a loading indicator while checking auth status
+    if (status === 'loading' || status === 'idle') {
+        return <div>Loading...</div>; // Or a more sophisticated spinner component
+    }
 
     const isLoginPage = location.pathname === '/admin/login';
 

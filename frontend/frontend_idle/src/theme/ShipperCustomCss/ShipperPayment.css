@@ -1,201 +1,353 @@
 .point-layout-container {
     display: flex;
-    gap: 2em;
-    max-width: 860px;
-    margin: 0 auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 2rem auto;
+}
+
+.left-sections-wrapper {
+    flex-basis: 65%;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.summary-section {
+    flex-basis: 30%;
+    flex-grow: 1;
+    height: fit-content;
+}
+
+@media (max-width: 768px) {
+    .left-sections-wrapper,
+    .summary-section {
+        flex-basis: 100%;
+    }
 }
 
 .point-management-section,
-.point-payment-section {
-    flex: 1;
-    background: #f9fbff;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(30, 60, 140, 0.07);
-    padding: 2em 1.4em;
-    font-family: "Noto Sans KR", sans-serif;
-}
-
-.point-manage-container {
-    max-width: 420px;
-    margin: 0 auto;
-    background: #f9fbff;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(30, 60, 140, 0.07);
-    padding: 2em 1.4em 2em 1.4em;
-    font-family: "Noto Sans KR", sans-serif;
-}
-
-.point-balance-section {
+.order-info-section {
+    flex: 2 1 0%;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    margin-bottom: 2em;
-    background: #f0f5ff;
-    border-radius: 10px;
-    padding: 1.2em 0;
+    gap: 1.5rem;
+    background: #fef8f8;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 2em 1.4em;
+    font-family: "Noto Sans KR", sans-serif;
+    border: 1px solid #f3c7d3;
 }
 
-.point-balance-label {
-    color: #6b90d4;
-    font-size: 1rem;
-    font-weight: 550;
-}
-.point-balance-amount {
-    color: #1560d4;
-    font-size: 2.2rem;
-    font-weight: bold;
-    margin-top: 0.3em;
+.order-details-wrap {
+    border: 1px solid #eee;
+    padding: 1.5rem;
+    border-radius: 8px;
 }
 
-.point-charge-section {
-    display: flex;
-    flex-direction: column; /* 세로 정렬로 변경 */
-    gap: 0.7em;
-    margin-bottom: 2em;
+.point-use-wrap {
+    border: 1px solid #eee;
+    padding: 1.5rem;
+    border-radius: 8px;
 }
 
-.charge-input-group {
-    display: flex;
-    gap: 0.7em;
-}
-
-.point-charge-section label {
-    font-size: 1.05rem;
-    color: #3c5073;
-    min-width: 78px;
-}
-
-.point-charge-section input[type="number"] {
-    flex: 1 1 100px;
-    padding: 0.47em 0.8em;
-    border: 1.4px solid #c7d5ec;
-    border-radius: 7px;
-    font-size: 1rem;
-}
-.charge-btn {
-    background: #1560d4;
-    color: #fff;
+.page-title {
+    font-size: 1.25rem;
     font-weight: 600;
-    border: none;
-    border-radius: 7px;
-    padding: 0.57em 1.13em;
-    cursor: pointer;
-    font-size: 1.05rem;
-    transition: background 0.2s;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
 }
-.charge-btn:hover {
-    background: #1c4290;
-}
-.point-history-section {
-    margin-top: 2.2em;
-}
-.point-history-section h3 {
-    color: #3757a6;
-    font-size: 1.15rem;
-    margin-bottom: 0.7em;
-}
-.point-history-section ul {
+
+.charge-point-table {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: 1.5rem 0;
 }
-.history-item {
+
+.charge-point-table li {
     display: flex;
     justify-content: space-between;
-    padding: 0.67em 0;
-    border-bottom: 1px solid #e7eff8;
+    margin-bottom: 0.75rem;
     font-size: 1rem;
 }
-.history-item.plus .history-amount {
-    color: #167d43;
-}
-.history-item.minus .history-amount {
-    color: #e84c3d;
-}
-.history-type {
-    min-width: 42px;
+
+.charge-point-table li span:last-child {
     font-weight: 500;
-}
-.history-date {
-    color: #849bb7;
-    font-size: 0.97rem;
-    min-width: 78px;
-    text-align: right;
-}
-
-/* 포인트 결제 섹션 스타일 */
-.point-payment-container {
-    /* 기존 스타일 유지 */
-}
-
-.current-points {
-    text-align: center;
-    margin-bottom: 1.5em;
-    font-size: 1.1rem;
-    color: #3c5073;
-}
-
-.input-section {
-    margin-bottom: 1.5em;
-}
-
-.input-section label {
-    display: block;
-    margin-bottom: 0.5em;
-    font-size: 1.05rem;
-    color: #3c5073;
-}
-
-.input-section input {
-    width: 100%;
-    padding: 0.8em;
-    border: 1.4px solid #c7d5ec;
-    border-radius: 7px;
-    font-size: 1rem;
 }
 
 .payment-btn {
     width: 100%;
-    padding: 0.8em;
-    background: #1560d4;
-    color: #fff;
-    font-weight: 600;
-    border: none;
-    border-radius: 7px;
-    cursor: pointer;
+    padding: 1rem;
     font-size: 1.1rem;
-    transition: background 0.2s;
+    font-weight: 600;
+    color: #fff;
+    background-color: #f3c7d3;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 .payment-btn:hover {
-    background: #1c4290;
+    background-color: #e0b0c0;
 }
 
 .payment-btn:disabled {
-    background: #a0b5d4;
+    background-color: #f3c7d3;
     cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* .
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    background-color: #f3c7d3;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+} */
+
+.payment-btn:hover {
+    background-color: #e0b0c0;
+}
+
+.payment-btn:disabled {
+    background-color: #f3c7d3;
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 .payment-message {
-    margin-top: 1em;
+    margin-top: 1rem;
+    color: #28a745;
     text-align: center;
-    color: #167d43; /* 성공 메시지 색상 */
 }
 
-.page-title {
-    font-size: 1.5em; /* 글자 크기 조정 */
-    font-weight: bold; /* 굵은 글씨 */
-    color: #0a3069; /* 카드 제목과 동일한 색상 */
-    margin-bottom: 1.5em; /* 아래쪽 여백 추가 */
-    text-align: left; /* 왼쪽 정렬 */
+.current-points {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    text-align: center;
 }
 
-@media (max-width: 880px) {
+.current-points strong {
+    color: #f3c7d3;
+}
+
+.input-section {
+    margin-bottom: 1.5rem;
+}
+
+.input-section label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.point-input-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.point-input-group input[type="number"] {
+    flex-grow: 1;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.max-use-btn {
+    padding: 0.75rem 1rem;
+    background-color: #f3c7d3;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.max-use-btn:hover {
+    background-color: #e0b0c0;
+}
+
+.final-payment-info {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.final-payment-info .final-amount {
+    font-weight: 700;
+    color: #f3c7d3;
+}
+
+.pay-method-section {
+    margin-bottom: 1.5rem;
+}
+
+.pay-method-section .section-title {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.pay-method-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.pay-method-list label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.point-usage-section,
+.payment-method-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    background: #fef8f8;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 2em 1.4em;
+    font-family: "Noto Sans KR", sans-serif;
+    border: 1px solid #f3c7d3;
+    height: fit-content;
+}
+
+.point-usage-details-content,
+.payment-method-details-content {
+    border: 1px solid #eee;
+    padding: 1.5rem;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.left-sections-wrapper {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 300px;
+}
+
+.summary-section {
+    flex: 1;
+    min-width: 250px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.summary-section .page-title {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 1.5em;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.summary-details-content .summary-table {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1.5rem;
+}
+
+.summary-details-content .summary-table li {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 1rem;
+}
+
+.summary-details-content .summary-table li .discount {
+    color: #e53935;
+    font-weight: 500;
+}
+
+.summary-details-content .summary-table li.summary-subtotal {
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.summary-details-content .summary-table li.final-amount-to-pay {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #000;
+    border-top: 2px solid #eee;
+    padding-top: 1rem;
+    margin-top: 1rem;
+}
+
+.summary-details-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.summary-details-content li {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px dashed #eee;
+    font-size: 1.1em;
+    color: #555;
+}
+
+.summary-details-content li:last-child {
+    border-bottom: none;
+    font-weight: bold;
+    color: #000;
+    font-size: 1.2em;
+    margin-top: 10px;
+    padding-top: 15px;
+    border-top: 2px solid #ddd;
+}
+
+.summary-details-content li span {
+    font-weight: normal;
+    color: #333;
+}
+
+.summary-details-content .summary-table .point-discount {
+    color: #d9534f; /* A distinct color for the discount */
+    font-weight: 500;
+}
+
+.summary-details-content li.final-amount-to-pay span.final {
+    color: #d9534f;
+    font-size: 1.1em;
+}
+
+@media (max-width: 768px) {
     .point-layout-container {
         flex-direction: column;
     }
-    .point-payment-section {
-        border-top: 1px solid #d8e2f0; /* A light border for separation */
-        margin-top: 2em; /* Add some margin for extra spacing */
+    .left-sections-wrapper,
+    .summary-section {
+        flex: none;
+        width: 100%;
+        min-width: unset;
     }
 }

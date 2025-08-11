@@ -16,6 +16,7 @@ const LoginComponent = lazy(() => import("../layouts/components/admin/LoginCompo
 const ActiveChatSessionsList = lazy(() => import("../layouts/components/chat/ActiveChatSessionsList"));
 
 const adminRoutes = [
+    { index: true, element: <DashboardComponent /> }, // 기본 경로 추가
     { path: "dashboard", element: <DashboardComponent /> },
     {
         path: "admin-accounts",
