@@ -48,6 +48,14 @@ const useCustomMove = () => {
         navigate("/login");
     };
 
+    const moveToSignUpPage = () => {
+        navigate("/signup");
+    };
+
+    const moveToMainPage = () => {
+        navigate("/");
+    }
+
     return {
         shipperMoveToDashBoard,
         shipperMoveToDetails,
@@ -65,6 +73,8 @@ const useCustomMove = () => {
         moveToAdminPage,
         moveToWebSocketTestPage,
         moveToLoginPage,
+        moveToSignUpPage,
+        moveToMainPage
     };
 };
 

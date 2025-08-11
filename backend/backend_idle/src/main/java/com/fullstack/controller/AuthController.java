@@ -4,11 +4,14 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fullstack.entity.CustomerEntity;
 import com.fullstack.model.CustomerDTO;
 import com.fullstack.model.LoginResponseDTO;
 import com.fullstack.model.TokenDTO;
@@ -62,11 +65,24 @@ public class AuthController {
 	}
 
 	@PostMapping("/logout")
-	public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+	public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
 		String refreshToken = TokenCookieUtils.getRefreshTokenFromCookie(request);
 		
 		TokenCookieUtils.clearRefreshTokenCookie(response);
 		
 		return ResponseEntity.noContent().build();
 	}
+	
+	@GetMapping("/auto")
+    public ResponseEntity<LoginResponseDTO> getCurrentUser(Authentication authentication) {
+        CustomerEntity customerEntity = (CustomerEntity) authentication.getPrincipal();
+
+        LoginResponseDTO loginResponseDTO = new LoginResponseDTO(
+        	customerEntity.getId(),
+        	customerEntity.getNickname(),
+        	customerEntity.getRole()
+        );
+
+        return ResponseEntity.ok(loginResponseDTO);
+    }
 }

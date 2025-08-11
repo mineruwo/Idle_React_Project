@@ -1,7 +1,7 @@
 
 import axios from "axios";
 import api from "./authApi";
-import { clearAccessToken, setAccessToken } from "../utils/tokenStore";
+import { clearAccessToken, setAccessToken } from "../auth/tokenStore";
 
 export const login = async (customer) => {
     try {

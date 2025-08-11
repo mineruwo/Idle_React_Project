@@ -7,6 +7,7 @@ import { feedbackCustomizations } from './customizations/feedback';
 import { navigationCustomizations } from './customizations/navigation.js';
 import { surfacesCustomizations } from './customizations/surfaces';
 import { colorSchemes, typography, shadows, shape } from './themePrimitives.js';
+import { Fragment, useMemo } from 'react';
 
 function AppTheme(props) {
   const { children, disableCustomTheme, themeComponents } = props;

@@ -15,6 +15,7 @@ import RadioGroup from '@mui/material/RadioGroup';
 import useCustomMove from '../../../hooks/useCustomMove';
 import { checkIdDuplicate, checkNicknameDuplicate, signUp } from '../../../api/signupApi';
 import { UserCard as Card, UserContainer as SignUpContainer } from '../../../theme/User/UserCard';
+import { useState } from 'react';
 
 export default function SignUp(props) {
   const [emailError, setEmailError] = useState(false);

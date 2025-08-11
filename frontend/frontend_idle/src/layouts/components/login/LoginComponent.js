@@ -15,6 +15,7 @@ import { GoogleIcon, KakaoIcon, PinkTruckIcon } from './IconComponent';
 import useCustomMove from '../../../hooks/useCustomMove';
 import { checkAccount, login } from '../../../api/loginApi';
 import { UserCard as Card, UserContainer as SignInContainer } from '../../../theme/User/UserCard';
+import { useState } from 'react';
 
 
 export default function SignIn(props) {
@@ -83,8 +84,6 @@ export default function SignIn(props) {
 
             const customRole = result.role;
             setRole(customRole);
-
-            alert(customRole);
 
             if (customRole === "shipper") {
                 shipperMoveToDashBoard();
