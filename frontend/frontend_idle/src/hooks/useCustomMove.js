@@ -15,6 +15,10 @@ const useCustomMove = () => {
         navigate({ pathname: `../shipper/order` });
     };
 
+    const shipperMoveToOrderBoard = () => {
+        navigate({ pathname: `../shipper/orderBoard` });
+    };
+
     const shipperMoveToPayment = () => {
         navigate({ pathname: `../shipper/payment` });
     };
@@ -52,6 +56,7 @@ const useCustomMove = () => {
         shipperMoveToDashBoard,
         shipperMoveToDetails,
         shipperMoveToOrder,
+        shipperMoveToOrderBoard,
         shipperMoveToPayment,
         shipperMoveToReview,
         shipperMoveToPoint,

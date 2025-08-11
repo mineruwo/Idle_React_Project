@@ -13,6 +13,9 @@ const shipperRouter = () => {
     const ShipperOrder = lazy(() =>
         import("../pages/shipperPage/ShipperOrderPage")
     );
+    const ShipperOrderBoard = lazy(() =>
+        import("../pages/shipperPage/ShipperOrderBoardPage")
+    );
     const ShipperDetails = lazy(() =>
         import("../pages/shipperPage/ShipperDetailsPage")
     );
@@ -40,6 +43,14 @@ const shipperRouter = () => {
             element: (
                 <Suspense fallback={Loading}>
                     <ShipperOrder />
+                </Suspense>
+            ),
+        },
+        {
+            path: "orderBoard",
+            element: (
+                <Suspense fallback={Loading}>
+                    <ShipperOrderBoard />
                 </Suspense>
             ),
         },

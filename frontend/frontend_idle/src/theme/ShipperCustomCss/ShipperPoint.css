@@ -231,3 +231,66 @@
         box-sizing: border-box;
     }
 }
+
+.easy-payment-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.payment-option {
+    flex: 1;
+    min-width: 100px;
+    padding: 10px;
+    border: 2px solid #eee;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    color: #555;
+}
+
+.payment-option:hover {
+    border-color: #f3c7d3;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.payment-option.selected {
+    border-color: #f3c7d3;
+    background-color: #fff0f5; /* Lighter pink background */
+    color: #f3c7d3;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.payment-option input[type="radio"] {
+    display: none; /* Hide the actual radio button */
+}
+
+.payment-option span {
+    margin-top: 5px;
+    font-size: 1em;
+}
+
+.payment-group {
+    margin-bottom: 1.5rem;
+}
+
+.payment-group:last-child {
+    margin-bottom: 0;
+}
+
+.payment-group-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+}

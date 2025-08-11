@@ -5,6 +5,7 @@ const ShipperNavBarComponent = () => {
         shipperMoveToDashBoard,
         shipperMoveToDetails,
         shipperMoveToOrder,
+        shipperMoveToOrderBoard,
         shipperMoveToPoint,
         shipperMoveToPayment,
         shipperMoveToReview,
@@ -56,6 +57,12 @@ const ShipperNavBarComponent = () => {
                                 onClick={shipperMoveToOrder}
                             >
                                 <div className="nav-link">오더신청</div>
+                            </li>
+                            <li
+                                className="nav-item py-2 border-bottom border-light border-opacity-25"
+                                onClick={shipperMoveToOrderBoard}
+                            >
+                                <div className="nav-link">오더게시판</div>
                             </li>
                             <li
                                 className="nav-item py-2 border-bottom border-light border-opacity-25"
