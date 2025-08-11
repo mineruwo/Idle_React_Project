@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "./BubbleAnimation.css";
-import cherryImg from "./cherry.png";
+import cherryImg from "./cherry1.png";
 
 const BubbleAnimation = ({ warmth = 60 }) => {
   const [bubbles, setBubbles] = useState([]);

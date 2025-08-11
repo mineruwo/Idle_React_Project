@@ -39,10 +39,10 @@ public class PaymentEntity {
     private LocalDateTime cancelledAt; // 결제 취소 시간
     private String impUid; // 아임포트(포트원)에서 발급하는 고유 ID (결제 완료 후 저장)
     
-    //차주페이지 관련 entity column
-    @ManyToOne
-    @JoinColumn(name = "transport_auth_id", nullable = false)
-    private TransportAuth transportAuth;
+//    //차주페이지 관련 entity column
+//    @ManyToOne
+//    @JoinColumn(name = "transport_auth_id", nullable = false)
+//    private TransportAuth transportAuth;
 	
 	
 }
