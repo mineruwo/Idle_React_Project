@@ -8,10 +8,13 @@ import com.fullstack.security.jwt.JWTUtil;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -80,6 +83,43 @@ public class CustomerServiceImpl implements CustomerService {
 		return CustomerEntity.builder().id(dto.getId()).passwordEnc(dto.getPasswordEnc())
 				.customName(dto.getCustomName()).phone(dto.getPhone()).nickname(dto.getNickname()).role(dto.getRole())
 				.createdAt(LocalDateTime.now()).isLefted(false).userPoint(0).build();
+	}
+
+	@Override
+	public Page<CustomerEntity> getCustomers(Pageable pageable) {
+		return customerRepository.findAll(pageable);
+	}
+
+	@Override
+	public CustomerDTO createCustomer(CustomerDTO dto) {
+		// 비밀번호 암호화
+		String rawPassword = dto.getPasswordEnc();
+		String encodedPassword = passwordEncoder.encode(rawPassword);
+		dto.setPasswordEnc(encodedPassword);
+
+		CustomerEntity entity = dtoToEntity(dto);
+		System.out.println("CustomerEntity before save: " + entity);
+		CustomerEntity savedEntity = customerRepository.save(entity);
+		System.out.println("CustomerEntity after save: " + savedEntity);
+		return entityToDto(savedEntity);
+	}
+
+	private CustomerDTO entityToDto(CustomerEntity entity) {
+		CustomerDTO dto = new CustomerDTO();
+		dto.setId(entity.getId());
+		dto.setPasswordEnc(entity.getPasswordEnc());
+		dto.setCustomName(entity.getCustomName());
+		dto.setRole(entity.getRole());
+		dto.setCreatedAt(entity.getCreatedAt());
+		dto.setUpdatedAt(entity.getUpdatedAt());
+		dto.setPhone(entity.getPhone());
+		dto.setNickname(entity.getNickname());
+		dto.setSnsLoginProvider(entity.getSnsLoginProvider());
+		dto.setSnsProviderId(entity.getSnsProviderId());
+		dto.setLeftedAt(entity.getLeftedAt());
+		dto.setIsLefted(entity.getIsLefted());
+		dto.setUserPoint(entity.getUserPoint());
+		return dto;
 	}
 
 }
