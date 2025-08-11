@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { alpha } from '@mui/material/styles';
 
 import { buttonBaseClasses } from '@mui/material/ButtonBase';
@@ -58,7 +57,7 @@ export const navigationCustomizations = {
   },
   MuiSelect: {
     defaultProps: {
-      IconComponent: React.forwardRef((props, ref) => (
+      IconComponent: forwardRef((props, ref) => (
         <UnfoldMoreRoundedIcon fontSize="small" {...props} ref={ref} />
       )),
     },

@@ -1,4 +1,3 @@
-import * as React from 'react';
 import PropTypes from 'prop-types';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
@@ -11,7 +10,7 @@ import { colorSchemes, typography, shadows, shape } from './themePrimitives.js';
 
 function AppTheme(props) {
   const { children, disableCustomTheme, themeComponents } = props;
-  const theme = React.useMemo(() => {
+  const theme = useMemo(() => {
     return disableCustomTheme
       ? {}
       : createTheme({
@@ -35,7 +34,7 @@ function AppTheme(props) {
         });
   }, [disableCustomTheme, themeComponents]);
   if (disableCustomTheme) {
-    return <React.Fragment>{children}</React.Fragment>;
+    return <Fragment>{children}</Fragment>;
   }
   return (
     <ThemeProvider theme={theme} disableTransitionOnChange>
