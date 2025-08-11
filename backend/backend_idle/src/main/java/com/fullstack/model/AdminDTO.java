@@ -3,7 +3,7 @@ package com.fullstack.model;
 
 import java.time.LocalDateTime;
 
-import com.fullstack.model.enums.Role;
+import com.fullstack.model.enums.AdminRole;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +18,7 @@ public class AdminDTO {
 
     private Integer idIndex;
     private String adminId;
-    private Role role;
+    private AdminRole role;
     private String password;
     private String name;
     private String emplId;
