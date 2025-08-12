@@ -198,8 +198,8 @@ const OrderForm = () => {
         distance: distance ? Number(distance) : 0,
 
         // createdAt(등록일)은 백엔드 @CreationTimestamp로 자동 기록
-        reservedDate: !isImmediate && selectedDate ? selectedDate.toISOString() : "",
-        isImmediate,
+        reservedDate: isImmediate ? null : (selectedDate ? selectedDate.toISOString() : null),
+        isImmediate: !!isImmediate,
 
         // 옵션
         weight,

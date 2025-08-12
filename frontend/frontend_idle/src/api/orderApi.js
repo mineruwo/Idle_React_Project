@@ -72,4 +72,13 @@ export const updateOrder = async (orderId, updatedData) => {
     throw error;
   }
 };
+export const getDriverOfferSummary = async (orderId) => {
+  const { data } = await axios.get(`/api/orders/${orderId}/offers/summary`);
+  return data; // { count, minPrice, avgPrice }
+};
+
+export const createDriverOffer = async (orderId, { driverId, price, memo }) => {
+  const { data } = await axios.post(`/api/orders/${orderId}/offers`, { driverId, price, memo });
+  return data;
+};
 

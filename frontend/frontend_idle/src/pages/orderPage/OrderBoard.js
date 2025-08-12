@@ -71,23 +71,33 @@ const fmtDateTime = (v) => {
   }
 };
 
-const prettyPacking = (packingOptions) => {
-  if (!packingOptions) return "-";
-  const keys = Array.isArray(packingOptions)
-    ? packingOptions
-    : String(packingOptions)
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-  if (!keys.length) return "-";
-  return keys.map((k) => packingKeyToText[k] || k).join(", ");
+// 포장 문자열/JSON/배열 모두 안전하게 변환
+const prettyPacking = (val) => {
+  if (!val) return "-";
+  try {
+    if (typeof val === "string" && val.trim().startsWith("{")) {
+      const obj = JSON.parse(val);
+      const keys = Object.entries(obj)
+        .filter(([, v]) => !!v)
+        .map(([k]) => packingKeyToText[k] || k);
+      return keys.length ? keys.join(", ") : "-";
+    }
+  } catch { }
+  const keys = Array.isArray(val)
+    ? val
+    : String(val)
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  return keys.length ? keys.map((k) => packingKeyToText[k] || k).join(", ") : "-";
 };
 
-// 안전 숫자 변환
 const n = (v, def = 0) => {
   const num = Number(v);
   return Number.isFinite(num) ? num : def;
 };
+
+const isImmediateOf = (o) => (o?.isImmediate ?? o?.immediate) === true;
 
 /* ========================= 컴포넌트 ========================= */
 const OrderBoard = () => {
@@ -108,8 +118,12 @@ const OrderBoard = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
+  
+
   const panelRef = useRef(null);
   const cardRefs = useRef({});
+
+  
 
   useEffect(() => {
     (async () => {
@@ -146,12 +160,13 @@ const OrderBoard = () => {
   // 검색/필터
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    const matchText = (text) =>
-      String(text || "").toLowerCase().includes(needle);
+    const matchText = (text) => String(text || "").toLowerCase().includes(needle);
 
     return orders.filter((o) => {
-      if (immediateFilter === "immediate" && !o.isImmediate) return false;
-      if (immediateFilter === "reserved" && o.isImmediate) return false;
+      const immediate = isImmediateOf(o);
+
+      if (immediateFilter === "immediate" && !immediate) return false;
+      if (immediateFilter === "reserved" && immediate) return false;
       if (vehicleFilter && o.vehicle !== vehicleFilter) return false;
 
       if (!needle) return true;
@@ -160,7 +175,7 @@ const OrderBoard = () => {
       const sizeLabel = LABEL.cargoSize[o.cargoSize] || o.cargoSize || "";
       const weightLabel = LABEL.weight[o.weight] || o.weight || "";
       const vehicleLabel = LABEL.vehicle[o.vehicle] || o.vehicle || "";
-      const packingText = prettyPacking(o.packingOptions);
+      const packingText = prettyPacking(o.packingOptions ?? o.packingOption);
 
       return (
         matchText(o.departure) ||
@@ -179,7 +194,6 @@ const OrderBoard = () => {
   const sorted = useMemo(() => {
     const arr = [...filtered];
     if (sortKey === "latest") {
-      // 최신순 = createdAt 내림차순
       arr.sort((a, b) => {
         const ta = new Date(a.createdAt || a.date || 0).getTime();
         const tb = new Date(b.createdAt || b.date || 0).getTime();
@@ -190,20 +204,14 @@ const OrderBoard = () => {
 
     if (sortKey === "distance") {
       arr.sort((a, b) =>
-        sortDir === "asc"
-          ? n(a.distance) - n(b.distance)
-          : n(b.distance) - n(a.distance)
+        sortDir === "asc" ? n(a.distance) - n(b.distance) : n(b.distance) - n(a.distance)
       );
       return arr;
     }
 
     if (sortKey === "avgPrice") {
-      // 평균가가 없으면 proposedPrice/driverPrice로 보조
-      const getPrice = (o) =>
-        n(o.avgPrice, n(o.proposedPrice, n(o.driverPrice, 0)));
-      arr.sort((a, b) =>
-        sortDir === "asc" ? getPrice(a) - getPrice(b) : getPrice(b) - getPrice(a)
-      );
+      const getPrice = (o) => n(o.avgPrice, n(o.proposedPrice, n(o.driverPrice, 0)));
+      arr.sort((a, b) => (sortDir === "asc" ? getPrice(a) - getPrice(b) : getPrice(b) - getPrice(a)));
       return arr;
     }
 
@@ -213,6 +221,13 @@ const OrderBoard = () => {
   // 페이지네이션
   const total = sorted.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  // ✅ 보드 진입 시 무조건 최상단으로
+  useEffect(() => {
+    // 브라우저의 스크롤 복원 동작 대비해서 2번 보정
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    requestAnimationFrame(() => window.scrollTo(0, 0));
+  }, []);
 
   // 필터/정렬이 바뀌면 1페이지로
   useEffect(() => {
@@ -243,20 +258,20 @@ const OrderBoard = () => {
             placeholder="출발/도착/화물/차량/포장/상태로 검색..."
           />
 
-          <Select value={immediateFilter} onChange={(e) => setImmediateFilter(e.target.value)}>
+          <SelectBox value={immediateFilter} onChange={(e) => setImmediateFilter(e.target.value)}>
             <option value="all">전체(즉시+예약)</option>
             <option value="immediate">즉시</option>
             <option value="reserved">예약</option>
-          </Select>
+          </SelectBox>
 
-          <Select value={vehicleFilter} onChange={(e) => setVehicleFilter(e.target.value)}>
+          <SelectBox value={vehicleFilter} onChange={(e) => setVehicleFilter(e.target.value)}>
             <option value="">차량 전체</option>
             <option value="1ton">1톤 트럭</option>
             <option value="2.5ton">2.5톤 트럭</option>
             <option value="5ton">5톤 트럭</option>
             <option value="top">탑차</option>
             <option value="cold">냉장/냉동차</option>
-          </Select>
+          </SelectBox>
 
           <ResetBtn onClick={resetFilters}>초기화</ResetBtn>
         </FilterBar>
@@ -265,34 +280,33 @@ const OrderBoard = () => {
         <ControlsRow>
           <SortGroup>
             <SortLabel>정렬</SortLabel>
-            <Select value={sortKey} onChange={(e) => setSortKey(e.target.value)}>
+            <SelectBox value={sortKey} onChange={(e) => setSortKey(e.target.value)}>
               <option value="latest">최신순</option>
               <option value="distance">거리</option>
               <option value="avgPrice">평균가</option>
-            </Select>
+            </SelectBox>
 
             {sortKey !== "latest" && (
-              <Select value={sortDir} onChange={(e) => setSortDir(e.target.value)}>
+              <SelectBox value={sortDir} onChange={(e) => setSortDir(e.target.value)}>
                 <option value="asc">오름차순</option>
                 <option value="desc">내림차순</option>
-              </Select>
+              </SelectBox>
             )}
           </SortGroup>
 
           <PageSizeGroup>
             <SortLabel>페이지 당</SortLabel>
-            <Select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))}>
+            <SelectBox value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))}>
               <option value={5}>5</option>
               <option value={10}>10</option>
               <option value={20}>20</option>
-            </Select>
+            </SelectBox>
           </PageSizeGroup>
         </ControlsRow>
 
         <ResultMeta>
           총 {orders.length}건 중 <strong>{filtered.length}</strong>건(필터) →{" "}
-          <strong>{total}</strong>건(정렬) 중{" "}
-          <strong>{paged.length}</strong>건 표시 (페이지 {page}/{totalPages})
+          <strong>{total}</strong>건(정렬) 중 <strong>{paged.length}</strong>건 표시 (페이지 {page}/{totalPages})
         </ResultMeta>
 
         <CardList>
@@ -301,6 +315,7 @@ const OrderBoard = () => {
             const sizeLabel = LABEL.cargoSize[o.cargoSize] || o.cargoSize || "-";
             const weightLabel = LABEL.weight[o.weight] || o.weight || "-";
             const vehicleLabel = LABEL.vehicle[o.vehicle] || o.vehicle || "-";
+            const immediate = isImmediateOf(o);
 
             return (
               <Card
@@ -341,7 +356,7 @@ const OrderBoard = () => {
                   <Col>
                     <SubLabel>예약 시간</SubLabel>
                     <SubValue>
-                      {o.isImmediate ? "즉시" : o.reservedDate ? fmtDateTime(o.reservedDate) : "-"}
+                      {immediate ? "즉시" : o.reservedDate ? fmtDateTime(o.reservedDate) : "-"}
                     </SubValue>
                   </Col>
                 </InfoGrid>
@@ -360,25 +375,15 @@ const OrderBoard = () => {
 
           <PageNumbers>
             {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .slice(
-                Math.max(0, page - 3),
-                Math.max(0, page - 3) + 5 // 최대 5개만 노출
-              )
+              .slice(Math.max(0, page - 3), Math.max(0, page - 3) + 5)
               .map((p) => (
-                <PageNumber
-                  key={p}
-                  data-active={p === page}
-                  onClick={() => setPage(p)}
-                >
+                <PageNumber key={p} data-active={p === page} onClick={() => setPage(p)}>
                   {p}
                 </PageNumber>
               ))}
           </PageNumbers>
 
-          <PageBtn
-            disabled={page === totalPages}
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-          >
+          <PageBtn disabled={page === totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>
             다음 →
           </PageBtn>
         </Pagination>
@@ -428,11 +433,11 @@ const OrderBoard = () => {
               <Row>
                 <Key>예약시간</Key>
                 <Val>
-                  {selected.isImmediate
+                  {isImmediateOf(selected)
                     ? "즉시"
                     : selected.reservedDate
-                    ? fmtDateTime(selected.reservedDate)
-                    : "-"}
+                      ? fmtDateTime(selected.reservedDate)
+                      : "-"}
                 </Val>
               </Row>
             </Section>
@@ -446,21 +451,15 @@ const OrderBoard = () => {
               <SectionTitle>운임 정보</SectionTitle>
               <Row>
                 <Key>기사 제안가</Key>
-                <Val>
-                  {selected.driverPrice ? `${Number(selected.driverPrice).toLocaleString()} 원` : "-"}
-                </Val>
+                <Val>{selected.driverPrice ? `${Number(selected.driverPrice).toLocaleString()} 원` : "-"}</Val>
               </Row>
               <Row>
                 <Key>화주 제안가</Key>
-                <Val>
-                  {selected.proposedPrice ? `${Number(selected.proposedPrice).toLocaleString()} 원` : "-"}
-                </Val>
+                <Val>{selected.proposedPrice ? `${Number(selected.proposedPrice).toLocaleString()} 원` : "-"}</Val>
               </Row>
               <Row>
                 <Key>평균가</Key>
-                <Val>
-                  {selected.avgPrice ? `${Number(selected.avgPrice).toLocaleString()} 원` : "-"}
-                </Val>
+                <Val>{selected.avgPrice ? `${Number(selected.avgPrice).toLocaleString()} 원` : "-"}</Val>
               </Row>
               <RightHint>
                 예상 거리 {selected.distance != null ? `${Number(selected.distance).toFixed(2)}km` : "-"}
@@ -475,8 +474,7 @@ const OrderBoard = () => {
 
 export default OrderBoard;
 
-/* ========================= 스타일 (핑크 테마) ========================= */
-
+/* ========================= 스타일 (핑크 테마, 반응형 보강) ========================= */
 const PINK = {
   bg: "#fff7fb",
   cardBorder: "#f9d8e8",
@@ -509,12 +507,15 @@ const PageWrap = styled.div`
   @media (max-width: 1200px) {
     grid-template-columns: 1fr;
   }
+  @media (max-width: 600px) {
+    padding: 16px;
+    gap: 16px;
+  }
 `;
 
 const ListArea = styled.div`
   transition: transform 260ms ease, opacity 260ms ease;
   transform-origin: left center;
-
   &[data-panel-open="true"] {
     transform: translateX(0px);
   }
@@ -522,7 +523,7 @@ const ListArea = styled.div`
 
 const Header = styled.h1`
   margin: 6px 0 12px;
-  font-size: 28px;
+  font-size: clamp(22px, 2.4vw, 28px);
   font-weight: 800;
   color: ${PINK.header};
 `;
@@ -544,28 +545,24 @@ const SearchInput = styled.input`
   border-radius: 10px;
   border: 1px solid ${PINK.cardBorder};
   background: #fff;
-  font-size: 14px;
+  font-size: 16px;
   box-shadow: 0 2px 8px ${PINK.cardShadow};
   outline: none;
 
-  &:focus {
-    border-color: ${PINK.cardBorderHover};
-  }
+  &:focus { border-color: ${PINK.cardBorderHover}; }
 `;
 
-const Select = styled.select`
+const SelectBox = styled.select`
   height: 42px;
   padding: 0 12px;
   border-radius: 10px;
   border: 1px solid ${PINK.cardBorder};
   background: #fff;
-  font-size: 14px;
+  font-size: 16px;
   box-shadow: 0 2px 8px ${PINK.cardShadow};
   outline: none;
 
-  &:focus {
-    border-color: ${PINK.cardBorderHover};
-  }
+  &:focus { border-color: ${PINK.cardBorderHover}; }
 `;
 
 const ResetBtn = styled.button`
@@ -577,10 +574,7 @@ const ResetBtn = styled.button`
   color: ${PINK.header};
   font-weight: 800;
   cursor: pointer;
-
-  &:hover {
-    background: ${PINK.backBgHover};
-  }
+  &:hover { background: ${PINK.backBgHover}; }
 `;
 
 const ControlsRow = styled.div`
@@ -632,7 +626,6 @@ const Card = styled.div`
     border-color: ${PINK.cardBorderHover};
     box-shadow: 0 6px 18px ${PINK.cardShadowHover};
   }
-
   &[data-selected="true"] {
     border-color: ${PINK.strong};
     box-shadow: 0 8px 22px rgba(232, 90, 166, 0.2);
@@ -644,6 +637,8 @@ const RowBetween = styled.div`
   justify-content: space-between;
   align-items: baseline;
   margin-bottom: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
 `;
 
 const FromTo = styled.div`
@@ -652,6 +647,11 @@ const FromTo = styled.div`
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+
+  @media (max-width: 520px) {
+    white-space: normal;
+    line-height: 1.35;
+  }
 `;
 
 const Strong = styled.span`
@@ -671,6 +671,9 @@ const InfoGrid = styled.div`
 
   @media (max-width: 760px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
   }
 `;
 
@@ -713,15 +716,13 @@ const PageBtn = styled.button`
   color: ${PINK.header};
   font-weight: 800;
   cursor: pointer;
-  &:disabled {
-    opacity: .5;
-    cursor: default;
-  }
+  &:disabled { opacity: .5; cursor: default; }
 `;
 
 const PageNumbers = styled.div`
   display: flex;
   gap: 6px;
+  flex-wrap: wrap;
 `;
 
 const PageNumber = styled.button`
@@ -765,6 +766,7 @@ const DetailArea = styled.aside`
   @media (max-width: 1200px) {
     position: static;
     height: auto;
+    margin-top: 8px;
   }
 `;
 
@@ -786,10 +788,7 @@ const BackBtn = styled.button`
   border-radius: 10px;
   font-weight: 800;
   cursor: pointer;
-
-  &:hover {
-    background: ${PINK.backBgHover};
-  }
+  &:hover { background: ${PINK.backBgHover}; }
 `;
 
 const DetailTitle = styled.h2`
