@@ -1,6 +1,8 @@
-.point-layout-container {
+.sp-point-layout-container {
     display: flex;
-    flex-direction: column; /* 세로로 정렬 */
+    flex-direction: row; /* 가로로 정렬 */
+    flex-wrap: wrap;
+    justify-content: space-between;
     gap: 2rem;
     padding: 2rem;
     max-width: 1200px;
@@ -10,10 +12,10 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.point-management-section,
+.sp-point-management-section,
 .order-info-section {
     /* order-info-section 추가 */
-    flex: 2 1 0%;
+    flex: 1 1 48%; /* Adjust to take roughly half width with gap */
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -54,13 +56,14 @@
     border-radius: 8px;
 }
 
-.page-title,
+.sp-page-title,
 .point-history-section h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #eee;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #f3c7d3;
 }
 
 .history-item.plus .history-amount,
@@ -110,9 +113,13 @@
     text-align: right;
 }
 
-.use-amount-input .section-title {
-    font-weight: 500;
-    margin-bottom: 0.5rem;
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+    color: #333;
 }
 
 .use-amount-input input {
@@ -293,4 +300,88 @@
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid #e0e0e0;
+}
+
+/* Charge Point Table Design */
+.charge-point-table {
+    list-style: none;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    background-color: #ffffff;
+    border: 1px solid #f3c7d3;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.charge-point-table li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    font-size: 1rem;
+    color: #555;
+}
+
+.charge-point-table li:not(:last-child) {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.charge-point-table li span {
+    font-weight: 500;
+    color: #333;
+}
+
+.charge-point-table li .plus {
+    color: #2e7d32;
+    font-weight: 700;
+}
+
+.charge-point-table .after-charge-pt {
+    font-weight: bold;
+    color: #000;
+    padding-top: 1.5rem;
+    margin-top: 0.5rem;
+    border-top: 2px solid #f3c7d3;
+}
+
+.charge-point-table .after-charge-pt .final {
+    font-size: 1.2rem;
+    color: #d81b60;
+}
+
+.point-charge-actions {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.point-sections-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+}
+
+.sections-content-area {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    background: #fef8f8;
+    border-radius: 12px;
+    padding: 2em 1.4em;
+    border: 1px solid #f3c7d3;
+}
+
+.sections-content-area > .sp-point-management-section {
+    background: none;
+    border: none;
+    padding: 0;
+    box-shadow: none;
+}
+
+@media (min-width: 769px) and (max-width: 1113px) {
+    .preset-btn {
+        white-space: nowrap;
+        padding: 0.6rem;
+        font-size: 0.9rem;
+    }
 }

@@ -1,4 +1,4 @@
-.point-layout-container {
+.spp-point-layout-container {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -30,7 +30,7 @@
     }
 }
 
-.point-management-section,
+.spp-point-management-section,
 .order-info-section {
     flex: 2 1 0%;
     display: flex;
@@ -50,14 +50,24 @@
     border-radius: 8px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
+    gap: 2rem;
 }
 
 .order-amount {
     font-size: 1.5rem;
     font-weight: bold;
     color: #333;
-    text-align: right;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.order-amount span:first-child {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #666;
 }
 
 .point-use-wrap {
@@ -66,7 +76,7 @@
     border-radius: 8px;
 }
 
-.page-title {
+.spp-page-title {
     font-size: 1.25rem;
     font-weight: 600;
     margin-bottom: 1rem;
@@ -78,7 +88,7 @@
     list-style: none;
     padding: 0;
     margin: 0;
-    margin-right: 2rem;
+    flex: 1;
 }
 
 .order-info-table li {
@@ -198,7 +208,7 @@
 }
 
 .point-usage-section,
-.payment-method-section {
+.spp-payment-method-section {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -234,7 +244,7 @@
     min-width: 250px;
 }
 
-.summary-section .page-title {
+.summary-section .spp-page-title {
     margin-top: 0;
     margin-bottom: 20px;
     color: #333;

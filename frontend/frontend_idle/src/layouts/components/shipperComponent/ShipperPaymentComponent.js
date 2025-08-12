@@ -225,25 +225,22 @@ const ShipperPaymentComponent = ({ nickname, userId }) => {
     const vatAmount = finalPaymentAmount - supplyAmount;
 
     return (
-        <div className="point-layout-container">
+        <div className="spp-point-layout-container">
             <div className="left-sections-wrapper">
                 <button onClick={addOrder} style={{ marginBottom: "1rem" }}>
                     주문 정보 추가 테스트
                 </button>
                 {/* 주문 정보 섹션 */}
                 <div className="order-info-section">
-                    <h2 className="page-title">주문 정보</h2>
+                    <h2 className="spp-page-title">주문 정보</h2>
                     {orderList.map((order) => (
                         <div className="order-item">
                             <div className="order-amount">
-                                {order.amount.toLocaleString()}원
+                                <span>{order.orderId}</span>
+                                <span>{order.amount.toLocaleString()}원</span>
                             </div>
                             <div className="order-details-wrap">
                                 <ul className="order-info-table">
-                                    <li>
-                                        <span>주문 번호</span>
-                                        <span>{order.orderId}</span>
-                                    </li>
                                     <li>
                                         <span>상품명</span>
                                         <span>{order.itemName}</span>
@@ -260,6 +257,8 @@ const ShipperPaymentComponent = ({ nickname, userId }) => {
                                         <span>화물 종류</span>
                                         <span>{order.cargoType}</span>
                                     </li>
+                                </ul>
+                                <ul className="order-info-table">
                                     <li>
                                         <span>크기</span>
                                         <span>{order.size}</span>
@@ -283,8 +282,8 @@ const ShipperPaymentComponent = ({ nickname, userId }) => {
                 </div>
 
                 {/* 포인트 사용 섹션 */}
-                <div className="point-usage-section point-management-section">
-                    <h2 className="page-title">포인트 사용</h2>
+                <div className="point-usage-section spp-point-management-section">
+                    <h2 className="spp-page-title">포인트 사용</h2>
                     <div className="point-usage-details-content">
                         <div className="current-points">
                             현재 사용 가능 포인트:{" "}
@@ -326,8 +325,8 @@ const ShipperPaymentComponent = ({ nickname, userId }) => {
                     </div>
                 </div>
 
-                <div className="payment-method-section point-management-section">
-                    <h2 className="page-title">결제 수단</h2>
+                <div className="spp-payment-method-section spp-point-management-section">
+                    <h2 className="spp-page-title">결제 수단</h2>
                     <div className="payment-method-details-content">
                         <div className="payment-group">
                             <h3 className="payment-group-title">일반결제</h3>
@@ -429,8 +428,8 @@ const ShipperPaymentComponent = ({ nickname, userId }) => {
                 </div>
             </div>
 
-            <div className="summary-section point-management-section">
-                <h2 className="page-title">결제 요약</h2>
+            <div className="summary-section spp-point-management-section">
+                <h2 className="spp-page-title">결제 요약</h2>
                 <div className="summary-details-content">
                     <ul className="summary-table">
                         <li>
