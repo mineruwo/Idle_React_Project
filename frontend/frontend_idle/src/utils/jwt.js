@@ -31,6 +31,11 @@ export function parseJwt(token) {
   }
 }
 
+export function getIdFromToken(token) {
+  const claims = parseJwt(token);
+  return claims?.sub ?? null;
+}
+
 export function getRoleFromToken(token) {
   const claims = parseJwt(token);
   return claims?.role ? String(claims.role).toLowerCase() : null;
