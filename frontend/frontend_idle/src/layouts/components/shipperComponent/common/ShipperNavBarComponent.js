@@ -3,7 +3,6 @@ import useCustomMove from "../../../../hooks/useCustomMove";
 const ShipperNavBarComponent = () => {
     const {
         shipperMoveToDashBoard,
-        shipperMoveToDetails,
         shipperMoveToOrder,
         shipperMoveToOrderBoard,
         shipperMoveToPoint,
@@ -63,12 +62,6 @@ const ShipperNavBarComponent = () => {
                                 onClick={shipperMoveToOrderBoard}
                             >
                                 <div className="nav-link">오더게시판</div>
-                            </li>
-                            <li
-                                className="nav-item py-2 border-bottom border-light border-opacity-25"
-                                onClick={shipperMoveToDetails}
-                            >
-                                <div className="nav-link">오더상세</div>
                             </li>
                             <li
                                 className="nav-item py-2 border-bottom border-light border-opacity-25"

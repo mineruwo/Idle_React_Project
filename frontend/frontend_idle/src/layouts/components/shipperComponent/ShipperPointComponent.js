@@ -176,7 +176,9 @@ const ShipperPointComponent = ({ nickname, userId }) => {
                             <li>
                                 충전할 포인트{" "}
                                 <span className="plus">
-                                    +{Number(chargeAmount || 0).toLocaleString()}P
+                                    +
+                                    {Number(chargeAmount || 0).toLocaleString()}
+                                    P
                                 </span>
                             </li>
                             <li className="after-charge-pt">
@@ -198,9 +200,7 @@ const ShipperPointComponent = ({ nickname, userId }) => {
                 <h2 className="sp-page-title">결제 수단</h2>
                 <div className="payment-method-details-content">
                     <div className="payment-group">
-                        <h3 className="payment-group-title">
-                            일반결제
-                        </h3>
+                        <h3 className="payment-group-title">일반결제</h3>
                         <div className="pay-method-list easy-payment-options">
                             <label
                                 className={`payment-option ${
@@ -213,13 +213,9 @@ const ShipperPointComponent = ({ nickname, userId }) => {
                                     type="radio"
                                     name="paymentType"
                                     value="card"
-                                    checked={
-                                        selectedPaymentType === "card"
-                                    }
+                                    checked={selectedPaymentType === "card"}
                                     onChange={(e) =>
-                                        setSelectedPaymentType(
-                                            e.target.value
-                                        )
+                                        setSelectedPaymentType(e.target.value)
                                     }
                                 />
                                 <span>일반결제</span>
@@ -227,9 +223,7 @@ const ShipperPointComponent = ({ nickname, userId }) => {
                         </div>
                     </div>
                     <div className="payment-group">
-                        <h3 className="payment-group-title">
-                            간편결제
-                        </h3>
+                        <h3 className="payment-group-title">간편결제</h3>
                         <div className="pay-method-list easy-payment-options">
                             <label
                                 className={`payment-option ${
@@ -242,14 +236,9 @@ const ShipperPointComponent = ({ nickname, userId }) => {
                                     type="radio"
                                     name="paymentType"
                                     value="kakaopay"
-                                    checked={
-                                        selectedPaymentType ===
-                                        "kakaopay"
-                                    }
+                                    checked={selectedPaymentType === "kakaopay"}
                                     onChange={(e) =>
-                                        setSelectedPaymentType(
-                                            e.target.value
-                                        )
+                                        setSelectedPaymentType(e.target.value)
                                     }
                                 />
                                 <span>카카오페이</span>
@@ -265,14 +254,9 @@ const ShipperPointComponent = ({ nickname, userId }) => {
                                     type="radio"
                                     name="paymentType"
                                     value="tosspay"
-                                    checked={
-                                        selectedPaymentType ===
-                                        "tosspay"
-                                    }
+                                    checked={selectedPaymentType === "tosspay"}
                                     onChange={(e) =>
-                                        setSelectedPaymentType(
-                                            e.target.value
-                                        )
+                                        setSelectedPaymentType(e.target.value)
                                     }
                                 />
                                 <span>토스페이</span>
@@ -288,13 +272,9 @@ const ShipperPointComponent = ({ nickname, userId }) => {
                                     type="radio"
                                     name="paymentType"
                                     value="payco"
-                                    checked={
-                                        selectedPaymentType === "payco"
-                                    }
+                                    checked={selectedPaymentType === "payco"}
                                     onChange={(e) =>
-                                        setSelectedPaymentType(
-                                            e.target.value
-                                        )
+                                        setSelectedPaymentType(e.target.value)
                                     }
                                 />
                                 <span>페이코</span>
@@ -312,9 +292,7 @@ const ShipperPointComponent = ({ nickname, userId }) => {
                 {isLoading
                     ? "결제 처리중..."
                     : chargeAmount
-                    ? `${Number(
-                          chargeAmount
-                      ).toLocaleString()}원 충전하기`
+                    ? `${Number(chargeAmount).toLocaleString()}원 충전하기`
                     : "금액을 입력해주세요"}
             </button>
             {message && <p className="payment-message">{message}</p>}

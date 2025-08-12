@@ -7,10 +7,6 @@ const useCustomMove = () => {
         navigate({ pathname: `../shipper` });
     };
 
-    const shipperMoveToDetails = () => {
-        navigate({ pathname: `../shipper/details` });
-    };
-
     const shipperMoveToOrder = () => {
         navigate({ pathname: `../shipper/order` });
     };
@@ -58,11 +54,10 @@ const useCustomMove = () => {
 
     const moveToMainPage = () => {
         navigate("/");
-    }
+    };
 
     return {
         shipperMoveToDashBoard,
-        shipperMoveToDetails,
         shipperMoveToOrder,
         shipperMoveToOrderBoard,
         shipperMoveToPayment,
@@ -79,7 +74,7 @@ const useCustomMove = () => {
         moveToWebSocketTestPage,
         moveToLoginPage,
         moveToSignUpPage,
-        moveToMainPage
+        moveToMainPage,
     };
 };
 
