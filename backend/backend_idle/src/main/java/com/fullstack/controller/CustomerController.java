@@ -1,17 +1,11 @@
 package com.fullstack.controller;
 
 import com.fullstack.model.CustomerDTO;
-import com.fullstack.model.LoginResponseDTO;
-import com.fullstack.security.jwt.JWTUtil;
 import com.fullstack.service.CustomerService;
 
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
-import java.time.Duration;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

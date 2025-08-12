@@ -16,7 +16,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
-import com.fullstack.model.enums.Role;
+import com.fullstack.model.enums.AdminRole;
+
 
 
 @Entity
@@ -38,7 +39,7 @@ public class Admin {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ROLE", nullable = false)
-    private Role role;
+    private AdminRole role;
 
     @Column(name = "PASSWORD", nullable = false)
     private String password;
