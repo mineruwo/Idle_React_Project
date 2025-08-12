@@ -10,5 +10,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminLoginResponseDTO {
-    private AdminDTO admin;
+    private String adminId;
+    private String name;
+    private String role;
+
+    public AdminLoginResponseDTO(AdminDTO adminDTO) {
+        this.adminId = adminDTO.getAdminId();
+        this.name = adminDTO.getName();
+        this.role = adminDTO.getRole().name();
+    }
 }
