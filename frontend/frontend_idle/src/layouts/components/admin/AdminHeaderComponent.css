@@ -1,8 +1,31 @@
 .admin-header-container {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Adjust as needed */
+    justify-content: space-between;
     width: 100%;
+    padding: 0 10px; /* 좌우 패딩 추가 */
+}
+
+.header-left-section, .header-right-section {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* 요소 사이의 간격 */
+}
+
+.user-info {
+    color: white; /* 텍스트 색상 */
+    font-weight: bold;
+}
+
+.logout-btn {
+    background-color: transparent;
+    border: none;
+    color: white;
+    padding: 0;
+}
+
+.logout-btn:hover {
+    text-decoration: underline;
 }
 
 .admin-header-hamburger {
@@ -12,15 +35,13 @@
     font-size: 24px;
     cursor: pointer;
     color: white; /* Adjust color to match header */
-    margin-right: 15px; /* Space between hamburger and brand */
 }
 
 @media (max-width: 767px) {
     .admin-header-hamburger {
         display: block; /* Show on smaller screens */
     }
-    /* Adjust other header elements for smaller screens if necessary */
-    .admin-header-container .navbar-brand {
-        margin-left: 0; /* Remove default margin if any */
+    .user-info {
+        display: none; /* 작은 화면에서는 사용자 정보 숨기기 (선택 사항) */
     }
 }

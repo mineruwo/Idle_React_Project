@@ -1,4 +1,3 @@
-import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -16,24 +15,25 @@ import RadioGroup from '@mui/material/RadioGroup';
 import useCustomMove from '../../../hooks/useCustomMove';
 import { checkIdDuplicate, checkNicknameDuplicate, signUp } from '../../../api/signupApi';
 import { UserCard as Card, UserContainer as SignUpContainer } from '../../../theme/User/UserCard';
+import { useState } from 'react';
 
 export default function SignUp(props) {
-  const [emailError, setEmailError] = React.useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
-  const [passwordError, setPasswordError] = React.useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
-  const [nameError, setNameError] = React.useState(false);
-  const [nameErrorMessage, setNameErrorMessage] = React.useState('');
-  const [nicknameError, setNicknameError] = React.useState(false);
-  const [nicknameErrorMessage, setNicknameErrorMessage] = React.useState('');
-  const [phoneError, setPhoneError] = React.useState(false);
-  const [phoneErrorMessage, setPhoneErrorMessage] = React.useState('');
-  const [customName, setCustomName] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [nickname, setNickname] = React.useState("");
-  const [id, setId] = React.useState("");
-  const [phone, setPhone] = React.useState("");
-  const [role, setRole] = React.useState('shipper');
+  const [emailError, setEmailError] = useState(false);
+  const [emailErrorMessage, setEmailErrorMessage] = useState('');
+  const [passwordError, setPasswordError] = useState(false);
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
+  const [nameError, setNameError] = useState(false);
+  const [nameErrorMessage, setNameErrorMessage] = useState('');
+  const [nicknameError, setNicknameError] = useState(false);
+  const [nicknameErrorMessage, setNicknameErrorMessage] = useState('');
+  const [phoneError, setPhoneError] = useState(false);
+  const [phoneErrorMessage, setPhoneErrorMessage] = useState('');
+  const [customName, setCustomName] = useState("");
+  const [password, setPassword] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [id, setId] = useState("");
+  const [phone, setPhone] = useState("");
+  const [role, setRole] = useState('shipper');
 
   const {
     moveToLoginPage,

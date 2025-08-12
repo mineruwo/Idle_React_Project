@@ -14,6 +14,10 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import com.fullstack.model.CustomerDTO;
+import com.fullstack.service.CustomerService;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +33,9 @@ public class AdminController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private CustomerService customerService;
 
     @PostMapping("/login")
     public ResponseEntity<AdminLoginResponseDTO> login(@RequestBody AdminLoginRequestDTO loginRequestDTO, HttpServletResponse response) {
@@ -87,6 +94,16 @@ public class AdminController {
         return ResponseEntity.ok(adminPage);
     }
 
+    @GetMapping("/customers")
+    public ResponseEntity<Page<CustomerDTO>> getCustomerList(Pageable pageable) {
+        Page<CustomerDTO> customerPage = customerService.getCustomers(pageable).map(customer -> new CustomerDTO().builder()
+                .id(customer.getId())
+                .role(customer.getRole())
+                .createdAt(customer.getCreatedAt())
+                .customName(customer.getCustomName()).build());
+        return ResponseEntity.ok(customerPage);
+    }
+
     @PostMapping("/accounts")
     @PreAuthorize("hasAuthority('ROLE_DEV_ADMIN') or hasAuthority('ROLE_ALL_PERMISSION')")
     public ResponseEntity<?> createAdmin(@RequestBody AdminDTO adminDTO) {
@@ -95,6 +112,18 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.CREATED).body(createdAdmin);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating admin: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/customers")
+    @PreAuthorize("hasAuthority('ROLE_DEV_ADMIN') or hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_ALL_PERMISSION')")
+    public ResponseEntity<?> createCustomer(@RequestBody CustomerDTO customerDTO) {
+        System.out.println("Received customer creation request for: " + customerDTO);
+        try {
+            CustomerDTO createdCustomer = customerService.createCustomer(customerDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdCustomer);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating customer: " + e.getMessage());
         }
     }
 }

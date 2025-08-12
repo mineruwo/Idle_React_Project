@@ -9,6 +9,7 @@ import adminRoutes from "./adminRouter";
 import FloatingChatButton from "../layouts/components/common/FloatingChatButton";
 import OrderBoard from "../pages/orderPage/OrderBoard";
 import shipperRouter from "./shipperRouter";
+import { RedirectIfAuthed } from "../auth/RouteGuards";
 
 const Loading = <div>Loading 중...</div>;
 
@@ -17,7 +18,7 @@ const Main = lazy(() => import("../pages/mainpage/MainPage"));
 const DashPage = lazy(() => import("../pages/carOwnerPage/CarPage"));
 const OrderForm = lazy(() => import("../pages/orderPage/OrderForm"));
 const Login = lazy(() => import("../pages/loginpage/LoginPage"));
-const Singup = lazy(() => import("../pages/signuppage/SignupPage"));
+const Signup = lazy(() => import("../pages/signuppage/SignupPage"));
 const Dstest = lazy(() => import("../pages/mainpage/TestPage"));
 const AdminPage = lazy(() => import("../pages/adminPage/AdminPage"));
 const Shipper = lazy(() => import("../pages/shipperPage/ShipperDashBoard"));
@@ -136,11 +137,11 @@ const root = createBrowserRouter([
             },
             {
                 path: "login",
-                element: <Login />,
+                element: <RedirectIfAuthed><Login /></RedirectIfAuthed>,
             },
             {
                 path: "signup",
-                element: <Singup />,
+                element: <RedirectIfAuthed><Signup /></RedirectIfAuthed>,
             },
             {
                 path: "dstest",

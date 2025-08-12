@@ -1,29 +1,89 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link, Navigate } from "react-router-dom";
 import "../../../theme/GNB.css";
 import BubbleAnimation from "../carownerComponent/common/BubbleAnimation";
+import { ACCESS_TOKEN_KEY, AUTH_CHANGE_EVENT, clearAccessToken, getAccessToken } from "../../../auth/tokenStore";
+import api from "../../../api/authApi";
+import { getRoleFromToken } from "../../../utils/jwt";
+import useCustomMove from "../../../hooks/useCustomMove";
 
 const GNB = () => {
     const [hideHeader, setHideHeader] = useState(false);
-    const [lastScrollY, setLastScrollY] = useState(0);
 
+    // !! -> 원래 값을 boolean으로 확실하게 변환
+    const [isLoggedIn, setIsLoggedIn] = useState(!!getAccessToken());
+
+    const [role, setRole] = useState(() => {
+        const token = getAccessToken();
+        return token ? getRoleFromToken(token) : null;
+    });
+
+    const {
+        shipperMoveToDashBoard,
+        carOwnerMoveToDashboard,
+        moveToLoginPage,
+        moveToMainPage,
+        moveToSignUpPage
+    } = useCustomMove();
+
+    const lastYRef = useRef(0);
+
+    // 스크롤
     useEffect(() => {
         const handleScroll = () => {
-            const currentY = window.scrollY;
+            const y = window.scrollY;
 
-            if (currentY > lastScrollY && currentY > 80) {
-                setHideHeader(true); // 아래로 스크롤하면 숨김
-            } else {
-                setHideHeader(false); // 위로 스크롤하면 보임
-            }
-
-            setLastScrollY(currentY);
+            if (y > lastYRef.current && y > 80) setHideHeader(true);
+            else setHideHeader(false);
+            lastYRef.current = y;
         };
 
-        window.addEventListener("scroll", handleScroll);
-
+        window.addEventListener("scroll", handleScroll, { passive: true });
         return () => window.removeEventListener("scroll", handleScroll);
-    }, [lastScrollY]);
+    }, []);
+
+    // 로그인/로그아웃/다른 탭 동기화
+    useEffect(() => {
+        const syncAuth = () => {
+            const token = getAccessToken();
+            setIsLoggedIn(!!token);
+            setRole(token ? getRoleFromToken(token) : null);
+        };
+
+
+        const onStorage = (e) => {
+            if (e.key === ACCESS_TOKEN_KEY) syncAuth();
+        };
+
+        window.addEventListener(AUTH_CHANGE_EVENT, syncAuth);
+        window.addEventListener("storage", onStorage);
+
+        // 초기 1회 동기화
+        syncAuth();
+
+        return () => {
+            window.removeEventListener(AUTH_CHANGE_EVENT, syncAuth);
+            window.removeEventListener("storage", onStorage);
+        };
+    }, []);
+
+    const handleMyPage = useCallback(() => {
+        if (role === "shipper") shipperMoveToDashBoard();
+        else if (role === "carrier") carOwnerMoveToDashboard();
+        else moveToLoginPage();
+    }, [role, shipperMoveToDashBoard, carOwnerMoveToDashboard, moveToLoginPage]);
+
+    const handleLogout = async () => {
+        try {
+            if (api?.post) {
+                await api.post("/auth/logout");
+            }
+        } catch (_) { // 에러 발생해도 UI 유지
+        } finally {
+            clearAccessToken();
+            moveToMainPage();
+        }
+    };
 
     return (
         <div
@@ -32,9 +92,13 @@ const GNB = () => {
             data-bs-theme="light"
         >
             <div className="container-fluid">
-                <a href="../" className="navbar-brand">
+                <button
+                    type="button"
+                    className="navbar-brand btn btn-link p-0"
+                    onClick={moveToMainPage}
+                >
                     idle
-                </a>
+                </button>
 
                 <button
                     className="navbar-toggler"
@@ -49,22 +113,51 @@ const GNB = () => {
                 </button>
 
                 <div className="collapse navbar-collapse" id="navbarResponsive">
-                    <ul className="navbar-nav ms-md-auto">
-                        <li className="nav-item">
-                            <Link to="/" className="nav-link">
-                                고객센터(미정)
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link to="/login/" className="nav-link">
-                                로그인
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link to="/signup/" className="nav-link">
-                                회원가입
-                            </Link>
-                        </li>
+                    <ul className="navbar-nav ms-md-auto align-items-center gap-3">
+                        {!isLoggedIn ? (
+                            <>
+                                <li className="nav-item">
+                                    <button
+                                        type="button"
+                                        className="nav-link btn btn-link px-0 py-2"
+                                        onClick={moveToLoginPage}
+                                    >
+                                        로그인
+                                    </button>
+                                </li>
+                                <li className="nav-item">
+                                    <button
+                                        type="button"
+                                        className="nav-link btn btn-link px-0 py-2"
+                                        onClick={moveToSignUpPage}
+                                    >
+                                        회원가입
+                                    </button>
+                                </li>
+                            </>
+                        ) : (
+                            <>
+                                <li className="nav-item">
+                                    <button
+                                        type="button"
+                                        className="nav-link btn btn-link px-0 py-2"
+                                        onClick={handleMyPage}
+                                    >
+                                        마이페이지
+                                    </button>
+                                </li>
+                                <li className="nav-item">
+                                    <button
+                                        type="button"
+                                        className="nav-link btn btn-link px-0 py-2"
+                                        onClick={handleLogout}
+                                    >
+                                        로그아웃
+                                    </button>
+                                </li>
+                            </>
+                        )}
+
                     </ul>
                 </div>
             </div>
