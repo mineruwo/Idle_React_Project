@@ -3,7 +3,7 @@ export const AUTH_CHANGE_EVENT = "auth-change";
 
 export const getAccessToken = () => localStorage.getItem(ACCESS_TOKEN_KEY);
 
-export const setAccessToken = (token, opts) => {
+export const setAccessToken = (token) => {
     localStorage.setItem(ACCESS_TOKEN_KEY, token);
     window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
 } 

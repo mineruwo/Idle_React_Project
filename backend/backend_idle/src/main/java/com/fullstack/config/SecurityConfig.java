@@ -16,6 +16,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.fullstack.security.jwt.JWTFilter;
 
+
 import java.util.Arrays;
 
 @Configuration

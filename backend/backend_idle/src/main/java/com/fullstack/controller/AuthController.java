@@ -10,11 +10,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.fullstack.entity.CustomerEntity;
 import com.fullstack.model.CustomerDTO;
 import com.fullstack.model.LoginResponseDTO;
 import com.fullstack.model.TokenDTO;
+import com.fullstack.repository.CustomerRepository;
 import com.fullstack.security.jwt.JWTUtil;
 import com.fullstack.security.util.TokenCookieUtils;
 import com.fullstack.service.CustomerService;
@@ -32,7 +34,8 @@ public class AuthController {
 	private final CustomerService customerService;
 	private final TokenService tokenService;
 	private final JWTUtil jwtUtil;
-
+	private final CustomerRepository customerRepository;
+	
 	@PostMapping("/login")
 	public ResponseEntity<Map<String, Object>> login(@RequestBody CustomerDTO customerDTO, HttpServletResponse response) {
 		LoginResponseDTO responseDTO = customerService.login(customerDTO);
@@ -75,8 +78,11 @@ public class AuthController {
 	
 	@GetMapping("/auto")
     public ResponseEntity<LoginResponseDTO> getCurrentUser(Authentication authentication) {
-        CustomerEntity customerEntity = (CustomerEntity) authentication.getPrincipal();
-
+	    String id = authentication.getName();
+		
+		CustomerEntity customerEntity = customerRepository.findById(id)
+	            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+		
         LoginResponseDTO loginResponseDTO = new LoginResponseDTO(
         	customerEntity.getId(),
         	customerEntity.getNickname(),
