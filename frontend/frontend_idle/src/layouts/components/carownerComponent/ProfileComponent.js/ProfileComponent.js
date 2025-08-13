@@ -1,19 +1,20 @@
 import { useEffect, useState } from "react";
-import "../../../../theme/CarOwner/profile.css";
+import "../../../../../src/theme/CarOwner/profile.css"
 import useCustomMove from "../../../../hooks/useCustomMove";
-import { fetchCarOwnerProfile } from "../../../../api/CarOwnertransportApi";
+import { fetchCarOwnerProfileMe } from "../../../../api/CarOwnerProfileApi";
 
 const ProfileComponent = () => {
   const { carOwnerMoveToEditProfile } = useCustomMove();
   const [user, setUser] = useState(null);
-  const customName = "hongcha"; // 나중에 로그인 유저 정보로 교체
+  const [err, setErr] = useState(null);
 
   useEffect(() => {
-    fetchCarOwnerProfile(customName)
+    fetchCarOwnerProfileMe()
       .then(setUser)
-      .catch((err) => console.error("프로필 불러오기 실패", err));
-  }, [customName]);
+      .catch((e) => setErr(e.message));
+  }, []);
 
+  if (err) return <div className="profilewrapper">에러: {err}</div>;
   if (!user) return <div className="profilewrapper">로딩 중...</div>;
 
   return (
@@ -22,7 +23,7 @@ const ProfileComponent = () => {
         <div className="profile-card">
           <div className="profile-avatar">
             <div className="imgdiv">
-              <img src="/img/main/tungtung.PNG" />
+              <img src={user.avatarUrl || "/img/main/tungtung.PNG"} alt="avatar" />
             </div>
           </div>
           <div className="avatar-info">

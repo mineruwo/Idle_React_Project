@@ -3,7 +3,7 @@ import "../../../../theme/CarOwner/cardashboard.css";
 import useCustomMove from "../../../../hooks/useCustomMove";
 import WarmthPieChart from "./WarmPieChart";
 import { useEffect } from "react";
-import { fetchTransportSummary } from "../../../../api/CarOwnertransportApi";
+import { fetchTransportSummary } from "../../../../api/CarOwnerProfileApi";
 import { useState } from "react";
 
 const DashboardHeader = ({ name, completed, inProgress, scheduled, total, revenue, commission, settlement }) => {

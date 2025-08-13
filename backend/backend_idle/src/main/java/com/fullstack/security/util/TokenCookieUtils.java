@@ -7,42 +7,47 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class TokenCookieUtils {
-	
-	private static final String REFRESH_TOKEN_NAME = "refreshToken";
-	
-	public static void setRefreshTokenCookie(HttpServletResponse response, String token, long expire) {
-		ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_NAME, token)
-				.httpOnly(true)
-				.secure(true)
-				.path("/")
-				.maxAge(expire)
-				.sameSite("Strict") // 또는 Lax 나중에 확인
-				.build();
-		
+
+	public static void setAccessTokenCookie(HttpServletResponse response, String token, long maxAgeSeconds) {
+		ResponseCookie cookie = ResponseCookie.from("accessToken", token).httpOnly(true).secure(true).sameSite("None")
+				.path("/").maxAge(maxAgeSeconds).build();
 		response.addHeader("Set-Cookie", cookie.toString());
-				
 	}
-	
+
+	public static void clearAccessTokenCookie(HttpServletResponse response) {
+		ResponseCookie cookie = ResponseCookie.from("accessToken", "").httpOnly(true).secure(true).sameSite("None")
+				.path("/").maxAge(0).build();
+		response.addHeader("Set-Cookie", cookie.toString());
+	}
+
+	public static void setRefreshTokenCookie(HttpServletResponse response, String token, long maxAgeSeconds) {
+		ResponseCookie cookie = ResponseCookie.from("refreshToken", token).httpOnly(true).secure(true).sameSite("None")
+				.path("/").maxAge(maxAgeSeconds).build();
+		response.addHeader("Set-Cookie", cookie.toString());
+	}
+
+	public static void clearRefreshTokenCookie(HttpServletResponse response) {
+		ResponseCookie cookie = ResponseCookie.from("refreshToken", "").httpOnly(true).secure(true).sameSite("None")
+				.path("/").maxAge(0).build();
+		response.addHeader("Set-Cookie", cookie.toString());
+	}
+
+	public static String getAccessTokenFromCookie(HttpServletRequest request) {
+		return getCookieValue(request, "accessToken");
+	}
+
 	public static String getRefreshTokenFromCookie(HttpServletRequest request) {
-		if (request.getCookies() != null) {
-			for (Cookie cookie : request.getCookies()) {
-				if (REFRESH_TOKEN_NAME.equals(cookie.getName())) {
-					return cookie.getValue();
-				}
+		return getCookieValue(request, "refreshToken");
+	}
+
+	public static String getCookieValue(HttpServletRequest request, String name) {
+		if (request.getCookies() == null)
+			return null;
+		for (Cookie c : request.getCookies()) {
+			if (name.equals(c.getName())) {
+				return c.getValue();
 			}
 		}
 		return null;
-	}
-	
-	public static void clearRefreshTokenCookie(HttpServletResponse response) {
-		ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_NAME, "")
-				.httpOnly(true)
-				.secure(true)
-				.path("/")
-				.maxAge(0)
-				.sameSite("Strict") // 위와 동일
-				.build();
-		
-		response.addHeader("Set-Cookie", cookie.toString());
 	}
 }

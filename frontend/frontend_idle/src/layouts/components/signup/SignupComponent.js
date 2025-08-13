@@ -1,4 +1,3 @@
-import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -16,36 +15,44 @@ import RadioGroup from '@mui/material/RadioGroup';
 import useCustomMove from '../../../hooks/useCustomMove';
 import { checkIdDuplicate, checkNicknameDuplicate, signUp } from '../../../api/signupApi';
 import { UserCard as Card, UserContainer as SignUpContainer } from '../../../theme/User/UserCard';
+import { useState } from 'react';
+import EmailVerificationModal from '../modal/EmailVerificationModal';
 
 export default function SignUp(props) {
-  const [emailError, setEmailError] = React.useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
-  const [passwordError, setPasswordError] = React.useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
-  const [nameError, setNameError] = React.useState(false);
-  const [nameErrorMessage, setNameErrorMessage] = React.useState('');
-  const [nicknameError, setNicknameError] = React.useState(false);
-  const [nicknameErrorMessage, setNicknameErrorMessage] = React.useState('');
-  const [phoneError, setPhoneError] = React.useState(false);
-  const [phoneErrorMessage, setPhoneErrorMessage] = React.useState('');
-  const [customName, setCustomName] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [nickname, setNickname] = React.useState("");
-  const [id, setId] = React.useState("");
-  const [phone, setPhone] = React.useState("");
-  const [role, setRole] = React.useState('shipper');
+  const [emailError, setEmailError] = useState(false);
+  const [emailErrorMessage, setEmailErrorMessage] = useState('');
+  const [passwordError, setPasswordError] = useState(false);
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
+  const [passwordCheckError, setPasswordCheckError] = useState(false);
+  const [passwordCheckErrorMessage, setPasswordCheckErrorMessage] = useState('');
+  const [nameError, setNameError] = useState(false);
+  const [nameErrorMessage, setNameErrorMessage] = useState('');
+  const [nicknameError, setNicknameError] = useState(false);
+  const [nicknameErrorMessage, setNicknameErrorMessage] = useState('');
+  const [phoneError, setPhoneError] = useState(false);
+  const [phoneErrorMessage, setPhoneErrorMessage] = useState('');
+  const [customName, setCustomName] = useState("");
+  const [password, setPassword] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [id, setId] = useState("");
+  const [phone, setPhone] = useState("");
+  const [role, setRole] = useState('shipper');
+
+  const [openModal, setOpenModal] = useState(false);
 
   const {
-    moveToLoginPage,
+    moveToLoginPage
   } = useCustomMove();
 
   // 유효성 검사
   const validateInputs = () => {
     const email = document.getElementById('id').value.trim();
     const password = document.getElementById('password').value.trim();
+    const passwordCheck = document.getElementById('passwordCheck').value.trim();
     const customName = document.getElementById('customName').value.trim();
     const nickname = document.getElementById('nickname').value.trim();
     const phone = document.getElementById('phone').value.trim();
+    
 
     let isValid = true;
 
@@ -69,6 +76,16 @@ export default function SignUp(props) {
     } else {
       setPasswordError(false);
       setPasswordErrorMessage('');
+    }
+
+    // 비밀번호 확인 유효성 검사
+    if (passwordCheck !== password) {
+      setPasswordCheckError(true);
+      setPasswordCheckErrorMessage('비밀번호가 일치하지 않습니다');
+      isValid = false;
+    } else {
+      setPasswordCheckError(false);
+      setPasswordCheckErrorMessage('');
     }
 
     // 이름 유효성 검사 (한글/영문 2자 이상)
@@ -107,24 +124,6 @@ export default function SignUp(props) {
     return isValid;
   };
 
-  // 회원가입 API 호출
-  const signUpApi = async () => {
-    try {
-      await signUp({
-        customName,
-        passwordEnc: password,
-        nickname,
-        id,
-        phone,
-        role
-      });
-      alert("회원가입 성공");
-      moveToLoginPage();
-    } catch (err) {
-      alert(err.message);
-    }
-  }
-
   const handleSubmit = async (event) => {
     event.preventDefault();
     // 유효성 검사
@@ -142,7 +141,7 @@ export default function SignUp(props) {
       return;
     }
 
-    signUpApi();
+    setOpenModal(true);
   };
 
   return (
@@ -208,6 +207,23 @@ export default function SignUp(props) {
                 error={passwordError}
                 helperText={passwordErrorMessage}
                 color={passwordError ? 'error' : 'primary'}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </FormControl>
+            {/* 비밀번호 확인 */}
+            <FormControl>
+              <FormLabel htmlFor="passwordCheck">비밀번호 확인</FormLabel>
+              <TextField
+                fullWidth
+                name="passwordCheck"
+                placeholder="••••••"
+                type="password"
+                id="passwordCheck"
+                autoComplete="new-password"
+                variant="outlined"
+                error={passwordCheckError}
+                helperText={passwordCheckErrorMessage}
+                color={passwordCheckError ? 'error' : 'primary'}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </FormControl>
@@ -297,9 +313,15 @@ export default function SignUp(props) {
             <Typography sx={{ textAlign: 'center' }}>
               이미 계정이 있나요?{' '}
               <Link
-                href="/material-ui/getting-started/templates/sign-in/"
+                component="button"
                 variant="body2"
-                sx={{ alignSelf: 'center' }}
+                sx={{
+                  alignSelf: 'center',
+                  verticalAlign: 'baseline',
+                  padding: 0,
+                  lineHeight: 'inherit'
+                }}
+                onClick={moveToLoginPage}
               >
                 로그인
               </Link>
@@ -307,6 +329,16 @@ export default function SignUp(props) {
           </Box>
         </Card>
       </SignUpContainer>
+      <EmailVerificationModal
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        email={id} 
+        onVerified={async () => {
+          await signUp({ customName, passwordEnc: password, nickname, id, role });
+          alert("회원가입 성공");
+          moveToLoginPage();
+        }}
+      />
     </AppTheme>
   );
 }

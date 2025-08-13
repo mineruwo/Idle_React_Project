@@ -1,4 +1,3 @@
-import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
@@ -16,33 +15,35 @@ import { GoogleIcon, KakaoIcon, PinkTruckIcon } from './IconComponent';
 import useCustomMove from '../../../hooks/useCustomMove';
 import { checkAccount, login } from '../../../api/loginApi';
 import { UserCard as Card, UserContainer as SignInContainer } from '../../../theme/User/UserCard';
+import { useState } from 'react';
+import { useAuth } from '../../../auth/AuthProvider';
 
 
 export default function SignIn(props) {
-    const [emailError, setEmailError] = React.useState(false);
-    const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
-    const [passwordError, setPasswordError] = React.useState(false);
-    const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
-    const [open, setOpen] = React.useState(false);
-    const [password, setPassword] = React.useState("");
-    const [id, setId] = React.useState("");
-    const [role, setRole] = React.useState("");
+    const [emailError, setEmailError] = useState(false);
+    const [emailErrorMessage, setEmailErrorMessage] = useState('');
+    const [passwordError, setPasswordError] = useState(false);
+    const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
+    const [open, setOpen] = useState(false);
+    const [password, setPassword] = useState("");
+    const [id, setId] = useState("");
+    const [role, setRole] = useState("");
+
+    const { refreshAuth } = useAuth(); //
 
     const {
         shipperMoveToDashBoard,
-        carOwnerMoveToDashboard
+        carOwnerMoveToDashboard,
+        moveToSignUpPage
     } = useCustomMove();
 
     // 유효성 검사
     const validateInputs = () => {
-        const email = document.getElementById('id').value.trim();
-        const password = document.getElementById('password').value.trim();
-
         let isValid = true;
 
         // 이메일 유효성 검사
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-        if (!email || !emailRegex.test(email)) {
+        if (!id || !emailRegex.test(id)) {
             setEmailError(true);
             setEmailErrorMessage('이메일 형식에 맞게 입력해주세요');
             isValid = false;
@@ -84,8 +85,7 @@ export default function SignIn(props) {
 
             const customRole = result.role;
             setRole(customRole);
-
-            alert(customRole);
+            await refreshAuth();
 
             if (customRole === "shipper") {
                 shipperMoveToDashBoard();
@@ -102,6 +102,8 @@ export default function SignIn(props) {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
+        if (!validateInputs()) return;
+
         // ID & 암호 체크
         const isValidAccount = await checkAccount(id, password); // ID
         if (isValidAccount === false) {
@@ -109,7 +111,11 @@ export default function SignIn(props) {
             return;
         }
 
-        loginApi();
+        try {
+            await loginApi();
+        } catch (err) {
+            alert(err.message || "로그인 실패");
+        }
     };
 
     return (
@@ -144,10 +150,10 @@ export default function SignIn(props) {
                                 value={id}
                                 onChange={(e) => setId(e.target.value)}
                                 id="id"
-                                type="id"
+                                type="email"
                                 name="id"
                                 placeholder="your@email.com"
-                                autoComplete="id"
+                                autoComplete="email"
                                 required
                                 fullWidth
                                 variant="outlined"
@@ -181,7 +187,6 @@ export default function SignIn(props) {
                             type="submit"
                             fullWidth
                             variant="contained"
-                            onClick={validateInputs}
                         >
                             로그인
                         </Button>
@@ -218,9 +223,15 @@ export default function SignIn(props) {
                         <Typography sx={{ textAlign: 'center' }}>
                             회원이 아니신가요?{' '}
                             <Link
-                                href="/material-ui/getting-started/templates/sign-in/"
+                                component="button"
                                 variant="body2"
-                                sx={{ alignSelf: 'center' }}
+                                sx={{
+                                    alignSelf: 'center',
+                                    verticalAlign: 'baseline',
+                                    padding: 0,
+                                    lineHeight: 'inherit'
+                                }}
+                                onClick={moveToSignUpPage}
                             >
                                 회원가입
                             </Link>

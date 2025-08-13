@@ -1,29 +1,57 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "../../../theme/GNB.css";
 import BubbleAnimation from "../carownerComponent/common/BubbleAnimation";
+import api from "../../../api/authApi";
+import useCustomMove from "../../../hooks/useCustomMove";
+import { useAuth } from "../../../auth/AuthProvider";
 
 const GNB = () => {
     const [hideHeader, setHideHeader] = useState(false);
-    const [lastScrollY, setLastScrollY] = useState(0);
 
+    const { authenticated, profile, logOut } = useAuth();
+
+    const {
+        shipperMoveToDashBoard,
+        carOwnerMoveToDashboard,
+        moveToLoginPage,
+        moveToMainPage,
+        moveToSignUpPage
+    } = useCustomMove();
+
+    const lastYRef = useRef(0);
+
+    // 스크롤
     useEffect(() => {
         const handleScroll = () => {
-            const currentY = window.scrollY;
+            const y = window.scrollY;
 
-            if (currentY > lastScrollY && currentY > 80) {
-                setHideHeader(true); // 아래로 스크롤하면 숨김
-            } else {
-                setHideHeader(false); // 위로 스크롤하면 보임
-            }
-
-            setLastScrollY(currentY);
+            if (y > lastYRef.current && y > 80) setHideHeader(true);
+            else setHideHeader(false);
+            lastYRef.current = y;
         };
 
-        window.addEventListener("scroll", handleScroll);
-
+        window.addEventListener("scroll", handleScroll, { passive: true });
         return () => window.removeEventListener("scroll", handleScroll);
-    }, [lastScrollY]);
+    }, []);
+
+    const role = profile?.role;
+
+    const handleMyPage = useCallback(() => {
+        if (role === "shipper") shipperMoveToDashBoard();
+        else if (role === "carrier") carOwnerMoveToDashboard();
+        else moveToLoginPage();
+    }, [role, shipperMoveToDashBoard, carOwnerMoveToDashboard, moveToLoginPage]);
+
+    const handleLogout = async () => {
+        try {
+            await api.post("/auth/logout"); 
+        } catch (_) {
+            // 실패해도 UI는 일관되게 처리
+        } finally {
+            logOut();          
+            moveToMainPage();  
+        }
+    };
 
     return (
         <div
@@ -32,9 +60,13 @@ const GNB = () => {
             data-bs-theme="light"
         >
             <div className="container-fluid">
-                <a href="../" className="navbar-brand">
+                <button
+                    type="button"
+                    className="navbar-brand btn btn-link p-0"
+                    onClick={moveToMainPage}
+                >
                     idle
-                </a>
+                </button>
 
                 <button
                     className="navbar-toggler"
@@ -49,22 +81,51 @@ const GNB = () => {
                 </button>
 
                 <div className="collapse navbar-collapse" id="navbarResponsive">
-                    <ul className="navbar-nav ms-md-auto">
-                        <li className="nav-item">
-                            <Link to="/" className="nav-link">
-                                고객센터(미정)
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link to="/login/" className="nav-link">
-                                로그인
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link to="/signup/" className="nav-link">
-                                회원가입
-                            </Link>
-                        </li>
+                    <ul className="navbar-nav ms-md-auto align-items-center gap-3">
+                        {!authenticated ? (
+                            <>
+                                <li className="nav-item">
+                                    <button
+                                        type="button"
+                                        className="nav-link btn btn-link px-0 py-2"
+                                        onClick={moveToLoginPage}
+                                    >
+                                        로그인
+                                    </button>
+                                </li>
+                                <li className="nav-item">
+                                    <button
+                                        type="button"
+                                        className="nav-link btn btn-link px-0 py-2"
+                                        onClick={moveToSignUpPage}
+                                    >
+                                        회원가입
+                                    </button>
+                                </li>
+                            </>
+                        ) : (
+                            <>
+                                <li className="nav-item">
+                                    <button
+                                        type="button"
+                                        className="nav-link btn btn-link px-0 py-2"
+                                        onClick={handleMyPage}
+                                    >
+                                        마이페이지
+                                    </button>
+                                </li>
+                                <li className="nav-item">
+                                    <button
+                                        type="button"
+                                        className="nav-link btn btn-link px-0 py-2"
+                                        onClick={handleLogout}
+                                    >
+                                        로그아웃
+                                    </button>
+                                </li>
+                            </>
+                        )}
+
                     </ul>
                 </div>
             </div>

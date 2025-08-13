@@ -16,6 +16,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.fullstack.security.jwt.JWTFilter;
 
+
 import java.util.Arrays;
 
 @Configuration
@@ -51,6 +52,7 @@ public class SecurityConfig {
                     "/api/customer/**", // 고객 관련 API
                     "/api/payment/**",
                     "/api/admin/chat-sessions/**" // 채팅 세션 관련 API 허용
+                    "/api/email/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )

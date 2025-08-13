@@ -30,7 +30,10 @@ public interface CustomerRepository extends JpaRepository<CustomerEntity, Intege
 	
 	Optional<CustomerEntity> findByNickname(String nickname);
 	
+	
 	boolean existsById(String id);
 
     boolean existsByNickname(String nickname);
+    
+    boolean existsByNicknameAndIdNot(String nickname, String id);
 }
