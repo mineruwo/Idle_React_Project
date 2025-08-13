@@ -1,0 +1,149 @@
+
+:root {
+    --admin-pink-bg: #fff7fb;
+    --admin-pink-card-border: #f9d8e8;
+    --admin-pink-card-shadow: rgba(232, 90, 166, 0.08);
+    --admin-pink-strong: #E85AA6;
+    --admin-pink-text: #2b2330;
+    --admin-pink-sub-text: #9b7f8c;
+    --admin-pink-label: #b792a3;
+    --admin-pink-panel-border: #f3c9db;
+    --admin-pink-header: #cc3f88;
+    --admin-pink-back-bg: #ffe6f2;
+    --admin-pink-back-bg-hover: #ffd9ea;
+}
+
+.admin-container {
+    background-color: var(--admin-pink-bg);
+}
+
+.admin-header h2 {
+    color: var(--admin-pink-header);
+}
+
+.admin-primary-btn {
+    background-color: var(--admin-pink-strong);
+    color: white;
+}
+.admin-primary-btn:hover {
+    background-color: var(--admin-pink-header);
+}
+
+/* --- Table Styles --- */
+.admin-table {
+    background-color: #fff;
+}
+
+.admin-table th,
+.admin-table td {
+    border-bottom-color: var(--admin-pink-panel-border);
+    color: var(--admin-pink-text);
+}
+
+.admin-table th {
+    background-color: var(--admin-pink-bg);
+    color: var(--admin-pink-strong);
+}
+
+.admin-table-row:hover {
+    background-color: var(--admin-pink-bg);
+}
+
+.admin-table-row.deactivated {
+    background-color: #f8f8f8;
+    color: #aaa;
+}
+.admin-table-row.deactivated td {
+    color: #ccc;
+}
+.admin-table-row.deactivated:hover {
+    background-color: #f0f0f0;
+}
+
+/* Align title to the left */
+.admin-table td:nth-child(2) {
+    color: var(--admin-pink-text);
+}
+
+.admin-content-row td {
+    border-bottom-color: var(--admin-pink-panel-border);
+}
+
+.admin-content-box {
+    background-color: #fffafd;
+    color: var(--admin-pink-text);
+}
+
+.admin-actions {
+    background-color: #fffafd;
+}
+
+.admin-action-btn {
+    border-color: var(--admin-pink-card-border);
+}
+
+.admin-modify-btn {
+    background-color: #fff;
+    color: var(--admin-pink-strong);
+}
+.admin-modify-btn:hover {
+    background-color: var(--admin-pink-bg);
+    border-color: var(--admin-pink-strong);
+}
+
+.admin-delete-btn {
+    background-color: var(--admin-pink-strong);
+    color: white;
+    border-color: var(--admin-pink-strong);
+}
+.admin-delete-btn:hover {
+    background-color: var(--admin-pink-header);
+    border-color: var(--admin-pink-header);
+}
+
+.admin-toggle-btn {
+    background-color: var(--admin-pink-back-bg);
+    color: var(--admin-pink-header);
+    border-color: var(--admin-pink-back-bg-hover);
+}
+.admin-toggle-btn:hover {
+    background-color: var(--admin-pink-back-bg-hover);
+    border-color: var(--admin-pink-panel-border);
+}
+
+/* --- Form Styles --- */
+.admin-form-container {
+    background-color: #fff;
+}
+
+.admin-form-group label {
+    color: var(--admin-pink-strong);
+}
+
+.admin-form-group input,
+.admin-form-group textarea,
+.admin-form-group select {
+    border-color: var(--admin-pink-panel-border);
+    color: var(--admin-pink-text);
+    background-color: var(--admin-pink-bg);
+}
+
+.admin-form-group input:focus,
+.admin-form-group textarea:focus,
+.admin-form-group select:focus {
+    border-color: var(--admin-pink-strong);
+    box-shadow: 0 0 0 3px var(--admin-pink-back-bg);
+}
+
+/* --- Login Page Styles --- */
+.login-page-container {
+    background-color: var(--admin-pink-bg);
+}
+
+.login-form-box {
+    background-color: #fff;
+}
+
+.login-header {
+    color: var(--admin-pink-header);
+}

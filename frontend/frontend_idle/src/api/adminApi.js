@@ -80,3 +80,23 @@ export const getAllNotices = async () => {
         throw error;
     }
 };
+
+export const deleteNotice = async (noticeId) => {
+    try {
+        const response = await axios.delete(`${API_BASE_URL}/api/admin/notices/${noticeId}`, { withCredentials: true });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to delete notice:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const toggleNoticeActive = async (noticeId) => {
+    try {
+        const response = await axios.patch(`${API_BASE_URL}/api/admin/notices/${noticeId}/toggle`, {}, { withCredentials: true });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to toggle notice activation:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
