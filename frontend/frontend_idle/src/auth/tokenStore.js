@@ -3,9 +3,8 @@ export const AUTH_CHANGE_EVENT = "auth-change";
 
 export const getAccessToken = () => localStorage.getItem(ACCESS_TOKEN_KEY);
 
-export const setAccessToken = (token) => {
+export const setAccessToken = (token, opts) => {
     localStorage.setItem(ACCESS_TOKEN_KEY, token);
-    // GNB가 반응
     window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
 } 
 

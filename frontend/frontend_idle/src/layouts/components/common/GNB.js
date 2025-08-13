@@ -1,22 +1,16 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "../../../theme/GNB.css";
 import BubbleAnimation from "../carownerComponent/common/BubbleAnimation";
-import { ACCESS_TOKEN_KEY, AUTH_CHANGE_EVENT, clearAccessToken, getAccessToken } from "../../../auth/tokenStore";
+import { clearAccessToken, getAccessToken } from "../../../auth/tokenStore";
 import api from "../../../api/authApi";
 import { getRoleFromToken } from "../../../utils/jwt";
 import useCustomMove from "../../../hooks/useCustomMove";
+import { useAuth } from "../../../auth/AuthProvider";
 
 const GNB = () => {
     const [hideHeader, setHideHeader] = useState(false);
 
-    // !! -> 원래 값을 boolean으로 확실하게 변환
-    const [isLoggedIn, setIsLoggedIn] = useState(!!getAccessToken());
-
-    const [role, setRole] = useState(() => {
-        const token = getAccessToken();
-        return token ? getRoleFromToken(token) : null;
-    });
+    const { loading, authenticated, profile, refreshAuth, logOut } = useAuth();
 
     const {
         shipperMoveToDashBoard,
@@ -42,30 +36,7 @@ const GNB = () => {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
-    // 로그인/로그아웃/다른 탭 동기화
-    useEffect(() => {
-        const syncAuth = () => {
-            const token = getAccessToken();
-            setIsLoggedIn(!!token);
-            setRole(token ? getRoleFromToken(token) : null);
-        };
-
-
-        const onStorage = (e) => {
-            if (e.key === ACCESS_TOKEN_KEY) syncAuth();
-        };
-
-        window.addEventListener(AUTH_CHANGE_EVENT, syncAuth);
-        window.addEventListener("storage", onStorage);
-
-        // 초기 1회 동기화
-        syncAuth();
-
-        return () => {
-            window.removeEventListener(AUTH_CHANGE_EVENT, syncAuth);
-            window.removeEventListener("storage", onStorage);
-        };
-    }, []);
+    const role = profile?.role || getRoleFromToken(getAccessToken());
 
     const handleMyPage = useCallback(() => {
         if (role === "shipper") shipperMoveToDashBoard();
@@ -80,6 +51,7 @@ const GNB = () => {
             }
         } catch (_) { // 에러 발생해도 UI 유지
         } finally {
+            logOut();
             clearAccessToken();
             moveToMainPage();
         }
@@ -114,7 +86,7 @@ const GNB = () => {
 
                 <div className="collapse navbar-collapse" id="navbarResponsive">
                     <ul className="navbar-nav ms-md-auto align-items-center gap-3">
-                        {!isLoggedIn ? (
+                        {!authenticated ? (
                             <>
                                 <li className="nav-item">
                                     <button

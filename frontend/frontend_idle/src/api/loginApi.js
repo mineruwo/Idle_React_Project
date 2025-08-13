@@ -3,9 +3,9 @@ import axios from "axios";
 import api from "./authApi";
 import { clearAccessToken, setAccessToken } from "../auth/tokenStore";
 
-export const login = async (customer) => {
+export const login = async (id) => {
     try {
-        const { data } = await api.post("/auth/login", customer);
+        const { data } = await api.post("/auth/login", id);
 
         setAccessToken(data.accessToken);
 

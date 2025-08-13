@@ -56,6 +56,17 @@ const useCustomMove = () => {
         navigate("/");
     };
 
+    const moveToMyPageByRole = (role) => {
+        switch (role) {
+            case "shipper":
+                navigate("/shipper");
+            case "carrier":
+                navigate("/carPage");
+            default:
+                navigate("/");
+        }
+    };
+
     return {
         shipperMoveToDashBoard,
         shipperMoveToOrder,
@@ -75,6 +86,7 @@ const useCustomMove = () => {
         moveToLoginPage,
         moveToSignUpPage,
         moveToMainPage,
+        moveToMyPageByRole,
     };
 };
 
