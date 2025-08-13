@@ -279,16 +279,25 @@ public class PaymentServiceImpl implements PaymentService {
             return;
         }
         
+        if (optionalPayment.isPresent()) {
         PaymentEntity payment = optionalPayment.get();
         
-        // 이미 처리된 결제(PAID)는 상태를 변경하지 않음
-        if ("PAID".equals(payment.getPaymentStatus())) {
-            log.info("failPayment: merchantUid '{}'는 이미 PAID 상태이므로 변경하지 않습니다.", merchantUid);
-            return;
-        }
-        
-        payment.setPaymentStatus("FAILED");
-        paymentRepository.save(payment);
-        log.info("failPayment: merchantUid '{}'의 상태를 FAILED로 업데이트했습니다.", merchantUid);
+	        if(!"PAID".equals(payment.getMerchantUid())) {
+	        	payment.setPaymentStatus("FAILED");
+	        	paymentRepository.save(payment);
+	        	log.info("failPayment: merchanUid '{}'의 상태를 FAILED 상태로 업데이트 했습니다.", merchantUid);
+	        } else {
+	        	log.info("failPayment: merchanUid '{}'는 이미 PAID 상태이므로 변경하지 않습니다.", merchantUid);
+	        }
+	    } else {
+	    	log.warn("failPayment: merchanUid '{}'에 해당하는 결제 정보를 찾을 수 없어 새로 생성합니다.", merchantUid);
+	    	PaymentEntity failedPayment = new PaymentEntity();
+	    	failedPayment.setMerchantUid(merchantUid);
+	    	failedPayment.setPaymentStatus("FAILED");
+	    	
+	    	failedPayment.setCancelledAt(LocalDateTime.now());
+	    	paymentRepository.save(failedPayment);
+	    }
     }
 }
+     
