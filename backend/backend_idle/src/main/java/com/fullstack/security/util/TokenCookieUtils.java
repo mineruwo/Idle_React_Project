@@ -13,10 +13,10 @@ public class TokenCookieUtils {
 	public static void setRefreshTokenCookie(HttpServletResponse response, String token, long expire) {
 		ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_NAME, token)
 				.httpOnly(true)
-				.secure(true)
+				.secure(false) // 수정
 				.path("/")
 				.maxAge(expire)
-				.sameSite("Strict") // 또는 Lax 나중에 확인
+				.sameSite("Lax") //
 				.build();
 		
 		response.addHeader("Set-Cookie", cookie.toString());
@@ -37,10 +37,10 @@ public class TokenCookieUtils {
 	public static void clearRefreshTokenCookie(HttpServletResponse response) {
 		ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN_NAME, "")
 				.httpOnly(true)
-				.secure(true)
+				.secure(false)
 				.path("/")
 				.maxAge(0)
-				.sameSite("Strict") // 위와 동일
+				.sameSite("Lax") // 위와 동일
 				.build();
 		
 		response.addHeader("Set-Cookie", cookie.toString());
