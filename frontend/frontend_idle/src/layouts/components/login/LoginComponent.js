@@ -30,7 +30,8 @@ export default function SignIn(props) {
 
     const {
         shipperMoveToDashBoard,
-        carOwnerMoveToDashboard
+        carOwnerMoveToDashboard,
+        moveToSignUpPage
     } = useCustomMove();
 
     // 유효성 검사
@@ -216,9 +217,15 @@ export default function SignIn(props) {
                         <Typography sx={{ textAlign: 'center' }}>
                             회원이 아니신가요?{' '}
                             <Link
-                                href="/material-ui/getting-started/templates/sign-in/"
+                                component="button"
                                 variant="body2"
-                                sx={{ alignSelf: 'center' }}
+                                sx={{
+                                    alignSelf: 'center',
+                                    verticalAlign: 'baseline', 
+                                    padding: 0,               
+                                    lineHeight: 'inherit'      
+                                }}
+                                onClick={moveToSignUpPage}
                             >
                                 회원가입
                             </Link>
