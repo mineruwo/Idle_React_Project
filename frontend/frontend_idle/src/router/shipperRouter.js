@@ -25,6 +25,9 @@ const shipperRouter = () => {
     const ShipperPoint = lazy(() =>
         import("../pages/shipperPage/ShipperPointPage")
     );
+    const ShipperPaymentSuccess = lazy(() =>
+        import("../pages/shipperPage/ShipperPaymentSuccessPage")
+    );
 
     return [
         {
@@ -56,6 +59,14 @@ const shipperRouter = () => {
             element: (
                 <Suspense fallback={Loading}>
                     <ShipperPayment />
+                </Suspense>
+            ),
+        },
+        {
+            path: "payment/success",
+            element: (
+                <Suspense fallback={Loading}>
+                    <ShipperPaymentSuccess />
                 </Suspense>
             ),
         },

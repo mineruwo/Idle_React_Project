@@ -1,5 +1,4 @@
 import axios from "axios";
-import { getAccessToken } from "../auth/tokenStore";
 
 export const API_SERVER_HOST = "http://localhost:8080";
 
@@ -53,13 +52,10 @@ export const verifyPayment = async (verificationData) => {
 
 export const fetchUserPoints = async () => {
     try {
-        const token = getAccessToken();
         const response = await axios.get(
             `${API_SERVER_HOST}/api/customer/user/points`,
             {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+                withCredentials: true,
             }
         );
         return response.data;

@@ -1,0 +1,116 @@
+.spp-success-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    background-color: #f4f6f8;
+    padding: 2rem;
+}
+
+.spp-success-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 3rem;
+    text-align: center;
+    max-width: 600px;
+    width: 100%;
+}
+
+.spp-success-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+}
+
+.spp-success-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.spp-success-title {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.spp-success-message {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 2rem;
+}
+
+.spp-success-summary {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    text-align: left;
+}
+
+.spp-summary-title {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 1rem;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 0.5rem;
+}
+
+.spp-success-summary ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.spp-success-summary li {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    font-size: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.spp-success-summary li:last-child {
+    border-bottom: none;
+}
+
+.spp-success-summary li strong {
+    color: #555;
+}
+
+.spp-success-summary li span {
+    color: #333;
+    font-weight: 500;
+}
+
+.spp-success-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.spp-success-btn {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.spp-success-btn:hover {
+    background-color: #0056b3;
+}
+
+.spp-success-btn-secondary {
+    background-color: #6c757d;
+}
+
+.spp-success-btn-secondary:hover {
+    background-color: #5a6268;
+}

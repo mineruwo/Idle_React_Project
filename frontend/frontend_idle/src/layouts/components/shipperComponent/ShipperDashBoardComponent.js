@@ -1,10 +1,27 @@
+import { useEffect, useState } from "react";
 import useCustomMove from "../../../hooks/useCustomMove";
 import "../../../theme/ShipperCustomCss/ShipperDashBoard.css";
 import ShippingStatusComponent from "./ShippingStatusComponent";
+import { fetchUserPoints } from "../../../api/paymentApi";
 
-const ShipperDashBoardComponent = () => {
+const ShipperDashBoardComponent = (userId) => {
     const { shipperMoveToDetails, shipperMoveToPoint, shipperMoveToReview } =
         useCustomMove();
+
+    const [currentPoints, setCurrentPoints] = useState(0);
+
+    useEffect(() => {
+        const getUserPoints = async () => {
+            try {
+                const response = await fetchUserPoints();
+                setCurrentPoints(response.points);
+            } catch (error) {
+                console.error("Failed to fetch user points:", error);
+            }
+        };
+
+        getUserPoints();
+    }, [userId]);
 
     return (
         <div className="dashboard">
@@ -21,8 +38,9 @@ const ShipperDashBoardComponent = () => {
                 </div>
                 <div className="card">
                     <div className="card-title">포인트</div>
-                    <div className="card-content">175,000P</div>
-                    <div className="card-desc">최근 충전: +20,000P</div>
+                    <div className="card-content">
+                        {currentPoints.toLocaleString()}P
+                    </div>
                     <div className="card-action" onClick={shipperMoveToPoint}>
                         포인트 내역
                     </div>

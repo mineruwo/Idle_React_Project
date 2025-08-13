@@ -4,27 +4,31 @@ const useCustomMove = () => {
     const navigate = useNavigate();
 
     const shipperMoveToDashBoard = () => {
-        navigate({ pathname: `../shipper` });
+        navigate({ pathname: `/shipper` });
     };
 
     const shipperMoveToOrder = () => {
-        navigate({ pathname: `../shipper/order` });
+        navigate({ pathname: `/shipper/order` });
     };
 
     const shipperMoveToOrderBoard = () => {
-        navigate({ pathname: `../shipper/orderBoard` });
+        navigate({ pathname: `/shipper/orderBoard` });
     };
 
     const shipperMoveToPayment = () => {
-        navigate({ pathname: `../shipper/payment` });
+        navigate({ pathname: `/shipper/payment` });
+    };
+
+    const shipperMoveToPaymentSuccess = (state) => {
+        navigate({ pathname: `/shipper/payment/success` }, { state });
     };
 
     const shipperMoveToReview = () => {
-        navigate({ pathname: `../shipper/review` });
+        navigate({ pathname: `/shipper/review` });
     };
 
     const shipperMoveToPoint = () => {
-        navigate({ pathname: `../shipper/point` });
+        navigate({ pathname: `/shipper/point` });
     };
 
     const carOwnerMoveToDashboard = () => navigate("/carPage");
@@ -74,6 +78,7 @@ const useCustomMove = () => {
         shipperMoveToPayment,
         shipperMoveToReview,
         shipperMoveToPoint,
+        shipperMoveToPaymentSuccess,
         carOwnerMoveToDashboard,
         carOwnerMoveToProfile,
         carOwnerMoveToEditProfile,

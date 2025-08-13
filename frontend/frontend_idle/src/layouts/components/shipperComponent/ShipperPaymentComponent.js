@@ -7,6 +7,7 @@ import {
     fetchUserPoints,
     failPayment,
 } from "../../../api/paymentApi";
+import useCustomMove from "../../../hooks/useCustomMove";
 
 const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
     const [currentPoints, setCurrentPoints] = useState(0);
@@ -14,6 +15,8 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [selectedPaymentType, setSelectedPaymentType] = useState("card");
+
+    const { shipperMoveToPaymentSuccess } = useCustomMove();
 
     const [orderList, setOrderList] = useState([
         {
@@ -171,6 +174,21 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
 
                                 if (verifyResponse.success) {
                                     setMessage("결제 성공 및 검증 완료");
+                                    const paymentInfo = {
+                                        merchantUid: rsp.merchant_uid,
+                                        itemName:
+                                            orderList.length > 1
+                                                ? `${
+                                                      orderList[0].itemName
+                                                  } 외 ${
+                                                      orderList.length - 1
+                                                  }건`
+                                                : orderList[0].itemName,
+                                        amount: amountToPayExternally,
+                                        paidAt: new Date().toISOString(),
+                                        pgProvider: pgProviderForBackend,
+                                    };
+
                                     // 외부 결제 성공 후 포인트 차감
                                     if (pointsToApply > 0) {
                                         const pointDeductionResponse =
@@ -190,6 +208,9 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                                             );
                                         }
                                     }
+                                    shipperMoveToPaymentSuccess({
+                                        paymentInfo,
+                                    });
                                 } else {
                                     setMessage(
                                         `결제 검증 실패: ${verifyResponse.message}`

@@ -26,7 +26,7 @@ import lombok.Setter;
 public class PaymentEntity {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
     private String merchantUid; // 상점 주문 번호
     private String itemName;    // 상품명

@@ -267,37 +267,32 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public void failPayment(String merchantUid) {
+        log.info("failPayment method called for merchantUid: {}", merchantUid);
+
         if (merchantUid == null || merchantUid.isBlank()) {
             log.warn("failPayment 호출 시 merchantUid가 null이거나 비어있습니다.");
             return;
         }
-        
+
         Optional<PaymentEntity> optionalPayment = paymentRepository.findByMerchantUid(merchantUid);
-        
+
         if (optionalPayment.isEmpty()) {
-            log.warn("failPayment: merchantUid '{}'에 해당하는 결제 정보를 찾을 수 없습니다.", merchantUid);
+            log.error("failPayment: merchantUid '{}'에 해당하는 결제 정보를 찾을 수 없습니다. 결제 실패 처리를 중단합니다.", merchantUid);
             return;
         }
-        
-        if (optionalPayment.isPresent()) {
+
         PaymentEntity payment = optionalPayment.get();
-        
-	        if(!"PAID".equals(payment.getMerchantUid())) {
-	        	payment.setPaymentStatus("FAILED");
-	        	paymentRepository.save(payment);
-	        	log.info("failPayment: merchanUid '{}'의 상태를 FAILED 상태로 업데이트 했습니다.", merchantUid);
-	        } else {
-	        	log.info("failPayment: merchanUid '{}'는 이미 PAID 상태이므로 변경하지 않습니다.", merchantUid);
-	        }
-	    } else {
-	    	log.warn("failPayment: merchanUid '{}'에 해당하는 결제 정보를 찾을 수 없어 새로 생성합니다.", merchantUid);
-	    	PaymentEntity failedPayment = new PaymentEntity();
-	    	failedPayment.setMerchantUid(merchantUid);
-	    	failedPayment.setPaymentStatus("FAILED");
-	    	
-	    	failedPayment.setCancelledAt(LocalDateTime.now());
-	    	paymentRepository.save(failedPayment);
-	    }
+        log.info("failPayment: PaymentEntity found for merchantUid: {}. Current status: {}", merchantUid, payment.getPaymentStatus());
+
+        if ("READY".equals(payment.getPaymentStatus())) {
+            log.info("failPayment: Payment status is READY. Updating status to FAILED for merchantUid: {}", merchantUid);
+            payment.setPaymentStatus("FAILED");
+            payment.setCancelledAt(LocalDateTime.now());
+            paymentRepository.save(payment);
+            log.info("failPayment: merchantUid '{}'의 상태를 FAILED로 업데이트하고 cancelledAt을 설정했습니다.", merchantUid);
+        } else {
+            log.warn("failPayment: merchantUid '{}'의 결제 상태가 'READY'가 아니므로(현재 상태: {}) 변경하지 않습니다.", merchantUid, payment.getPaymentStatus());
+        }
     }
 }
      
