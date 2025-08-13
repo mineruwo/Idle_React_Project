@@ -10,8 +10,10 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -121,6 +123,12 @@ public class CustomerServiceImpl implements CustomerService {
 		dto.setIsLefted(entity.getIsLefted());
 		dto.setUserPoint(entity.getUserPoint());
 		return dto;
+	}
+
+	@Override
+	public Integer getPoints(String id) {
+		CustomerEntity customerEntity = customerRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+		return customerEntity.getUserPoint();
 	}
 
 }

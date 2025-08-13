@@ -7,7 +7,7 @@ import {
     fetchUserPoints,
 } from "../../../api/paymentApi";
 
-const ShipperPointComponent = ({ nickname, userId }) => {
+const ShipperPointComponent = ({ nickname, userId, userEmail }) => {
     const [currentPoints, setCurrentPoints] = useState(0);
     const CHARGE_PRESETS = [10000, 30000, 50000, 100000, 200000];
     const handlePresetClick = (amount) => setChargeAmount(amount);
@@ -15,7 +15,7 @@ const ShipperPointComponent = ({ nickname, userId }) => {
     useEffect(() => {
         const getUserPoints = async () => {
             try {
-                const response = await fetchUserPoints(userId);
+                const response = await fetchUserPoints();
                 setCurrentPoints(response.points);
             } catch (error) {
                 console.error("Failed to fetch user points:", error);
@@ -75,7 +75,7 @@ const ShipperPointComponent = ({ nickname, userId }) => {
                 itemName: "포인트 충전",
                 amount: amount,
                 buyerName: nickname,
-                buyerEmail: "buyer@example.com", // 실제 사용자 이메일로 변경 필요
+                buyerEmail: userEmail, // 실제 사용자 이메일로 변경 필요
                 userId: userId,
                 pgProvider: pgProviderForBackend,
             });
@@ -96,7 +96,7 @@ const ShipperPointComponent = ({ nickname, userId }) => {
                     merchant_uid: merchantUid,
                     name: "포인트 충전",
                     amount: amount,
-                    buyer_email: "buyer@example.com", // 실제 사용자 이메일로 변경 필요
+                    buyer_email: userEmail, // 실제 사용자 이메일로 변경 필요
                     buyer_name: nickname,
                     buyer_tel: "010-1222-2222", // 실제 사용자 전화번호로 변경 필요
                     buyer_addr: "서울특별시 강남구 삼성동", // 실제 사용자 주소로 변경 필요

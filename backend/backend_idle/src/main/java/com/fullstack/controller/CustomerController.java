@@ -5,8 +5,11 @@ import com.fullstack.service.CustomerService;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -47,5 +50,11 @@ public class CustomerController {
     	boolean result = customerService.isNicknameDuplicate(nickname);
     	
     	return ResponseEntity.ok(result);
+    }
+    
+    @GetMapping("/user/points")
+    public ResponseEntity<Map<String, Integer>> getUserPoints(@AuthenticationPrincipal String id) {
+    	Integer points = customerService.getPoints(id);
+    	return ResponseEntity.ok(Map.of("points", points));
     }
 }

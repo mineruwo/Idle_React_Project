@@ -13,11 +13,15 @@ const ShipperPaymentPage = () => {
         return <div> 로그인이 필요합니다.</div>;
     }
 
-    const { id, nickname } = profile;
+    const { id, idNum, nickname } = profile;
 
     return (
         <div>
-            <ShipperPaymentComponent nickname={nickname} userId={id} />
+            <ShipperPaymentComponent
+                nickname={nickname}
+                userId={idNum}
+                userEmail={id}
+            />
         </div>
     );
 };

@@ -1,14 +1,15 @@
 import axios from "axios";
+import { getAccessToken } from "../auth/tokenStore";
 
 export const API_SERVER_HOST = "http://localhost:8080";
 
-export const payWithPoints = async (userId, pointsToUse) => {
+export const payWithPoints = async ({ userId, points }) => {
     try {
         const response = await axios.post(
             `${API_SERVER_HOST}/api/payment/use`,
             {
                 userId: userId,
-                points: pointsToUse,
+                points: points,
             }
         );
         return response.data;
@@ -50,10 +51,16 @@ export const verifyPayment = async (verificationData) => {
     }
 };
 
-export const fetchUserPoints = async (userId) => {
+export const fetchUserPoints = async () => {
     try {
+        const token = getAccessToken();
         const response = await axios.get(
-            `${API_SERVER_HOST}/api/user/${userId}/points`
+            `${API_SERVER_HOST}/api/customer/user/points`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
         );
         return response.data;
     } catch (error) {

@@ -8,7 +8,7 @@ import {
     failPayment,
 } from "../../../api/paymentApi";
 
-const ShipperPaymentComponent = ({ nickname, userId }) => {
+const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
     const [currentPoints, setCurrentPoints] = useState(0);
     const [usePoints, setUsePoints] = useState(""); // 사용할 포인트 입력 값
     const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +35,7 @@ const ShipperPaymentComponent = ({ nickname, userId }) => {
     useEffect(() => {
         const getUserPoints = async () => {
             try {
-                const response = await fetchUserPoints(userId);
+                const response = await fetchUserPoints();
                 setCurrentPoints(response.points);
             } catch (error) {
                 console.error("Failed to fetch user points:", error);
@@ -129,7 +129,7 @@ const ShipperPaymentComponent = ({ nickname, userId }) => {
                             : orderList[0].itemName,
                     amount: amountToPayExternally, // 외부 결제 금액
                     buyerName: nickname,
-                    buyerEmail: "buyer@example.example.com",
+                    buyerEmail: userEmail,
                     userId: userId,
                     pgProvider: pgProviderForBackend,
                 });
@@ -153,8 +153,8 @@ const ShipperPaymentComponent = ({ nickname, userId }) => {
                                       orderList.length - 1
                                   }건`
                                 : orderList[0].itemName,
-                        amount: amountToPayExternally, // 외부 결제 금액
-                        buyer_email: "buyer@example.example.com",
+                        amount: amountToPayExternally,
+                        buyer_email: userEmail,
                         buyer_name: nickname,
                         buyer_tel: "010-1222-2222",
                         buyer_addr: "서울특별시 강남구 삼성동",
@@ -234,11 +234,12 @@ const ShipperPaymentComponent = ({ nickname, userId }) => {
                 <div className="order-info-section">
                     <h2 className="spp-page-title">주문 정보</h2>
                     {orderList.map((order) => (
-                        <div className="order-item">
+                        <div className="order-item" key={order.orderId}>
                             <div className="order-amount">
                                 <span>{order.orderId}</span>
                                 <span>{order.amount.toLocaleString()}원</span>
                             </div>
+
                             <div className="order-details-wrap">
                                 <ul className="order-info-table">
                                     <li>
