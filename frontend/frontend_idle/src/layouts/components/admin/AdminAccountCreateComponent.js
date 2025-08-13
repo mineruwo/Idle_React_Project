@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Modal from "../common/Modal";
 import { createAdmin } from "../../../api/adminApi";
-import '../../theme/admin.css'; // Corrected path to theme/admin.css
+import '../../../theme/admin.css'; // Corrected path to theme/admin.css
 // import './AdminAccountCreateComponent.css'; // Removed
 
 const AdminAccountCreateComponent = () => {
