@@ -1,4 +1,5 @@
 :root {
+    /* Existing variables from theme/admin.css */
     --admin-pink-bg: #fff7fb;
     --admin-pink-card-border: #f9d8e8;
     --admin-pink-card-border-hover: #f4c1d8;
@@ -15,8 +16,19 @@
     --admin-pink-back-bg-hover: #ffd9ea;
     --admin-pink-tag-bg: #ffe2ef;
     --admin-pink-tag-text: #d84b95;
+
+    /* Merged from CustomCSS/admin.css - Form specific colors */
+    --admin-pink-form-button-bg: #ffb1d3ff;
+    --admin-pink-form-button-hover: #f48fb1;
+    --admin-pink-form-input-border: #ccc;
+    --admin-pink-form-input-bg-filled: #ffffff;
+    --admin-pink-form-input-bg-empty: #f5f5f5;
+    --admin-pink-form-input-focus-border: #e08cab;
+    --admin-pink-form-input-focus-shadow: rgba(224, 140, 171, 0.2);
+    --admin-pink-form-divider: #f48fb1;
 }
 
+/* General styles for the admin page */
 body {
     background-color: var(--admin-pink-bg);
     font-family: sans-serif; /* 기본 폰트 설정 */
@@ -158,35 +170,40 @@ body {
 .admin-toggle-btn:hover { background-color: var(--admin-pink-back-bg-hover); border-color: var(--admin-pink-panel-border); }
 
 /* --- Form Styles --- */
+/* Merged from CustomCSS/admin.css and theme/admin.css */
 .admin-form-container {
-    background-color: #fff;
-    padding: 32px;
-    border-radius: 14px;
-    box-shadow: 0 4px 14px var(--admin-pink-card-shadow);
+    max-width: 600px; /* From CustomCSS */
+    margin: auto; /* From CustomCSS */
+    padding: 32px; /* From theme */
+    font-family: sans-serif; /* From CustomCSS */
+    background: var(--admin-pink-panel-bg); /* From CustomCSS */
+    border: 1px solid var(--admin-pink-panel-border); /* From CustomCSS */
+    border-radius: 14px; /* From theme */
+    box-shadow: 0 4px 14px var(--admin-pink-card-shadow); /* From theme (using CustomCSS's shadow value) */
 }
 
 .admin-form-group {
-    margin-bottom: 22px;
+    margin-bottom: 22px; /* From theme */
 }
 
 .admin-form-group label {
     display: block;
     margin-bottom: 8px;
-    color: var(--admin-pink-strong);
-    font-weight: 600;
-    font-size: 14px;
+    color: var(--admin-pink-strong); /* From theme */
+    font-weight: 600; /* From theme */
+    font-size: 14px; /* From theme */
 }
 
 .admin-form-group input,
 .admin-form-group textarea,
 .admin-form-group select {
     width: 100%;
-    padding: 12px;
-    border: 1px solid var(--admin-pink-panel-border);
-    border-radius: 8px;
+    padding: 12px; /* From theme */
+    border: 1px solid var(--admin-pink-panel-border); /* From theme */
+    border-radius: 8px; /* From CustomCSS */
     font-size: 15px;
-    color: var(--admin-pink-text);
-    background-color: var(--admin-pink-bg);
+    color: var(--admin-pink-text); /* From theme */
+    background-color: var(--admin-pink-bg); /* From theme */
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
     box-sizing: border-box;
 }
@@ -195,8 +212,8 @@ body {
 .admin-form-group textarea:focus,
 .admin-form-group select:focus {
     outline: none;
-    border-color: var(--admin-pink-strong);
-    box-shadow: 0 0 0 3px var(--admin-pink-back-bg);
+    border-color: var(--admin-pink-strong); /* From theme */
+    box-shadow: 0 0 0 3px var(--admin-pink-back-bg); /* From theme */
 }
 
 .admin-form-group textarea {
@@ -228,4 +245,108 @@ body {
     color: var(--admin-pink-header);
     font-size: 28px;
     font-weight: 800;
+}
+
+/* Card styles (mimicking OrderBoard's Card) - from CustomCSS/admin.css */
+.admin-card {
+    background: #fff;
+    border: 1px solid var(--admin-pink-card-border);
+    border-radius: 14px;
+    padding: 18px 20px 14px;
+    box-shadow: 0 4px 14px var(--admin-pink-card-shadow);
+    cursor: pointer;
+    transition: box-shadow 180ms ease, border-color 180ms ease, transform 120ms ease;
+}
+
+.admin-card:hover {
+    border-color: var(--admin-pink-card-border-hover);
+    box-shadow: 0 6px 18px var(--admin-pink-card-shadow-hover);
+}
+
+/* Button styles - from CustomCSS/admin.css */
+.admin-button {
+    padding: 0.6rem 1.6rem;
+    font-size: 0.95rem;
+    background-color: var(--admin-pink-form-button-bg);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    min-width: 120px;
+    transition: all 0.2s ease-in-out;
+}
+
+.admin-button:hover {
+    background-color: var(--admin-pink-form-button-hover);
+}
+
+/* Label styles - from CustomCSS/admin.css */
+.admin-label {
+    display: block;
+    margin-top: 1.2rem;
+    font-weight: bold;
+    color: var(--admin-pink-label);
+}
+
+/* Input and Select styles - from CustomCSS/admin.css */
+/* Overriding theme's form-group input/select for specific padding/border-radius */
+.admin-input,
+.admin-select {
+    width: 100%;
+    padding: 0.7rem; /* From CustomCSS */
+    margin-top: 0.4rem; /* From CustomCSS */
+    border: 1px solid var(--admin-pink-form-input-border); /* From CustomCSS */
+    border-radius: 8px; /* From CustomCSS */
+    background-color: var(--admin-pink-form-input-bg-empty); /* From CustomCSS */
+    outline: none;
+    font-size: 15px;
+    color: var(--admin-pink-text);
+}
+
+.admin-input:focus,
+.admin-select:focus {
+    background-color: var(--admin-pink-form-input-bg-filled); /* From CustomCSS */
+    border-color: var(--admin-pink-form-input-focus-border); /* From CustomCSS */
+    box-shadow: 0 0 0 2px var(--admin-pink-form-input-focus-shadow); /* From CustomCSS */
+}
+
+/* Table styles (mimicking OrderBoard's info-table concept) - from CustomCSS/admin.css */
+/* Overriding theme's admin-table for specific padding/border-radius/shadow */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    background: #fff;
+    border-radius: 10px; /* From CustomCSS */
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* From CustomCSS */
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 12px 15px; /* From CustomCSS */
+    border-bottom: 1px solid var(--admin-pink-card-border);
+    text-align: left; /* From CustomCSS */
+    color: var(--admin-pink-text);
+}
+
+.admin-table th {
+    background-color: var(--admin-pink-tag-bg);
+    color: var(--admin-pink-header);
+    font-weight: 800; /* From CustomCSS */
+    font-size: 14px; /* From CustomCSS */
+}
+
+.admin-table tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-table tbody tr:hover {
+    background-color: var(--admin-pink-bg);
+}
+
+/* Specific styles for AdminAccountCreateComponent */
+.create-admin-form-card {
+    /* This class is already in AdminAccountCreateComponent.js */
+    /* We will apply admin-form-container to it */
 }
