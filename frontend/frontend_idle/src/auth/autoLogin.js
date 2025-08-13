@@ -1,23 +1,10 @@
-import api from "../api/authApi";
-import { getAccessToken, setAccessToken, clearAccessToken } from "./tokenStore";
+import api from "../api/authApi"; // withCredentials: true + 401->refresh 인터셉터 적용된 인스턴스
 
 export const autoLogin = async () => {
-    const token = getAccessToken();
-    if (!token) return { authenticated: false, profile: null };
-
     try {
-        const auto = await api.get("/auth/auto");
-        return { authenticated: true, profile: auto.data };
-    } catch (e) {
-        try {
-            const { data } = await api.post("/auth/refresh");
-            setAccessToken(data.accessToken);
-            const auto = await api.get("/auth/auto");
-            return { authenticated: true, profile: auto.data };
-        } catch {
-            clearAccessToken();
-            return { authenticated: false, profile: null};
-        }
+        const { data } = await api.get("/auth/auto"); // 쿠키 자동 전송
+        return { authenticated: true, profile: data };
+    } catch {
+        return { authenticated: false, profile: null };
     }
-}
-
+};

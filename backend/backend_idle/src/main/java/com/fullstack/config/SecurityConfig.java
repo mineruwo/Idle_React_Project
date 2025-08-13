@@ -51,10 +51,9 @@ public class SecurityConfig {
                     "/ws/**", "/ws-chat/**", // 웹소켓 경로
                     "/api/customer/**", // 고객 관련 API
                     "/api/payment/**",
-                    "/api/car-owner/profile"
-                    
+                    "/api/admin/chat-sessions/**" // 채팅 세션 관련 API 허용
+                    "/api/email/**"
                 ).permitAll()
-                
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

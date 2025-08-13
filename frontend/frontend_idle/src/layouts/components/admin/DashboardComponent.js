@@ -1,14 +1,13 @@
+
 import React from 'react';
-import { Box, Typography, Paper } from '@mui/material';
-import { useSelector } from 'react-redux'; // Import useSelector
-import AdminAccountDashboard from './AdminAccountDashboard'; // Import AdminAccountDashboard
-import CustomerAccountDashboard from './CustomerAccountDashboard'; // Import CustomerAccountDashboard
-import './DashboardComponent.css'; // Import CSS file
+import { useSelector } from 'react-redux';
+import AdminAccountDashboard from './AdminAccountDashboard';
+import CustomerAccountDashboard from './CustomerAccountDashboard';
+import '../../../theme/admin.css';
 
 const DashboardComponent = () => {
-  const { adminName, role } = useSelector((state) => state.adminLogin); // Get adminName and role
+  const { adminName, role } = useSelector((state) => state.adminLogin);
 
-  // Define menu configuration based on roles, similar to SidebarComponent
   const menuConfig = {
     ALL_PERMISSION: ['대시보드', '관리자 계정 관리', '고객 계정 관리', '매출 관리', '상담 문의 관리', '공지 사항 관리'],
     DEV_ADMIN: ['대시보드', '관리자 계정 관리'],
@@ -19,54 +18,56 @@ const DashboardComponent = () => {
 
   const accessibleMenus = menuConfig[role] || [];
 
+  // Simple card component for dashboard sections
+  const DashboardSection = ({ title, children }) => (
+    <div className="admin-form-container" style={{ marginBottom: '24px' }}>
+        <h3 style={{ color: 'var(--admin-pink-header)', borderBottom: '1px solid var(--admin-pink-panel-border)', paddingBottom: '10px', marginBottom: '15px' }}>{title}</h3>
+        {children}
+    </div>
+  );
+
   return (
-    <Box className="dashboard-main-box">
-      <Typography variant="h4" gutterBottom className="dashboard-title">
-        {adminName}님 대시보드
-      </Typography>
+    <div className="admin-container">
+        <div className="admin-header">
+            <h2>{adminName}님, 환영합니다.</h2>
+        </div>
 
-      <Box className="dashboard-content-box">
-        {/* 관리자 계정 관리 영역 */}
         {accessibleMenus.includes('관리자 계정 관리') && (
-          // Replaced Paper with AdminAccountDashboard
-          <AdminAccountDashboard />
+          <DashboardSection title="관리자 계정 관리">
+             <AdminAccountDashboard />
+          </DashboardSection>
         )}
 
-        {/* 고객 계정 관리 영역 */}
         {accessibleMenus.includes('고객 계정 관리') && (
-          // Replaced Paper with CustomerAccountDashboard
-          <CustomerAccountDashboard />
+            <DashboardSection title="고객 계정 관리">
+                <CustomerAccountDashboard />
+            </DashboardSection>
         )}
 
-        {/* 매출 관리 영역 */}
         {accessibleMenus.includes('매출 관리') && (
-          <Paper className="dashboard-debug-paper bg-fff3e0">
-            <Typography variant="h6">매출 관리 영역</Typography>
-          </Paper>
+            <DashboardSection title="매출 관리">
+                <p>매출 관리 관련 내용이 여기에 표시됩니다.</p>
+            </DashboardSection>
         )}
 
-        {/* 상담 문의 관리 영역 */}
         {accessibleMenus.includes('상담 문의 관리') && (
-          <Paper className="dashboard-debug-paper bg-f3e5f5">
-            <Typography variant="h6">상담 문의 관리 영역</Typography>
-          </Paper>
+            <DashboardSection title="상담 문의 관리">
+                <p>상담 문의 관련 내용이 여기에 표시됩니다.</p>
+            </DashboardSection>
         )}
 
-        {/* 공지 사항 관리 영역 */}
         {accessibleMenus.includes('공지 사항 관리') && (
-          <Paper className="dashboard-debug-paper bg-ffebee">
-            <Typography variant="h6">공지 사항 관리 영역</Typography>
-          </Paper>
+            <DashboardSection title="공지 사항 관리">
+                <p>공지 사항 관련 내용이 여기에 표시됩니다.</p>
+            </DashboardSection>
         )}
 
-        {/* 기타 대시보드 내용 (권한이 없는 경우) */}
-        {accessibleMenus.length === 1 && accessibleMenus.includes('대시보드') && ( // Only '대시보드' is accessible
-          <Paper className="dashboard-debug-paper bg-eceff1">
-            <Typography variant="h6">접근 가능한 대시보드 내용이 없습니다.</Typography>
-          </Paper>
+        {accessibleMenus.length === 1 && accessibleMenus[0] === '대시보드' && (
+             <DashboardSection title="대시보드">
+                <p>접근 가능한 메뉴가 없습니다.</p>
+            </DashboardSection>
         )}
-      </Box>
-    </Box>
+    </div>
   );
 };
 

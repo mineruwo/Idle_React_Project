@@ -54,6 +54,9 @@ dependencies {
 
     // H2 Database (개발용)
     runtimeOnly 'com.h2database:h2'
+    
+    // email
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
 }
 
 tasks.named('test') {

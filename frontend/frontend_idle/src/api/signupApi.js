@@ -3,14 +3,14 @@ import { API_SERVER_HOST } from "./paymentApi";
 
 const host = `${API_SERVER_HOST}/api/customer`;
 
-export const signUp = async (customer) => {
+export const signUp = async (id) => {
     try {
-        const res = await axios.post(`${host}/signup`, customer);
+        const res = await axios.post(`${host}/signup`, id);
 
         return res.data;
     } catch (error) {
         if (error.response) {
-            throw new Error(error.response.data.message || "회원가입 실패");
+            throw new Error(error.response.data.message || "회원가입 실패:", error.response ? error.response.data : error.message);
         } else {
             throw new Error("서버와 연결할 수 없습니다");
         }

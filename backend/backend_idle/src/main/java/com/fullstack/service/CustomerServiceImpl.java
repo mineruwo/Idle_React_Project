@@ -40,7 +40,8 @@ public class CustomerServiceImpl implements CustomerService {
 		return new LoginResponseDTO (
 				entity.getId(),
 				entity.getNickname(),
-				entity.getRole()
+				entity.getRole(),
+				entity.getIdNum()
 		    );
 	}
 	
