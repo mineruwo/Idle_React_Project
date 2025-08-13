@@ -60,3 +60,23 @@ export const createCustomer = async (customerData) => {
         throw error;
     }
 };
+
+export const createNotice = async (noticeData) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/api/admin/notices`, noticeData, { withCredentials: true });
+        return response.data;
+    } catch (error) {
+        console.error('Notice creation failed:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const getAllNotices = async () => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/api/admin/notices`, { withCredentials: true });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch notices:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};

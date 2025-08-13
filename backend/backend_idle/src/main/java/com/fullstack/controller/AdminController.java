@@ -1,5 +1,6 @@
 package com.fullstack.controller;
 
+import com.fullstack.entity.Notice;
 import com.fullstack.model.AdminDTO;
 import com.fullstack.model.AdminLoginRequestDTO;
 import com.fullstack.model.AdminLoginResponseDTO;
@@ -15,7 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import com.fullstack.model.CustomerDTO;
+import com.fullstack.model.NoticeDTO;
 import com.fullstack.service.CustomerService;
+import com.fullstack.service.NoticeService;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,6 +39,9 @@ public class AdminController {
 
     @Autowired
     private CustomerService customerService;
+
+    @Autowired
+    private NoticeService noticeService;
 
     @PostMapping("/login")
     public ResponseEntity<AdminLoginResponseDTO> login(@RequestBody AdminLoginRequestDTO loginRequestDTO, HttpServletResponse response) {
@@ -125,5 +131,22 @@ public class AdminController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating customer: " + e.getMessage());
         }
+    }
+
+    @PostMapping("/notices")
+    @PreAuthorize("hasRole('MANAGER_COUNSELING') or hasRole('DEV_ADMIN') or hasRole('ALL_PERMISSION')") // Adjust roles as needed
+    public ResponseEntity<?> createNotice(@RequestBody NoticeDTO noticeDTO) {
+        try {
+            Notice createdNotice = noticeService.createNotice(noticeDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdNotice);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating notice: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/notices")
+    public ResponseEntity<List<Notice>> getAllNotices() {
+        List<Notice> notices = noticeService.getAllNotices();
+        return ResponseEntity.ok(notices);
     }
 }
