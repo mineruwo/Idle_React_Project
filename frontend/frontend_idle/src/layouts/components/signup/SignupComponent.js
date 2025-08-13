@@ -36,7 +36,7 @@ export default function SignUp(props) {
   const [role, setRole] = useState('shipper');
 
   const {
-    moveToLoginPage,
+    moveToLoginPage
   } = useCustomMove();
 
   // 유효성 검사
@@ -297,9 +297,15 @@ export default function SignUp(props) {
             <Typography sx={{ textAlign: 'center' }}>
               이미 계정이 있나요?{' '}
               <Link
-                href="/material-ui/getting-started/templates/sign-in/"
+                component="button"
                 variant="body2"
-                sx={{ alignSelf: 'center' }}
+                sx={{
+                  alignSelf: 'center',
+                  verticalAlign: 'baseline',
+                  padding: 0,
+                  lineHeight: 'inherit'
+                }}
+                onClick={moveToLoginPage}
               >
                 로그인
               </Link>

@@ -86,7 +86,8 @@ public class AuthController {
         LoginResponseDTO loginResponseDTO = new LoginResponseDTO(
         	customerEntity.getId(),
         	customerEntity.getNickname(),
-        	customerEntity.getRole()
+        	customerEntity.getRole(),
+        	customerEntity.getIdNum()
         );
 
         return ResponseEntity.ok(loginResponseDTO);
