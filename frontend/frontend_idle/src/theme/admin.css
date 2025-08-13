@@ -1,48 +1,97 @@
-
 :root {
     --admin-pink-bg: #fff7fb;
     --admin-pink-card-border: #f9d8e8;
+    --admin-pink-card-border-hover: #f4c1d8;
     --admin-pink-card-shadow: rgba(232, 90, 166, 0.08);
+    --admin-pink-card-shadow-hover: rgba(232, 90, 166, 0.14);
     --admin-pink-strong: #E85AA6;
     --admin-pink-text: #2b2330;
     --admin-pink-sub-text: #9b7f8c;
     --admin-pink-label: #b792a3;
     --admin-pink-panel-border: #f3c9db;
+    --admin-pink-panel-bg: #ffffff;
     --admin-pink-header: #cc3f88;
     --admin-pink-back-bg: #ffe6f2;
     --admin-pink-back-bg-hover: #ffd9ea;
+    --admin-pink-tag-bg: #ffe2ef;
+    --admin-pink-tag-text: #d84b95;
+}
+
+body {
+    background-color: var(--admin-pink-bg);
+    font-family: sans-serif; /* 기본 폰트 설정 */
+    color: var(--admin-pink-text);
 }
 
 .admin-container {
+    padding: 24px;
     background-color: var(--admin-pink-bg);
+    border-radius: 16px;
+    min-height: calc(100vh - 48px);
+    box-sizing: border-box;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--admin-pink-panel-border);
 }
 
 .admin-header h2 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 800;
     color: var(--admin-pink-header);
 }
 
 .admin-primary-btn {
+    padding: 10px 20px;
     background-color: var(--admin-pink-strong);
     color: white;
+    border: none;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
+
 .admin-primary-btn:hover {
     background-color: var(--admin-pink-header);
 }
 
 /* --- Table Styles --- */
 .admin-table {
+    width: 100%;
+    border-collapse: collapse;
     background-color: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px var(--admin-pink-card-shadow);
+    overflow: hidden; /* For border-radius to work on tables */
 }
 
 .admin-table th,
 .admin-table td {
-    border-bottom-color: var(--admin-pink-panel-border);
+    border-bottom: 1px solid var(--admin-pink-panel-border);
+    padding: 14px 16px;
+    text-align: center;
     color: var(--admin-pink-text);
 }
 
 .admin-table th {
     background-color: var(--admin-pink-bg);
     color: var(--admin-pink-strong);
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.admin-table-row {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 .admin-table-row:hover {
@@ -62,88 +111,121 @@
 
 /* Align title to the left */
 .admin-table td:nth-child(2) {
-    color: var(--admin-pink-text);
+    text-align: left;
+    font-weight: 600;
 }
 
 .admin-content-row td {
-    border-bottom-color: var(--admin-pink-panel-border);
+    padding: 0;
+    border-bottom: 1px solid var(--admin-pink-panel-border);
 }
 
 .admin-content-box {
-    background-color: #fffafd;
+    padding: 24px;
+    background-color: #fffafd; /* A very light pink from the reference */
+    text-align: left;
+    white-space: pre-wrap;
+    line-height: 1.7;
     color: var(--admin-pink-text);
 }
 
 .admin-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
     background-color: #fffafd;
 }
 
 .admin-action-btn {
-    border-color: var(--admin-pink-card-border);
+    padding: 8px 14px;
+    border: 1px solid var(--admin-pink-card-border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    transition: all 0.2s ease;
 }
 
-.admin-modify-btn {
-    background-color: #fff;
-    color: var(--admin-pink-strong);
-}
-.admin-modify-btn:hover {
-    background-color: var(--admin-pink-bg);
-    border-color: var(--admin-pink-strong);
-}
-
-.admin-delete-btn {
-    background-color: var(--admin-pink-strong);
-    color: white;
-    border-color: var(--admin-pink-strong);
-}
-.admin-delete-btn:hover {
-    background-color: var(--admin-pink-header);
-    border-color: var(--admin-pink-header);
-}
-
-.admin-toggle-btn {
-    background-color: var(--admin-pink-back-bg);
-    color: var(--admin-pink-header);
-    border-color: var(--admin-pink-back-bg-hover);
-}
-.admin-toggle-btn:hover {
-    background-color: var(--admin-pink-back-bg-hover);
-    border-color: var(--admin-pink-panel-border);
-}
+.admin-modify-btn { background-color: #fff; color: var(--admin-pink-strong); }
+.admin-modify-btn:hover { background-color: var(--admin-pink-bg); border-color: var(--admin-pink-strong); }
+.admin-delete-btn { background-color: var(--admin-pink-strong); color: white; border-color: var(--admin-pink-strong); }
+.admin-delete-btn:hover { background-color: var(--admin-pink-header); border-color: var(--admin-pink-header); }
+.admin-toggle-btn { background-color: var(--admin-pink-back-bg); color: var(--admin-pink-header); border-color: var(--admin-pink-back-bg-hover); }
+.admin-toggle-btn:hover { background-color: var(--admin-pink-back-bg-hover); border-color: var(--admin-pink-panel-border); }
 
 /* --- Form Styles --- */
 .admin-form-container {
     background-color: #fff;
+    padding: 32px;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px var(--admin-pink-card-shadow);
+}
+
+.admin-form-group {
+    margin-bottom: 22px;
 }
 
 .admin-form-group label {
+    display: block;
+    margin-bottom: 8px;
     color: var(--admin-pink-strong);
+    font-weight: 600;
+    font-size: 14px;
 }
 
 .admin-form-group input,
 .admin-form-group textarea,
 .admin-form-group select {
-    border-color: var(--admin-pink-panel-border);
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--admin-pink-panel-border);
+    border-radius: 8px;
+    font-size: 15px;
     color: var(--admin-pink-text);
     background-color: var(--admin-pink-bg);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
 }
 
 .admin-form-group input:focus,
 .admin-form-group textarea:focus,
 .admin-form-group select:focus {
+    outline: none;
     border-color: var(--admin-pink-strong);
     box-shadow: 0 0 0 3px var(--admin-pink-back-bg);
 }
 
+.admin-form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
 /* --- Login Page Styles --- */
 .login-page-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
     background-color: var(--admin-pink-bg);
 }
 
 .login-form-box {
+    width: 100%;
+    max-width: 400px;
+    padding: 40px;
     background-color: #fff;
+    border-radius: 14px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
 }
 
 .login-header {
+    text-align: center;
+    margin-bottom: 24px;
     color: var(--admin-pink-header);
+    font-size: 28px;
+    font-weight: 800;
 }

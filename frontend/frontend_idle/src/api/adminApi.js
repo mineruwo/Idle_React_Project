@@ -100,3 +100,26 @@ export const toggleNoticeActive = async (noticeId) => {
         throw error;
     }
 };
+
+// New API functions for chat session details and customer inquiries
+export const fetchChatSessionDetails = async (chatRoomId) => {
+    try {
+        // Mock API response for now, replace with actual backend call
+        const response = await axios.get(`${API_BASE_URL}/api/admin/chat-sessions/${chatRoomId}/details`, { withCredentials: true });
+        return response.data;
+    } catch (error) {
+        console.error(`Failed to fetch chat session details for ${chatRoomId}:`, error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const fetchCustomerRecentInquiries = async (customerId) => {
+    try {
+        // Mock API response for now, replace with actual backend call
+        const response = await axios.get(`${API_BASE_URL}/api/admin/inquiries/customer/${customerId}/recent`, { withCredentials: true });
+        return response.data;
+    } catch (error) {
+        console.error(`Failed to fetch recent inquiries for customer ${customerId}:`, error.response ? error.response.data : error.message);
+        throw error;
+    }
+};

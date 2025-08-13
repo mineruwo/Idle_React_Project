@@ -2,9 +2,9 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { adminLogin } from "../../../slices/adminLoginSlice";
 import { loginAdmin } from "../../../api/adminApi";
-import useCustomMove from "../../../hooks/useCustomMove"; // useCustomMove 임포트
-import Modal from "../common/Modal"; // Modal 컴포넌트 import
-import './LoginComponent.css'; // CSS 파일 import
+import useCustomMove from "../../../hooks/useCustomMove";
+import Modal from "../common/Modal";
+import '../../../theme/admin.css'; // 공통 CSS 파일 import
 
 const LoginComponent = () => {
     const [id, setId] = useState("");
@@ -14,7 +14,7 @@ const LoginComponent = () => {
     const [autoClose, setAutoClose] = useState(null);
 
     const dispatch = useDispatch();
-    const { moveToAdminPage } = useCustomMove(); // moveToAdminPage 가져오기
+    const { moveToAdminPage } = useCustomMove();
 
     const handleLogin = async () => {
         if (!id) {
@@ -30,11 +30,9 @@ const LoginComponent = () => {
             return;
         }
 
-        console.log("ID:", id, "Password:", password);
         try {
             const result = await loginAdmin(id, password);
-            console.log("Login successful:", result);
-            dispatch(adminLogin(result)); // Redux 상태 업데이트 시 result 전달
+            dispatch(adminLogin(result));
             setModalMessage("관리자 로그인 성공!");
             setShowModal(true);
             setAutoClose(1500);
@@ -53,52 +51,46 @@ const LoginComponent = () => {
     const handleConfirm = () => {
         setShowModal(false);
         if (modalMessage === "관리자 로그인 성공!") {
-            console.log("확인용 로그 confirm");
-            moveToAdminPage(); 
+            moveToAdminPage();
         }
     }
 
-
     return (
-        <div className="login-form-card bg-primary">
+        <div className="login-page-container">
             <Modal show={showModal} message={modalMessage} onClose={closeModal} onConfirm={handleConfirm} autoCloseDelay={autoClose} />
-            <h2>로그인</h2>
-            <form>
-                <div className="mb-3">
-                    <label htmlFor="idInput" className="form-label">
-                        아이디
-                    </label>
-                    <input
-                        type="text"
-                        className="form-control"
-                        id="idInput"
-                        value={id}
-                        onChange={(e) => setId(e.target.value)}
-                    />
-                </div>
-                <div className="mb-3">
-                    <label htmlFor="passwordInput" className="form-label">
-                        비밀번호
-                    </label>
-                    <input
-                        type="password"
-                        className="form-control"
-                        id="passwordInput"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                </div>
-                <button
-                    type="button"
-                    className="btn btn-light w-100"
-                    onClick={handleLogin}
-                >
-                    로그인
-                </button>
-            </form>
+            <div className="login-form-box">
+                <h2 className="login-header">관리자 로그인</h2>
+                <form>
+                    <div className="admin-form-group">
+                        <label htmlFor="idInput">아이디</label>
+                        <input
+                            type="text"
+                            id="idInput"
+                            value={id}
+                            onChange={(e) => setId(e.target.value)}
+                        />
+                    </div>
+                    <div className="admin-form-group">
+                        <label htmlFor="passwordInput">비밀번호</label>
+                        <input
+                            type="password"
+                            id="passwordInput"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                    </div>
+                    <button
+                        type="button"
+                        className="admin-primary-btn"
+                        onClick={handleLogin}
+                        style={{ width: '100%', marginTop: '20px' }}
+                    >
+                        로그인
+                    </button>
+                </form>
+            </div>
         </div>
     );
 };
 
 export default LoginComponent;
-
