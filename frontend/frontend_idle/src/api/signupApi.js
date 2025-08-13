@@ -19,7 +19,6 @@ export const signUp = async (customer) => {
 
 // 아이디 중복검사
 export const checkIdDuplicate = async (id) => {
-    alert(`${host}/check-id?id=${id}`);
     try {
         const res = await axios.get(`${host}/check-id?id=${id}`);
         return res.data;

@@ -1,0 +1,36 @@
+/* DashboardComponent.css */
+
+.dashboard-main-box {
+  flex-grow: 1;
+  padding-left: 24px;
+  padding-right: 24px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.dashboard-title {
+  text-align: right;
+}
+
+.dashboard-content-box {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.dashboard-debug-paper {
+  padding: 16px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Specific background colors for debug divs */
+.bg-e0f7fa { background-color: #e0f7fa; }
+.bg-e8f5e9 { background-color: #e8f5e9; }
+.bg-fff3e0 { background-color: #fff3e0; }
+.bg-f3e5f5 { background-color: #f3e5f5; }
+.bg-ffebee { background-color: #ffebee; }
+.bg-eceff1 { background-color: #eceff1; }

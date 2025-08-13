@@ -2,7 +2,7 @@ package com.fullstack.idle;
 
 import com.fullstack.entity.Admin;
 import com.fullstack.model.AdminDTO;
-import com.fullstack.model.enums.Role;
+import com.fullstack.model.enums.AdminRole;
 import com.fullstack.repository.AdminRepository;
 import com.fullstack.service.AdminService;
 
@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.annotation.Commit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,7 +35,7 @@ class AdminServiceTests {
                 .adminId("admin")
                 .password(rawPassword)
                 .name("개발 관리자")
-                .role(Role.DEV_ADMIN)	
+                .role(AdminRole.DEV_ADMIN)	
                 .emplId("001")
                 .build();
 
@@ -48,7 +47,7 @@ class AdminServiceTests {
         assertThat(foundAdminEntity).isNotNull();
         assertThat(passwordEncoder.matches(rawPassword, foundAdminEntity.getPassword())).isTrue();
         assertThat(foundAdminEntity.getName()).isEqualTo("개발 관리자");
-        assertThat(foundAdminEntity.getRole()).isEqualTo(Role.DEV_ADMIN);
+        assertThat(foundAdminEntity.getRole()).isEqualTo(AdminRole.DEV_ADMIN);
         assertThat(foundAdminEntity.getEmplId()).isEqualTo("001");
 
         System.out.println(foundAdminEntity);

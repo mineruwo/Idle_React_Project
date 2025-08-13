@@ -31,6 +31,7 @@ export const adminLogout = createAsyncThunk(
 const initialState = {
     id: '',
     adminName: '',
+    role: null, // 권한 필드 추가
     isAuthenticated: false,
     status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
     error: null
@@ -44,6 +45,7 @@ const adminLoginSlice = createSlice({
             const data = action.payload;
             state.id = data.adminId;
             state.adminName = data.name;
+            state.role = data.role; // 권한 정보 저장
             state.isAuthenticated = true;
             state.status = 'succeeded';
         }
@@ -59,6 +61,7 @@ const adminLoginSlice = createSlice({
                 state.isAuthenticated = true;
                 state.id = action.payload.adminId;
                 state.adminName = action.payload.name;
+                state.role = action.payload.role; // 권한 정보 저장
             })
             .addCase(checkAuthStatus.rejected, (state, action) => {
                 state.status = 'failed';
@@ -73,6 +76,7 @@ const adminLoginSlice = createSlice({
                 state.status = 'idle'; // Reset to idle after logout
                 state.id = '';
                 state.adminName = '';
+                state.role = null; // 권한 정보 초기화
                 state.isAuthenticated = false;
                 state.error = null;
             })

@@ -37,3 +37,26 @@ export const getAdminList = async (page = 0, size = 10) => {
         throw error;
     }
 };
+
+export const getCustomerList = async (page = 0, size = 10) => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/api/admin/customers`, {
+            params: { page, size },
+            withCredentials: true
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch customer list:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const createCustomer = async (customerData) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/api/admin/customers`, customerData, { withCredentials: true });
+        return response.data;
+    } catch (error) {
+        console.error('Customer creation failed:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};

@@ -9,16 +9,15 @@ import adminRoutes from "./adminRouter";
 import FloatingChatButton from "../layouts/components/common/FloatingChatButton";
 import OrderBoard from "../pages/orderPage/OrderBoard";
 import shipperRouter from "./shipperRouter";
+import { RedirectIfAuthed, RequireAuth } from "./RouteGuards";
 
 const Loading = <div>Loading 중...</div>;
 
 // 페이지 컴포넌트 import
 const Main = lazy(() => import("../pages/mainpage/MainPage"));
-const DashPage = lazy(() => import("../pages/carOwnerPage/CarPage"));
 const OrderForm = lazy(() => import("../pages/orderPage/OrderForm"));
 const Login = lazy(() => import("../pages/loginpage/LoginPage"));
-const Singup = lazy(() => import("../pages/signuppage/SignupPage"));
-const Dstest = lazy(() => import("../pages/mainpage/TestPage"));
+const Signup = lazy(() => import("../pages/signuppage/SignupPage"));
 const AdminPage = lazy(() => import("../pages/adminPage/AdminPage"));
 const Shipper = lazy(() => import("../pages/shipperPage/ShipperDashBoard"));
 
@@ -55,9 +54,23 @@ const root = createBrowserRouter([
                 index: true,
                 element: <Main />,
             },
+            // 게스트
+            {
+                path: "login",
+                element: <RedirectIfAuthed><Login /></RedirectIfAuthed>,
+            },
+            {
+                path: "signup",
+                element: <RedirectIfAuthed><Signup /></RedirectIfAuthed>,
+            },
+            // 차주
             {
                 path: "carPage",
-                element: <CarPage />,
+                element: (
+                    <RequireAuth roles={["carrier"]}>
+                        <CarPage />
+                    </RequireAuth>
+                ),
                 children: [
                     {
                         index: true,
@@ -121,6 +134,7 @@ const root = createBrowserRouter([
                     },
                 ],
             },
+            // 관리자
             {
                 path: "admin",
                 element: (
@@ -135,29 +149,18 @@ const root = createBrowserRouter([
                 element: <OrderForm />,
             },
             {
-                path: "login",
-                element: <Login />,
-            },
-            {
-                path: "signup",
-                element: <Singup />,
-            },
-            {
-                path: "dstest",
-                element: <Dstest />,
-            },
-            {
                 path: "board",
                 element: <OrderBoard />,
             },
         ],
     },
+    // 화주
     {
         path: "shipper",
         element: (
-            <Suspense fallback={Loading}>
-                <Shipper />
-            </Suspense>
+            <RequireAuth roles={["shipper"]}>
+                <Suspense fallback={Loading}><Shipper /></Suspense>
+            </RequireAuth>
         ),
         children: shipperRouter(),
     },

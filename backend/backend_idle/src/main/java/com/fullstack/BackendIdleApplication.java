@@ -1,7 +1,7 @@
 package com.fullstack;
 
 import com.fullstack.entity.Admin;
-import com.fullstack.model.enums.Role;
+import com.fullstack.model.enums.AdminRole;
 import com.fullstack.repository.AdminRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -35,7 +35,7 @@ public class BackendIdleApplication {
                         .adminId("admin")
                         .password(passwordEncoder.encode("admin1234")) // 안전한 비밀번호로 변경 권장
                         .name("기본 관리자")
-                        .role(Role.ALL_PERMISSION) // 모든 권한 부여
+                        .role(AdminRole.ALL_PERMISSION) // 모든 권한 부여
                         .emplId("EMP001")
                         .regDate(LocalDateTime.now())
                         .isDel(false)

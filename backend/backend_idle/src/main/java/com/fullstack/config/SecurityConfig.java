@@ -46,6 +46,8 @@ public class SecurityConfig {
                     "/api/admin/check-auth", // 추가: 인증 상태 확인 엔드포인트 허용
                     "/api/admin/logout", // 추가: 로그아웃 엔드포인트 허용
                     "/api/admin/accounts", // 경로 변경
+                    "/api/admin/customers", // 고객 목록 조회 허용
+                    "/api/admin/customers/**", // 고객 생성/수정/삭제 허용 (POST, PUT, DELETE)
                     "/ws/**", "/ws-chat/**", // 웹소켓 경로
                     "/api/customer/**", // 고객 관련 API
                     "/api/payment/**"

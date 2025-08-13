@@ -48,6 +48,22 @@ const useCustomMove = () => {
         navigate("/login");
     };
 
+    const moveToSignUpPage = () => {
+        navigate("/signup");
+    };
+
+    const moveToMainPage = () => {
+        navigate("/");
+    }
+
+     const moveToMyPageByRole = (role) => {
+        switch (role) {
+            case "shipper": navigate("/shipper");
+            case "carrier": navigate("/carPage");
+            default: navigate("/");
+        }
+    }
+
     return {
         shipperMoveToDashBoard,
         shipperMoveToDetails,
@@ -65,6 +81,9 @@ const useCustomMove = () => {
         moveToAdminPage,
         moveToWebSocketTestPage,
         moveToLoginPage,
+        moveToSignUpPage,
+        moveToMainPage,
+        moveToMyPageByRole
     };
 };
 

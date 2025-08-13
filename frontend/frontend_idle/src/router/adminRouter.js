@@ -1,5 +1,6 @@
 import { lazy } from "react";
-import { Navigate } from "react-router-dom";
+import { Outlet } from "react-router-dom"; // Outlet 임포트
+import ProtectedRoute from "./ProtectedRoute"; // ProtectedRoute 임포트
 
 const DashboardComponent = lazy(() => import("../layouts/components/admin/DashboardComponent"));
 const AdminAccountListComponent = lazy(() => import("../layouts/components/admin/AdminAccountListComponent"));
@@ -16,10 +17,17 @@ const LoginComponent = lazy(() => import("../layouts/components/admin/LoginCompo
 const ActiveChatSessionsList = lazy(() => import("../layouts/components/chat/ActiveChatSessionsList"));
 
 const adminRoutes = [
-    { index: true, element: <DashboardComponent /> }, // 기본 경로 추가
-    { path: "dashboard", element: <DashboardComponent /> },
+    { 
+        index: true, 
+        element: <ProtectedRoute><DashboardComponent /></ProtectedRoute> 
+    },
+    { 
+        path: "dashboard", 
+        element: <ProtectedRoute><DashboardComponent /></ProtectedRoute> 
+    },
     {
         path: "admin-accounts",
+        element: <ProtectedRoute requiredRoles={['DEV_ADMIN']}><Outlet /></ProtectedRoute>,
         children: [
             { index: true, element: <AdminAccountListComponent /> },
             { path: "create", element: <AdminAccountCreateComponent /> },
@@ -27,6 +35,7 @@ const adminRoutes = [
     },
     {
         path: "customer-accounts",
+        element: <ProtectedRoute requiredRoles={['ADMIN']}><Outlet /></ProtectedRoute>,
         children: [
             { index: true, element: <CustomerAccountListComponent /> },
             { path: "create", element: <CustomerAccountCreateComponent /> },
@@ -34,6 +43,7 @@ const adminRoutes = [
     },
     {
         path: "sales",
+        element: <ProtectedRoute requiredRoles={['ADMIN']}><Outlet /></ProtectedRoute>,
         children: [
             { index: true, element: <SalesDetailComponent /> },
             { path: "settlement", element: <SalesSettlementComponent /> },
@@ -41,6 +51,7 @@ const adminRoutes = [
     },
     {
         path: "inquiries",
+        element: <ProtectedRoute requiredRoles={['MANAGER_COUNSELING', 'COUNSELOR']}><Outlet /></ProtectedRoute>,
         children: [
             { index: true, element: <InquiryListComponent /> },
             { path: "my-inquiries", element: <MyInquiriesComponent /> },
@@ -49,6 +60,7 @@ const adminRoutes = [
     },
     {
         path: "notices",
+        element: <ProtectedRoute requiredRoles={['MANAGER_COUNSELING']}><Outlet /></ProtectedRoute>,
         children: [
             { index: true, element: <NoticeListComponent /> },
             { path: "faq", element: <FAQManagementComponent /> },
