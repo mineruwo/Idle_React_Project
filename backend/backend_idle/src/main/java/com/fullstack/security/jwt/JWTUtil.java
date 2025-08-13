@@ -8,7 +8,7 @@ import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
+import com.fullstack.controller.OrderController;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -18,10 +18,13 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JWTUtil {
 
+    private final OrderController orderController;
+
 	private final Key key;
 	
-	public JWTUtil(@Value("${jwt.secret}") String secret) {
-		this.key = Keys.hmacShaKeyFor(secret.getBytes()); 
+	public JWTUtil(@Value("${jwt.secret}") String secret, OrderController orderController) {
+		this.key = Keys.hmacShaKeyFor(secret.getBytes());
+		this.orderController = orderController; 
 	}
 	
 	public String generateAccessToken(String id, String role, Duration expire) {
@@ -45,6 +48,9 @@ public class JWTUtil {
 	
 	// 토큰에서 ID 추출
 	public String getId(String token) {
+		
+		String ids  = parseClaims(token).getSubject();
+		
 		return parseClaims(token).getSubject();
 	}
 	
