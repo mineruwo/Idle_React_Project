@@ -1,12 +1,23 @@
+import { useAuth } from "../../auth/AuthProvider";
 import ShipperPaymentComponent from "../../layouts/components/shipperComponent/ShipperPaymentComponent";
+useAuth;
 
 const ShipperPaymentPage = () => {
-    const nickname = "testUser"; // 예시 닉네임
-    const userId = 1; // 임시 userId 설정. 실제 애플리케이션에서는 인증된 사용자 정보에서 가져와야 합니다.
+    const { profile, loading, authenticated } = useAuth();
+
+    if (loading) {
+        return <div> 로딩 중...</div>;
+    }
+
+    if (!authenticated || !profile) {
+        return <div> 로그인이 필요합니다.</div>;
+    }
+
+    const { id, nickname } = profile;
 
     return (
         <div>
-            <ShipperPaymentComponent nickname={nickname} userId={userId} />
+            <ShipperPaymentComponent nickname={nickname} userId={id} />
         </div>
     );
 };

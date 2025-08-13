@@ -1,5 +1,18 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { ACCESS_TOKEN_KEY, AUTH_CHANGE_EVENT, clearAccessToken, getAccessToken, setAccessToken } from "./tokenStore";
+import {
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
+import {
+    ACCESS_TOKEN_KEY,
+    AUTH_CHANGE_EVENT,
+    clearAccessToken,
+    getAccessToken,
+    setAccessToken,
+} from "./tokenStore";
 import api from "../api/authApi";
 
 const AuthContext = createContext(null);
@@ -8,7 +21,11 @@ export const useAuth = () => useContext(AuthContext);
 const SKIP_REFRESH_ONCE = "auth:skipRefreshOnce";
 
 export default function AuthProvider({ children }) {
-    const [state, setState] = useState({ loading: true, authenticated: false, profile: null });
+    const [state, setState] = useState({
+        loading: true,
+        authenticated: false,
+        profile: null,
+    });
 
     // 중복 호출/루프 방지용 가드
     const evaluatingRef = useRef(false);
@@ -36,11 +53,14 @@ export default function AuthProvider({ children }) {
                 sessionStorage.getItem(SKIP_REFRESH_ONCE) === "1";
 
             if (!token) {
-                
                 if (skipOnce) {
                     skipRefreshOnceRef.current = false;
                     sessionStorage.removeItem(SKIP_REFRESH_ONCE);
-                    setState({ loading: false, authenticated: false, profile: null });
+                    setState({
+                        loading: false,
+                        authenticated: false,
+                        profile: null,
+                    });
                     return;
                 }
 
@@ -51,10 +71,18 @@ export default function AuthProvider({ children }) {
                         lastTokenRef.current = data.accessToken;
                     }
                     const auto = await api.get("/auth/auto");
-                    setState({ loading: false, authenticated: true, profile: auto.data });
+                    setState({
+                        loading: false,
+                        authenticated: true,
+                        profile: auto.data,
+                    });
                 } catch {
                     clearAccessToken();
-                    setState({ loading: false, authenticated: false, profile: null });
+                    setState({
+                        loading: false,
+                        authenticated: false,
+                        profile: null,
+                    });
                 }
                 return;
             }
@@ -62,7 +90,11 @@ export default function AuthProvider({ children }) {
             // access 토큰으로 현재 사용자 조회
             try {
                 const auto = await api.get("/auth/auto");
-                setState({ loading: false, authenticated: true, profile: auto.data });
+                setState({
+                    loading: false,
+                    authenticated: true,
+                    profile: auto.data,
+                });
                 return;
             } catch (_) {
                 // 통과 못하면 refresh 시도
@@ -75,19 +107,27 @@ export default function AuthProvider({ children }) {
                     lastTokenRef.current = data.accessToken;
                 }
                 const auto2 = await api.get("/auth/auto");
-                setState({ loading: false, authenticated: true, profile: auto2.data });
+                setState({
+                    loading: false,
+                    authenticated: true,
+                    profile: auto2.data,
+                });
                 return;
             } catch (_) {
                 // refresh도 실패 → 완전 로그아웃 상태
                 clearAccessToken();
-                setState({ loading: false, authenticated: false, profile: null });
+                setState({
+                    loading: false,
+                    authenticated: false,
+                    profile: null,
+                });
             }
         } finally {
             evaluatingRef.current = false;
         }
     }, []);
 
-        // 최초 1회 상태 결정
+    // 최초 1회 상태 결정
     useEffect(() => {
         evaluate();
     }, [evaluate]);
@@ -117,14 +157,17 @@ export default function AuthProvider({ children }) {
             }
         };
         window.addEventListener(AUTH_CHANGE_EVENT, onAuthChange);
-        return () => window.removeEventListener(AUTH_CHANGE_EVENT, onAuthChange);
+        return () =>
+            window.removeEventListener(AUTH_CHANGE_EVENT, onAuthChange);
     }, [evaluate]);
 
     // 외부에서 강제 재평가
     const refreshAuth = evaluate;
 
     return (
-        <AuthContext.Provider value={{ ...state, refreshAuth: evaluate, logOut }}>
+        <AuthContext.Provider
+            value={{ ...state, refreshAuth: evaluate, logOut }}
+        >
             {children}
         </AuthContext.Provider>
     );
