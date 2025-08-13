@@ -1,16 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import "../../../theme/GNB.css";
 import BubbleAnimation from "../carownerComponent/common/BubbleAnimation";
-import { clearAccessToken, getAccessToken } from "../../../auth/tokenStore";
 import api from "../../../api/authApi";
-import { getRoleFromToken } from "../../../utils/jwt";
 import useCustomMove from "../../../hooks/useCustomMove";
 import { useAuth } from "../../../auth/AuthProvider";
 
 const GNB = () => {
     const [hideHeader, setHideHeader] = useState(false);
 
-    const { loading, authenticated, profile, refreshAuth, logOut } = useAuth();
+    const { authenticated, profile, logOut } = useAuth();
 
     const {
         shipperMoveToDashBoard,
@@ -36,7 +34,7 @@ const GNB = () => {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
-    const role = profile?.role || getRoleFromToken(getAccessToken());
+    const role = profile?.role;
 
     const handleMyPage = useCallback(() => {
         if (role === "shipper") shipperMoveToDashBoard();
@@ -46,14 +44,12 @@ const GNB = () => {
 
     const handleLogout = async () => {
         try {
-            if (api?.post) {
-                await api.post("/auth/logout");
-            }
-        } catch (_) { // 에러 발생해도 UI 유지
+            await api.post("/auth/logout"); 
+        } catch (_) {
+            // 실패해도 UI는 일관되게 처리
         } finally {
-            logOut();
-            clearAccessToken();
-            moveToMainPage();
+            logOut();          
+            moveToMainPage();  
         }
     };
 

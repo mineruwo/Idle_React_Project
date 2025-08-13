@@ -1,7 +1,8 @@
+
 import { useState } from "react";
 import { createCustomer } from "../../../api/adminApi";
 import Modal from "../common/Modal";
-import './AdminAccountListComponent.css'; // Reuse the same CSS for consistency
+import '../../../theme/admin.css'; // 공통 CSS 임포트
 
 const CustomerCreateComponent = () => {
     const [newCustomer, setNewCustomer] = useState({
@@ -22,7 +23,6 @@ const CustomerCreateComponent = () => {
 
     const handleCreateSubmit = async (e) => {
         e.preventDefault();
-        console.log("Attempting to create customer with data:", newCustomer);
         try {
             await createCustomer(newCustomer);
             setModalMessage("고객 계정이 성공적으로 생성되었습니다.");
@@ -47,38 +47,40 @@ const CustomerCreateComponent = () => {
     };
 
     return (
-        <div className="admin-account-list-container">
+        <div className="admin-container">
             <Modal show={showModal} message={modalMessage} onClose={closeModal} />
-            <h2>새 고객 계정 생성</h2>
-            <form onSubmit={handleCreateSubmit}>
-                <div className="form-group">
+            <div className="admin-header">
+                <h2>새 고객 계정 생성</h2>
+            </div>
+            <form onSubmit={handleCreateSubmit} className="admin-form-container">
+                <div className="admin-form-group">
                     <label htmlFor="id">ID:</label>
                     <input type="text" id="id" name="id" value={newCustomer.id} onChange={handleCreateFormChange} required />
                 </div>
-                <div className="form-group">
+                <div className="admin-form-group">
                     <label htmlFor="passwordEnc">비밀번호:</label>
                     <input type="password" id="passwordEnc" name="passwordEnc" value={newCustomer.passwordEnc} onChange={handleCreateFormChange} required />
                 </div>
-                <div className="form-group">
+                <div className="admin-form-group">
                     <label htmlFor="customName">이름:</label>
                     <input type="text" id="customName" name="customName" value={newCustomer.customName} onChange={handleCreateFormChange} required />
                 </div>
-                <div className="form-group">
+                <div className="admin-form-group">
                     <label htmlFor="phone">전화번호:</label>
                     <input type="tel" id="phone" name="phone" value={newCustomer.phone} onChange={handleCreateFormChange} required />
                 </div>
-                <div className="form-group">
+                <div className="admin-form-group">
                     <label htmlFor="nickname">닉네임:</label>
                     <input type="text" id="nickname" name="nickname" value={newCustomer.nickname} onChange={handleCreateFormChange} required />
                 </div>
-                <div className="form-group">
+                <div className="admin-form-group">
                     <label htmlFor="role">역할:</label>
                     <select id="role" name="role" value={newCustomer.role} onChange={handleCreateFormChange}>
                         <option value="SHIPPER">Shipper</option>
                         <option value="CARRIER">Carrier</option>
                     </select>
                 </div>
-                <button type="submit">생성</button>
+                <button type="submit" className="admin-primary-btn">생성</button>
             </form>
         </div>
     );

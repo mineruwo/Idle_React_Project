@@ -1,7 +1,8 @@
 import { useState } from "react";
 import Modal from "../common/Modal";
 import { createAdmin } from "../../../api/adminApi";
-import './AdminAccountCreateComponent.css';
+import '../../../theme/admin.css'; // Corrected path to theme/admin.css
+// import './AdminAccountCreateComponent.css'; // Removed
 
 const AdminAccountCreateComponent = () => {
     const [adminInfo, setAdminInfo] = useState({
@@ -71,29 +72,29 @@ const AdminAccountCreateComponent = () => {
     };
 
     return (
-        <div className="create-admin-form-card">
+        <div className="create-admin-form-card admin-form-container">
             <Modal show={showModal} message={modalMessage} onClose={closeModal} />
-            <h2>관리자 계정 생성</h2>
+            <h2 className="admin-header">관리자 계정 생성</h2>
             <form>
-                <div className="form-group">
-                    <label htmlFor="id">아이디</label>
-                    <input type="text" id="id" name="id" value={adminInfo.id} onChange={handleChange} />
+                <div className="form-group admin-form-group">
+                    <label htmlFor="id" className="admin-label">아이디</label>
+                    <input type="text" id="id" name="id" value={adminInfo.id} onChange={handleChange} className="admin-input" />
                 </div>
-                <div className="form-group">
-                    <label htmlFor="password">비밀번호</label>
-                    <input type="text" id="password" name="password" value={adminInfo.password} onChange={handleChange} />
+                <div className="form-group admin-form-group">
+                    <label htmlFor="password" className="admin-label">비밀번호</label>
+                    <input type="text" id="password" name="password" value={adminInfo.password} onChange={handleChange} className="admin-input" />
                 </div>
-                <div className="form-group">
-                    <label htmlFor="name">이름</label>
-                    <input type="text" id="name" name="name" value={adminInfo.name} onChange={handleChange} />
+                <div className="form-group admin-form-group">
+                    <label htmlFor="name" className="admin-label">이름</label>
+                    <input type="text" id="name" name="name" value={adminInfo.name} onChange={handleChange} className="admin-input" />
                 </div>
-                <div className="form-group">
-                    <label htmlFor="employeeNumber">사번</label>
-                    <input type="text" id="employeeNumber" name="employeeNumber" value={adminInfo.employeeNumber} onChange={handleChange} />
+                <div className="form-group admin-form-group">
+                    <label htmlFor="employeeNumber" className="admin-label">사번</label>
+                    <input type="text" id="employeeNumber" name="employeeNumber" value={adminInfo.employeeNumber} onChange={handleChange} className="admin-input" />
                 </div>
-                <div className="form-group">
-                    <label htmlFor="role">역할</label>
-                    <select id="role" name="role" value={adminInfo.role} onChange={handleChange}>
+                <div className="form-group admin-form-group">
+                    <label htmlFor="role" className="admin-label">역할</label>
+                    <select id="role" name="role" value={adminInfo.role} onChange={handleChange} className="admin-select">
                         {roleOptions.map(option => (
                             <option key={option.value} value={option.value}>
                                 {option.label}
@@ -101,7 +102,7 @@ const AdminAccountCreateComponent = () => {
                         ))}
                     </select>
                 </div>
-                <button type="button" className="btn btn-primary w-100" onClick={handleCreate}>
+                <button type="button" className="admin-button" onClick={handleCreate}>
                     생성
                 </button>
             </form>

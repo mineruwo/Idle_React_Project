@@ -14,20 +14,75 @@ const ModalChatSession = ({ isOpen, onClose }) => {
     const [chatRoomId, setChatRoomId] = useState(null);
 
     const reduxUserInfo = useSelector((state) => state.adminLogin?.userInfo);
+    const createChatSessionOnBackend = async (chatRoomId, userInfo) => {
+        const customerData = userInfo ? { id: userInfo.id, customName: userInfo.username } : null; // Adjust based on actual userInfo structure
+        try {
+            const response = await fetch(`${apiConfig.apiBaseUrl}/admin/chat-sessions`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(sessionStorage.getItem('accessToken') && { 'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}` }) // Conditionally add Authorization header
+                },
+                body: JSON.stringify({
+                    chatRoomId: chatRoomId,
+                    customer: customerData
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Failed to create chat session on backend:', errorData);
+                // Handle error, e.g., show a message to the user
+            } else {
+                const sessionData = await response.json();
+                console.log('Chat session created on backend:', sessionData);
+            }
+        } catch (error) {
+            console.error('Error creating chat session on backend:', error);
+        }
+    };
+
+    const deleteChatSessionOnBackend = async (chatRoomIdToDelete) => {
+        try {
+            const response = await fetch(`${apiConfig.apiBaseUrl}/api/admin/chat-sessions/${chatRoomIdToDelete}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(sessionStorage.getItem('accessToken') && { 'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}` })
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Failed to delete chat session on backend:', errorData);
+            } else {
+                console.log('Chat session deleted on backend:', chatRoomIdToDelete);
+                sessionStorage.removeItem('chatRoomId'); // Clear chatRoomId from session storage
+                sessionStorage.removeItem('chatSessionCreated'); // Clear the flag
+                sessionStorage.removeItem('guestId'); // Clear guestId if it exists
+            }
+        } catch (error) {
+            console.error('Error deleting chat session on backend:', error);
+        }
+    };
+
     const [currentUser, setCurrentUser] = useState(null);
 
     useEffect(() => {
         if (isOpen) {
-            if (chatRoomId === null) {
+            let currentChatRoomId = chatRoomId;
+            if (currentChatRoomId === null) {
                 let storedChatRoomId = sessionStorage.getItem('chatRoomId');
                 if (!storedChatRoomId) {
                     storedChatRoomId = `room_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
                     sessionStorage.setItem('chatRoomId', storedChatRoomId);
                 }
-                setChatRoomId(storedChatRoomId);
+                currentChatRoomId = storedChatRoomId;
+                setChatRoomId(currentChatRoomId);
             }
 
-            if (currentUser === null) {
+            let currentDeterminedUser = currentUser;
+            if (currentDeterminedUser === null) {
                 let determinedUser = reduxUserInfo;
                 if (!determinedUser) {
                     const sessionUser = sessionStorage.getItem('userInfo');
@@ -46,7 +101,20 @@ const ModalChatSession = ({ isOpen, onClose }) => {
                     }
                     newCurrentUserIdentifier = guestId;
                 }
-                setCurrentUser(newCurrentUserIdentifier);
+                currentDeterminedUser = newCurrentUserIdentifier;
+                setCurrentUser(currentDeterminedUser);
+            }
+
+            // Call backend to create chat session only if a new chatRoomId was just generated
+            // and currentUser is determined.
+            // This ensures the API call happens only once for a new session.
+            console.log('ModalChatSession useEffect triggered. isOpen:', isOpen, 'chatRoomId:', currentChatRoomId, 'currentUser:', currentDeterminedUser, 'chatSessionCreated flag:', sessionStorage.getItem('chatSessionCreated'));
+            if (currentChatRoomId && currentDeterminedUser && !sessionStorage.getItem('chatSessionCreated')) {
+                console.log('Attempting to create chat session on backend...');
+                createChatSessionOnBackend(currentChatRoomId, reduxUserInfo || JSON.parse(sessionStorage.getItem('userInfo')));
+                sessionStorage.setItem('chatSessionCreated', 'true'); // Prevent multiple calls
+            } else {
+                console.log('Skipping chat session creation. Conditions: chatRoomId:', currentChatRoomId, 'currentUser:', currentDeterminedUser, 'chatSessionCreated flag:', sessionStorage.getItem('chatSessionCreated'));
             }
         }
     }, [isOpen, reduxUserInfo, chatRoomId, currentUser]);
@@ -82,6 +150,10 @@ const ModalChatSession = ({ isOpen, onClose }) => {
             return () => {
                 if (client) {
                     client.deactivate();
+                    // Call backend to delete chat session when WebSocket closes
+                    if (chatRoomId) { // Ensure chatRoomId exists before attempting deletion
+                        deleteChatSessionOnBackend(chatRoomId);
+                    }
                 }
             };
         }
