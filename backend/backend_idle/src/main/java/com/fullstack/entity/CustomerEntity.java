@@ -75,4 +75,7 @@ public class CustomerEntity {
 	@Column(name="RT_EXPIRES_AT")
 	private LocalDateTime rtExpiresAt;
 	
+	@Column(name = "AVATAR_URL", length = 200)
+	private String avatarUrl;
+	
 }

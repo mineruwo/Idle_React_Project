@@ -1,92 +1,127 @@
-// DeliverySettlementPage.js
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../../../../theme/CarOwner/Settlement.css";
-
-const mockSummary = {
-    totalSettlement: 1545000,
-    period: "2024-04-01 ~ 2024-04-30",
-    completed: {
-        count: 15,
-        sales: 2400000,
-        commission: 855000,
-        net: 1545000,
-    },
-    inProgress: {
-        count: 3,
-        estimatedSales: 530000,
-        estimatedCommission: 190000,
-    },
-};
-
-const mockDeliveries = [
-    { date: "04.2.4", from: "서울", to: "부산", sales: 400000, commission: 140000, driverPay: 65000, net: 260000 },
-    { date: "04.2.3", from: "인천", to: "대구", sales: 200000, commission: 130000, driverPay: 140000, net: 260000 },
-    { date: "04.2.2", from: "대구", to: "청주", sales: 200000, commission: 140000, driverPay: 140000, net: 260000 },
-    { date: "04.2.1", from: "서울", to: "부산", sales: 400000, commission: 140000, driverPay: 65000, net: 260000 },
-    { date: "04.2.2", from: "인천", to: "대구", sales: 300000, commission: 140000, driverPay: 130000, net: 260000 },
-    { date: "04.2.8", from: "서울", to: "서울", sales: 400000, commission: 35000, driverPay: 140000, net: 260000 },
-];
+import {
+  fetchSettlements,
+  fetchSettlementSummaryCard,
+  // 필요 시: createSettlement, approveSettlement, paySettlement, cancelSettlement
+} from "../../../../api/CarOwnerApi/CarOwnerSettlementApi";
 
 const SettlementComponent = () => {
-    return (
-        <div className="settlement-page">
-            <p>정산 기간: {mockSummary.period}</p>
-            <div className="actions">
-                <div className="settlementtitle">
-                <h1>정산 금액: ₩{mockSummary.totalSettlement.toLocaleString()}</h1>
-                
-                </div>
-                <div className="settlementprintbtn">
-                <button>정산 인쇄</button>
-                </div>
-            </div>
+  // 필터
+  const [from, setFrom] = useState(""); // yyyy-MM-dd
+  const [to, setTo] = useState("");
+  const [status, setStatus] = useState(""); // REQUESTED/APPROVED/PAID/CANCELED/""
+  const [pageData, setPageData] = useState({ content: [], number: 0, size: 10, totalPages: 0, totalElements: 0 });
+  const [card, setCard] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState(null);
 
-            <div className="summary-section">
-                <div className="box">
-                    <h3>📦 배송 완료</h3>
-                    <p>매출: {mockSummary.completed.count}건 / ₩{mockSummary.completed.sales.toLocaleString()}</p>
-                    <p>수수료: ₩{mockSummary.completed.commission.toLocaleString()}</p>
-                    <p className="total">정산금액: ₩{mockSummary.completed.net.toLocaleString()}</p>
-                </div>
+  const load = async (page = 0) => {
+    setLoading(true); setErr(null);
+    try {
+      const [listRes, cardRes] = await Promise.all([
+        fetchSettlements({ page, size: pageData.size, status, from, to }),
+        fetchSettlementSummaryCard()
+      ]);
+      setPageData(listRes);
+      setCard(cardRes);
+    } catch (e) {
+      setErr(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-                <div className="box">
-                    <h3>🚚 진행 중</h3>
-                    <p>건수: {mockSummary.inProgress.count}건</p>
-                    <p>예정 매출: ₩{mockSummary.inProgress.estimatedSales.toLocaleString()}</p>
-                    <p>예정 수수료: ₩{mockSummary.inProgress.estimatedCommission.toLocaleString()}</p>
-                </div>
+  useEffect(() => { load(0); }, [from, to, status]);
 
+  const print = () => window.print();
 
-            </div>
-
-            <table className="delivery-table">
-                <thead>
-                    <tr>
-                        <th>배송일</th>
-                        <th>출발지</th>
-                        <th>도착지</th>
-                        <th>매출</th>
-                        <th>수수료</th>
-                        <th>정산지급액</th>
-                        <th>정산액</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {mockDeliveries.map((item, idx) => (
-                        <tr key={idx}>
-                            <td>{item.date}</td>
-                            <td>{item.from}</td>
-                            <td>{item.to}</td>
-                            <td>₩{item.sales.toLocaleString()}</td>
-                            <td>₩{item.commission.toLocaleString()}</td>
-                            <td>₩{item.driverPay.toLocaleString()}</td>
-                            <td>₩{item.net.toLocaleString()}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+  return (
+    <div className="settlement-page">
+      {/* 상단 필터/액션 */}
+      <div className="actions" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div className="settlementtitle">
+          <h1>정산 내역</h1>
+          <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+            <span>기간</span>
+            <input type="date" value={from} onChange={(e)=>setFrom(e.target.value)} />
+            <span>~</span>
+            <input type="date" value={to} onChange={(e)=>setTo(e.target.value)} />
+            <select value={status} onChange={(e)=>setStatus(e.target.value)}>
+              <option value="">전체</option>
+              <option value="REQUESTED">요청</option>
+              <option value="APPROVED">승인</option>
+              <option value="PAID">지급완료</option>
+              <option value="CANCELED">취소</option>
+            </select>
+            <button onClick={()=>load(0)}>조회</button>
+          </div>
         </div>
-    );
+        <div className="settlementprintbtn">
+          <button onClick={print}>정산 인쇄</button>
+        </div>
+      </div>
+
+      {/* 요약 카드 */}
+      {card && (
+        <div className="summary-section">
+          <div className="box">
+            <h3>📆 기준 월</h3>
+            <p>{card.month}</p>
+          </div>
+          <div className="box">
+            <h3>💰 오늘 수입</h3>
+            <p className="total">₩{card.todayEarnings.toLocaleString()}</p>
+          </div>
+          <div className="box">
+            <h3>📈 이번 달 수입</h3>
+            <p className="total">₩{card.monthEarnings.toLocaleString()}</p>
+          </div>
+          <div className="box">
+            <h3>⏳ 미지급 합계</h3>
+            <p className="total">₩{card.unsettledAmount.toLocaleString()}</p>
+          </div>
+        </div>
+      )}
+
+      {/* 목록/테이블 */}
+      {err && <div className="error">에러: {err}</div>}
+      {loading ? (
+        <div>불러오는 중...</div>
+      ) : (
+        <>
+          <table className="delivery-table">
+            <thead>
+              <tr>
+                <th>정산ID</th>
+                <th>오더ID</th>
+                <th>금액</th>
+                <th>상태</th>
+                <th>요청일</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pageData.content.map((it) => (
+                <tr key={it.id}>
+                  <td>{it.id}</td>
+                  <td>{it.orderId}</td>
+                  <td>₩{it.amount?.toLocaleString?.() ?? "-"}</td>
+                  <td>{it.status}</td>
+                  <td>{it.createdAt?.replace("T"," ")}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <div className="pager" style={{ marginTop: 12 }}>
+            <button disabled={pageData.number <= 0} onClick={() => load(pageData.number - 1)}>이전</button>
+            <span style={{ margin: "0 8px" }}>{pageData.number + 1} / {pageData.totalPages || 1}</span>
+            <button disabled={pageData.number + 1 >= pageData.totalPages} onClick={() => load(pageData.number + 1)}>다음</button>
+          </div>
+        </>
+      )}
+    </div>
+  );
 };
 
 export default SettlementComponent;
