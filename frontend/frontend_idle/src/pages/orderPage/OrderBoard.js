@@ -42,7 +42,7 @@ const packingKeyToText = {
   fragile: "파손위험물",
 };
 
-/* ========================= 날짜 유틸 ========================= */
+/* ========================= 유틸 ========================= */
 const fmtDate = (v) => {
   try {
     const d = new Date(v);
@@ -71,17 +71,33 @@ const fmtDateTime = (v) => {
   }
 };
 
-const prettyPacking = (packingOptions) => {
-  if (!packingOptions) return "-";
-  const keys = Array.isArray(packingOptions)
-    ? packingOptions
-    : String(packingOptions)
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-  if (!keys.length) return "-";
-  return keys.map((k) => packingKeyToText[k] || k).join(", ");
+// 포장 문자열/JSON/배열 모두 안전하게 변환
+const prettyPacking = (val) => {
+  if (!val) return "-";
+  try {
+    if (typeof val === "string" && val.trim().startsWith("{")) {
+      const obj = JSON.parse(val);
+      const keys = Object.entries(obj)
+        .filter(([, v]) => !!v)
+        .map(([k]) => packingKeyToText[k] || k);
+      return keys.length ? keys.join(", ") : "-";
+    }
+  } catch { }
+  const keys = Array.isArray(val)
+    ? val
+    : String(val)
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  return keys.length ? keys.map((k) => packingKeyToText[k] || k).join(", ") : "-";
 };
+
+const n = (v, def = 0) => {
+  const num = Number(v);
+  return Number.isFinite(num) ? num : def;
+};
+
+const isImmediateOf = (o) => (o?.isImmediate ?? o?.immediate) === true;
 
 /* ========================= 컴포넌트 ========================= */
 const OrderBoard = () => {
@@ -89,8 +105,25 @@ const OrderBoard = () => {
   const [selected, setSelected] = useState(null);
   const [panelOpen, setPanelOpen] = useState(false);
 
+  // 검색/필터
+  const [q, setQ] = useState("");
+  const [immediateFilter, setImmediateFilter] = useState("all"); // all | immediate | reserved
+  const [vehicleFilter, setVehicleFilter] = useState(""); // '', '1ton', ...
+
+  // 정렬
+  const [sortKey, setSortKey] = useState("latest"); // latest | distance | avgPrice
+  const [sortDir, setSortDir] = useState("asc"); // asc | desc (latest는 내부 고정)
+
+  // 페이지네이션
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  
+
   const panelRef = useRef(null);
-  const cardRefs = useRef({}); // 각 카드 dom
+  const cardRefs = useRef({});
+
+  
 
   useEffect(() => {
     (async () => {
@@ -106,14 +139,13 @@ const OrderBoard = () => {
   const handleSelect = (o) => {
     setSelected(o);
     setPanelOpen(true);
-
-    // 선택 카드 옆으로 보이게 스크롤 보정
     requestAnimationFrame(() => {
       const el = cardRefs.current[o.id];
       if (!el || !panelRef.current) return;
       const cardRect = el.getBoundingClientRect();
       const panelRect = panelRef.current.getBoundingClientRect();
-      const targetTop = window.scrollY + (cardRect.top - panelRect.top) + window.scrollY - 16;
+      const targetTop =
+        window.scrollY + (cardRect.top - panelRect.top) + window.scrollY - 16;
       window.scrollTo({ top: targetTop, behavior: "smooth" });
     });
   };
@@ -125,17 +157,165 @@ const OrderBoard = () => {
 
   const todayStr = useMemo(() => fmtDate(new Date()), []);
 
+  // 검색/필터
+  const filtered = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    const matchText = (text) => String(text || "").toLowerCase().includes(needle);
+
+    return orders.filter((o) => {
+      const immediate = isImmediateOf(o);
+
+      if (immediateFilter === "immediate" && !immediate) return false;
+      if (immediateFilter === "reserved" && immediate) return false;
+      if (vehicleFilter && o.vehicle !== vehicleFilter) return false;
+
+      if (!needle) return true;
+
+      const cargoTypeLabel = LABEL.cargoType[o.cargoType] || o.cargoType || "";
+      const sizeLabel = LABEL.cargoSize[o.cargoSize] || o.cargoSize || "";
+      const weightLabel = LABEL.weight[o.weight] || o.weight || "";
+      const vehicleLabel = LABEL.vehicle[o.vehicle] || o.vehicle || "";
+      const packingText = prettyPacking(o.packingOptions ?? o.packingOption);
+
+      return (
+        matchText(o.departure) ||
+        matchText(o.arrival) ||
+        matchText(o.status) ||
+        matchText(packingText) ||
+        matchText(cargoTypeLabel) ||
+        matchText(sizeLabel) ||
+        matchText(weightLabel) ||
+        matchText(vehicleLabel)
+      );
+    });
+  }, [orders, q, immediateFilter, vehicleFilter]);
+
+  // 정렬
+  const sorted = useMemo(() => {
+    const arr = [...filtered];
+    if (sortKey === "latest") {
+      arr.sort((a, b) => {
+        const ta = new Date(a.createdAt || a.date || 0).getTime();
+        const tb = new Date(b.createdAt || b.date || 0).getTime();
+        return tb - ta; // desc
+      });
+      return arr;
+    }
+
+    if (sortKey === "distance") {
+      arr.sort((a, b) =>
+        sortDir === "asc" ? n(a.distance) - n(b.distance) : n(b.distance) - n(a.distance)
+      );
+      return arr;
+    }
+
+    if (sortKey === "avgPrice") {
+      const getPrice = (o) => n(o.avgPrice, n(o.proposedPrice, n(o.driverPrice, 0)));
+      arr.sort((a, b) => (sortDir === "asc" ? getPrice(a) - getPrice(b) : getPrice(b) - getPrice(a)));
+      return arr;
+    }
+
+    return arr;
+  }, [filtered, sortKey, sortDir]);
+
+  // 페이지네이션
+  const total = sorted.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  // ✅ 보드 진입 시 무조건 최상단으로
+  useEffect(() => {
+    // 브라우저의 스크롤 복원 동작 대비해서 2번 보정
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    requestAnimationFrame(() => window.scrollTo(0, 0));
+  }, []);
+
+  // 필터/정렬이 바뀌면 1페이지로
+  useEffect(() => {
+    setPage(1);
+  }, [q, immediateFilter, vehicleFilter, sortKey, sortDir, pageSize]);
+
+  const paged = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return sorted.slice(start, start + pageSize);
+  }, [sorted, page, pageSize]);
+
+  const resetFilters = () => {
+    setQ("");
+    setImmediateFilter("all");
+    setVehicleFilter("");
+  };
+
   return (
     <PageWrap>
       <ListArea data-panel-open={panelOpen}>
         <Header>오더 게시판</Header>
 
+        {/* ===== 검색/필터 바 ===== */}
+        <FilterBar>
+          <SearchInput
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="출발/도착/화물/차량/포장/상태로 검색..."
+          />
+
+          <SelectBox value={immediateFilter} onChange={(e) => setImmediateFilter(e.target.value)}>
+            <option value="all">전체(즉시+예약)</option>
+            <option value="immediate">즉시</option>
+            <option value="reserved">예약</option>
+          </SelectBox>
+
+          <SelectBox value={vehicleFilter} onChange={(e) => setVehicleFilter(e.target.value)}>
+            <option value="">차량 전체</option>
+            <option value="1ton">1톤 트럭</option>
+            <option value="2.5ton">2.5톤 트럭</option>
+            <option value="5ton">5톤 트럭</option>
+            <option value="top">탑차</option>
+            <option value="cold">냉장/냉동차</option>
+          </SelectBox>
+
+          <ResetBtn onClick={resetFilters}>초기화</ResetBtn>
+        </FilterBar>
+
+        {/* ===== 정렬/페이지 사이드 컨트롤 ===== */}
+        <ControlsRow>
+          <SortGroup>
+            <SortLabel>정렬</SortLabel>
+            <SelectBox value={sortKey} onChange={(e) => setSortKey(e.target.value)}>
+              <option value="latest">최신순</option>
+              <option value="distance">거리</option>
+              <option value="avgPrice">평균가</option>
+            </SelectBox>
+
+            {sortKey !== "latest" && (
+              <SelectBox value={sortDir} onChange={(e) => setSortDir(e.target.value)}>
+                <option value="asc">오름차순</option>
+                <option value="desc">내림차순</option>
+              </SelectBox>
+            )}
+          </SortGroup>
+
+          <PageSizeGroup>
+            <SortLabel>페이지 당</SortLabel>
+            <SelectBox value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))}>
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+            </SelectBox>
+          </PageSizeGroup>
+        </ControlsRow>
+
+        <ResultMeta>
+          총 {orders.length}건 중 <strong>{filtered.length}</strong>건(필터) →{" "}
+          <strong>{total}</strong>건(정렬) 중 <strong>{paged.length}</strong>건 표시 (페이지 {page}/{totalPages})
+        </ResultMeta>
+
         <CardList>
-          {orders.map((o) => {
+          {paged.map((o) => {
             const cargoTypeLabel = LABEL.cargoType[o.cargoType] || o.cargoType || "-";
             const sizeLabel = LABEL.cargoSize[o.cargoSize] || o.cargoSize || "-";
             const weightLabel = LABEL.weight[o.weight] || o.weight || "-";
             const vehicleLabel = LABEL.vehicle[o.vehicle] || o.vehicle || "-";
+            const immediate = isImmediateOf(o);
 
             return (
               <Card
@@ -171,22 +351,42 @@ const OrderBoard = () => {
                   </Col>
                   <Col>
                     <SubLabel>포장</SubLabel>
-                    <SubValue>{prettyPacking(o.packingOptions)}</SubValue>
+                    <SubValue>{prettyPacking(o.packingOptions ?? o.packingOption)}</SubValue>
                   </Col>
                   <Col>
                     <SubLabel>예약 시간</SubLabel>
                     <SubValue>
-                      {o.isImmediate ? "즉시" : o.reservedDate ? fmtDateTime(o.reservedDate) : "-"}
+                      {immediate ? "즉시" : o.reservedDate ? fmtDateTime(o.reservedDate) : "-"}
                     </SubValue>
                   </Col>
                 </InfoGrid>
 
-                {/* 등록일 (카드 오른쪽 하단) */}
                 <DateWrap>{o.createdAt ? fmtDate(o.createdAt) : "-"}</DateWrap>
               </Card>
             );
           })}
         </CardList>
+
+        {/* ===== 페이지네이션 ===== */}
+        <Pagination>
+          <PageBtn disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
+            ← 이전
+          </PageBtn>
+
+          <PageNumbers>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .slice(Math.max(0, page - 3), Math.max(0, page - 3) + 5)
+              .map((p) => (
+                <PageNumber key={p} data-active={p === page} onClick={() => setPage(p)}>
+                  {p}
+                </PageNumber>
+              ))}
+          </PageNumbers>
+
+          <PageBtn disabled={page === totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>
+            다음 →
+          </PageBtn>
+        </Pagination>
       </ListArea>
 
       <DetailArea ref={panelRef} data-open={panelOpen}>
@@ -228,16 +428,16 @@ const OrderBoard = () => {
               </Row>
               <Row>
                 <Key>포장 여부</Key>
-                <Val>{prettyPacking(selected.packingOptions)}</Val>
+                <Val>{prettyPacking(selected.packingOptions ?? selected.packingOption)}</Val>
               </Row>
               <Row>
                 <Key>예약시간</Key>
                 <Val>
-                  {selected.isImmediate
+                  {isImmediateOf(selected)
                     ? "즉시"
                     : selected.reservedDate
-                    ? fmtDateTime(selected.reservedDate)
-                    : "-"}
+                      ? fmtDateTime(selected.reservedDate)
+                      : "-"}
                 </Val>
               </Row>
             </Section>
@@ -251,21 +451,15 @@ const OrderBoard = () => {
               <SectionTitle>운임 정보</SectionTitle>
               <Row>
                 <Key>기사 제안가</Key>
-                <Val>
-                  {selected.driverPrice ? `${Number(selected.driverPrice).toLocaleString()} 원` : "-"}
-                </Val>
+                <Val>{selected.driverPrice ? `${Number(selected.driverPrice).toLocaleString()} 원` : "-"}</Val>
               </Row>
               <Row>
                 <Key>화주 제안가</Key>
-                <Val>
-                  {selected.proposedPrice ? `${Number(selected.proposedPrice).toLocaleString()} 원` : "-"}
-                </Val>
+                <Val>{selected.proposedPrice ? `${Number(selected.proposedPrice).toLocaleString()} 원` : "-"}</Val>
               </Row>
               <Row>
                 <Key>평균가</Key>
-                <Val>
-                  {selected.avgPrice ? `${Number(selected.avgPrice).toLocaleString()} 원` : "-"}
-                </Val>
+                <Val>{selected.avgPrice ? `${Number(selected.avgPrice).toLocaleString()} 원` : "-"}</Val>
               </Row>
               <RightHint>
                 예상 거리 {selected.distance != null ? `${Number(selected.distance).toFixed(2)}km` : "-"}
@@ -280,8 +474,7 @@ const OrderBoard = () => {
 
 export default OrderBoard;
 
-/* ========================= 스타일 (핑크 테마) ========================= */
-
+/* ========================= 스타일 (핑크 테마, 반응형 보강) ========================= */
 const PINK = {
   bg: "#fff7fb",
   cardBorder: "#f9d8e8",
@@ -314,22 +507,104 @@ const PageWrap = styled.div`
   @media (max-width: 1200px) {
     grid-template-columns: 1fr;
   }
+  @media (max-width: 600px) {
+    padding: 16px;
+    gap: 16px;
+  }
 `;
 
 const ListArea = styled.div`
   transition: transform 260ms ease, opacity 260ms ease;
   transform-origin: left center;
-
   &[data-panel-open="true"] {
     transform: translateX(0px);
   }
 `;
 
 const Header = styled.h1`
-  margin: 6px 0 18px;
-  font-size: 28px;
+  margin: 6px 0 12px;
+  font-size: clamp(22px, 2.4vw, 28px);
   font-weight: 800;
   color: ${PINK.header};
+`;
+
+const FilterBar = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 160px 160px auto;
+  gap: 10px;
+  margin: 8px 0 12px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const SearchInput = styled.input`
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid ${PINK.cardBorder};
+  background: #fff;
+  font-size: 16px;
+  box-shadow: 0 2px 8px ${PINK.cardShadow};
+  outline: none;
+
+  &:focus { border-color: ${PINK.cardBorderHover}; }
+`;
+
+const SelectBox = styled.select`
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid ${PINK.cardBorder};
+  background: #fff;
+  font-size: 16px;
+  box-shadow: 0 2px 8px ${PINK.cardShadow};
+  outline: none;
+
+  &:focus { border-color: ${PINK.cardBorderHover}; }
+`;
+
+const ResetBtn = styled.button`
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 0;
+  background: ${PINK.backBg};
+  color: ${PINK.header};
+  font-weight: 800;
+  cursor: pointer;
+  &:hover { background: ${PINK.backBgHover}; }
+`;
+
+const ControlsRow = styled.div`
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 8px;
+  flex-wrap: wrap;
+`;
+
+const SortGroup = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+`;
+
+const PageSizeGroup = styled(SortGroup)``;
+
+const SortLabel = styled.span`
+  font-size: 13px;
+  color: ${PINK.label};
+  font-weight: 700;
+`;
+
+const ResultMeta = styled.div`
+  margin: -2px 0 10px;
+  font-size: 13px;
+  color: ${PINK.subText};
+  strong { color: ${PINK.header}; }
 `;
 
 const CardList = styled.div`
@@ -351,7 +626,6 @@ const Card = styled.div`
     border-color: ${PINK.cardBorderHover};
     box-shadow: 0 6px 18px ${PINK.cardShadowHover};
   }
-
   &[data-selected="true"] {
     border-color: ${PINK.strong};
     box-shadow: 0 8px 22px rgba(232, 90, 166, 0.2);
@@ -363,6 +637,8 @@ const RowBetween = styled.div`
   justify-content: space-between;
   align-items: baseline;
   margin-bottom: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
 `;
 
 const FromTo = styled.div`
@@ -371,6 +647,11 @@ const FromTo = styled.div`
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+
+  @media (max-width: 520px) {
+    white-space: normal;
+    line-height: 1.35;
+  }
 `;
 
 const Strong = styled.span`
@@ -390,6 +671,9 @@ const InfoGrid = styled.div`
 
   @media (max-width: 760px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
   }
 `;
 
@@ -412,6 +696,50 @@ const DateWrap = styled.div`
   text-align: right;
   font-size: 12px;
   color: ${PINK.subText};
+`;
+
+const Pagination = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  margin: 18px 0 8px;
+  flex-wrap: wrap;
+`;
+
+const PageBtn = styled.button`
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 0;
+  background: ${PINK.backBg};
+  color: ${PINK.header};
+  font-weight: 800;
+  cursor: pointer;
+  &:disabled { opacity: .5; cursor: default; }
+`;
+
+const PageNumbers = styled.div`
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+`;
+
+const PageNumber = styled.button`
+  min-width: 34px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid ${PINK.cardBorder};
+  background: #fff;
+  color: ${PINK.text};
+  font-weight: 800;
+  cursor: pointer;
+  &[data-active="true"] {
+    background: ${PINK.tagBg};
+    color: ${PINK.tagText};
+    border-color: ${PINK.tagText};
+  }
 `;
 
 const DetailArea = styled.aside`
@@ -438,6 +766,7 @@ const DetailArea = styled.aside`
   @media (max-width: 1200px) {
     position: static;
     height: auto;
+    margin-top: 8px;
   }
 `;
 
@@ -459,10 +788,7 @@ const BackBtn = styled.button`
   border-radius: 10px;
   font-weight: 800;
   cursor: pointer;
-
-  &:hover {
-    background: ${PINK.backBgHover};
-  }
+  &:hover { background: ${PINK.backBgHover}; }
 `;
 
 const DetailTitle = styled.h2`
