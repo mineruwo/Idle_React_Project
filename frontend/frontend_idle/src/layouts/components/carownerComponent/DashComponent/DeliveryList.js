@@ -17,7 +17,9 @@ const DeliveryList = ({ deliveries }) => {
           </tr>
         </thead>
         <tbody>
-          {deliveries.map((d, i) => (
+          {(deliveries || []).length === 0 ? (
+            <tr><td colSpan="7">진행중인 배송이 없습니다.</td></tr>
+          ) : (deliveries || []).map((d, i) => (
             <tr key={i}>
               <td>{d.deliveryNum}</td>
               <td>{d.status}</td>

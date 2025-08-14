@@ -33,10 +33,6 @@ public class JWTFilter extends OncePerRequestFilter {
 			HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		
-		System.out.println(" jwt 토큰 검증 필터 실행");
-		
-		System.out.println( "리퀘스트 쿠키가 있냐? "+ request.getCookies() == null);
-		
 		String token = null;
 		// HttpOnly 쿠키에서 토큰 추출
 	

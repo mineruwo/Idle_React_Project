@@ -13,51 +13,62 @@ import java.util.Optional;
 
 public interface CarOwnerOrderListRepository extends JpaRepository<CarOwnerOrderList, Long> {
 
-    long countByOwnerId(String ownerId);
+	long countByOwnerId(String ownerId);
 
-    long countByOwnerIdAndStatus(String ownerId, Status status);
+	long countByOwnerIdAndStatus(String ownerId, Status status);
 
-    long countByOwnerIdAndStatusAndUpdatedAtBetween(
-            String ownerId, Status status, LocalDateTime start, LocalDateTime end);
+	long countByOwnerIdAndStatusAndUpdatedAtBetween(String ownerId, Status status, LocalDateTime start,
+			LocalDateTime end);
 
-    List<CarOwnerOrderList> findTop5ByOwnerIdOrderByUpdatedAtDesc(String ownerId);
+	List<CarOwnerOrderList> findTop5ByOwnerIdOrderByUpdatedAtDesc(String ownerId);
 
-    Optional<CarOwnerOrderList> findByIdAndOwnerId(Long id, String ownerId);
+	Optional<CarOwnerOrderList> findByIdAndOwnerId(Long id, String ownerId);
+	
+	  // ✅ 진행중 리스트 (최근순) — 배송중 표에 사용
+	List<CarOwnerOrderList> findByOwnerIdAndStatusOrderByUpdatedAtDesc(
+            String ownerId, CarOwnerOrderList.Status status);
 
-    @Query(
-        value = """
-            select o from CarOwnerOrderList o
+    // ✅ 일자별 운송건수 집계 (updatedAt 기준, 필요시 scheduledDate로 교체)
+    @Query("""
+            select function('to_char', o.updatedAt, 'YYYY-MM-DD') as day, count(o) as cnt
+            from CarOwnerOrderList o
             where o.ownerId = :ownerId
-              and (:status is null or o.status = :status)
               and o.updatedAt between :start and :end
-              and (
-                   :q is null or :q = '' or
-                   lower(o.departure) like lower(concat('%', :q, '%')) or
-                   lower(o.arrival)   like lower(concat('%', :q, '%')) or
-                   lower(o.cargoType) like lower(concat('%', :q, '%'))
-              )
-            order by o.updatedAt desc
-            """,
-        countQuery = """
-            select count(o) from CarOwnerOrderList o
-            where o.ownerId = :ownerId
-              and (:status is null or o.status = :status)
-              and o.updatedAt between :start and :end
-              and (
-                   :q is null or :q = '' or
-                   lower(o.departure) like lower(concat('%', :q, '%')) or
-                   lower(o.arrival)   like lower(concat('%', :q, '%')) or
-                   lower(o.cargoType) like lower(concat('%', :q, '%'))
-              )
-            """
-    )
-    Page<CarOwnerOrderList> search(
-            @Param("ownerId") String ownerId,
-            @Param("status") Status status,                 // nullable 필터
-            @Param("start") LocalDateTime start,
-            @Param("end") LocalDateTime end,
-            @Param("q") String q,
-            Pageable pageable
-    );
+            group by function('to_char', o.updatedAt, 'YYYY-MM-DD')
+            order by day
+        """)
+        List<Object[]> countDailyDeliveries(
+                @Param("ownerId") String ownerId,
+                @Param("start") LocalDateTime start,
+                @Param("end") LocalDateTime end);
+
     
+	@Query(value = """
+			select o from CarOwnerOrderList o
+			where o.ownerId = :ownerId
+			  and (:status is null or o.status = :status)
+			  and o.updatedAt between :start and :end
+			  and (
+			       :q is null or :q = '' or
+			       lower(o.departure) like lower(concat('%', :q, '%')) or
+			       lower(o.arrival)   like lower(concat('%', :q, '%')) or
+			       lower(o.cargoType) like lower(concat('%', :q, '%'))
+			  )
+			order by o.updatedAt desc
+			""", countQuery = """
+			select count(o) from CarOwnerOrderList o
+			where o.ownerId = :ownerId
+			  and (:status is null or o.status = :status)
+			  and o.updatedAt between :start and :end
+			  and (
+			       :q is null or :q = '' or
+			       lower(o.departure) like lower(concat('%', :q, '%')) or
+			       lower(o.arrival)   like lower(concat('%', :q, '%')) or
+			       lower(o.cargoType) like lower(concat('%', :q, '%'))
+			  )
+			""")
+	Page<CarOwnerOrderList> search(@Param("ownerId") String ownerId, @Param("status") Status status, // nullable 필터
+			@Param("start") LocalDateTime start, @Param("end") LocalDateTime end, @Param("q") String q,
+			Pageable pageable);
+
 }

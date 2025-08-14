@@ -36,7 +36,5 @@ public class Order {
 
     private String status;              // 주문 상태 (예: 대기중, 배차완료 등)
 
-    @ManyToOne
-    @JoinColumn(name = "transport_auth_id", nullable = true)
-    private TransportAuth transportAuth;
+    
 }
