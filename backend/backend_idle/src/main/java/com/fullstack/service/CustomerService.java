@@ -23,5 +23,5 @@ public interface CustomerService {
 
 	public CustomerDTO createCustomer(CustomerDTO dto);
 	
-	Integer getPoints(String id);
+	public Integer getPoints(String id);
 }
