@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { fetchOrders } from "../../api/orderApi";
-import { fetchOffersByOrder, acceptOffer, fetchAssignment } from "../../api/offerApi";
+import { fetchOffersByOrder, acceptOffer, fetchAssignment, createOffer } from "../../api/offerApi";
 
 /* ========================= 라벨 매핑 ========================= */
 const LABEL = {
@@ -111,6 +111,10 @@ const OrderBoard = () => {
   const [assignment, setAssignment] = useState({ assignedDriverId: null, driverPrice: null, status: null });
   const [loadingOffers, setLoadingOffers] = useState(false);
 
+  // 개발/운영 공용: 입찰 입력 (driverId는 백엔드가 세팅)
+  const [bidPrice, setBidPrice] = useState("");
+  const [bidMemo, setBidMemo] = useState("");
+
   // 검색/필터
   const [q, setQ] = useState("");
   const [immediateFilter, setImmediateFilter] = useState("all"); // all | immediate | reserved
@@ -132,6 +136,7 @@ const OrderBoard = () => {
     (async () => {
       try {
         const data = await fetchOrders();
+        // fetchOrders가 배열 리턴하도록 맞춰져 있음 (res.data가 아니라 data)
         setOrders(data || []);
       } catch (e) {
         console.error("오더 목록 불러오기 실패:", e);
@@ -178,6 +183,8 @@ const OrderBoard = () => {
     setSelected(null);
     setOffers([]);
     setAssignment({ assignedDriverId: null, driverPrice: null, status: null });
+    setBidPrice("");
+    setBidMemo("");
   };
 
   const handleAccept = async (offerId) => {
@@ -189,6 +196,26 @@ const OrderBoard = () => {
     } catch (e) {
       console.error("입찰 확정 실패:", e);
       alert("입찰 확정에 실패했습니다.");
+    }
+  };
+
+  // ✅ 입찰 등록 (driverId 전송 안 함)
+  const handleBid = async () => {
+    if (!selected) return;
+    const priceNum = Number(bidPrice);
+    if (!priceNum || priceNum <= 0) {
+      alert("유효한 제안가를 입력하세요.");
+      return;
+    }
+    try {
+      await createOffer({ orderId: selected.id, price: priceNum, memo: bidMemo || "" });
+      setBidPrice("");
+      setBidMemo("");
+      await loadOfferAndAssignment(selected.id);
+      alert("입찰이 등록되었습니다.");
+    } catch (e) {
+      console.error("입찰 등록 실패:", e);
+      alert("입찰 등록에 실패했습니다.");
     }
   };
 
@@ -401,7 +428,7 @@ const OrderBoard = () => {
             ← 이전
           </PageBtn>
 
-          <PageNumbers>
+        <PageNumbers>
             {Array.from({ length: totalPages }, (_, i) => i + 1)
               .slice(Math.max(0, page - 3), Math.max(0, page - 3) + 5)
               .map((p) => (
@@ -429,7 +456,9 @@ const OrderBoard = () => {
             {/* ===== 배정 뱃지 헤더 ===== */}
             <BadgeRow>
               {assignment?.assignedDriverId ? (
-                <Badge>배정: Driver #{assignment.assignedDriverId} / {Number(assignment.driverPrice ?? 0).toLocaleString()}원</Badge>
+                <Badge>
+                  배정: Driver #{assignment.assignedDriverId} / {Number(assignment.driverPrice ?? 0).toLocaleString()}원
+                </Badge>
               ) : (
                 <BadgeGray>미배정</BadgeGray>
               )}
@@ -503,7 +532,8 @@ const OrderBoard = () => {
                   {offers.map((o) => (
                     <OfferItem key={o.id}>
                       <div>
-                        <b>Driver #{o.driverId}</b> · {Number(o.price ?? 0).toLocaleString()}원
+                        <b>{o.driverNick ? o.driverNick : `Driver #${o.driverId}`}</b> ·{" "}
+                        {Number(o.price ?? 0).toLocaleString()}원
                         <small style={{ marginLeft: 8, opacity: 0.7 }}>({o.status})</small>
                       </div>
                       <AcceptBtn
@@ -516,13 +546,41 @@ const OrderBoard = () => {
                   ))}
                 </OfferList>
               )}
+
+              {/* 입찰 등록 (driverId는 전송하지 않음) */}
+              {selected?.status !== "ASSIGNED" && (
+                <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                  <Muted>입찰 등록:</Muted>
+                  <input
+                    type="number"
+                    placeholder="제안가"
+                    value={bidPrice}
+                    onChange={(e) => setBidPrice(e.target.value)}
+                    style={{ width: 120, padding: "6px 8px", borderRadius: 8, border: "1px solid #e5e9f2" }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="메모(선택)"
+                    value={bidMemo}
+                    onChange={(e) => setBidMemo(e.target.value)}
+                    style={{ width: 260, padding: "6px 8px", borderRadius: 8, border: "1px solid #e5e9f2" }}
+                  />
+                  <AcceptBtn onClick={handleBid}>등록</AcceptBtn>
+                </div>
+              )}
             </Section>
 
             <Section>
               <SectionTitle>운임 정보</SectionTitle>
               <Row>
                 <Key>기사 제안가</Key>
-                <Val>{selected.driverPrice ? `${Number(selected.driverPrice).toLocaleString()} 원` : "-"}</Val>
+                <Val>
+                  {assignment?.driverPrice != null
+                    ? `${Number(assignment.driverPrice).toLocaleString()} 원`
+                    : selected.driverPrice
+                    ? `${Number(selected.driverPrice).toLocaleString()} 원`
+                    : "-"}
+                </Val>
               </Row>
               <Row>
                 <Key>화주 제안가</Key>
