@@ -38,10 +38,14 @@ public class SecurityConfig {
             .httpBasic(httpBasic -> httpBasic.disable()) // HTTP Basic 인증 비활성화
             .formLogin(formLogin -> formLogin.disable()) // 폼 로그인 비활성화
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함
+            .anonymous(anonymous -> anonymous.disable()) // 익명 비활성화
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/api/orders/**",   // 🚚 오더 등록/조회/삭제 전부 허용
-                    "/api/auth/**",     // (선택) 로그인/회원가입 API도 허용
+                    "/api/auth/login",
+                    "/api/auth/refresh",
+                    "/api/auth/logout",
+                    "/api/auth/email/**",      
                     "/api/admin/login", // 경로 변경
                     "/api/admin/check-auth", // 추가: 인증 상태 확인 엔드포인트 허용
                     "/api/admin/logout", // 추가: 로그아웃 엔드포인트 허용
@@ -54,6 +58,9 @@ public class SecurityConfig {
                     "/api/admin/chat-sessions/**", // 채팅 세션 관련 API 허용
                     "/api/email/**"
                 ).permitAll()
+                .requestMatchers(
+                        "/api/auth/auto"
+                ).authenticated()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
