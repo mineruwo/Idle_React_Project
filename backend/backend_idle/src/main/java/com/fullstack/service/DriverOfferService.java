@@ -52,6 +52,9 @@ public class DriverOfferService {
         // 오더에 기사제안가 반영
         Order order = offer.getOrder();
         order.setDriverPrice(offer.getPrice());
+        order.setAssignedDriverId(offer.getDriverId());  // ✅ 배정 기사 ID
+        order.setStatus("ASSIGNED");                     // ✅ 상태 변경
+
 
         // 다른 PENDING은 거절 처리
         driverOfferRepository.rejectOthers(order.getId(), offer.getId());

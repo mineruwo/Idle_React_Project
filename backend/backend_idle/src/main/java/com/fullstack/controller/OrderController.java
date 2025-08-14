@@ -6,7 +6,9 @@ import com.fullstack.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 @RestController
@@ -14,23 +16,34 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderController {
 
-    private final OrderService orderService; // ✅ 서비스만 주입
+    private final OrderService orderService;
 
-    // ✅ 등록 (DTO 사용) — createdAt은 엔티티에서 자동 기록
+    // 등록
     @PostMapping
     public Order save(@RequestBody OrderDto dto) {
         return orderService.saveOrder(dto);
     }
 
-    // ✅ 목록 (항상 최신순)
+    // 목록
     @GetMapping
     public List<Order> findAllLatest() {
         return orderService.getAllOrders();
     }
 
-    // ✅ 단건 조회
+    // 단건 조회  ✅ 오타/괄호 정리
     @GetMapping("/{id}")
     public Order findById(@PathVariable Long id) {
         return orderService.getOrderById(id);
+    }
+
+    // 배정 정보만 전달: { assignedDriverId, driverPrice, status }
+    @GetMapping("/{id}/assignment")
+    public Map<String, Object> getAssignment(@PathVariable Long id) {
+        Order o = orderService.getOrderById(id);
+        Map<String, Object> res = new HashMap<>();
+        res.put("assignedDriverId", o.getAssignedDriverId()); // 배정된 기사 ID (없으면 null)
+        res.put("driverPrice", o.getDriverPrice());           // 확정가 (없으면 null)
+        res.put("status", o.getStatus());                     // OPEN/ASSIGNED/...
+        return res;
     }
 }
