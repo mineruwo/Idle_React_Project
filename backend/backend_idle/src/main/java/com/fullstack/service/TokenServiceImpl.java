@@ -33,7 +33,7 @@ public class TokenServiceImpl implements TokenService {
 		customerEntity.setRtExpiresAt(jwtUtil.getExpiration(refreshToken));
 		customerRepository.save(customerEntity);
 		
-		long atExpiresIn = 15 * 60;
+		long atExpiresIn = 60 * 60;
 		long rtExpiresIn = 14 * 24 * 60 * 60;
 		
 		return new TokenDTO(accessToken, refreshToken, atExpiresIn, rtExpiresIn);
@@ -60,7 +60,7 @@ public class TokenServiceImpl implements TokenService {
 	    customerEntity.setRtExpiresAt(jwtUtil.getExpiration(newRt));
 	    customerRepository.save(customerEntity);
 	    
-	    long atExpiresIn = 15 * 60;
+	    long atExpiresIn = 60 * 60;
 		long rtExpiresIn = 14 * 24 * 60 * 60;
 
 	    return new TokenDTO(newAt, newRt, atExpiresIn, rtExpiresIn);
