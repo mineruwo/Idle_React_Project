@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { fetchOrders } from "../../api/orderApi";
+import { fetchOffersByOrder, acceptOffer, fetchAssignment } from "../../api/offerApi";
 
 /* ========================= 라벨 매핑 ========================= */
 const LABEL = {
@@ -82,13 +83,13 @@ const prettyPacking = (val) => {
         .map(([k]) => packingKeyToText[k] || k);
       return keys.length ? keys.join(", ") : "-";
     }
-  } catch { }
+  } catch {}
   const keys = Array.isArray(val)
     ? val
     : String(val)
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
   return keys.length ? keys.map((k) => packingKeyToText[k] || k).join(", ") : "-";
 };
 
@@ -105,6 +106,11 @@ const OrderBoard = () => {
   const [selected, setSelected] = useState(null);
   const [panelOpen, setPanelOpen] = useState(false);
 
+  // 입찰/배정 상태
+  const [offers, setOffers] = useState([]);
+  const [assignment, setAssignment] = useState({ assignedDriverId: null, driverPrice: null, status: null });
+  const [loadingOffers, setLoadingOffers] = useState(false);
+
   // 검색/필터
   const [q, setQ] = useState("");
   const [immediateFilter, setImmediateFilter] = useState("all"); // all | immediate | reserved
@@ -118,13 +124,10 @@ const OrderBoard = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  
-
   const panelRef = useRef(null);
   const cardRefs = useRef({});
 
-  
-
+  /* ====== 목록 로드 ====== */
   useEffect(() => {
     (async () => {
       try {
@@ -136,23 +139,57 @@ const OrderBoard = () => {
     })();
   }, []);
 
-  const handleSelect = (o) => {
+  /* ====== 카드 선택 시 우측패널로 스크롤 보정 + 입찰/배정 로드 ====== */
+  const loadOfferAndAssignment = async (orderId) => {
+    setLoadingOffers(true);
+    try {
+      const [offersRes, assignRes] = await Promise.all([fetchOffersByOrder(orderId), fetchAssignment(orderId)]);
+      setOffers(Array.isArray(offersRes.data) ? offersRes.data : []);
+      setAssignment(assignRes.data || { assignedDriverId: null, driverPrice: null, status: null });
+    } catch (e) {
+      console.error("오퍼/배정 로드 실패:", e);
+      setOffers([]);
+      setAssignment({ assignedDriverId: null, driverPrice: null, status: null });
+    } finally {
+      setLoadingOffers(false);
+    }
+  };
+
+  const handleSelect = async (o) => {
     setSelected(o);
     setPanelOpen(true);
+
+    // 패널 위치 스크롤 보정
     requestAnimationFrame(() => {
       const el = cardRefs.current[o.id];
       if (!el || !panelRef.current) return;
       const cardRect = el.getBoundingClientRect();
       const panelRect = panelRef.current.getBoundingClientRect();
-      const targetTop =
-        window.scrollY + (cardRect.top - panelRect.top) + window.scrollY - 16;
+      const targetTop = window.scrollY + (cardRect.top - panelRect.top) + window.scrollY - 16;
       window.scrollTo({ top: targetTop, behavior: "smooth" });
     });
+
+    // 입찰/배정 로드
+    await loadOfferAndAssignment(o.id);
   };
 
   const handleBack = () => {
     setPanelOpen(false);
     setSelected(null);
+    setOffers([]);
+    setAssignment({ assignedDriverId: null, driverPrice: null, status: null });
+  };
+
+  const handleAccept = async (offerId) => {
+    if (!selected) return;
+    try {
+      await acceptOffer(offerId);
+      await loadOfferAndAssignment(selected.id); // 확정 후 재조회 → 뱃지/목록 갱신
+      alert("입찰 확정 완료");
+    } catch (e) {
+      console.error("입찰 확정 실패:", e);
+      alert("입찰 확정에 실패했습니다.");
+    }
   };
 
   const todayStr = useMemo(() => fmtDate(new Date()), []);
@@ -203,9 +240,7 @@ const OrderBoard = () => {
     }
 
     if (sortKey === "distance") {
-      arr.sort((a, b) =>
-        sortDir === "asc" ? n(a.distance) - n(b.distance) : n(b.distance) - n(a.distance)
-      );
+      arr.sort((a, b) => (sortDir === "asc" ? n(a.distance) - n(b.distance) : n(b.distance) - n(a.distance)));
       return arr;
     }
 
@@ -224,7 +259,6 @@ const OrderBoard = () => {
 
   // ✅ 보드 진입 시 무조건 최상단으로
   useEffect(() => {
-    // 브라우저의 스크롤 복원 동작 대비해서 2번 보정
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     requestAnimationFrame(() => window.scrollTo(0, 0));
   }, []);
@@ -252,11 +286,7 @@ const OrderBoard = () => {
 
         {/* ===== 검색/필터 바 ===== */}
         <FilterBar>
-          <SearchInput
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="출발/도착/화물/차량/포장/상태로 검색..."
-          />
+          <SearchInput value={q} onChange={(e) => setQ(e.target.value)} placeholder="출발/도착/화물/차량/포장/상태로 검색..." />
 
           <SelectBox value={immediateFilter} onChange={(e) => setImmediateFilter(e.target.value)}>
             <option value="all">전체(즉시+예약)</option>
@@ -305,8 +335,8 @@ const OrderBoard = () => {
         </ControlsRow>
 
         <ResultMeta>
-          총 {orders.length}건 중 <strong>{filtered.length}</strong>건(필터) →{" "}
-          <strong>{total}</strong>건(정렬) 중 <strong>{paged.length}</strong>건 표시 (페이지 {page}/{totalPages})
+          총 {orders.length}건 중 <strong>{filtered.length}</strong>건(필터) → <strong>{total}</strong>건(정렬) 중{" "}
+          <strong>{paged.length}</strong>건 표시 (페이지 {page}/{totalPages})
         </ResultMeta>
 
         <CardList>
@@ -355,9 +385,7 @@ const OrderBoard = () => {
                   </Col>
                   <Col>
                     <SubLabel>예약 시간</SubLabel>
-                    <SubValue>
-                      {immediate ? "즉시" : o.reservedDate ? fmtDateTime(o.reservedDate) : "-"}
-                    </SubValue>
+                    <SubValue>{immediate ? "즉시" : o.reservedDate ? fmtDateTime(o.reservedDate) : "-"}</SubValue>
                   </Col>
                 </InfoGrid>
 
@@ -398,6 +426,15 @@ const OrderBoard = () => {
 
         {selected ? (
           <>
+            {/* ===== 배정 뱃지 헤더 ===== */}
+            <BadgeRow>
+              {assignment?.assignedDriverId ? (
+                <Badge>배정: Driver #{assignment.assignedDriverId} / {Number(assignment.driverPrice ?? 0).toLocaleString()}원</Badge>
+              ) : (
+                <BadgeGray>미배정</BadgeGray>
+              )}
+            </BadgeRow>
+
             <Section>
               <SectionTitle>
                 화물 상세 정보 <StatusTag>{selected.status || "READY"}</StatusTag>
@@ -432,19 +469,53 @@ const OrderBoard = () => {
               </Row>
               <Row>
                 <Key>예약시간</Key>
-                <Val>
-                  {isImmediateOf(selected)
-                    ? "즉시"
-                    : selected.reservedDate
-                      ? fmtDateTime(selected.reservedDate)
-                      : "-"}
-                </Val>
+                <Val>{isImmediateOf(selected) ? "즉시" : selected.reservedDate ? fmtDateTime(selected.reservedDate) : "-"}</Val>
               </Row>
             </Section>
 
             <Section>
               <SectionTitle>배정된 기사</SectionTitle>
-              <Muted>예시 영역 (추후 기사 정보 연동)</Muted>
+              {assignment?.assignedDriverId ? (
+                <div>
+                  <Row>
+                    <Key>Driver ID</Key>
+                    <Val>{assignment.assignedDriverId}</Val>
+                  </Row>
+                  <Row>
+                    <Key>확정가</Key>
+                    <Val>{Number(assignment.driverPrice ?? 0).toLocaleString()} 원</Val>
+                  </Row>
+                </div>
+              ) : (
+                <Muted>아직 배정되지 않았습니다. 아래 입찰에서 확정하세요.</Muted>
+              )}
+            </Section>
+
+            <Section>
+              <SectionTitle>입찰 목록</SectionTitle>
+
+              {loadingOffers ? (
+                <Muted>불러오는 중...</Muted>
+              ) : offers.length === 0 ? (
+                <Muted>입찰이 아직 없습니다.</Muted>
+              ) : (
+                <OfferList>
+                  {offers.map((o) => (
+                    <OfferItem key={o.id}>
+                      <div>
+                        <b>Driver #{o.driverId}</b> · {Number(o.price ?? 0).toLocaleString()}원
+                        <small style={{ marginLeft: 8, opacity: 0.7 }}>({o.status})</small>
+                      </div>
+                      <AcceptBtn
+                        disabled={!!assignment?.assignedDriverId || o.status !== "PENDING"}
+                        onClick={() => handleAccept(o.id)}
+                      >
+                        입찰 확정
+                      </AcceptBtn>
+                    </OfferItem>
+                  ))}
+                </OfferList>
+              )}
             </Section>
 
             <Section>
@@ -461,9 +532,7 @@ const OrderBoard = () => {
                 <Key>평균가</Key>
                 <Val>{selected.avgPrice ? `${Number(selected.avgPrice).toLocaleString()} 원` : "-"}</Val>
               </Row>
-              <RightHint>
-                예상 거리 {selected.distance != null ? `${Number(selected.distance).toFixed(2)}km` : "-"}
-              </RightHint>
+              <RightHint>예상 거리 {selected.distance != null ? `${Number(selected.distance).toFixed(2)}km` : "-"}</RightHint>
             </Section>
           </>
         ) : null}
@@ -549,7 +618,9 @@ const SearchInput = styled.input`
   box-shadow: 0 2px 8px ${PINK.cardShadow};
   outline: none;
 
-  &:focus { border-color: ${PINK.cardBorderHover}; }
+  &:focus {
+    border-color: ${PINK.cardBorderHover};
+  }
 `;
 
 const SelectBox = styled.select`
@@ -562,7 +633,9 @@ const SelectBox = styled.select`
   box-shadow: 0 2px 8px ${PINK.cardShadow};
   outline: none;
 
-  &:focus { border-color: ${PINK.cardBorderHover}; }
+  &:focus {
+    border-color: ${PINK.cardBorderHover};
+  }
 `;
 
 const ResetBtn = styled.button`
@@ -574,7 +647,9 @@ const ResetBtn = styled.button`
   color: ${PINK.header};
   font-weight: 800;
   cursor: pointer;
-  &:hover { background: ${PINK.backBgHover}; }
+  &:hover {
+    background: ${PINK.backBgHover};
+  }
 `;
 
 const ControlsRow = styled.div`
@@ -604,7 +679,9 @@ const ResultMeta = styled.div`
   margin: -2px 0 10px;
   font-size: 13px;
   color: ${PINK.subText};
-  strong { color: ${PINK.header}; }
+  strong {
+    color: ${PINK.header};
+  }
 `;
 
 const CardList = styled.div`
@@ -716,7 +793,10 @@ const PageBtn = styled.button`
   color: ${PINK.header};
   font-weight: 800;
   cursor: pointer;
-  &:disabled { opacity: .5; cursor: default; }
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
 `;
 
 const PageNumbers = styled.div`
@@ -788,7 +868,9 @@ const BackBtn = styled.button`
   border-radius: 10px;
   font-weight: 800;
   cursor: pointer;
-  &:hover { background: ${PINK.backBgHover}; }
+  &:hover {
+    background: ${PINK.backBgHover};
+  }
 `;
 
 const DetailTitle = styled.h2`
@@ -854,6 +936,52 @@ const Val = styled.div`
 const Muted = styled.div`
   font-size: 13px;
   color: ${PINK.subText};
+`;
+
+/* ====== 추가: 배정 뱃지 & 입찰 리스트 스타일 ====== */
+const BadgeRow = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin: 10px 6px 0;
+`;
+const Badge = styled.span`
+  background: #113F67;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 900;
+`;
+const BadgeGray = styled(Badge)`
+  background: #c4cbd6;
+`;
+const OfferList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+const OfferItem = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: 1px solid ${PINK.panelBorder};
+  border-radius: 10px;
+  background: #fff;
+`;
+const AcceptBtn = styled.button`
+  border: 0;
+  outline: 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: ${PINK.tagBg};
+  color: ${PINK.tagText};
+  font-weight: 900;
+  cursor: pointer;
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
 `;
 
 const RightHint = styled.div`
