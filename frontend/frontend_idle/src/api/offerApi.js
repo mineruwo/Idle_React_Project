@@ -1,7 +1,6 @@
-// src/api/offerApi.js
+// frontend/src/api/offerApi.js
 import axios from "axios";
 
-// 공통 axios 인스턴스 (쿠키 쓰면 withCredentials true 유지)
 const HOST = "http://localhost:8080";
 const client = axios.create({
   baseURL: HOST,
@@ -16,9 +15,14 @@ export const fetchOffersByOrder = (orderId) =>
 export const acceptOffer = (offerId) =>
   client.post(`/api/offers/${offerId}/accept`);
 
-// 배정 정보만 조회 (뱃지용)
+// 배정 정보(뱃지/운임 갱신)
 export const fetchAssignment = (orderId) =>
   client.get(`/api/orders/${orderId}/assignment`);
 
-export const createOffer = (payload) =>
-  client.post(`/api/offers`, payload); // { orderId, driverId, price, memo }
+// (기사) 입찰 생성 — driverId는 안 보냄 (로그인에서 추출)
+export const createOffer = ({ orderId, price, memo }) =>
+  client.post(`/api/offers`, { orderId, price, memo });
+
+// (화주) 기사 선택 → 등록+배정 한 번에
+export const assignOfferDirect = ({ orderId, driverId, price, memo }) =>
+  client.post(`/api/offers/assign`, { orderId, driverId, price, memo });

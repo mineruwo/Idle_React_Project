@@ -1,19 +1,18 @@
+// com.fullstack.model.DriverOfferResponse
 package com.fullstack.model;
 
 import com.fullstack.entity.DriverOffer;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter @Builder
+@NoArgsConstructor @AllArgsConstructor
 public class DriverOfferResponse {
     private Long id;
     private Long orderId;
-    private Long driverId;
+    private Integer driverIdNum;  // CustomerEntity.ID_NUM
+    private String driverName;    // 옵션: customer_name or nickname
     private Long price;
     private String memo;
     private String status;
@@ -23,7 +22,8 @@ public class DriverOfferResponse {
         return DriverOfferResponse.builder()
                 .id(o.getId())
                 .orderId(o.getOrder().getId())
-                .driverId(o.getDriverId())
+                .driverIdNum(o.getDriver() != null ? o.getDriver().getIdNum() : null)
+                .driverName(o.getDriver() != null ? o.getDriver().getCustomName() : null) // 필드명에 맞춰 수정
                 .price(o.getPrice())
                 .memo(o.getMemo())
                 .status(o.getStatus().name())
