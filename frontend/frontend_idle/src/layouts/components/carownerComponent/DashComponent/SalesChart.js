@@ -1,7 +1,12 @@
 import React from "react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+} from "recharts";
 import "../../../../theme/CarOwner/cardashboard.css";
+
 const SalesChart = ({ data }) => {
+ 
+  
   return (
     <div className="chart-box">
       <h2>매출 및 운송건수</h2>
