@@ -35,12 +35,12 @@ public class CarOwnerLocalFileStorageServiceImpl implements CarOwnerFileStorageS
 
             Files.copy(file.getInputStream(), dest, StandardCopyOption.REPLACE_EXISTING);
 
-            // /uploads/** 로 정적 매핑되어 있다고 가정
+            // /uploads/**
             return "/uploads/avatars/" + filename;
         } catch (Exception e) {
             throw new RuntimeException("FILE_SAVE_FAILED", e);
         }
-    } // ← 빠졌던 닫는 중괄호!
+    }
 
     private String getExt(String name) {
         String ext = StringUtils.getFilenameExtension(name);

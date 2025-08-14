@@ -10,19 +10,26 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+
 
 @Repository
 public interface CustomerRepository extends JpaRepository<CustomerEntity, Integer> {
-
-    //차주페이지
-
-    @Query("SELECT c.idNum FROM CustomerEntity c WHERE c.nickname = :nickname")
-    Integer findIdNumByNickname(@Param("nickname") String nickname);
-
-    @Query("SELECT c.nickname FROM CustomerEntity c WHERE c.nickname = :nickname")
-    String findNickname(@Param("nickname") String nickname);
-    
+	
+	//차주 페이지 로그인id로 조회
+	@Query("select c from CustomerEntity c where c.id = :loginId")
+	Optional<CustomerEntity>findByLoginId(@Param("loginId") String loginId);
+  
+	// 닉네임 중복(본인 제외) 체크
+    @Query("""
+        select case when count(c) > 0 then true else false end
+        from CustomerEntity c
+        where c.nickname = :nickname
+          and c.id <> :loginId
+    """)
+    boolean existsByNicknameAndLoginIdNot(@Param("nickname") String nickname,
+                                          @Param("loginId") String loginId);
+	
+	
     Optional<CustomerEntity> findByCustomName(String customName);
 
     
