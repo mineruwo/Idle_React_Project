@@ -29,6 +29,10 @@ const shipperRouter = () => {
         import("../pages/shipperPage/ShipperPaymentSuccessPage")
     );
 
+    const ShipperOrderHistory = lazy(() =>
+        import("../pages/shipperPage/ShipperOrderHistoryPage")
+    );
+
     return [
         {
             index: true,
@@ -83,6 +87,14 @@ const shipperRouter = () => {
             element: (
                 <Suspense fallback={Loading}>
                     <ShipperPoint />
+                </Suspense>
+            ),
+        },
+        {
+            path: "orderHistory",
+            element: (
+                <Suspense fallback={Loading}>
+                    <ShipperOrderHistory />
                 </Suspense>
             ),
         },

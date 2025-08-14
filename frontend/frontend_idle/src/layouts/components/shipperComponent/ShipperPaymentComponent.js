@@ -11,7 +11,7 @@ import useCustomMove from "../../../hooks/useCustomMove";
 
 const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
     const [currentPoints, setCurrentPoints] = useState(0);
-    const [usePoints, setUsePoints] = useState(""); // 사용할 포인트 입력 값
+    const [usePoints, setUsePoints] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [selectedPaymentType, setSelectedPaymentType] = useState("card");
@@ -56,19 +56,19 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
     };
 
     const handlePayment = async () => {
-        const pointsToApply = parseInt(usePoints, 10) || 0;
+        const pointsToUse = parseInt(usePoints, 10) || 0;
         const totalOrderAmount = totalAmount;
 
-        if (pointsToApply < 0) {
+        if (pointsToUse < 0) {
             setMessage("사용할 포인트는 0 이상이어야 합니다.");
             return;
         }
-        if (pointsToApply > currentPoints) {
+        if (pointsToUse > currentPoints) {
             setMessage("보유 포인트보다 많은 포인트를 사용할 수 없습니다.");
             return;
         }
 
-        const amountToPayExternally = totalOrderAmount - pointsToApply;
+        const amountToPayExternally = totalOrderAmount - pointsToUse;
 
         setIsLoading(true);
         setMessage("결제 처리중...");
@@ -88,7 +88,7 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                     setCurrentPoints(
                         (prevPoints) => prevPoints - totalOrderAmount
                     );
-                    setUsePoints(""); // 사용 포인트 초기화
+                    setUsePoints("");
                 } else {
                     setMessage(`포인트 결제 실패: ${response.message}`);
                 }
@@ -135,6 +135,7 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                     buyerEmail: userEmail,
                     userId: userId,
                     pgProvider: pgProviderForBackend,
+                    pointsToUse: pointsToUse,
                 });
 
                 if (!prepareResponse.success) {
@@ -189,24 +190,12 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                                         pgProvider: pgProviderForBackend,
                                     };
 
-                                    // 외부 결제 성공 후 포인트 차감
-                                    if (pointsToApply > 0) {
-                                        const pointDeductionResponse =
-                                            await payWithPoints({
-                                                userId: userId,
-                                                points: pointsToApply,
-                                            });
-                                        if (pointDeductionResponse.success) {
-                                            setCurrentPoints(
-                                                (prevPoints) =>
-                                                    prevPoints - pointsToApply
-                                            );
-                                            setUsePoints("");
-                                        } else {
-                                            setMessage(
-                                                `포인트 차감 실패: ${pointDeductionResponse.message}`
-                                            );
-                                        }
+                                    if (pointsToUse > 0) {
+                                        setCurrentPoints(
+                                            (prevPoints) =>
+                                                prevPoints - pointsToUse
+                                        );
+                                        setUsePoints("");
                                     }
                                     shipperMoveToPaymentSuccess({
                                         paymentInfo,
@@ -251,7 +240,7 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                 <button onClick={addOrder} style={{ marginBottom: "1rem" }}>
                     주문 정보 추가 테스트
                 </button>
-                {/* 주문 정보 섹션 */}
+
                 <div className="order-info-section">
                     <h2 className="spp-page-title">주문 정보</h2>
                     {orderList.map((order) => (
@@ -303,7 +292,6 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                     ))}
                 </div>
 
-                {/* 포인트 사용 섹션 */}
                 <div className="point-usage-section spp-point-management-section">
                     <h2 className="spp-page-title">포인트 사용</h2>
                     <div className="point-usage-details-content">

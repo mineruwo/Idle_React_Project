@@ -15,7 +15,7 @@ import lombok.Setter;
 public class PaymentRequestDto {
 
 	@JsonProperty("merchantUid")
-	private String merchantUid; // 상점 고유 주문번호 (프론트에서 생성하여 넘겨줌)
+	private String merchantUid;
     @JsonProperty("itemName")
     private String itemName;
     @JsonProperty("amount")
@@ -25,11 +25,11 @@ public class PaymentRequestDto {
     @JsonProperty("buyerEmail")
     private String buyerEmail;
     @JsonProperty("userId")
-    private Integer userId; // 사용자 ID 추가
+    private Integer userId;
     @JsonProperty("pointsToUse")
-    private Integer pointsToUse; // 사용할 포인트
+    private Integer pointsToUse;
     @JsonProperty("pgProvider")
-    private String pgProvider; // PG사 정보 추가
+    private String pgProvider;
 	
 }
 

@@ -31,6 +31,10 @@ const useCustomMove = () => {
         navigate({ pathname: `/shipper/point` });
     };
 
+    const shipperMoveToOrderHistory = () => {
+        navigate({ pathname: `/shipper/orderHistory` });
+    };
+
     const carOwnerMoveToDashboard = () => navigate("/carPage");
     const carOwnerMoveToProfile = () => navigate("/carPage/profile");
     const carOwnerMoveToEditProfile = () => navigate("/carPage/editProfile");
@@ -79,6 +83,7 @@ const useCustomMove = () => {
         shipperMoveToReview,
         shipperMoveToPoint,
         shipperMoveToPaymentSuccess,
+        shipperMoveToOrderHistory,
         carOwnerMoveToDashboard,
         carOwnerMoveToProfile,
         carOwnerMoveToEditProfile,
