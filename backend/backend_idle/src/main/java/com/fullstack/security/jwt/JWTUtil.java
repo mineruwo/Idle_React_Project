@@ -18,13 +18,10 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JWTUtil {
 
-    private final OrderController orderController;
-
 	private final Key key;
 	
-	public JWTUtil(@Value("${jwt.secret}") String secret, OrderController orderController) {
+	public JWTUtil(@Value("${jwt.secret}") String secret) {
 		this.key = Keys.hmacShaKeyFor(secret.getBytes());
-		this.orderController = orderController; 
 	}
 	
 	public String generateAccessToken(String id, String role, Duration expire) {

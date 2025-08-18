@@ -46,6 +46,7 @@ public class AuthController {
 
 		TokenCookieUtils.setAccessTokenCookie(response, tokenDTO.getAccessToken(), tokenDTO.getAtExpiresIn());
 		TokenCookieUtils.setRefreshTokenCookie(response, tokenDTO.getRefreshToken(), tokenDTO.getRtExpiresIn());
+		TokenCookieUtils.setAuthHintCookie(response, true, tokenDTO.getRtExpiresIn());
 
 		return ResponseEntity.ok(Map.of("id", responseDTO.getId(), "role", responseDTO.getRole(), "atExpiresIn",
 				tokenDTO.getAtExpiresIn(), "rtExpiresIn", tokenDTO.getRtExpiresIn()));
@@ -60,6 +61,9 @@ public class AuthController {
 		}
 
 		TokenDTO tokenDTO = tokenService.refresh(refreshToken);
+		if (tokenDTO == null || tokenDTO.getAccessToken() == null) {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+	    }
 
 		TokenCookieUtils.setAccessTokenCookie(response, tokenDTO.getAccessToken(), tokenDTO.getAtExpiresIn());
 
@@ -67,6 +71,8 @@ public class AuthController {
 			TokenCookieUtils.setRefreshTokenCookie(response, tokenDTO.getRefreshToken(), tokenDTO.getRtExpiresIn());
 		}
 
+		TokenCookieUtils.setAuthHintCookie(response, true, tokenDTO.getRtExpiresIn());
+		
 		return ResponseEntity
 				.ok(Map.of("atExpiresIn", tokenDTO.getAtExpiresIn(), "rtRotated", tokenDTO.getRefreshToken() != null));
 	}
@@ -77,6 +83,7 @@ public class AuthController {
 
 		TokenCookieUtils.clearAccessTokenCookie(response);
 		TokenCookieUtils.clearRefreshTokenCookie(response);
+		TokenCookieUtils.clearAuthHintCookie(response);
 
 		return ResponseEntity.noContent().build();
 	}

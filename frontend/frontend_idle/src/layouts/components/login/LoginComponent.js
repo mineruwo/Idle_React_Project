@@ -28,6 +28,7 @@ export default function SignIn(props) {
     const [password, setPassword] = useState("");
     const [id, setId] = useState("");
     const [role, setRole] = useState("");
+    const [forgotOpen, setForgotOpen] = useState(false);
 
     const { refreshAuth } = useAuth(); //
 
@@ -182,7 +183,16 @@ export default function SignIn(props) {
                             control={<Checkbox value="remember" color="primary" />}
                             label="자동 로그인"
                         />
-                        <ForgotPasswordComponent open={open} handleClose={handleClose} />
+                        <ForgotPasswordComponent
+                            open={forgotOpen}
+                            handleClose={() => setForgotOpen(false)}
+                            onVerified={(email) => {
+                                // 권장: 서버에서 reset-ticket(일회용 토큰) 발급 후, 그 토큰으로 이동
+                                // 여기서는 단순히 email만 전달하여 reset 페이지로 이동하는 예시
+                                //navigate(`/reset-password?email=${encodeURIComponent(email)}`);
+                                moveToSignUpPage();
+                            }}
+                        />
                         <Button
                             type="submit"
                             fullWidth
@@ -190,13 +200,7 @@ export default function SignIn(props) {
                         >
                             로그인
                         </Button>
-                        <Link
-                            component="button"
-                            type="button"
-                            onClick={handleClickOpen}
-                            variant="body2"
-                            sx={{ alignSelf: 'center' }}
-                        >
+                        <Link component="button" type="button" onClick={() => setForgotOpen(true)} variant="body2" sx={{ alignSelf: 'center' }}>
                             비밀번호 찾기
                         </Link>
                     </Box>

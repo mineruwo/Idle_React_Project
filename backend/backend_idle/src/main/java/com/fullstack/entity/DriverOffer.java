@@ -3,33 +3,25 @@ package com.fullstack.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.LocalDateTime;
 
 @Entity
-@Table(
-    name = "driver_offers",
-    indexes = {
-        @Index(name = "idx_driver_offers_order", columnList = "order_id"),
-        @Index(name = "idx_driver_offers_driver", columnList = "driverId")
-    }
-)
+@Table(name = "driver_offers")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class DriverOffer {
-
-    public enum Status { PENDING, ACCEPTED, REJECTED, EXPIRED }
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)               // 주문 다:1
+    // 주문 다:1
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    @Column(nullable = false)
-    private Long driverId;                            // Driver 엔티티 생기면 ManyToOne으로 교체 가능
+    // ✅ 기사(CustomerEntity) FK로 조인 (ID_NUM)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "driver_id_num", referencedColumnName = "ID_NUM", nullable = false)
+    private CustomerEntity driver;
 
     @Column(nullable = false)
     private Long price;
@@ -37,12 +29,13 @@ public class DriverOffer {
     private String memo;
 
     @Enumerated(EnumType.STRING)
-    @Builder.Default
     private Status status = Status.PENDING;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    @PreUpdate
+    public void onUpdate(){ this.updatedAt = LocalDateTime.now(); }
+
+    public enum Status { PENDING, ACCEPTED, REJECTED, EXPIRED }
 }
