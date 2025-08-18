@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,68 +36,74 @@ public class AuthController {
 	private final TokenService tokenService;
 	private final JWTUtil jwtUtil;
 	private final CustomerRepository customerRepository;
-	
+
 	@PostMapping("/login")
-	public ResponseEntity<Map<String, Object>> login(@RequestBody CustomerDTO customerDTO, HttpServletResponse response) {
-	    LoginResponseDTO responseDTO = customerService.login(customerDTO);
+	public ResponseEntity<Map<String, Object>> login(@RequestBody CustomerDTO customerDTO,
+			HttpServletResponse response) {
+		LoginResponseDTO responseDTO = customerService.login(customerDTO);
 
-	    TokenDTO tokenDTO = tokenService.issue(responseDTO.getId(), responseDTO.getRole());
+		TokenDTO tokenDTO = tokenService.issue(responseDTO.getId(), responseDTO.getRole());
 
-	    TokenCookieUtils.setAccessTokenCookie(response, tokenDTO.getAccessToken(), tokenDTO.getAtExpiresIn());
-	    TokenCookieUtils.setRefreshTokenCookie(response, tokenDTO.getRefreshToken(), tokenDTO.getRtExpiresIn());
+		TokenCookieUtils.setAccessTokenCookie(response, tokenDTO.getAccessToken(), tokenDTO.getAtExpiresIn());
+		TokenCookieUtils.setRefreshTokenCookie(response, tokenDTO.getRefreshToken(), tokenDTO.getRtExpiresIn());
+		TokenCookieUtils.setAuthHintCookie(response, true, tokenDTO.getRtExpiresIn());
 
-	    return ResponseEntity.ok(
-	            Map.of("id", responseDTO.getId(),
-	                   "role", responseDTO.getRole(),
-	                   "atExpiresIn", tokenDTO.getAtExpiresIn(),
-	                   "rtExpiresIn", tokenDTO.getRtExpiresIn()));
+		return ResponseEntity.ok(Map.of("id", responseDTO.getId(), "role", responseDTO.getRole(), "atExpiresIn",
+				tokenDTO.getAtExpiresIn(), "rtExpiresIn", tokenDTO.getRtExpiresIn()));
 	}
 
 	@PostMapping("/refresh")
 	public ResponseEntity<Map<String, Object>> refresh(HttpServletRequest request, HttpServletResponse response) {
-	    String refreshToken = TokenCookieUtils.getRefreshTokenFromCookie(request);
+		String refreshToken = TokenCookieUtils.getRefreshTokenFromCookie(request);
 
-	    if (refreshToken == null) {
+		if (refreshToken == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
+
+		TokenDTO tokenDTO = tokenService.refresh(refreshToken);
+		if (tokenDTO == null || tokenDTO.getAccessToken() == null) {
 	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 	    }
 
-	    TokenDTO tokenDTO = tokenService.refresh(refreshToken);
+		TokenCookieUtils.setAccessTokenCookie(response, tokenDTO.getAccessToken(), tokenDTO.getAtExpiresIn());
 
-	    TokenCookieUtils.setAccessTokenCookie(response, tokenDTO.getAccessToken(), tokenDTO.getAtExpiresIn());
+		if (tokenDTO.getRefreshToken() != null) {
+			TokenCookieUtils.setRefreshTokenCookie(response, tokenDTO.getRefreshToken(), tokenDTO.getRtExpiresIn());
+		}
 
-	    if (tokenDTO.getRefreshToken() != null) {
-	        TokenCookieUtils.setRefreshTokenCookie(response, tokenDTO.getRefreshToken(), tokenDTO.getRtExpiresIn());
-	    }
-
-	    return ResponseEntity.ok(
-	            Map.of("atExpiresIn", tokenDTO.getAtExpiresIn(),
-	                   "rtRotated", tokenDTO.getRefreshToken() != null));
+		TokenCookieUtils.setAuthHintCookie(response, true, tokenDTO.getRtExpiresIn());
+		
+		return ResponseEntity
+				.ok(Map.of("atExpiresIn", tokenDTO.getAtExpiresIn(), "rtRotated", tokenDTO.getRefreshToken() != null));
 	}
 
 	@PostMapping("/logout")
 	public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
-	    String refreshToken = TokenCookieUtils.getRefreshTokenFromCookie(request);
+		String refreshToken = TokenCookieUtils.getRefreshTokenFromCookie(request);
 
-	    TokenCookieUtils.clearAccessTokenCookie(response);
-	    TokenCookieUtils.clearRefreshTokenCookie(response);
+		TokenCookieUtils.clearAccessTokenCookie(response);
+		TokenCookieUtils.clearRefreshTokenCookie(response);
+		TokenCookieUtils.clearAuthHintCookie(response);
 
-	    return ResponseEntity.noContent().build();
+		return ResponseEntity.noContent().build();
 	}
-	
-	@GetMapping("/auto")
-    public ResponseEntity<LoginResponseDTO> getCurrentUser(Authentication authentication) {
-	    String id = authentication.getName();
-		
-		CustomerEntity customerEntity = customerRepository.findById(id)
-	            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-		
-        LoginResponseDTO loginResponseDTO = new LoginResponseDTO(
-        	customerEntity.getId(),
-        	customerEntity.getNickname(),
-        	customerEntity.getRole(),
-        	customerEntity.getIdNum()
-        );
 
-        return ResponseEntity.ok(loginResponseDTO);
-    }
+	@GetMapping("/auto")
+	public ResponseEntity<LoginResponseDTO> getCurrentUser(Authentication authentication) {
+		
+		if (authentication == null || !authentication.isAuthenticated()
+				|| authentication instanceof AnonymousAuthenticationToken) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
+
+		String id = authentication.getName();
+
+		CustomerEntity customerEntity = customerRepository.findById(id)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+		LoginResponseDTO loginResponseDTO = new LoginResponseDTO(customerEntity.getId(), customerEntity.getNickname(),
+				customerEntity.getRole(), customerEntity.getIdNum());
+
+		return ResponseEntity.ok(loginResponseDTO);
+	}
 }

@@ -75,4 +75,18 @@ public class PaymentController {
 					.body(Map.of("success", false, "message", "서버 오류로 인해 포인트 사용에 실패했습니다."));
 		}
 	}
+	
+    @PostMapping("/fail")
+    public ResponseEntity<?> failPayment(@RequestBody Map<String, String> requestBody) {
+        String merchantUid = requestBody.get("merchantUid");
+        log.info("결제 실패 처리 요청: merchantUid={}", merchantUid);
+        try {
+            paymentService.failPayment(merchantUid);
+            return ResponseEntity.ok().body(Map.of("success", true, "message", "결제 실패 상태가 기록되었습니다."));
+        } catch (Exception e) {
+            log.error("결제 실패 처리 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", "결제 실패 처리 중 서버 오류가 발생했습니다."));
+        }
+    }
 }

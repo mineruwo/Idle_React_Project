@@ -1,3 +1,64 @@
+.shipping-status-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Space between individual order status cards */
+}
+
+.shipping-status-card {
+    border: 1px solid #ddd; /* A slightly darker border */
+    padding: 25px; /* More padding */
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Stronger shadow */
+    margin-bottom: 20px; /* Add some margin to separate cards if gap is not enough */
+}
+
+.shipping-status-card h3 {
+    font-size: 1em;
+    margin-bottom: 20px; /* Increased margin for spacing */
+    color: #555;
+    font-weight: normal;
+}
+
+.order-status-card {
+    border: 1px solid #eee;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.order-status-card h3 {
+    font-size: 1.1em;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.order-details {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    font-size: 0.9em;
+    color: #555;
+}
+
+/* Styles for completed steps (before the active step) */
+.steps .steps-segment.is-completed:after {
+    background-color: #f3c7d3; /* Lighter pink for completed lines */
+}
+.steps .steps-segment.is-completed .steps-marker {
+    background-color: #f3c7d3; /* Lighter pink for completed markers */
+    color: #fff;
+    border-color: #f3c7d3;
+}
+.steps .steps-segment.is-completed .steps-marker svg path {
+    stroke: #fff;
+}
+.steps .steps-segment.is-completed .steps-content .heading {
+    color: #f3c7d3; /* Lighter pink for completed text */
+}
+
+/* Existing styles for .steps, .steps-segment, etc. remain */
 .steps {
     display: flex;
     text-align: center;
@@ -54,48 +115,49 @@
 }
 .steps .steps-segment .steps-content .heading {
     font-size: 0.9em;
-    color: #f3c7d3;
+    color: #757575; /* Darker grey for heading */
     font-family: "Noto Sans KR", sans-serif;
     letter-spacing: 0;
 }
 .steps .steps-segment.is-active:after {
-    background-color: #e7eff8;
+    background-color: #e0e0e0; /* Neutral color for line after active step */
 }
 .steps .steps-segment.is-active ~ .steps-segment:after {
-    background-color: #e7eff8;
+    background-color: #e0e0e0; /* Neutral color for lines after active step */
 }
 .steps .steps-segment.is-active .steps-marker {
-    background-color: #f3c7d3;
+    background-color: #e91e63; /* Deeper pink/red */
     color: #fff;
+    border-color: #e91e63; /* Match border to background */
 }
 .steps .steps-segment.is-active .steps-marker svg path {
     stroke: #fff;
 }
-.steps .steps-segment.is-active ~ .steps-segment .steps-marker {
-    background-color: #e7eff8;
-    color: rgba(0, 0, 0, 0.7);
-}
-.steps .steps-segment.is-active .steps-marker.is-hollow {
+.steps .steps-segment.is-completed .steps-marker {
+    background-color: #f3c7d3; /* Lighter pink for completed markers */
+    color: #fff;
     border-color: #f3c7d3;
 }
-.steps .steps-segment.is-active ~ .steps-segment .steps-marker.is-hollow {
-    border-color: #e7eff8;
-    background-color: #fff;
-    color: #e7eff8;
+.steps .steps-segment.is-completed .steps-marker svg path {
+    stroke: #fff;
 }
-.steps
-    .steps-segment.is-active
-    ~ .steps-segment
-    .steps-marker.is-hollow
-    + .steps-content
-    .heading {
-    color: #849bb7;
+.steps .steps-segment.is-active .steps-marker {
+    background-color: #e91e63; /* Current markers */
+    color: #fff;
+    border-color: #e91e63;
 }
+.steps .steps-segment.is-active .steps-marker svg path {
+    stroke: #fff;
+}
+
+/* Default styles for future (hollow) steps */
 .steps .steps-segment .steps-marker.is-hollow {
-    border: 0.1em solid #f3c7d3;
+    border: 0.1em solid #bdbdbd; /* Darker grey border */
+    color: #757575; /* Darker grey text */
+    background-color: #fff;
 }
 .steps .steps-segment .steps-marker.is-hollow svg path {
-    stroke: #333;
+    stroke: #757575; /* Darker grey icon */
 }
 
 .page-title {
@@ -154,4 +216,97 @@
     .steps .steps-segment .steps-content .heading {
         font-size: 1em;
     }
+}
+
+.shipping-details {
+    margin-top: 2em;
+    padding: 1.5em;
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.08);
+}
+
+.status-section {
+    margin-bottom: 1.5em;
+}
+
+.status-section h2 {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0.5em;
+}
+
+.status-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.status-section li {
+    padding: 0.5em 0;
+    border-bottom: 1px solid #eee;
+}
+
+.status-logs {
+    margin-top: 1em;
+    border-top: 1px solid #eee;
+    padding-top: 1em;
+}
+
+.status-logs h4 {
+    font-size: 1em;
+    color: #333;
+    margin-bottom: 0.8em;
+}
+
+.status-logs ul {
+    list-style: none;
+    padding: 0;
+}
+
+.status-logs li {
+    display: grid; /* Use grid for better alignment of multiple columns */
+    grid-template-columns: 1fr 0.8fr 2fr; /* Adjust column widths as needed */
+    gap: 5px; /* Space between grid items */
+    padding: 0.4em 0;
+    border-bottom: 1px dotted #eee;
+    font-size: 0.9em;
+    color: #666;
+    align-items: center; /* Vertically align items */
+}
+
+.status-logs li:last-child {
+    border-bottom: none;
+}
+
+.log-status {
+    font-weight: 500;
+    color: #444;
+    font-size: 0.9em; /* Explicitly set font size */
+}
+
+.log-timestamp {
+    color: #888;
+    font-size: 0.9em; /* Explicitly set font size */
+}
+
+.log-description {
+    color: #555;
+    font-weight: normal;
+    font-size: 0.9em; /* Explicitly set font size */
+}
+
+.status-logs .log-headers {
+    display: grid;
+    grid-template-columns: 1fr 0.8fr 2fr; /* Match the grid of log items */
+    gap: 5px;
+    font-weight: bold;
+    margin-bottom: 0.5em;
+    padding-bottom: 0.5em;
+    border-bottom: 1px solid #ddd;
+    color: #333;
+}
+
+.status-logs .log-header-item {
+    text-align: left;
 }

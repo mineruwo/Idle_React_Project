@@ -49,42 +49,65 @@
     }
 }
 .write-review h3 {
-    font-size: 17px;
-    margin-bottom: 15px;
+    font-size: 1.2em;
+    margin-bottom: 1.2em;
+    color: #333;
 }
 .write-review form {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px; /* Increased gap for better spacing */
+}
+.write-review label {
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 5px; /* Space between label and input */
+    display: block; /* Ensure label takes full width */
 }
 .write-review select,
-.write-review textarea {
-    margin-left: 8px;
-    border: 1px solid #e4e6ea;
-    border-radius: 6px;
-    padding: 6px;
-    font-size: 15px;
+.write-review textarea,
+.write-review input[type="text"] { /* Added input[type="text"] for consistency */
+    width: calc(100% - 16px); /* Adjust width for padding */
+    padding: 10px 8px; /* Increased padding */
+    border: 1px solid #ccc; /* Softer border */
+    border-radius: 8px; /* Slightly more rounded corners */
+    font-size: 1em;
+    box-sizing: border-box; /* Include padding in width */
+    transition: border-color 0.3s ease;
+}
+.write-review select:focus,
+.write-review textarea:focus,
+.write-review input[type="text"]:focus {
+    border-color: #007bff; /* Highlight on focus */
+    outline: none;
 }
 .write-review textarea {
     resize: vertical;
-    min-height: 48px;
+    min-height: 80px; /* Increased min-height */
     font-family: inherit;
 }
 .write-review button {
     align-self: flex-end;
-    background: #f3c7d3;
+    background: #007bff; /* More standard blue */
     color: #fff;
     border: none;
-    border-radius: 6px;
-    padding: 6px 26px;
-    font-size: 15px;
+    border-radius: 8px; /* Consistent with inputs */
+    padding: 10px 25px; /* More padding */
+    font-size: 1em;
     font-weight: bold;
     cursor: pointer;
-    margin-top: 7px;
-    transition: background 0.2s;
+    margin-top: 15px; /* More space above button */
+    transition: background 0.3s ease, transform 0.2s ease; /* Smooth transitions */
 }
 .write-review button:hover {
     background: #0056b3;
+    transform: translateY(-2px); /* Slight lift effect */
+}
+.write-review p {
+    color: #666;
+    font-size: 0.9em;
+    margin-top: -10px; /* Adjust spacing for the driver info paragraph */
+    margin-bottom: 10px;
 }
 
 .review-list h3 {

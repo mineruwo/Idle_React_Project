@@ -22,4 +22,6 @@ public interface CustomerService {
 	public Page<CustomerEntity> getCustomers(Pageable pageable);
 
 	public CustomerDTO createCustomer(CustomerDTO dto);
+	
+	Integer getPoints(String id);
 }

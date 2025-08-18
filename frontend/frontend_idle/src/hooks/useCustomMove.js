@@ -4,27 +4,31 @@ const useCustomMove = () => {
     const navigate = useNavigate();
 
     const shipperMoveToDashBoard = () => {
-        navigate({ pathname: `../shipper` });
-    };
-
-    const shipperMoveToDetails = () => {
-        navigate({ pathname: `../shipper/details` });
+        navigate({ pathname: `/shipper` });
     };
 
     const shipperMoveToOrder = () => {
-        navigate({ pathname: `../shipper/order` });
+        navigate({ pathname: `/shipper/order` });
+    };
+
+    const shipperMoveToOrderBoard = () => {
+        navigate({ pathname: `/shipper/orderBoard` });
     };
 
     const shipperMoveToPayment = () => {
-        navigate({ pathname: `../shipper/payment` });
+        navigate({ pathname: `/shipper/payment` });
+    };
+
+    const shipperMoveToPaymentSuccess = (state) => {
+        navigate({ pathname: `/shipper/payment/success` }, { state });
     };
 
     const shipperMoveToReview = () => {
-        navigate({ pathname: `../shipper/review` });
+        navigate({ pathname: `/shipper/review` });
     };
 
     const shipperMoveToPoint = () => {
-        navigate({ pathname: `../shipper/point` });
+        navigate({ pathname: `/shipper/point` });
     };
 
     const carOwnerMoveToDashboard = () => navigate("/carPage");
@@ -54,23 +58,27 @@ const useCustomMove = () => {
 
     const moveToMainPage = () => {
         navigate("/");
-    }
+    };
 
-     const moveToMyPageByRole = (role) => {
+    const moveToMyPageByRole = (role) => {
         switch (role) {
-            case "shipper": navigate("/shipper");
-            case "carrier": navigate("/carPage");
-            default: navigate("/");
+            case "shipper":
+                navigate("/shipper");
+            case "carrier":
+                navigate("/carPage");
+            default:
+                navigate("/");
         }
-    }
+    };
 
     return {
         shipperMoveToDashBoard,
-        shipperMoveToDetails,
         shipperMoveToOrder,
+        shipperMoveToOrderBoard,
         shipperMoveToPayment,
         shipperMoveToReview,
         shipperMoveToPoint,
+        shipperMoveToPaymentSuccess,
         carOwnerMoveToDashboard,
         carOwnerMoveToProfile,
         carOwnerMoveToEditProfile,
@@ -83,7 +91,7 @@ const useCustomMove = () => {
         moveToLoginPage,
         moveToSignUpPage,
         moveToMainPage,
-        moveToMyPageByRole
+        moveToMyPageByRole,
     };
 };
 

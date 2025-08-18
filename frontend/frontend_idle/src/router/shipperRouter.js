@@ -13,8 +13,8 @@ const shipperRouter = () => {
     const ShipperOrder = lazy(() =>
         import("../pages/shipperPage/ShipperOrderPage")
     );
-    const ShipperDetails = lazy(() =>
-        import("../pages/shipperPage/ShipperDetailsPage")
+    const ShipperOrderBoard = lazy(() =>
+        import("../pages/shipperPage/ShipperOrderBoardPage")
     );
     const ShipperPayment = lazy(() =>
         import("../pages/shipperPage/ShipperPaymentPage")
@@ -24,6 +24,9 @@ const shipperRouter = () => {
     );
     const ShipperPoint = lazy(() =>
         import("../pages/shipperPage/ShipperPointPage")
+    );
+    const ShipperPaymentSuccess = lazy(() =>
+        import("../pages/shipperPage/ShipperPaymentSuccessPage")
     );
 
     return [
@@ -44,10 +47,10 @@ const shipperRouter = () => {
             ),
         },
         {
-            path: "details",
+            path: "orderBoard",
             element: (
                 <Suspense fallback={Loading}>
-                    <ShipperDetails />
+                    <ShipperOrderBoard />
                 </Suspense>
             ),
         },
@@ -56,6 +59,14 @@ const shipperRouter = () => {
             element: (
                 <Suspense fallback={Loading}>
                     <ShipperPayment />
+                </Suspense>
+            ),
+        },
+        {
+            path: "payment/success",
+            element: (
+                <Suspense fallback={Loading}>
+                    <ShipperPaymentSuccess />
                 </Suspense>
             ),
         },

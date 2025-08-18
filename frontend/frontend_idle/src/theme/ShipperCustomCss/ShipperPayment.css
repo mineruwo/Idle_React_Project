@@ -1,4 +1,4 @@
-.point-layout-container {
+.spp-point-layout-container {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -30,7 +30,7 @@
     }
 }
 
-.point-management-section,
+.spp-point-management-section,
 .order-info-section {
     flex: 2 1 0%;
     display: flex;
@@ -48,6 +48,26 @@
     border: 1px solid #eee;
     padding: 1.5rem;
     border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+}
+
+.order-amount {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.order-amount span:first-child {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #666;
 }
 
 .point-use-wrap {
@@ -56,7 +76,7 @@
     border-radius: 8px;
 }
 
-.page-title {
+.spp-page-title {
     font-size: 1.25rem;
     font-weight: 600;
     margin-bottom: 1rem;
@@ -64,20 +84,25 @@
     border-bottom: 1px solid #eee;
 }
 
-.charge-point-table {
+.order-info-table {
     list-style: none;
     padding: 0;
-    margin: 1.5rem 0;
+    margin: 0;
+    flex: 1;
 }
 
-.charge-point-table li {
+.order-info-table li {
     display: flex;
-    justify-content: space-between;
+    align-items: center;
     margin-bottom: 0.75rem;
     font-size: 1rem;
 }
 
-.charge-point-table li span:last-child {
+.order-info-table li span:first-child {
+    width: 80px; /* 라벨의 너비를 고정하여 값의 시작 위치를 정렬합니다. */
+}
+
+.order-info-table li span:last-child {
     font-weight: 500;
 }
 
@@ -93,29 +118,6 @@
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
-
-.payment-btn:hover {
-    background-color: #e0b0c0;
-}
-
-.payment-btn:disabled {
-    background-color: #f3c7d3;
-    cursor: not-allowed;
-    box-shadow: none;
-}
-
-/* .
-    width: 100%;
-    padding: 1rem;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #fff;
-    background-color: #f3c7d3;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-} */
 
 .payment-btn:hover {
     background-color: #e0b0c0;
@@ -192,15 +194,6 @@
     color: #f3c7d3;
 }
 
-.pay-method-section {
-    margin-bottom: 1.5rem;
-}
-
-.pay-method-section .section-title {
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-}
-
 .pay-method-list {
     display: flex;
     flex-wrap: wrap;
@@ -215,7 +208,7 @@
 }
 
 .point-usage-section,
-.payment-method-section {
+.spp-payment-method-section {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -229,7 +222,9 @@
 }
 
 .point-usage-details-content,
-.payment-method-details-content {
+.payment-method-details-content,
+.summary-details-content,
+.order-item {
     border: 1px solid #eee;
     padding: 1.5rem;
     border-radius: 8px;
@@ -247,14 +242,9 @@
 .summary-section {
     flex: 1;
     min-width: 250px;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.summary-section .page-title {
+.summary-section .spp-page-title {
     margin-top: 0;
     margin-bottom: 20px;
     color: #333;
@@ -350,4 +340,78 @@
         width: 100%;
         min-width: unset;
     }
+}
+
+.easy-payment-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.payment-option {
+    flex: 1;
+    min-width: 100px;
+    padding: 10px;
+    border: 2px solid #eee;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    color: #555;
+}
+
+.payment-option:hover {
+    border-color: #f3c7d3;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.payment-option.selected {
+    border-color: #f3c7d3;
+    background-color: #fff0f5; /* Lighter pink background */
+    color: #f3c7d3;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.payment-option input[type="radio"] {
+    display: none; /* Hide the actual radio button */
+}
+
+.payment-option span {
+    margin-top: 5px;
+    font-size: 1em;
+}
+
+.order-item {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.order-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.payment-group {
+    margin-bottom: 1.5rem;
+}
+
+.payment-group:last-child {
+    margin-bottom: 0;
+}
+
+.payment-group-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
 }
