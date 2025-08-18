@@ -9,7 +9,7 @@ import FormControl from '@mui/material/FormControl';
 import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import ForgotPasswordComponent from './ForgotPasswordComponent';
+import ForgotPasswordComponent from '../modal/ForgotPasswordModal';
 import AppTheme from '../../../theme/muitheme/AppTheme';
 import { GoogleIcon, KakaoIcon, PinkTruckIcon } from './IconComponent';
 import useCustomMove from '../../../hooks/useCustomMove';
@@ -17,6 +17,7 @@ import { checkAccount, login } from '../../../api/loginApi';
 import { UserCard as Card, UserContainer as SignInContainer } from '../../../theme/User/UserCard';
 import { useState } from 'react';
 import { useAuth } from '../../../auth/AuthProvider';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 
 export default function SignIn(props) {
@@ -24,13 +25,13 @@ export default function SignIn(props) {
     const [emailErrorMessage, setEmailErrorMessage] = useState('');
     const [passwordError, setPasswordError] = useState(false);
     const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
-    const [open, setOpen] = useState(false);
     const [password, setPassword] = useState("");
     const [id, setId] = useState("");
-    const [role, setRole] = useState("");
     const [forgotOpen, setForgotOpen] = useState(false);
 
     const { refreshAuth } = useAuth(); //
+
+    const navigate = useNavigate();
 
     const {
         shipperMoveToDashBoard,
@@ -67,14 +68,6 @@ export default function SignIn(props) {
         return isValid;
     };
 
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
-
-    const handleClose = () => {
-        setOpen(false);
-    };
-
     // 로그인 API 호출
     const loginApi = async () => {
         try {
@@ -85,7 +78,6 @@ export default function SignIn(props) {
             alert("로그인 성공");
 
             const customRole = result.role;
-            setRole(customRole);
             await refreshAuth();
 
             if (customRole === "shipper") {
@@ -186,11 +178,8 @@ export default function SignIn(props) {
                         <ForgotPasswordComponent
                             open={forgotOpen}
                             handleClose={() => setForgotOpen(false)}
-                            onVerified={(email) => {
-                                // 권장: 서버에서 reset-ticket(일회용 토큰) 발급 후, 그 토큰으로 이동
-                                // 여기서는 단순히 email만 전달하여 reset 페이지로 이동하는 예시
-                                //navigate(`/reset-password?email=${encodeURIComponent(email)}`);
-                                moveToSignUpPage();
+                            onVerified={({ email, token }) => {
+                                navigate(`/newPassword?token=${encodeURIComponent(token)}`);
                             }}
                         />
                         <Button

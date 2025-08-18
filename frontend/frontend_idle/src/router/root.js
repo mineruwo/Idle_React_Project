@@ -18,6 +18,7 @@ const Main = lazy(() => import("../pages/mainpage/MainPage"));
 const OrderForm = lazy(() => import("../pages/orderPage/OrderForm"));
 const Login = lazy(() => import("../pages/loginpage/LoginPage"));
 const Signup = lazy(() => import("../pages/signuppage/SignupPage"));
+const NewPassword = lazy(() => import ("../pages/loginpage/NewPasswordPage"))
 const AdminPage = lazy(() => import("../pages/adminPage/AdminPage"));
 const Shipper = lazy(() => import("../pages/shipperPage/ShipperDashBoard"));
 
@@ -63,7 +64,11 @@ const root = createBrowserRouter([
                 path: "signup",
                 element: <RedirectIfAuthed><Signup /></RedirectIfAuthed>,
             },
+            {
+                path: "newPassword",
+                element: <RedirectIfAuthed><NewPassword /></RedirectIfAuthed>
             // 차주
+            },
             {
                 path: "carPage",
                 element: (
