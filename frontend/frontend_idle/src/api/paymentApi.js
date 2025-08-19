@@ -1,11 +1,15 @@
 import axios from "axios";
 
-export const API_SERVER_HOST = "http://localhost:8080";
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
+const paymentApi = axios.create({
+    baseURL: API_BASE_URL,
+});
 
 export const payWithPoints = async ({ userId, points }) => {
     try {
-        const response = await axios.post(
-            `${API_SERVER_HOST}/api/payment/use`,
+        const response = await paymentApi.post(
+            '/payment/use',
             {
                 userId: userId,
                 points: points,
@@ -22,8 +26,8 @@ export const payWithPoints = async ({ userId, points }) => {
 export const preparePayment = async (paymentData) => {
     console.log("paymentData:", paymentData);
     try {
-        const response = await axios.post(
-            `${API_SERVER_HOST}/api/payment/prepare`,
+        const response = await paymentApi.post(
+            '/payment/prepare',
             paymentData
         );
         return response.data;
@@ -37,8 +41,8 @@ export const preparePayment = async (paymentData) => {
 
 export const verifyPayment = async (verificationData) => {
     try {
-        const response = await axios.post(
-            `${API_SERVER_HOST}/api/payment/verify`,
+        const response = await paymentApi.post(
+            '/payment/verify',
             verificationData
         );
         return response.data;
@@ -52,8 +56,8 @@ export const verifyPayment = async (verificationData) => {
 
 export const fetchUserPoints = async () => {
     try {
-        const response = await axios.get(
-            `${API_SERVER_HOST}/api/customer/user/points`,
+        const response = await paymentApi.get(
+            '/customer/user/points',
             {
                 withCredentials: true,
             }
@@ -69,8 +73,8 @@ export const fetchUserPoints = async () => {
 
 export const failPayment = async (merchantUid) => {
     try {
-        const response = await axios.post(
-            `${API_SERVER_HOST}/api/payment/fail`,
+        const response = await paymentApi.post(
+            '/payment/fail',
             { merchantUid }
         );
         return response.data;
