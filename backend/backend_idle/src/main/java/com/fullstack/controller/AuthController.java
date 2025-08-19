@@ -16,11 +16,13 @@ import org.springframework.web.server.ResponseStatusException;
 import com.fullstack.entity.CustomerEntity;
 import com.fullstack.model.CustomerDTO;
 import com.fullstack.model.LoginResponseDTO;
+import com.fullstack.model.ResetPasswordDTO;
 import com.fullstack.model.TokenDTO;
 import com.fullstack.repository.CustomerRepository;
 import com.fullstack.security.jwt.JWTUtil;
 import com.fullstack.security.util.TokenCookieUtils;
 import com.fullstack.service.CustomerService;
+import com.fullstack.service.ResetPasswordService;
 import com.fullstack.service.TokenService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,8 +36,8 @@ public class AuthController {
 
 	private final CustomerService customerService;
 	private final TokenService tokenService;
-	private final JWTUtil jwtUtil;
 	private final CustomerRepository customerRepository;
+	private final ResetPasswordService resetPasswordService;
 
 	@PostMapping("/login")
 	public ResponseEntity<Map<String, Object>> login(@RequestBody CustomerDTO customerDTO,
@@ -106,4 +108,12 @@ public class AuthController {
 
 		return ResponseEntity.ok(loginResponseDTO);
 	}
+	
+	@PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO) {
+        resetPasswordService.resetPassword(resetPasswordDTO);
+        return ResponseEntity.ok().build();
+    }
+	
+	
 }

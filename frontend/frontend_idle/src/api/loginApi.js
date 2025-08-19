@@ -11,10 +11,7 @@ export const login = async (credentials) => {
     try { localStorage.setItem("auth:pulse", String(Date.now())); } catch {}
     return data;
   } catch (error) {
-    if (error?.response?.data?.message) {
-      throw new Error(error.response.data.message);
-    }
-    throw new Error("로그인 실패: 서버와 연결할 수 없습니다");
+    throw error;
   }
 };
 

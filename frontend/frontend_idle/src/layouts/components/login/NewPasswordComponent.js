@@ -20,6 +20,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import CheckCircleRounded from "@mui/icons-material/CheckCircleRounded";
 import CancelRounded from "@mui/icons-material/CancelRounded";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import api from "../../../api/authApi";
 // ⚠️ 프로젝트에 맞게 경로 조정
 // axios 인스턴스: 로그인 등에서 사용하던 api 인스턴스 재사용
 // 예: import api from "../../api/authApi";
@@ -57,7 +58,7 @@ const RuleRow = ({ ok, label }) => (
 export default function NewPasswordComponent({ onSuccess }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const ticket = searchParams.get("ticket") || ""; // reset-ticket (일회용)
+  const token = searchParams.get("token") || ""; // reset-token (일회용)
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -70,7 +71,7 @@ export default function NewPasswordComponent({ onSuccess }) {
   const { rules, score, percent } = useMemo(() => calcStrength(password), [password]);
   const matches = password.length > 0 && password === confirm;
 
-  const canSubmit = ticket && matches && Object.values(rules).every(Boolean) && !submitting;
+  const canSubmit = token && matches && Object.values(rules).every(Boolean) && !submitting;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -78,37 +79,37 @@ export default function NewPasswordComponent({ onSuccess }) {
     setSubmitting(true);
     setError("");
     
-    // try {
-    //   // 서버 규격: { ticket, newPassword }
-    //   await api.post("/auth/reset-password", { ticket, newPassword: password });
-    //   setDone(true);
-    //   if (typeof onSuccess === "function") onSuccess();
-    // } catch (err) {
-    //   const msg = err?.response?.data?.message || "비밀번호 재설정에 실패했습니다. 링크가 만료되었거나 이미 사용되었을 수 있어요.";
-    //   setError(msg);
-    // } finally {
-    //   setSubmitting(false);
-    // }
+    try {
+      // 서버 규격: { ticket, newPassword }
+      await api.post("/auth/reset-password", { token, newPassword: password });
+      setDone(true);
+      if (typeof onSuccess === "function") onSuccess();
+    } catch (err) {
+      const msg = err?.response?.data?.message || "비밀번호 재설정에 실패했습니다. 링크가 만료되었거나 이미 사용되었을 수 있어요.";
+      setError(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-//   if (!ticket) {
-//     return (
-//       <Box minHeight="100vh" display="flex" alignItems="center" justifyContent="center" p={2}>
-//         <Card sx={{ width: "100%", maxWidth: 440 }}>
-//           <CardHeader title="비밀번호 재설정" subheader="유효하지 않은 접근" />
-//           <CardContent>
-//             <Alert severity="warning" sx={{ mb: 2 }}>
-//               이메일로 받은 재설정 링크에 포함된 토큰(ticket)이 없습니다. 비밀번호 찾기 화면에서 다시 시도해주세요.
-//             </Alert>
-//             <Stack direction="row" spacing={1}>
-//               <Button variant="outlined" onClick={() => navigate("/forgot-password")}>비밀번호 찾기</Button>
-//               <Button variant="text" onClick={() => navigate("/login")}>로그인으로</Button>
-//             </Stack>
-//           </CardContent>
-//         </Card>
-//       </Box>
-//     );
-//   }
+  if (!token) {
+    return (
+      <Box minHeight="100vh" display="flex" alignItems="center" justifyContent="center" p={2}>
+        <Card sx={{ width: "100%", maxWidth: 440 }}>
+          <CardHeader title="비밀번호 재설정" subheader="유효하지 않은 접근" />
+          <CardContent>
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              이메일로 받은 재설정 링크에 포함된 토큰이 없습니다. 비밀번호 찾기 화면에서 다시 시도해주세요.
+            </Alert>
+            <Stack direction="row" spacing={1}>
+              <Button variant="outlined" onClick={() => navigate("/forgot-password")}>비밀번호 찾기</Button>
+              <Button variant="text" onClick={() => navigate("/login")}>로그인으로</Button>
+            </Stack>
+          </CardContent>
+        </Card>
+      </Box>
+    );
+  }
 
   return (
     <Box minHeight="100vh" display="flex" alignItems="center" justifyContent="center" p={2}>

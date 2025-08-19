@@ -45,6 +45,7 @@ public class SecurityConfig {
                     "/api/auth/login",
                     "/api/auth/refresh",
                     "/api/auth/logout",
+                    "/api/auth/reset-password",
                     "/api/auth/email/**",      
                     "/api/admin/login", // 경로 변경
                     "/api/admin/check-auth", // 추가: 인증 상태 확인 엔드포인트 허용
