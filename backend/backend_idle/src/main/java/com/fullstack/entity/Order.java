@@ -44,9 +44,6 @@ public class Order {
     @Column(name = "assigned_driver_id")
     private Long assignedDriverId;
 
-    @ManyToOne
-    @JoinColumn(name = "transport_auth_id", nullable = true)
-    private TransportAuth transportAuth;
 
     /* 자동 타임스탬프 */
     @CreationTimestamp
