@@ -129,9 +129,9 @@ const GNB = () => {
                     </ul>
                 </div>
             </div>
-            <div className="bubblediv">
+            {/* <div className="bubblediv">
                 <BubbleAnimation warmth={100} />
-            </div>
+            </div> */}
         </div>
     );
 };
