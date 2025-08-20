@@ -6,10 +6,10 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import { useState } from 'react';
-import { sendEmailCode, verifyEmailCode } from '../../../api/emailApi';
+import { sendResetEmailCode, verifyResetEmailCode } from '../../../api/emailApi';
 import { CircularProgress, FormHelperText, Stack } from '@mui/material';
 
-function ForgotPasswordComponent({ open, handleClose, onVerified }) {
+function ForgotPasswordModal({ open, handleClose, onVerified }) {
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -29,7 +29,7 @@ function ForgotPasswordComponent({ open, handleClose, onVerified }) {
     }
     setSending(true);
     try {
-      await sendEmailCode(email);
+      await sendResetEmailCode(email);
       setSent(true);
       setSendMsg("인증 코드가 이메일로 전송되었습니다.");
     } catch (e) {
@@ -47,18 +47,17 @@ function ForgotPasswordComponent({ open, handleClose, onVerified }) {
     }
     setVerifying(true);
     try {
-      const { data } = await verifyEmailCode(email, code);
-      if (data === true) {
+      const { data } = await verifyResetEmailCode(email, code);
+      const token = data?.token;
+      
+     if (token) {
         setVerifyMsg("인증이 완료되었습니다.");
-        // ✅ 인증 성공 처리: 부모에게 알려주고 모달 닫기
-        // 보안상 권장: 여기서 서버에 reset-ticket 발급 요청 → 그 토큰으로 reset 페이지 이동
-        // onVerified(email, ticket) 형태를 쓰거나, 일단 email만 전달
         if (typeof onVerified === "function") {
-          onVerified(email);
+          onVerified({ email, token }); 
         }
         resetStateOnClose();
       } else {
-        setVerifyMsg("인증 코드가 올바르지 않습니다.");
+        setVerifyMsg("인증 코드가 올바르지 않거나 만료되었습니다.");
       }
     } catch (e) {
       setVerifyMsg("인증 중 오류가 발생했습니다.");
@@ -157,4 +156,4 @@ function ForgotPasswordComponent({ open, handleClose, onVerified }) {
   );
 }
 
-export default ForgotPasswordComponent;
+export default ForgotPasswordModal;

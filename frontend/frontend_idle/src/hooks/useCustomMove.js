@@ -64,11 +64,18 @@ const useCustomMove = () => {
         switch (role) {
             case "shipper":
                 navigate("/shipper");
+                break;
             case "carrier":
                 navigate("/carPage");
+                break;
             default:
                 navigate("/");
         }
+    };
+
+    const moveToNewPassword = (token, {replace = false} = {}) => {
+        if (!token) return;
+        navigate("/newPassword", {state: { token }, replace });
     };
 
     return {
@@ -92,6 +99,7 @@ const useCustomMove = () => {
         moveToSignUpPage,
         moveToMainPage,
         moveToMyPageByRole,
+        moveToNewPassword,
     };
 };
 

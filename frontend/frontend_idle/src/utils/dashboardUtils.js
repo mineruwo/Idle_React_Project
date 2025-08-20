@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const renderAccountPanel = (title, dateColumnName) => (
     <div style={{ flex: 1, border: '1px dashed #aaa', padding: '15px', borderRadius: '8px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>

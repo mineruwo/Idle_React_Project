@@ -1,22 +1,20 @@
 import { useState } from "react";
 import { Box, Button, Modal, Stack, TextField, Typography } from "@mui/material";
-import axios from "axios";
+import { sendSignupEmailCode, verifySignupEmailCode } from "../../../api/emailApi";
 
 export default function EmailVerificationModal({ open, onClose, onVerified, email }) {
   const [code, setCode] = useState("");
   const [sent, setSent] = useState(false);
 
   const sendCode = async () => {
-    await axios.post("/api/email/send-code", null, { params: { email } });
+    await sendSignupEmailCode(email);
     setSent(true);
     alert("인증 코드가 발송되었습니다.");
   };
 
   const verifyCode = async () => {
-    const { data } = await axios.post("/api/email/verify-code", null, {
-      params: { email, code }
-    });
-    if (data === true) {
+    const { data } = await verifySignupEmailCode(email, code);
+    if (data?.ok && data?.verified === true) {
       alert("이메일 인증이 완료되었습니다!");
       onVerified();
       onClose();
@@ -24,6 +22,7 @@ export default function EmailVerificationModal({ open, onClose, onVerified, emai
       alert("인증 코드가 올바르지 않습니다.");
     }
   };
+
 
   return (
     <Modal open={open} onClose={onClose}>
