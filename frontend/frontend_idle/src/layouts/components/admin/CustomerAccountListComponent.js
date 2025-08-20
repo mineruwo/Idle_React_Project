@@ -14,13 +14,30 @@ const CustomerAccountListComponent = () => {
     const [modalMessage, setModalMessage] = useState("");
     const [selectedCustomerId, setSelectedCustomerId] = useState(null);
 
+    const [roleFilter, setRoleFilter] = useState('');
+    const [sortConfig, setSortConfig] = useState({ key: 'id', direction: 'asc' });
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchType, setSearchType] = useState('id'); // Default search type
+
     useEffect(() => {
         fetchCustomerList();
-    }, [page, size]);
+    }, [page, size, roleFilter, sortConfig, searchQuery, searchType]); // Add searchType and searchQuery to dependencies
 
     const fetchCustomerList = async () => {
         try {
-            const response = await getCustomerList(page, size);
+            const params = {
+                page,
+                size,
+                role: roleFilter,
+                sort: `${sortConfig.key},${sortConfig.direction}`,
+            };
+
+            if (searchQuery) {
+                params.searchType = searchType;
+                params.searchQuery = searchQuery;
+            }
+
+            const response = await getCustomerList(params);
             setCustomerList(response.content);
             setTotalPages(response.totalPages);
         } catch (error) {
@@ -38,25 +55,64 @@ const CustomerAccountListComponent = () => {
         setSelectedCustomerId(selectedCustomerId === customerId ? null : customerId);
     };
 
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        setPage(0); // Reset to first page on new search
+        fetchCustomerList();
+    };
+
     const closeModal = () => {
         setShowModal(false);
     };
+
+    const roles = ['CARRIER', 'SHIPPER'];
 
     return (
         <div className="admin-container">
             <Modal show={showModal} message={modalMessage} onClose={closeModal} />
             <div className="admin-header">
                 <h2>고객 계정 목록</h2>
-                {/* <Link to="/admin/customer-accounts/create" className="admin-primary-btn">새 고객 생성</Link> */}
+            </div>
+
+            <div className="admin-controls">
+                <div className="admin-filter">
+                    <label htmlFor="role-filter">역할:</label>
+                    <select id="role-filter" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
+                        <option value="">모두</option>
+                        {roles.map(role => <option key={role} value={role}>{role}</option>)}
+                    </select>
+                </div>
+                <form onSubmit={handleSearch} className="admin-search">
+                    <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+                        <option value="id">ID</option>
+                        <option value="customName">이름</option>
+                        <option value="contact">연락처</option> {/* Assuming 'contact' field exists in Customer entity */}
+                    </select>
+                    <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="검색..."
+                    />
+                    <button type="submit" className="admin-primary-btn">검색</button>
+                </form>
             </div>
 
             <table className="admin-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>이름</th>
-                        <th>가입일</th>
-                        <th>역할</th>
+                        <th onClick={() => handleSort('id')} className={sortConfig.key === 'id' ? `sort-${sortConfig.direction}` : ''}>ID</th>
+                        <th onClick={() => handleSort('customName')} className={sortConfig.key === 'customName' ? `sort-${sortConfig.direction}` : ''}>이름</th>
+                        <th onClick={() => handleSort('createdAt')} className={sortConfig.key === 'createdAt' ? `sort-${sortConfig.direction}` : ''}>가입일</th>
+                        <th onClick={() => handleSort('role')} className={sortConfig.key === 'role' ? `sort-${sortConfig.direction}` : ''}>역할</th>
                     </tr>
                 </thead>
                 <tbody>
