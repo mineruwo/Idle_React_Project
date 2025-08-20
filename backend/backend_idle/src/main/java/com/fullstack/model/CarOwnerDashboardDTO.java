@@ -28,6 +28,7 @@ public final class CarOwnerDashboardDTO {
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
     public static class DashboardSummaryDTO {
         private String name;          // 차주 닉네임/표시명
+        private String nickname;
         private int completed;        // 완료건
         private int inProgress;       // 진행중
         private int scheduled;        // 예정
@@ -39,13 +40,13 @@ public final class CarOwnerDashboardDTO {
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
     public static class DeliveryItemDTO {
-        private String deliveryNum;     // 주문/운송 번호
-        private String status;          // "배송중" 등
-        private String transport_type;  // 화물 종류
-        private String from;            // 출발지
-        private String s_date;          // 출발 예정일
-        private String to;              // 도착지
-        private String date;            // 도착 예정일
+        private Long id;             // ★ 엔티티 id (프론트 액션에 필수)
+        private String deliveryNum;  // 화면 표기용 번호 (id 문자열)
+        private String status;       // CREATED/ONGOING/COMPLETED/CANCELED (enum name)
+        private String transport_type;
+        private String from;
+        private String s_date;       // 출발 예정일(문자열)
+        private String to;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder

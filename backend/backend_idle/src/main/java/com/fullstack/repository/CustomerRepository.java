@@ -34,25 +34,11 @@ public interface CustomerRepository extends JpaRepository<CustomerEntity, Intege
     boolean existsByNicknameAndLoginIdNot(@Param("nickname") String nickname,
                                           @Param("loginId") String loginId);
     
-    @Query("""
-    	    select c from CustomerEntity c
-    	     where c.id = :email and (c.isLefted = false or c.isLefted is null)
-    	  """)
-    Optional<CustomerEntity> findActiveByEmail(@Param("email") String email);
-    
-    
-    @Modifying
-    @Query("""
-      update CustomerEntity c
-         set c.resetUsed = true
-       where c.resetTokenHash = :hash
-         and (c.resetUsed = false or c.resetUsed is null)
-         and c.resetExpiresAt > :now
-    """)
-    int markResetTokenUsed(@Param("hash") String hash, @Param("now") LocalDateTime now);
+    @Query("select c.nickname from CustomerEntity c where c.id = :ownerId")
+    Optional<String> findNicknameByOwnerId(@Param("ownerId") String ownerId);
 	
 	
-    Optional<CustomerEntity> findByCustomName(String customName);
+
 
 	Optional<CustomerEntity> findById(String id);
 	

@@ -96,7 +96,6 @@ public class SecurityConfig {
             "http://localhost:3000",
             "https://idle-react-project-front.onrender.com"
         ));
-        // 메소드/헤더
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(Arrays.asList("*"));
         // 크리덴셜(쿠키) 허용

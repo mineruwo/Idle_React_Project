@@ -5,14 +5,13 @@ import SalesChart from "../../../../layouts/components/carownerComponent/DashCom
 import WarmPieChart from "../../../../layouts/components/carownerComponent/DashComponent/WarmPieChart";
 import DeliveryList from "../../../../layouts/components/carownerComponent/DashComponent/DeliveryList";
 import {
-    fetchTransportSummary,
-    fetchSalesChart,
-    fetchDeliveries,
-    fetchWarmth,
-} from "../../../../api/CarOwnerApi/CarOwnerDashboardApi";
+  fetchDeliveries,
+  fetchSalesChart,
+  fetchTransportSummary,
+  fetchWarmth
+} from "../../../../api/CarOwnerApi/CarOwnerDashboard_deliveryApi";
 
 const CarOwnerDashboard = () => {
-    const ownerId = "hongcha"; // 로그인 연동 예정
 
     const [summary, setSummary] = useState(null);
     const [salesData, setSalesData] = useState([]);
@@ -20,28 +19,41 @@ const CarOwnerDashboard = () => {
     const [warmth, setWarmth] = useState({ onTime: 0, late: 0 });
     const [loading, setLoading] = useState(true);
     const [err, setErr] = useState(null);
-
+console.log("[DASH] module loaded");
     useEffect(() => {
+        console.log("[DASH] useEffect run");
         (async () => {
+            console.log("[DASH] before Promise.all");
             try {
                 const [s, sc, d, w] = await Promise.all([
-                    fetchTransportSummary(ownerId),
-                    fetchSalesChart(ownerId),
-                    fetchDeliveries(ownerId),
-                    fetchWarmth(ownerId),
+                    fetchTransportSummary(),
+                    fetchSalesChart(),
+                    fetchDeliveries(),
+                    fetchWarmth(),
                 ]);
+                 console.log("[DASH] after Promise.all", { s, scLen: sc?.length, dLen: d?.length, w });
                 setSummary(s);
                 setSalesData(sc || []);
                 setDeliveries(d || []);
                 setWarmth(w || { onTime: 0, late: 0 });
             } catch (e) {
+                 console.log("[DASH] catch", e);
                 console.error(e);
                 setErr(e.message || "데이터 로딩 실패");
             } finally {
+                console.log("[DASH] finally");
                 setLoading(false);
             }
         })();
-    }, [ownerId]);
+    },[]);
+     const refreshDeliveries = async () => {
+    try {
+      const d = await fetchDeliveries();
+      setDeliveries(d || []);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
     if (loading) return <div className="dashboard-loading">로딩 중...</div>;
     if (err) return <div className="dashboard-error">에러: {String(err)}</div>;
@@ -60,7 +72,7 @@ const CarOwnerDashboard = () => {
                     <div className="dashboard-row">
                         {/* 헤더 카드 */}
                         <DashboardHeader
-                            name={summary?.name}
+                            name={summary?.nickname}
                             completed={summary?.completed}
                             inProgress={summary?.inProgress}
                             scheduled={summary?.scheduled}
@@ -77,7 +89,7 @@ const CarOwnerDashboard = () => {
                             </div>
                             <div className="warminfo">
                                 <p>
-                                    <strong>{summary?.name}님</strong>, 따뜻함 온도 💗 <strong>{warmthScore}</strong>
+                                    <strong>{summary?.nickname}님</strong>, 따뜻함 온도 💗 <strong>{warmthScore}</strong>
                                 </p>
                                 <p>🕒 {warmth.late === 0 ? "와우! 완벽합니다!" : "좋아요! 더 좋아질 수 있어요."}</p>
                             </div>
@@ -91,7 +103,7 @@ const CarOwnerDashboard = () => {
 
             {/* 진행중 리스트 */}
             <div className="delbox">
-                <DeliveryList deliveries={deliveries} />
+                <DeliveryList deliveries={deliveries} onRefresh={refreshDeliveries} />
             </div>
         </>
     );

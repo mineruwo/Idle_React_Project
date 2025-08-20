@@ -78,10 +78,6 @@ public class Order {
     @Column(name = "assigned_driver_id")
     private Long assignedDriverId;        // BIGINT
 
-    /** (선택) 외래키 - 스키마에 존재함 */
-    @ManyToOne
-    @JoinColumn(name = "transport_auth_id", nullable = true)
-    private TransportAuth transportAuth;
 
     /** 타임스탬프 */
     @CreationTimestamp

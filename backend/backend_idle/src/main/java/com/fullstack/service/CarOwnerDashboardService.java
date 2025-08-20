@@ -13,5 +13,6 @@ public interface CarOwnerDashboardService {
     List<DeliveryItemDTO> getDeliveries(String ownerId);
     List<SalesChartDTO> getSalesChart(String ownerId);
     WarmthDTO getWarmth(String ownerId);
+    
 }
 
