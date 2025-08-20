@@ -96,25 +96,16 @@ public class Order {
     /* ===== 주문번호 자동 생성 ===== */
     @PrePersist
     public void ensureOrderNo() {
-        // 상태 기본값 보정
-        if (this.status == null || this.status.isBlank()) {
-            this.status = "OPEN";
-        }
-        // 주문번호 없으면 생성
         if (this.orderNo == null || this.orderNo.isBlank()) {
-            this.orderNo = "ODR-" + randomCode(12);   // 총 길이 예: ODR-XXXXXXXXXXXX (16자)
+            this.orderNo = "ODR-" + randomCode(10); // ← 날짜 없음, 랜덤 10자
         }
     }
 
     // 가독성 좋은 문자셋 (0,1,O,I 제외)
-    private static final String CODESET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    private static final SecureRandom RND = new SecureRandom();
-
-    private static String randomCode(int len) {
+    private String randomCode(int len) {
+        final String A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // 0,O,1,I 제외
         StringBuilder sb = new StringBuilder(len);
-        for (int i = 0; i < len; i++) {
-            sb.append(CODESET.charAt(RND.nextInt(CODESET.length())));
-        }
+        for (int i = 0; i < len; i++) sb.append(A.charAt((int)(Math.random()*A.length())));
         return sb.toString();
     }
 }
