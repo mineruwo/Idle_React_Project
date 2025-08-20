@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { sendResetEmailCode, verifyResetEmailCode } from '../../../api/emailApi';
 import { CircularProgress, FormHelperText, Stack } from '@mui/material';
 
-function ForgotPasswordComponent({ open, handleClose, onVerified }) {
+function ForgotPasswordModal({ open, handleClose, onVerified }) {
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -49,8 +49,6 @@ function ForgotPasswordComponent({ open, handleClose, onVerified }) {
     try {
       const { data } = await verifyResetEmailCode(email, code);
       const token = data?.token;
-
-      alert(token);
       
      if (token) {
         setVerifyMsg("인증이 완료되었습니다.");
@@ -158,4 +156,4 @@ function ForgotPasswordComponent({ open, handleClose, onVerified }) {
   );
 }
 
-export default ForgotPasswordComponent;
+export default ForgotPasswordModal;

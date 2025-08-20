@@ -75,9 +75,7 @@ const useCustomMove = () => {
 
     const moveToNewPassword = (token, {replace = false} = {}) => {
         if (!token) return;
-
-        const query = new URLSearchParams({ token }).toString();
-        navigate(`/newPassword?${query}`, {replace});
+        navigate("/newPassword", {state: { token }, replace });
     };
 
     return {

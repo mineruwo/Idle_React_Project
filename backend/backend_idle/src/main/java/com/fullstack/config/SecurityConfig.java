@@ -60,7 +60,7 @@ public class SecurityConfig {
                     "/api/email/**"
                 ).permitAll()
                 .requestMatchers(
-                        "/api/auth/auto"
+                        "/api/auth/me"
                 ).authenticated()
                 .anyRequest().authenticated()
             )

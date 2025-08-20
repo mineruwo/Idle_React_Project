@@ -2,8 +2,10 @@ package com.fullstack.service;
 
 import java.time.LocalDateTime;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.fullstack.entity.CustomerEntity;
 import com.fullstack.model.ResetPasswordDTO;
@@ -25,14 +27,25 @@ public class ResetPasswordServiceImpl implements ResetPasswordService {
         String hash = HashUtils.sha256(resetPasswordDTO.getToken());
         LocalDateTime now = LocalDateTime.now();
 
+        /*
         int updated = customerRepository.markResetTokenUsed(hash, now);
         if (updated == 0) {
             throw new IllegalArgumentException("토큰이 만료되었거나 이미 사용되었습니다.");
-        }
-
+        }*/
+        
         CustomerEntity customer = customerRepository.findByResetTokenHash(hash)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 토큰입니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "유효하지 않은 토큰입니다."));
 
+        if (Boolean.TRUE.equals(customer.getResetUsed()) ||
+                customer.getResetExpiresAt() == null ||
+                !customer.getResetExpiresAt().isAfter(now)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "토큰이 만료되었거나 이미 사용되었습니다.");
+            }
+        
+        if (passwordEncoder.matches(resetPasswordDTO.getNewPassword(), customer.getPasswordEnc())) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "새로운 비밀번호는 기존 비밀번호와 같을 수 없습니다.");
+        }
+        
         customer.setPasswordEnc(passwordEncoder.encode(resetPasswordDTO.getNewPassword()));
         customer.setUpdatedAt(now);
 

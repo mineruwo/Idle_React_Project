@@ -19,7 +19,6 @@ import com.fullstack.model.LoginResponseDTO;
 import com.fullstack.model.ResetPasswordDTO;
 import com.fullstack.model.TokenDTO;
 import com.fullstack.repository.CustomerRepository;
-import com.fullstack.security.jwt.JWTUtil;
 import com.fullstack.security.util.TokenCookieUtils;
 import com.fullstack.service.CustomerService;
 import com.fullstack.service.ResetPasswordService;
@@ -81,8 +80,7 @@ public class AuthController {
 
 	@PostMapping("/logout")
 	public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
-		String refreshToken = TokenCookieUtils.getRefreshTokenFromCookie(request);
-
+		
 		TokenCookieUtils.clearAccessTokenCookie(response);
 		TokenCookieUtils.clearRefreshTokenCookie(response);
 		TokenCookieUtils.clearAuthHintCookie(response);
@@ -90,7 +88,7 @@ public class AuthController {
 		return ResponseEntity.noContent().build();
 	}
 
-	@GetMapping("/auto")
+	@GetMapping("/me")
 	public ResponseEntity<LoginResponseDTO> getCurrentUser(Authentication authentication) {
 		
 		if (authentication == null || !authentication.isAuthenticated()

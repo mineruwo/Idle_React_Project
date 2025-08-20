@@ -13,11 +13,12 @@ import useCustomMove from '../../../hooks/useCustomMove';
 import { login } from '../../../api/loginApi';
 import { UserCard as Card, UserContainer as SignInContainer } from '../../../theme/User/UserCard';
 import { useState } from 'react';
-import { useAuth } from '../../../auth/AuthProvider';
 import ForgotPasswordModal from '../modal/ForgotPasswordModal';
+import { useAuth } from '../../../auth/AuthProvider';
+import { replace } from 'react-router-dom';
 
 
-export default function SignIn(props) {
+export default function LoginComponent(props) {
     const [emailError, setEmailError] = useState(false);
     const [emailErrorMessage, setEmailErrorMessage] = useState('');
     const [passwordError, setPasswordError] = useState(false);
@@ -26,7 +27,7 @@ export default function SignIn(props) {
     const [id, setId] = useState("");
     const [forgotOpen, setForgotOpen] = useState(false);
 
-    const { setAuth } = useAuth();
+    const { refreshAuth } = useAuth();
 
     const {
         moveToSignUpPage,
@@ -67,33 +68,24 @@ export default function SignIn(props) {
         e.preventDefault();
         if (!validateInputs()) return;
 
-        let result;
         try {
-            result = await login({ id, passwordEnc: password });
+            const res = await login({ id, passwordEnc: password });
+
+            const role = res?.role;
+            if (role) {
+                moveToMyPageByRole(role);
+            } else {
+                console.warn("login 응답에 role이 없어 라우팅을 건너뜁니다");
+            }
+
+            await refreshAuth(true);
         } catch (err) {
-            // axios error 형태 가정
-            if (err?.response?.status === 401 || err?.response?.status === 403) {
+            const status = err?.response?.status;
+            if (status === 401 || status === 403) {
                 alert("ID 또는 비밀번호가 틀렸습니다");
             } else {
                 alert(err?.message || "로그인 중 오류가 발생했습니다");
             }
-            return; // 로그인 실패면 이후 흐름 중단
-        }
-
-        // 2) 로그인 성공 후 상태 반영/이동
-        try {
-            setAuth({
-                id: result.id,
-                nickname: result.nickname,
-                role: result.role,
-                isAuthenticated: true,
-            });
-
-            // switch문에 break 빠진 것 없나 꼭 확인!
-            moveToMyPageByRole(result.role);
-        } catch (err) {
-            // 여기서 에러가 난다면 자격증명 문제 아님 → 콘솔에만 기록
-            console.error("Post-login flow error:", err);
         }
     };
 
@@ -161,7 +153,7 @@ export default function SignIn(props) {
                         <ForgotPasswordModal
                             open={forgotOpen}
                             handleClose={() => setForgotOpen(false)}
-                            onVerified={({ email, token }) => moveToNewPassword(token)}
+                            onVerified={({ token }) => moveToNewPassword(token, { replace: true })}
                         />
                         <br></br>
                         <Button
