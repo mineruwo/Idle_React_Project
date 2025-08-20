@@ -12,5 +12,7 @@ public interface ReviewService {
 
     List<ReviewResponseDTO> getReviewsByTarget(Integer targetId);
 
+    List<ReviewResponseDTO> getReviewsByAuthor(String authorEmail);
+
     void deleteReview(Long reviewId, String authorEmail);
 }

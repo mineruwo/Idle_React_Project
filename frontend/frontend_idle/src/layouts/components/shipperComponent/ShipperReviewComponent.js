@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import "../../../theme/ShipperCustomCss/ShipperReview.css";
-import { createReview, getReviewsByTarget, deleteReview } from '../../../api/reviewApi'; // API 함수 임포트
+import { createReview, getReviewsByTarget, deleteReview, getMyReviews } from '../../../api/reviewApi'; // API 함수 임포트
 import { useAuth } from '../../../auth/AuthProvider'; // 사용자 정보 가져오기
 
 const ShipperReviewComponent = () => {
@@ -38,23 +38,13 @@ const ShipperReviewComponent = () => {
         }
     }, [selectedOrder, orders]);
 
-    // 컴포넌트 마운트 시 리뷰 목록 불러오기
+    // 컴포넌트 마운트 시 내가 쓴 리뷰 목록 불러오기
     useEffect(() => {
-        const fetchReviews = async () => {
+        const fetchMyReviews = async () => {
             try {
                 setIsLoading(true);
-                // 특정 차주(targetId)의 리뷰를 가져오려면 해당 차주의 ID가 필요합니다.
-                // 여기서는 예시로 첫 번째 오더의 driverId를 사용하거나,
-                // 모든 리뷰를 가져오는 API가 있다면 해당 API를 호출해야 합니다.
-                // 현재 백엔드 API는 targetId를 필수로 받으므로, 임시로 첫 번째 드라이버의 ID를 사용합니다.
-                // 실제로는 리뷰를 보고자 하는 차주의 ID를 동적으로 받아와야 합니다.
-                const defaultTargetId = orders.length > 0 && orders[0].driverId ? orders[0].driverId : null;
-                if (defaultTargetId) {
-                    const data = await getReviewsByTarget(defaultTargetId);
-                    setReviews(data);
-                } else {
-                    setReviews([]); // 대상이 없으면 빈 배열
-                }
+                const data = await getMyReviews();
+                setReviews(data);
             } catch (err) {
                 setError('리뷰를 불러오는데 실패했습니다.');
                 console.error('Failed to fetch reviews:', err);
@@ -63,8 +53,8 @@ const ShipperReviewComponent = () => {
             }
         };
 
-        fetchReviews();
-    }, [orders]); // orders 상태가 변경될 때 다시 불러오도록 의존성 추가
+        fetchMyReviews();
+    }, []); // 컴포넌트가 처음 마운트될 때만 실행
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -100,7 +90,7 @@ const ShipperReviewComponent = () => {
 
             // 리뷰 등록 후 목록 갱신 (여기서는 임시로 첫 번째 드라이버의 리뷰를 다시 불러옴)
             // 실제로는 해당 오더의 리뷰만 갱신하거나, 모든 리뷰를 다시 불러와야 합니다.
-            const data = await getReviewsByTarget(targetDriverId);
+            const data = await getMyReviews();
             setReviews(data);
 
             // 폼 초기화
@@ -130,12 +120,9 @@ const ShipperReviewComponent = () => {
             setIsLoading(true);
             await deleteReview(reviewId);
             alert('리뷰가 성공적으로 삭제되었습니다.');
-            // 삭제 후 목록 갱신 (여기서는 임시로 첫 번째 드라이버의 리뷰를 다시 불러옴)
-            const defaultTargetId = orders.length > 0 && orders[0].driverId ? orders[0].driverId : null;
-            if (defaultTargetId) {
-                const data = await getReviewsByTarget(defaultTargetId);
-                setReviews(data);
-            }
+            // 삭제 후 목록 갱신
+            const data = await getMyReviews();
+            setReviews(data);
         } catch (err) {
             setError('리뷰 삭제에 실패했습니다.');
             console.error('Failed to delete review:', err);

@@ -97,3 +97,24 @@ export const getOrderById = async (orderId) => {
         );
     }
 };
+
+export const updateOrderStatus = async (orderId, status) => {
+    try {
+        const response = await axios.put(
+            `${API_SERVER_HOST}/api/orders/${orderId}/status`,
+            status, // Send status directly as request body
+            {
+                headers: {
+                    'Content-Type': 'text/plain' // Backend expects String, not JSON
+                },
+                withCredentials: true
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error(`주문 ID ${orderId} 상태 업데이트 실패:`, error);
+        throw new Error(
+            error.response?.data?.message || "주문 상태 업데이트 중 오류 발생"
+        );
+    }
+};

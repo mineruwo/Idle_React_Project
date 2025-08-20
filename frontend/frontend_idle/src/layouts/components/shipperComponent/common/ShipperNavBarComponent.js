@@ -6,9 +6,9 @@ const ShipperNavBarComponent = () => {
         shipperMoveToOrder,
         shipperMoveToOrderBoard,
         shipperMoveToPoint,
-        shipperMoveToPayment,
         shipperMoveToReview,
         shipperMoveToOrderHistory,
+        shipperMoveToInquiries,
     } = useCustomMove();
 
     return (
@@ -78,15 +78,15 @@ const ShipperNavBarComponent = () => {
                             </li>
                             <li
                                 className="nav-item py-2 border-bottom border-light border-opacity-25"
-                                onClick={shipperMoveToPayment}
-                            >
-                                <div className="nav-link">결제</div>
-                            </li>
-                            <li
-                                className="nav-item py-2 border-bottom border-light border-opacity-25"
                                 onClick={shipperMoveToReview}
                             >
                                 <div className="nav-link">후기작성</div>
+                            </li>
+                            <li
+                                className="nav-item py-2 border-bottom border-light border-opacity-25"
+                                onClick={shipperMoveToInquiries}
+                            >
+                                <div className="nav-link">문의내역</div>
                             </li>
                         </ul>
                     </div>

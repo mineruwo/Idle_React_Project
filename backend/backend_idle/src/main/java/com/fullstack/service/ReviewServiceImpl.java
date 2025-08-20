@@ -61,6 +61,32 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<ReviewResponseDTO> getReviewsByAuthor(String authorEmail) {
+        // 1. 로그인 정보 확인
+        if (authorEmail == null) {
+            throw new AccessDeniedException("로그인이 필요한 서비스입니다.");
+        }
+        // 2. 이메일로 작성자 정보 조회
+        CustomerEntity author = customerRepository.findById(authorEmail)
+                .orElseThrow(() -> new IllegalArgumentException("작성자 정보를 찾을 수 없습니다: " + authorEmail));
+
+        // 3. 작성자의 idNum 값 확인 (디버깅용 방어 코드)
+        Integer authorIdNum = author.getIdNum();
+        if (authorIdNum == null) {
+            throw new IllegalArgumentException("오류: 사용자 정보에 idNum이 설정되어 있지 않습니다.");
+        }
+
+        // 4. idNum으로 리뷰 목록 조회
+        List<ReviewEntity> reviews = reviewRepository.findByAuthor_IdNum(authorIdNum);
+
+        // 5. DTO로 변환하여 반환
+        return reviews.stream()
+                .map(ReviewResponseDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void deleteReview(Long reviewId, String authorEmail) {
         ReviewEntity review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("리뷰를 찾을 수 없습니다."));

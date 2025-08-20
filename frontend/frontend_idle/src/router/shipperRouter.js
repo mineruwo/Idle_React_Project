@@ -33,6 +33,10 @@ const shipperRouter = () => {
         import("../pages/shipperPage/ShipperOrderHistoryPage")
     );
 
+    const ShipperInquiries = lazy(() =>
+        import("../pages/shipperPage/ShipperInquiriesPage")
+    );
+
     return [
         {
             index: true,
@@ -95,6 +99,14 @@ const shipperRouter = () => {
             element: (
                 <Suspense fallback={Loading}>
                     <ShipperOrderHistory />
+                </Suspense>
+            ),
+        },
+        {
+            path: "inquiries",
+            element: (
+                <Suspense fallback={Loading}>
+                    <ShipperInquiries />
                 </Suspense>
             ),
         },

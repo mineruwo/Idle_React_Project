@@ -58,3 +58,19 @@ export const deleteReview = async (reviewId) => {
     throw error;
   }
 };
+
+// 내가 작성한 모든 리뷰를 가져오는 함수
+export const getMyReviews = async () => {
+  try {
+    const response = await axios.get(
+      `${API_SERVER_HOST}/api/reviews/my-reviews`,
+      {
+        withCredentials: true
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("내 리뷰 목록을 가져오는데 실패했습니다.", error);
+    throw error;
+  }
+};

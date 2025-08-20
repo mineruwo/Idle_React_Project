@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 @RestController
 @RequestMapping("/api/reviews")
 @RequiredArgsConstructor
@@ -32,6 +33,13 @@ public class ReviewController {
     @GetMapping("/target/{targetId}")
     public ResponseEntity<List<ReviewResponseDTO>> getReviewsByTarget(@PathVariable("targetId") Integer targetId) {
         List<ReviewResponseDTO> reviews = reviewService.getReviewsByTarget(targetId);
+        return ResponseEntity.ok(reviews);
+    }
+
+    // 내가 작성한 리뷰 목록 조회
+    @GetMapping("/my-reviews")
+    public ResponseEntity<List<ReviewResponseDTO>> getMyReviews(@AuthenticationPrincipal String authorEmail) {
+        List<ReviewResponseDTO> reviews = reviewService.getReviewsByAuthor(authorEmail);
         return ResponseEntity.ok(reviews);
     }
 

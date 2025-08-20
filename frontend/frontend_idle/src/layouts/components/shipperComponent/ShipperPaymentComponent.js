@@ -7,6 +7,7 @@ import {
     fetchUserPoints,
     failPayment,
     getOrderById,
+    updateOrderStatus,
 } from "../../../api/paymentApi";
 import useCustomMove from "../../../hooks/useCustomMove";
 import { useSearchParams } from "react-router-dom";
@@ -28,15 +29,20 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
         if (orderId) {
             getOrderById(orderId)
                 .then((data) => {
-                    const formattedOrder = {
-                        orderId: data.id,
-                        itemName: data.cargoType
-                            ? `${data.cargoType} 운송 서비스`
-                            : "화물 운송 서비스",
-                        amount: data.driverPrice,
-                        ...data,
-                    };
-                    setOrderList([formattedOrder]);
+                    if (data.status === "PAYMENT_PENDING") {
+                        const formattedOrder = {
+                            orderId: data.id,
+                            itemName: data.cargoType
+                                ? `${data.cargoType} 운송 서비스`
+                                : "화물 운송 서비스",
+                            amount: data.driverPrice,
+                            ...data,
+                        };
+                        setOrderList([formattedOrder]);
+                    } else {
+                        setMessage("이 주문은 결제 대기 상태가 아닙니다.");
+                        setOrderList([]);
+                    }
                 })
                 .catch((error) => {
                     console.error("주문 정보 조회 실패:", error);
@@ -201,6 +207,15 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                                         pgProvider: pgProviderForBackend,
                                     };
 
+                                    // 주문 상태 업데이트 호출 부분에 try-catch 추가
+                                    try {
+                                        await updateOrderStatus(orderList[0].orderId, "PAYMENT_COMPLETED");
+                                        console.log("주문 상태 업데이트 성공!");
+                                    } catch (statusUpdateError) {
+                                        console.error("주문 상태 업데이트 실패:", statusUpdateError);
+                                        setMessage(`주문 상태 업데이트 실패: ${statusUpdateError.message}`);
+                                    }
+
                                     if (pointsToUse > 0) {
                                         setCurrentPoints(
                                             (prevPoints) =>
@@ -256,7 +271,7 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                         <div className="order-item" key={order.orderId}>
                             <div className="order-amount">
                                 <span>{order.orderId}</span>
-                                <span>{order.amount.toLocaleString()}원</span>
+                                <span>{(order.amount || 0).toLocaleString()}원</span>
                             </div>
 
                             <div className="order-details-wrap">
