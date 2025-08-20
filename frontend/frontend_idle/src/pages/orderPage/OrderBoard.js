@@ -136,7 +136,6 @@ const OrderBoard = () => {
     (async () => {
       try {
         const data = await fetchOrders();
-        // fetchOrders가 배열 리턴하도록 맞춰져 있음 (res.data가 아니라 data)
         setOrders(data || []);
       } catch (e) {
         console.error("오더 목록 불러오기 실패:", e);
@@ -242,6 +241,7 @@ const OrderBoard = () => {
       const packingText = prettyPacking(o.packingOptions ?? o.packingOption);
 
       return (
+        matchText(o.orderNo) || // ✅ 주문번호로도 검색
         matchText(o.departure) ||
         matchText(o.arrival) ||
         matchText(o.status) ||
@@ -313,7 +313,11 @@ const OrderBoard = () => {
 
         {/* ===== 검색/필터 바 ===== */}
         <FilterBar>
-          <SearchInput value={q} onChange={(e) => setQ(e.target.value)} placeholder="출발/도착/화물/차량/포장/상태로 검색..." />
+          <SearchInput
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="주문번호/출발/도착/화물/차량/포장/상태 검색..."
+          />
 
           <SelectBox value={immediateFilter} onChange={(e) => setImmediateFilter(e.target.value)}>
             <option value="all">전체(즉시+예약)</option>
@@ -381,6 +385,7 @@ const OrderBoard = () => {
                 onClick={() => handleSelect(o)}
                 data-selected={selected?.id === o.id}
               >
+                {/* 1행: 출발 → 도착 + 우측 상태 */}
                 <RowBetween>
                   <FromTo>
                     <Strong>출발</Strong> {o.departure} &nbsp;→&nbsp;
@@ -388,6 +393,11 @@ const OrderBoard = () => {
                   </FromTo>
                   <RightMeta>{o.status || "READY"}</RightMeta>
                 </RowBetween>
+
+                {/* 2행: 주문번호 배지 (출발/도착 아래에 항상 노출) */}
+                <OrderNoBadge title={o.orderNo || ""}>
+                  {o.orderNo || "-"}
+                </OrderNoBadge>
 
                 <InfoGrid>
                   <Col>
@@ -416,7 +426,8 @@ const OrderBoard = () => {
                   </Col>
                 </InfoGrid>
 
-                <DateWrap>{o.createdAt ? fmtDate(o.createdAt) : "-"}</DateWrap>
+                {/* 등록일 표시는 제거. 필요 시 아래 주석 해제 */}
+                {/* <DateWrap>{o.createdAt ? fmtDate(o.createdAt) : "-"}</DateWrap> */}
               </Card>
             );
           })}
@@ -428,7 +439,7 @@ const OrderBoard = () => {
             ← 이전
           </PageBtn>
 
-        <PageNumbers>
+          <PageNumbers>
             {Array.from({ length: totalPages }, (_, i) => i + 1)
               .slice(Math.max(0, page - 3), Math.max(0, page - 3) + 5)
               .map((p) => (
@@ -468,6 +479,10 @@ const OrderBoard = () => {
               <SectionTitle>
                 화물 상세 정보 <StatusTag>{selected.status || "READY"}</StatusTag>
               </SectionTitle>
+              <Row>
+                <Key>주문번호</Key>
+                <Val>{selected.orderNo || "-"}</Val>
+              </Row>
               <Row>
                 <Key>출발지</Key>
                 <Val>{selected.departure}</Val>
@@ -771,7 +786,7 @@ const RowBetween = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   gap: 8px;
   flex-wrap: wrap;
 `;
@@ -797,6 +812,22 @@ const Strong = styled.span`
 const RightMeta = styled.span`
   color: ${PINK.tagText};
   font-weight: 800;
+`;
+
+/* ✅ 주문번호 배지 */
+const OrderNoBadge = styled.div`
+  display: inline-block;
+  margin: 2px 0 10px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #eef3ff;
+  color: #3b5bcc;
+  font-weight: 900;
+  font-size: 12px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const InfoGrid = styled.div`
