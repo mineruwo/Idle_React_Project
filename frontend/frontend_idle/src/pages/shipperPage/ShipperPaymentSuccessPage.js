@@ -1,9 +1,10 @@
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import useCustomMove from '../../hooks/useCustomMove';
 import './../../theme/ShipperCustomCss/ShipperPaymentSuccessPage.css';
 
 const ShipperPaymentSuccessPage = () => {
-    const navigate = useNavigate();
+    const { shipperMoveToOrderBoard, moveToMainPage } = useCustomMove();
     const location = useLocation();
     const { paymentInfo } = location.state || {};
 
@@ -13,7 +14,7 @@ const ShipperPaymentSuccessPage = () => {
                 <div className="spp-success-card">
                     <h2>잘못된 접근입니다.</h2>
                     <p>결제 정보를 찾을 수 없습니다.</p>
-                    <button onClick={() => navigate('/')} className="spp-success-btn">메인으로 돌아가기</button>
+                    <button onClick={moveToMainPage} className="spp-success-btn">메인으로 돌아가기</button>
                 </div>
             </div>
         );
@@ -43,8 +44,8 @@ const ShipperPaymentSuccessPage = () => {
                 </div>
 
                 <div className="spp-success-actions">
-                    <button onClick={() => navigate('/shipper/order-history')} className="spp-success-btn">주문 내역 확인</button>
-                    <button onClick={() => navigate('/')} className="spp-success-btn spp-success-btn-secondary">메인으로 돌아가기</button>
+                    <button onClick={shipperMoveToOrderBoard} className="spp-success-btn">주문 내역 확인</button>
+                    <button onClick={moveToMainPage} className="spp-success-btn spp-success-btn-secondary">메인으로 돌아가기</button>
                 </div>
             </div>
         </div>

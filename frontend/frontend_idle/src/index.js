@@ -4,6 +4,21 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+if (!window.__fetchHooked) {
+  const _fetch = window.fetch;
+  window.fetch = async (...args) => {
+    console.log("[FETCH][REQ]", args[0], args[1]);
+    try {
+      const res = await _fetch(...args);
+      console.log("[FETCH][RES]", res.status, res.url);
+      return res;
+    } catch (e) {
+      console.log("[FETCH][ERR]", e);
+      throw e;
+    }
+  };
+  window.__fetchHooked = true;
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

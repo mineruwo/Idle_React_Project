@@ -15,8 +15,11 @@ const useCustomMove = () => {
         navigate({ pathname: `/shipper/orderBoard` });
     };
 
-    const shipperMoveToPayment = () => {
-        navigate({ pathname: `/shipper/payment` });
+    const shipperMoveToPayment = (orderId) => {
+        navigate({
+            pathname: `/shipper/payment`,
+            search: `?orderId=${orderId}`,
+        });
     };
 
     const shipperMoveToPaymentSuccess = (state) => {
@@ -29,6 +32,14 @@ const useCustomMove = () => {
 
     const shipperMoveToPoint = () => {
         navigate({ pathname: `/shipper/point` });
+    };
+
+    const shipperMoveToOrderHistory = () => {
+        navigate({ pathname: `/shipper/orderHistory` });
+    };
+
+    const shipperMoveToInquiries = () => {
+        navigate({ pathname: `/shipper/inquiries` });
     };
 
     const carOwnerMoveToDashboard = () => navigate("/carPage");
@@ -64,11 +75,18 @@ const useCustomMove = () => {
         switch (role) {
             case "shipper":
                 navigate("/shipper");
+                break;
             case "carrier":
                 navigate("/carPage");
+                break;
             default:
                 navigate("/");
         }
+    };
+
+    const moveToNewPassword = (token, {replace = false} = {}) => {
+        if (!token) return;
+        navigate("/newPassword", {state: { token }, replace });
     };
 
     return {
@@ -79,6 +97,8 @@ const useCustomMove = () => {
         shipperMoveToReview,
         shipperMoveToPoint,
         shipperMoveToPaymentSuccess,
+        shipperMoveToOrderHistory,
+        shipperMoveToInquiries,
         carOwnerMoveToDashboard,
         carOwnerMoveToProfile,
         carOwnerMoveToEditProfile,
@@ -92,6 +112,7 @@ const useCustomMove = () => {
         moveToSignUpPage,
         moveToMainPage,
         moveToMyPageByRole,
+        moveToNewPassword,
     };
 };
 

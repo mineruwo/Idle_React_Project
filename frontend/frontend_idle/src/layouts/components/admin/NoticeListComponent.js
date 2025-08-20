@@ -79,6 +79,7 @@ const NoticeListComponent = () => {
                         <th>제목</th>
                         <th>작성자</th>
                         <th>작성일</th>
+                        <th>조회수</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -90,10 +91,11 @@ const NoticeListComponent = () => {
                                     <td>{notice.title}</td>
                                     <td>{notice.writerAdminId}</td>
                                     <td>{new Date(notice.createdAt).toLocaleDateString()}</td>
+                                    <td>{notice.viewCount}</td>
                                 </tr>
                                 {expandedNoticeId === notice.id && (
                                     <tr className="admin-content-row">
-                                        <td colSpan="4">
+                                        <td colSpan="5">
                                             <div className="admin-content-box">
                                                 {notice.content}
                                             </div>

@@ -4,6 +4,7 @@ import com.fullstack.entity.Notice;
 import com.fullstack.model.NoticeDTO;
 import com.fullstack.repository.NoticeRepository;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,5 +27,17 @@ public class NoticeService {
 
     public List<Notice> getAllNotices() {
         return noticeRepository.findAll();
+    }
+    
+    public Notice getNoticeById(Long noticeId) {
+        Optional<Notice> optionalNotice = noticeRepository.findById(noticeId);
+        if (optionalNotice.isPresent()) {
+            Notice notice = optionalNotice.get();
+            notice.setViewCount(notice.getViewCount() + 1);
+            return noticeRepository.save(notice);
+        } else {
+            // Handle the case where the notice is not found
+            return null;
+        }
     }
 }

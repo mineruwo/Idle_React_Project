@@ -1,7 +1,6 @@
 import axios from "axios"
-import { API_SERVER_HOST } from "./paymentApi";
 
-const host = `${API_SERVER_HOST}/api/customer`;
+const host = `${process.env.REACT_APP_API_BASE_URL}/customer`;
 
 export const signUp = async (id) => {
     try {

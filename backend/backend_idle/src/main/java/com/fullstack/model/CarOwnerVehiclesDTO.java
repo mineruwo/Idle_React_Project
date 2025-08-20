@@ -11,6 +11,8 @@ import lombok.Builder;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 /**
  * 차량(Vehicle) 관련 DTO 묶음
  * 사용: VehicleDTO.VehicleCreateRequest, VehicleDTO.VehicleDetailResponse 등
@@ -47,6 +49,10 @@ public final class CarOwnerVehiclesDTO {
         private String plateNumber;
         private String type;
         private boolean primary;
+        private String model;
+        private Integer capacity;
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        private LocalDateTime registeredAt;
         private String status; // ACTIVE/INACTIVE
     }
 

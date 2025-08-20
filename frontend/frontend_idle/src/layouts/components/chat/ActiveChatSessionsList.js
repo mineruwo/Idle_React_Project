@@ -12,7 +12,7 @@ const ActiveChatSessionsList = () => {
         const fetchSessions = async () => {
             console.log('Fetching active chat sessions...');
             try {
-                const response = await fetch('/api/admin/chat-sessions');
+                const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/admin/chat-sessions`);
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.error(`HTTP error! status: ${response.status}, message: ${errorText}`);

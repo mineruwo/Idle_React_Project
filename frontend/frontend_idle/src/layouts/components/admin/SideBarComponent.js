@@ -146,7 +146,7 @@ const SidebarComponent = ({ isOpen, toggleSidebar }) => {
             {openSubMenu === 'notices' && (
               <ul className="submenu-list">
                 <li onClick={(e) => handleNavigation('/admin/notices', e)} className={matchNoticesExact ? 'active' : ''}>공지 사항 관리</li>
-                <li onClick={(e) => handleNavigation('/admin/notices/faq', e)} className={matchFAQ ? 'active' : ''}>자주 묻는 질문 관리</li>
+                <li onClick={(e) => handleNavigation('/admin/faqs', e)} className={matchFAQ ? 'active' : ''}>자주 묻는 질문 관리</li>
               </ul>
             )}
           </li>

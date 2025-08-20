@@ -1,6 +1,5 @@
 import { useAuth } from "../../auth/AuthProvider";
 import ShipperPaymentComponent from "../../layouts/components/shipperComponent/ShipperPaymentComponent";
-useAuth;
 
 const ShipperPaymentPage = () => {
     const { profile, loading, authenticated } = useAuth();

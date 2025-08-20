@@ -17,7 +17,7 @@ public class EmailServiceImpl implements EmailService {
         
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
-        message.setSubject("회원가입 이메일 인증 코드");
+        message.setSubject("이메일 인증 코드");
         message.setText("인증 코드: " + code);
         mailSender.send(message);
 

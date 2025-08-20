@@ -334,7 +334,7 @@ export default function SignUp(props) {
         onClose={() => setOpenModal(false)}
         email={id} 
         onVerified={async () => {
-          await signUp({ customName, passwordEnc: password, nickname, id, role });
+          await signUp({ customName, passwordEnc: password, nickname, id, role, phone });
           alert("회원가입 성공");
           moveToLoginPage();
         }}

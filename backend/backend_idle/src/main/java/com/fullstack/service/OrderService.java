@@ -86,4 +86,15 @@ public class OrderService {
     public List<Order> getAllOrders() {
         return orderRepository.findAll();
     }
+
+    /** 주문 상태 업데이트 */
+    @Transactional
+    public Order updateOrderStatus(Long orderId, String newStatus) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + orderId));
+        
+        // TODO: Add validation for status transitions if necessary
+        order.setStatus(newStatus);
+        return orderRepository.save(order);
+    }
 }

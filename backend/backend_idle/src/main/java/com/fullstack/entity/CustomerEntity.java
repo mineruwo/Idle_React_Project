@@ -80,4 +80,12 @@ public class CustomerEntity {
 	@Column(name = "AVATAR_URL", length = 200)
 	private String avatarUrl;
 	
+	// 비밀번호 찾기용 리셋 토큰
+	@Column(name = "RESET_TOKEN_HASH", length = 64, unique = true)
+	private String resetTokenHash;
+	@Column(name = "RESET_EXPIRES_AT")
+	private LocalDateTime resetExpiresAt;
+	@Column(name = "RESET_USED") // nullable = false 
+	private Boolean resetUsed = false;
+	
 }

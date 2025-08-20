@@ -55,6 +55,16 @@ const ShipperDashBoardComponent = (userId) => {
                         내 후기 보기
                     </div>
                 </div>
+                <div className="card">
+                    <div className="card-title">내 문의 내역</div>
+                    <div className="card-content">3건</div>
+                    <div className="card-desc">
+                        최근 문의: 답변 완료 2, 답변 대기 1
+                    </div>
+                    <div className="card-action">
+                        상세보기
+                    </div>
+                </div>
             </div>
             <div className="dashboard-row-1">
                 <div className="card card-full-width">

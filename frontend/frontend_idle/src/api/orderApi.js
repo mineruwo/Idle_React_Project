@@ -1,8 +1,12 @@
 // src/api/order/orderApi.js
 import axios from "axios";
 
-/** ==== 공통 ==== */
-const HOST = "http://localhost:8080";
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
+const orderApi = axios.create({
+    baseURL: API_BASE_URL,
+    withCredentials: true,
+});
 
 /**
  * ✅ 퍼블릭 전용 클라이언트
@@ -10,7 +14,7 @@ const HOST = "http://localhost:8080";
  * - 전역 인터셉터/디폴트에 쿠키/Authorization이 있어도 제거
  */
 export const publicClient = axios.create({
-  baseURL: HOST,
+  baseURL: API_BASE_URL,
   withCredentials: false,
   timeout: 15000,
 });
@@ -31,7 +35,7 @@ publicClient.interceptors.request.use((config) => {
  * - withCredentials true (세션/쿠키 사용)
  */
 export const authClient = axios.create({
-  baseURL: HOST,
+  baseURL: API_BASE_URL,
   withCredentials: true,
   timeout: 15000,
 });

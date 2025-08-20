@@ -6,18 +6,29 @@ import com.fullstack.model.LoginResponseDTO;
 import com.fullstack.repository.CustomerRepository;
 import com.fullstack.security.jwt.JWTUtil;
 
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +36,6 @@ public class CustomerServiceImpl implements CustomerService {
 
 	private final CustomerRepository customerRepository;
 	private final PasswordEncoder passwordEncoder;
-	private final JWTUtil jwtUtil;
 
 	// 로그인
 	@Override
@@ -89,9 +99,121 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	@Override
-	public Page<CustomerEntity> getCustomers(Pageable pageable) {
-		return customerRepository.findAll(pageable);
-	}
+    public Page<CustomerEntity> getCustomers(Pageable pageable, String role, String searchType, String searchQuery) {
+        Specification<CustomerEntity> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Role filter
+            if (role != null && !role.isEmpty()) {
+                predicates.add(cb.equal(cb.upper(root.get("role")), role.toUpperCase()));
+            }
+
+            // Search filter
+            if (searchQuery != null && !searchQuery.isEmpty()) {
+                switch (searchType) {
+                    case "id":
+                        predicates.add(cb.like(root.get("id"), "%" + searchQuery + "%"));
+                        break;
+                    case "customName":
+                        predicates.add(cb.like(root.get("customName"), "%" + searchQuery + "%"));
+                        break;
+                    case "phone": // Changed from 'contact' to 'phone' based on CustomerEntity
+                        predicates.add(cb.like(root.get("phone"), "%" + searchQuery + "%"));
+                        break;
+                }
+            }
+
+            // Exclude lefted customers (assuming isLefted is a boolean field)
+            predicates.add(cb.isFalse(root.get("isLefted")));
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Page<CustomerEntity> customerPage = customerRepository.findAll(spec, pageable);
+        return customerPage;
+    }
+
+    private LocalDateTime calculateDateTime(String dateRange) {
+        LocalDateTime now = LocalDateTime.now();
+        switch (dateRange) {
+            case "1day":
+                return now.minus(1, ChronoUnit.DAYS);
+            case "1week":
+                return now.minus(1, ChronoUnit.WEEKS);
+            case "1month":
+                return now.minus(1, ChronoUnit.MONTHS);
+            default:
+                return LocalDateTime.MIN; // No date filter
+        }
+    }
+
+    @Override
+    public Page<CustomerDTO> getRecentlyCreatedCustomers(Pageable pageable, String dateRange) {
+        LocalDateTime filterDateTime = calculateDateTime(dateRange);
+        Specification<CustomerEntity> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isFalse(root.get("isLefted")));
+            predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), filterDateTime));
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        Page<CustomerEntity> customerPage = customerRepository.findAll(spec, pageable);
+        return customerPage.map(this::entityToDto);
+    }
+
+    @Override
+    public Page<CustomerDTO> getRecentlyDeletedCustomers(Pageable pageable, String dateRange) {
+        LocalDateTime filterDateTime = calculateDateTime(dateRange);
+        Specification<CustomerEntity> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isTrue(root.get("isLefted")));
+            predicates.add(cb.greaterThanOrEqualTo(root.get("leftedAt"), filterDateTime));
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        Page<CustomerEntity> customerPage = customerRepository.findAll(spec, pageable);
+        return customerPage.map(this::entityToDto);
+    }
+
+	@Override
+    public Map<String, Long> getDailyCustomerCreationCounts(int year, int month) {
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDate startOfMonth = yearMonth.atDay(1);
+        LocalDate endOfMonth = yearMonth.atEndOfMonth();
+
+        List<Object[]> results = customerRepository.countCustomersByCreationDate(startOfMonth, endOfMonth);
+
+        Map<String, Long> dailyCounts = new LinkedHashMap<>();
+        for (LocalDate date = startOfMonth; !date.isAfter(endOfMonth); date = date.plusDays(1)) {
+            dailyCounts.put(date.toString(), 0L);
+        }
+
+        for (Object[] result : results) {
+            LocalDate date = ((java.sql.Date) result[0]).toLocalDate(); // Fixed: Convert java.sql.Date to java.time.LocalDate
+            Long count = (Long) result[1];
+            dailyCounts.put(date.toString(), count);
+        }
+        return dailyCounts;
+    }
+
+    @Override
+    public Map<String, Long> getDailyCustomerDeletionCounts(int year, int month) {
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDate startOfMonth = yearMonth.atDay(1);
+        LocalDate endOfMonth = yearMonth.atEndOfMonth();
+
+        List<Object[]> results = customerRepository.countCustomersByDeletionDate(startOfMonth, endOfMonth);
+
+        Map<String, Long> dailyCounts = new LinkedHashMap<>();
+        for (LocalDate date = startOfMonth; !date.isAfter(endOfMonth); date = date.plusDays(1)) {
+            dailyCounts.put(date.toString(), 0L);
+        }
+
+        for (Object[] result : results) {
+            LocalDate date = ((java.sql.Date) result[0]).toLocalDate(); // Fixed: Convert java.sql.Date to java.time.LocalDate
+            Long count = (Long) result[1];
+            dailyCounts.put(date.toString(), count);
+        }
+        return dailyCounts;
+    }
 
 	@Override
 	public CustomerDTO createCustomer(CustomerDTO dto) {
