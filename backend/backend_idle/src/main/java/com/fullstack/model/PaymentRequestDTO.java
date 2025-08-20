@@ -12,7 +12,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class PaymentRequestDto {
+public class PaymentRequestDTO {
 
 	@JsonProperty("merchantUid")
 	private String merchantUid;

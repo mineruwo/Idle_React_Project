@@ -75,6 +75,25 @@ export const failPayment = async (merchantUid) => {
         );
         return response.data;
     } catch (error) {
-        console.error("결제 실패 정보 전송 중 오류 발생:", error);
+        throw new Error(
+            error.response?.data?.message || "결제 실패 정보 전송 중 오류 발생"
+        );
+    }
+};
+
+export const getOrderById = async (orderId) => {
+    try {
+        const response = await axios.get(
+            `${API_SERVER_HOST}/api/orders/${orderId}`,
+            {
+                withCredentials: true,
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error(`ID ${orderId} 주문 정보 조회 실패:`, error);
+        throw new Error(
+            error.response?.data?.message || "주문 정보를 가져오는 중 오류 발생"
+        );
     }
 };

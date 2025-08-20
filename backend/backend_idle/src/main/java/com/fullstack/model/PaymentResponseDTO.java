@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class PaymentResponseDto {
+public class PaymentResponseDTO {
 
 	private boolean success;
     private String message;

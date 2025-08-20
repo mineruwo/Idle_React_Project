@@ -10,10 +10,10 @@ import org.springframework.stereotype.Service;
 import com.fullstack.entity.CustomerEntity;
 import com.fullstack.entity.PaymentEntity;
 import com.fullstack.entity.PointHistory;
-import com.fullstack.model.PaymentRequestDto;
-import com.fullstack.model.PaymentResponseDto;
-import com.fullstack.model.PaymentVerificationDto;
-import com.fullstack.model.PointUsageRequestDto;
+import com.fullstack.model.PaymentRequestDTO;
+import com.fullstack.model.PaymentResponseDTO;
+import com.fullstack.model.PaymentVerificationDTO;
+import com.fullstack.model.PointUsageRequestDTO;
 import com.fullstack.repository.CustomerRepository;
 import com.fullstack.repository.PaymentRepository;
 import com.fullstack.repository.PointHistoryRepository;
@@ -51,10 +51,10 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public PaymentResponseDto preparePayment(PaymentRequestDto requestDto) {
+    public PaymentResponseDTO preparePayment(PaymentRequestDTO requestDto) {
         Optional<PaymentEntity> existingPayment = paymentRepository.findByMerchantUid(requestDto.getMerchantUid());
         if (existingPayment.isPresent()) {
-            return new PaymentResponseDto(false, "이미 요청된 주문번호입니다.", null, requestDto.getMerchantUid(), null, null,
+            return new PaymentResponseDTO(false, "이미 요청된 주문번호입니다.", null, requestDto.getMerchantUid(), null, null,
                     null);
         }
 
@@ -78,7 +78,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         paymentRepository.save(paymentEntity);
 
-        PaymentResponseDto responseDto = new PaymentResponseDto();
+        PaymentResponseDTO responseDto = new PaymentResponseDTO();
         responseDto.setSuccess(true);
         responseDto.setMessage("결제 요청 정보가 성공적으로 저장되었습니다.");
         responseDto.setMerchantUid(paymentEntity.getMerchantUid());
@@ -89,11 +89,11 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public PaymentResponseDto verifyPayment(PaymentVerificationDto verificationDto) {
+    public PaymentResponseDTO verifyPayment(PaymentVerificationDTO verificationDto) {
         String impUid = verificationDto.getImpUid();
         String merchantUid = verificationDto.getMerchantUid();
 
-        PaymentResponseDto responseDto = new PaymentResponseDto();
+        PaymentResponseDTO responseDto = new PaymentResponseDTO();
         responseDto.setMerchantUid(merchantUid);
         responseDto.setImpUid(impUid);
 
@@ -138,7 +138,7 @@ public class PaymentServiceImpl implements PaymentService {
                     log.error("verifyPayment: Customer entity is null for merchantUid: {}", merchantUid);
                 } else {
                     log.info("verifyPayment: Calling usePoints for userId: {} with points: {}", storedPayment.getCustomer().getIdNum(), storedPayment.getPointsUsed());
-                    PointUsageRequestDto pointUsageRequest = new PointUsageRequestDto();
+                    PointUsageRequestDTO pointUsageRequest = new PointUsageRequestDTO();
                     pointUsageRequest.setUserId(storedPayment.getCustomer().getIdNum());
                     pointUsageRequest.setPoints(storedPayment.getPointsUsed());
                     usePoints(pointUsageRequest);
@@ -172,7 +172,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public void usePoints(PointUsageRequestDto requestDto) {
+    public void usePoints(PointUsageRequestDTO requestDto) {
         log.info("Entering usePoints method for userId: {} with points: {}", requestDto.getUserId(), requestDto.getPoints());
         CustomerEntity customer = customerRepository.findById(requestDto.getUserId())
                 .orElseThrow(() -> {

@@ -6,8 +6,10 @@ import {
     verifyPayment,
     fetchUserPoints,
     failPayment,
+    getOrderById,
 } from "../../../api/paymentApi";
 import useCustomMove from "../../../hooks/useCustomMove";
+import { useSearchParams } from "react-router-dom";
 
 const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
     const [currentPoints, setCurrentPoints] = useState(0);
@@ -18,22 +20,31 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
 
     const { shipperMoveToPaymentSuccess } = useCustomMove();
 
-    const [orderList, setOrderList] = useState([
-        {
-            orderId: "ORD123456789",
-            itemName: "화물 운송 서비스",
-            amount: 50000,
-        },
-    ]);
+    const [orderList, setOrderList] = useState([]);
+    const [searchParams] = useSearchParams();
 
-    const addOrder = () => {
-        const newOrder = {
-            orderId: `ORD${Math.floor(Math.random() * 1000000000)}`,
-            itemName: "추가된 운송 서비스",
-            amount: Math.floor(Math.random() * 100000) + 10000,
-        };
-        setOrderList((prevList) => [...prevList, newOrder]);
-    };
+    useEffect(() => {
+        const orderId = searchParams.get("orderId");
+        if (orderId) {
+            getOrderById(orderId)
+                .then((data) => {
+                    const formattedOrder = {
+                        orderId: data.id,
+                        itemName: data.cargoType
+                            ? `${data.cargoType} 운송 서비스`
+                            : "화물 운송 서비스",
+                        amount: data.driverPrice,
+                        ...data,
+                    };
+                    setOrderList([formattedOrder]);
+                })
+                .catch((error) => {
+                    console.error("주문 정보 조회 실패:", error);
+                    setMessage("주문 정보를 불러오는데 실패했습니다.");
+                    setOrderList([]);
+                });
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         const getUserPoints = async () => {
@@ -237,9 +248,7 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
     return (
         <div className="spp-point-layout-container">
             <div className="left-sections-wrapper">
-                <button onClick={addOrder} style={{ marginBottom: "1rem" }}>
-                    주문 정보 추가 테스트
-                </button>
+                
 
                 <div className="order-info-section">
                     <h2 className="spp-page-title">주문 정보</h2>

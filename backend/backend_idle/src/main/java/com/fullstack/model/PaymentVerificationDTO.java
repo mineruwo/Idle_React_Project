@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PaymentVerificationDto {
+public class PaymentVerificationDTO {
 
 	private String impUid;
     private String merchantUid;
