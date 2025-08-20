@@ -88,7 +88,7 @@ export const failPayment = async (merchantUid) => {
 export const getOrderById = async (orderId) => {
     try {
         const response = await axios.get(
-            `${API_SERVER_HOST}/api/orders/${orderId}`,
+            `${API_BASE_URL}/api/orders/${orderId}`,
             {
                 withCredentials: true,
             }
@@ -105,7 +105,7 @@ export const getOrderById = async (orderId) => {
 export const updateOrderStatus = async (orderId, status) => {
     try {
         const response = await axios.put(
-            `${API_SERVER_HOST}/api/orders/${orderId}/status`,
+            `${API_BASE_URL}/api/orders/${orderId}/status`,
             status, // Send status directly as request body
             {
                 headers: {

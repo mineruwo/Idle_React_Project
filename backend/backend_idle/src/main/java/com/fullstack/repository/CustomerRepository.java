@@ -37,7 +37,11 @@ public interface CustomerRepository extends JpaRepository<CustomerEntity, Intege
     @Query("select c.nickname from CustomerEntity c where c.id = :ownerId")
     Optional<String> findNicknameByOwnerId(@Param("ownerId") String ownerId);
 	
-	
+    @Query("""
+            select c from CustomerEntity c
+             where c.id = :email and (c.isLefted = false or c.isLefted is null)
+          """)
+     Optional<CustomerEntity> findActiveByEmail(@Param("email") String email);
 
 
 	Optional<CustomerEntity> findById(String id);

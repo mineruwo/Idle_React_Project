@@ -76,7 +76,7 @@ public class SecurityConfig {
                     "/api/reviews/target/**" // 특정 대상의 리뷰 목록 조회는 누구나 가능
                 ).permitAll()
                 .requestMatchers(
-                    "/api/auth/me"
+                    "/api/auth/me",
                     "/api/reviews"     // 리뷰 작성 및 삭제는 인증된 사용자만 가능
                 ).authenticated()
                 .anyRequest().authenticated()

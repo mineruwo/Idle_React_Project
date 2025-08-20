@@ -14,7 +14,7 @@ const orderApi = axios.create({
  * - 전역 인터셉터/디폴트에 쿠키/Authorization이 있어도 제거
  */
 export const publicClient = axios.create({
-  baseURL: HOST,
+  baseURL: API_BASE_URL,
   withCredentials: false,
   timeout: 15000,
 });
@@ -35,7 +35,7 @@ publicClient.interceptors.request.use((config) => {
  * - withCredentials true (세션/쿠키 사용)
  */
 export const authClient = axios.create({
-  baseURL: HOST,
+  baseURL: API_BASE_URL,
   withCredentials: true,
   timeout: 15000,
 });
