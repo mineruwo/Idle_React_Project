@@ -1,5 +1,6 @@
 // src/pages/orderPage/OrderBoard.js
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import useCustomMove from "../../hooks/useCustomMove";
 import styled from "styled-components";
 import { fetchOrders } from "../../api/orderApi";
 import { fetchOffersByOrder, acceptOffer, fetchAssignment, createOffer } from "../../api/offerApi";
@@ -102,6 +103,7 @@ const isImmediateOf = (o) => (o?.isImmediate ?? o?.immediate) === true;
 
 /* ========================= 컴포넌트 ========================= */
 const OrderBoard = () => {
+  const { shipperMoveToPayment } = useCustomMove();
   const [orders, setOrders] = useState([]);
   const [selected, setSelected] = useState(null);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -607,6 +609,14 @@ const OrderBoard = () => {
               </Row>
               <RightHint>예상 거리 {selected.distance != null ? `${Number(selected.distance).toFixed(2)}km` : "-"}</RightHint>
             </Section>
+
+            {selected?.status === "PAYMENT_PENDING" && selected?.driverPrice != null && (
+                <Section style={{ marginTop: 16 }}>
+                    <AcceptBtn onClick={() => shipperMoveToPayment(selected.id)}>
+                        {Number(selected.driverPrice).toLocaleString()}원 결제하기
+                    </AcceptBtn>
+                </Section>
+            )}
           </>
         ) : null}
       </DetailArea>

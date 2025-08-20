@@ -5,6 +5,7 @@ import com.fullstack.model.OrderDto;
 import com.fullstack.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
 import java.util.HashMap;
 import java.util.List;
@@ -38,8 +39,9 @@ public class OrderController {
 
     /** 단건 조회 */
     @GetMapping("/{id}")
-    public Order findById(@PathVariable Long id) {
-        return orderService.getOrderById(id);
+    public OrderDto findById(@PathVariable("id") Long id) {
+        Order orderEntity = orderService.getOrderById(id);
+        return OrderDto.fromEntity(orderEntity); // DTO로 변환 후 반환
     }
 
     /**
@@ -57,5 +59,12 @@ public class OrderController {
         res.put("driverPrice", o.getDriverPrice());           // 확정가 (없으면 null)
         res.put("status", o.getStatus());                     // 예: OPEN/ASSIGNED/등록완료 등
         return res;
+    }
+
+    // 주문 상태 업데이트
+    @PutMapping("/{id}/status")
+    public ResponseEntity<Void> updateOrderStatus(@PathVariable("id") Long id, @RequestBody String status) {
+        orderService.updateOrderStatus(id, status);
+        return ResponseEntity.ok().build();
     }
 }
