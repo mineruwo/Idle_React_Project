@@ -1,0 +1,43 @@
+/* RecentAdminAccountsDashboard.css */
+.recent-accounts-dashboard {
+    display: flex;
+    gap: 24px;
+}
+
+.recent-section {
+    flex: 1;
+    padding: 24px;
+    background: var(--admin-pink-panel-bg);
+    border: 1px solid var(--admin-pink-panel-border);
+    border-radius: 14px;
+    box-shadow: 0 4px 14px var(--admin-pink-card-shadow);
+}
+
+.recent-section h4 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    color: var(--admin-pink-header);
+    border-bottom: 1px solid var(--admin-pink-panel-border);
+    padding-bottom: 10px;
+}
+
+.recent-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.recent-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--admin-pink-bg);
+}
+
+.recent-list li:last-child {
+    border-bottom: none;
+}
+
+.recent-list .date {
+    color: var(--admin-pink-sub-text);
+}

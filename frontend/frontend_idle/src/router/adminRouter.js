@@ -14,6 +14,7 @@ const MyInquiriesComponent = lazy(() => import("../layouts/components/admin/MyIn
 const NoticeListComponent = lazy(() => import("../layouts/components/admin/NoticeListComponent"));
 const FAQManagementComponent = lazy(() => import("../layouts/components/admin/FAQManagementComponent"));
 const NoticeCreateComponent = lazy(() => import("../layouts/components/admin/NoticeCreateComponent"));
+const FAQCreateComponent = lazy(() => import("../layouts/components/admin/FAQCreateComponent"));
 const LoginComponent = lazy(() => import("../layouts/components/admin/LoginComponent"));
 const ActiveChatSessionsList = lazy(() => import("../layouts/components/chat/ActiveChatSessionsList"));
 
@@ -64,8 +65,15 @@ const adminRoutes = [
         element: <ProtectedRoute requiredRoles={['MANAGER_COUNSELING']}><Outlet /></ProtectedRoute>,
         children: [
             { index: true, element: <NoticeListComponent /> },
-            { path: "faq", element: <FAQManagementComponent /> },
             { path: "create", element: <NoticeCreateComponent /> },
+        ],
+    },
+    {
+        path: "faqs",
+        element: <ProtectedRoute requiredRoles={['MANAGER_COUNSELING']}><Outlet /></ProtectedRoute>,
+        children: [
+            { index: true, element: <FAQManagementComponent /> },
+            { path: "create", element: <FAQCreateComponent /> },
         ],
     },
         { path: "login", element: <LoginComponent /> },
