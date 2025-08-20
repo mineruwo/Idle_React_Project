@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import jakarta.servlet.FilterChain;
@@ -28,15 +29,16 @@ public class JWTFilter extends OncePerRequestFilter {
 
 	private final JWTUtil jwtUtil;
 
+	private static final AntPathMatcher MATCHER = new AntPathMatcher();
     // 공개 경로 목록 정의
-    private static final List<String> PUBLIC_PATHS = Arrays.asList(
-        "/api/customer/login",
-        "/api/customer/signup",
-        "/api/customer/check-id",
-        "/api/customer/check-nickname",
+    private static final List<String> PUBLIC_PATTERNS = Arrays.asList(
+    	"/api/auth/login",
+    	"/api/auth/refresh",
+    	"/api/auth/logout",
         "/api/admin/login",
         "/api/admin/signup",
-        "/ws/"
+        "/ws/**",
+        "/api/auth/reset-password"
     );
 
 	public JWTFilter(JWTUtil jwtUtil) {
@@ -48,9 +50,11 @@ public class JWTFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 
         String path = request.getRequestURI();
+        
+        log.info("JWTFilter path={}", path);
 
         // 요청 경로가 공개 경로인지 확인
-        boolean isPublicPath = PUBLIC_PATHS.stream().anyMatch(publicPath -> 
+        boolean isPublicPath = PUBLIC_PATTERNS.stream().anyMatch(publicPath -> 
             path.startsWith("/ws/") ? path.startsWith(publicPath) : path.equals(publicPath)
         );
 
@@ -96,6 +100,14 @@ public class JWTFilter extends OncePerRequestFilter {
             SecurityContextHolder.clearContext();
         }
 		filterChain.doFilter(request, response);
+	}
+	
+	@Override
+	protected boolean shouldNotFilter(HttpServletRequest request) {
+	  String uri = request.getRequestURI();
+	  boolean skip = PUBLIC_PATTERNS.stream().anyMatch(p -> MATCHER.match(p, uri));
+	  log.info("JWTFilter skip? uri={}, result={}", uri, skip);  // ★ 스킵 로그
+	  return skip;
 	}
 
 	private String resolveFromCookie(HttpServletRequest request) {

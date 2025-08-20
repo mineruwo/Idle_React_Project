@@ -6,7 +6,6 @@ import {
   CardContent,
   CardHeader,
   CircularProgress,
-  FormHelperText,
   IconButton,
   InputAdornment,
   LinearProgress,
@@ -106,14 +105,10 @@ export default function NewPasswordComponent({ onSuccess }) {
       const data = err?.response?.data;
       const msg = data?.message || data?.detail;
 
-      if (status === 422) {
-        setError(msg || "새 비밀번호는 기존 비밀번호와 달라야 합니다.");
+      if (status === 403) {
+        setError("이미 사용 중인 비밀번호입니다. 다른 비밀번호를 입력해 주세요.");
       } else if (status === 400) {
-        setError(msg || "링크가 만료되었거나 이미 사용되었습니다. 다시 요청해 주세요.");
-      } else if (status === 401 || status === 403) {
-        setError(msg || "권한이 없습니다. 링크로만 접근하거나 다시 요청해 주세요.");
-      } else if (status === 404 || status === 405) {
-        setError(msg || "요청 경로나 방식이 올바르지 않습니다. 다시 시도해 주세요.");
+        setError("링크가 만료되었거나 이미 사용되었습니다. 다시 요청해 주세요.");
       } else {
         setError(msg || "비밀번호 재설정에 실패했습니다. 다시 시도해 주세요.");
       }
