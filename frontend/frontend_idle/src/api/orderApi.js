@@ -46,7 +46,7 @@ export const authClient = axios.create({
 
 /** 🚚 오더 등록 (쓰기 → 인증 클라이언트) */
 export const saveOrder = async (orderData) => {
-  const { data } = await authClient.post("/api/orders", orderData, {
+  const { data } = await authClient.post("/orders", orderData, {
     headers: { "Content-Type": "application/json" },
   });
   return data;
@@ -54,11 +54,11 @@ export const saveOrder = async (orderData) => {
 
 /**
  * 📋 오더 목록/검색 (퍼블릭 GET)
- * - q가 있으면 /api/orders?q=... (주문번호/출발/도착/상태/차량/화물/포장 검색)
+ * - q가 있으면 /orders?q=... (주문번호/출발/도착/상태/차량/화물/포장 검색)
  * - 없으면 최신순 전체
  */
 export const fetchOrders = async (q) => {
-  const { data } = await publicClient.get("/api/orders", {
+  const { data } = await publicClient.get("/orders", {
     // axios가 알아서 ?q=... 구성
     params: q && String(q).trim() ? { q: String(q).trim() } : undefined,
   });
@@ -67,18 +67,18 @@ export const fetchOrders = async (q) => {
 
 /** 🔍 특정 오더 단건 (퍼블릭 GET) */
 export const fetchOrderById = async (orderId) => {
-  const { data } = await publicClient.get(`/api/orders/${orderId}`);
+  const { data } = await publicClient.get(`/orders/${orderId}`);
   return data;
 };
 
 /** ❌ 오더 삭제 (쓰기 → 인증) */
 export const deleteOrder = async (orderId) => {
-  await authClient.delete(`/api/orders/${orderId}`);
+  await authClient.delete(`/orders/${orderId}`);
 };
 
 /** ✏️ 오더 수정 (쓰기 → 인증) */
 export const updateOrder = async (orderId, updatedData) => {
-  const { data } = await authClient.put(`/api/orders/${orderId}`, updatedData, {
+  const { data } = await authClient.put(`/orders/${orderId}`, updatedData, {
     headers: { "Content-Type": "application/json" },
   });
   return data;
@@ -91,7 +91,7 @@ export const updateOrder = async (orderId, updatedData) => {
 /** 📊 입찰 요약 (퍼블릭 GET) → { count, minPrice, avgPrice } */
 export const getDriverOfferSummary = async (orderId) => {
   const { data } = await publicClient.get(
-    `/api/orders/${orderId}/offers/summary`
+    `/orders/${orderId}/offers/summary`
   );
   return data;
 };
@@ -102,7 +102,7 @@ export const getDriverOfferSummary = async (orderId) => {
  */
 export const createDriverOffer = async (orderId, { price, memo = "" }) => {
   const { data } = await authClient.post(
-    `/api/orders/${orderId}/offers`,
+    `/orders/${orderId}/offers`,
     { price, memo },
     { headers: { "Content-Type": "application/json" } }
   );
