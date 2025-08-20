@@ -3,7 +3,7 @@ import "../../../theme/ShipperCustomCss/ShipperPoint.css";
 import {
     payWithPoints,
     preparePayment,
-    verifyPayment,
+    verifyPointCharge,
     fetchUserPoints,
 } from "../../../api/paymentApi";
 
@@ -106,7 +106,7 @@ const ShipperPointComponent = ({ nickname, userId, userEmail }) => {
                 async (rsp) => {
                     if (rsp.success) {
                         try {
-                            const verifyResponse = await verifyPayment({
+                            const verifyResponse = await verifyPointCharge({
                                 impUid: rsp.imp_uid,
                                 merchantUid: rsp.merchant_uid,
                             });

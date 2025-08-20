@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import "../../../theme/ShipperCustomCss/ShipperPayment.css";
 import {
-    payWithPoints,
+    payOrderWithPoints,
     preparePayment,
     verifyPayment,
     fetchUserPoints,
@@ -93,19 +93,25 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
         try {
             if (amountToPayExternally <= 0) {
                 // 전액 포인트로 결제
-                const response = await payWithPoints({
+                const response = await payOrderWithPoints({
                     userId: userId,
-                    points: totalOrderAmount, // 주문 금액만큼 포인트 사용
+                    orderId: orderList[0].orderId,
+                    points: totalOrderAmount,
                 });
 
                 if (response.success) {
-                    setMessage(
-                        `${totalOrderAmount.toLocaleString()}P 포인트로 결제가 완료되었습니다.`
-                    );
-                    setCurrentPoints(
-                        (prevPoints) => prevPoints - totalOrderAmount
-                    );
-                    setUsePoints("");
+                    const paymentInfo = {
+                        merchantUid: response.merchantUid,
+                        itemName: orderList.length > 1
+                            ? `${orderList[0].itemName} 외 ${
+                                  orderList.length - 1
+                              }건`
+                            : orderList[0].itemName,
+                        amount: response.amount,
+                        paidAt: response.paidAt,
+                        pgProvider: "points",
+                    };
+                    shipperMoveToPaymentSuccess({ paymentInfo });
                 } else {
                     setMessage(`포인트 결제 실패: ${response.message}`);
                 }
@@ -209,11 +215,19 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
 
                                     // 주문 상태 업데이트 호출 부분에 try-catch 추가
                                     try {
-                                        await updateOrderStatus(orderList[0].orderId, "PAYMENT_COMPLETED");
+                                        await updateOrderStatus(
+                                            orderList[0].orderId,
+                                            "READY"
+                                        );
                                         console.log("주문 상태 업데이트 성공!");
                                     } catch (statusUpdateError) {
-                                        console.error("주문 상태 업데이트 실패:", statusUpdateError);
-                                        setMessage(`주문 상태 업데이트 실패: ${statusUpdateError.message}`);
+                                        console.error(
+                                            "주문 상태 업데이트 실패:",
+                                            statusUpdateError
+                                        );
+                                        setMessage(
+                                            `주문 상태 업데이트 실패: ${statusUpdateError.message}`
+                                        );
                                     }
 
                                     if (pointsToUse > 0) {
@@ -263,15 +277,15 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
     return (
         <div className="spp-point-layout-container">
             <div className="left-sections-wrapper">
-                
-
                 <div className="order-info-section">
                     <h2 className="spp-page-title">주문 정보</h2>
                     {orderList.map((order) => (
                         <div className="order-item" key={order.orderId}>
                             <div className="order-amount">
                                 <span>{order.orderId}</span>
-                                <span>{(order.amount || 0).toLocaleString()}원</span>
+                                <span>
+                                    {(order.amount || 0).toLocaleString()}원
+                                </span>
                             </div>
 
                             <div className="order-details-wrap">

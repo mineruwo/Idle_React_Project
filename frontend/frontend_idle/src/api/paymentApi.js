@@ -23,6 +23,21 @@ export const payWithPoints = async ({ userId, points }) => {
     }
 };
 
+export const payOrderWithPoints = async (paymentData) => {
+    try {
+        const response = await paymentApi.post(
+            '/payment/point-only',
+            paymentData
+        );
+        return response.data;
+    } catch (error) {
+        const message =
+            error.response?.data?.message ||
+            "포인트 결제 처리 중 오류가 발생했습니다.";
+        throw new Error(message);
+    }
+};
+
 export const preparePayment = async (paymentData) => {
     console.log("paymentData:", paymentData);
     try {
@@ -50,6 +65,21 @@ export const verifyPayment = async (verificationData) => {
         const message =
             error.response?.data?.message ||
             "결제 검증 중 오류가 발생했습니다.";
+        throw new Error(message);
+    }
+};
+
+export const verifyPointCharge = async (verificationData) => {
+    try {
+        const response = await paymentApi.post(
+            '/payment/verify-charge',
+            verificationData
+        );
+        return response.data;
+    } catch (error) {
+        const message =
+            error.response?.data?.message ||
+            "포인트 충전 검증 중 오류가 발생했습니다.";
         throw new Error(message);
     }
 };

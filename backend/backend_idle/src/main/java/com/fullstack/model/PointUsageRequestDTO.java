@@ -6,4 +6,5 @@ import lombok.Data;
 public class PointUsageRequestDTO {
     private Integer userId;
     private int points;
+    private Integer orderId; // Added field
 }
