@@ -28,9 +28,12 @@ public interface CustomerRepository extends JpaRepository<CustomerEntity, Intege
     """)
     boolean existsByNicknameAndLoginIdNot(@Param("nickname") String nickname,
                                           @Param("loginId") String loginId);
+    
+    @Query("select c.nickname from CustomerEntity c where c.id = :ownerId")
+    Optional<String> findNicknameByOwnerId(@Param("ownerId") String ownerId);
 	
 	
-    Optional<CustomerEntity> findByCustomName(String customName);
+
 
     
 	Optional<CustomerEntity> findById(String id);

@@ -77,7 +77,7 @@ public class SecurityConfig {
             "http://localhost:3000", // 로컬 프론트 주소
             "https://idle-react-project-front.onrender.com" // 배포된 프론트 주소
         ));
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(Arrays.asList("*"));
         config.setAllowCredentials(true); // 쿠키 전달 허용 (withCredentials: true 필요할 경우)
 

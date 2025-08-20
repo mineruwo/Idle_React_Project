@@ -8,9 +8,10 @@ import com.fullstack.model.CarOwnerDashboardDTO.WarmthDTO;
 
 import com.fullstack.service.CarOwnerDashboardService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
-
+import java.util.Map;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -18,17 +19,21 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/car-owner/dashboard")
 @RequiredArgsConstructor
+@Log4j2
 public class CarOwnerDashboardController {
 
     private final CarOwnerDashboardService dashboardService;
 
     @GetMapping("/summary")
     public DashboardSummaryDTO getSummary(@AuthenticationPrincipal String ownerId) {
+    	log.info("[GET] /summary ownerId={}", ownerId);
         return dashboardService.getSummary(ownerId);
     }
 
     @GetMapping("/deliveries")
-    public List<DeliveryItemDTO> getDeliveries(@AuthenticationPrincipal String ownerId) {
+    public List<DeliveryItemDTO> getDeliveries(
+            @AuthenticationPrincipal String ownerId) {
+    	 log.info("[GET] /deliveries ownerId={}", ownerId);
         return dashboardService.getDeliveries(ownerId);
     }
     @GetMapping("/sales-chart")
@@ -40,4 +45,5 @@ public class CarOwnerDashboardController {
     public WarmthDTO getWarmth(@AuthenticationPrincipal String ownerId) {
         return dashboardService.getWarmth(ownerId);
     }
+    
 }
