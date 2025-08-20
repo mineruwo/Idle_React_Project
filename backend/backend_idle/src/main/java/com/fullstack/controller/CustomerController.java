@@ -28,14 +28,6 @@ public class CustomerController {
     	return ResponseEntity.ok("회원가입 성공");
     }
     
-    // 로그인 검사
-    @PostMapping("/check-account")
-    public ResponseEntity<Boolean> checkAccount(@RequestBody CustomerDTO customerDTO) {
-    	boolean result = customerService.isAccountValid(customerDTO.getId(), customerDTO.getPasswordEnc());
-    	
-    	return ResponseEntity.ok(result);
-    }
-    
     // 아이디 중복 확인
     @GetMapping("/check-id")
     public ResponseEntity<Boolean> checkId(@RequestParam("id") String id) {

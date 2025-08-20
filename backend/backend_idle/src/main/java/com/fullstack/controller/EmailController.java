@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fullstack.repository.CustomerRepository;
 import com.fullstack.security.util.HashUtils;
 import com.fullstack.service.EmailService;
 import com.fullstack.service.ResetTokenService;
@@ -29,6 +31,7 @@ public class EmailController {
 
 	private final EmailService emailService;
 	private final ResetTokenService resetTokenService;
+	private final CustomerRepository customerRepository;
 	
 	public enum Purpose { SIGNUP_VERIFY_EMAIL, RESET_PASSWORD }
 	
@@ -46,13 +49,27 @@ public class EmailController {
 			@RequestParam(value = "purpose", defaultValue = "SIGNUP_VERIFY_EMAIL") Purpose purpose,
 			HttpSession session) {
 		
-		String code = emailService.sendVerificationEmail(email);
+		String normalizedEmail = email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
 		
 		long ttlSeconds = 600; 
-        String hash = HashUtils.sha256(code);
         long exp = Instant.now().getEpochSecond() + ttlSeconds;
 
-        session.setAttribute(key(email, purpose), new CodeEntry(hash, exp));
+        
+        if (purpose == Purpose.RESET_PASSWORD) {
+            boolean exists = customerRepository.existsById(normalizedEmail);
+
+            if (!exists) {
+                return ResponseEntity.accepted().body(Map.of(
+                        "message", "인증 코드 발송 완료",
+                        "ttlSeconds", ttlSeconds
+                ));
+            }
+        }
+        
+        String code = emailService.sendVerificationEmail(normalizedEmail);
+        
+        String hash = HashUtils.sha256(code);
+        session.setAttribute(key(normalizedEmail, purpose), new CodeEntry(hash, exp));
 
         return ResponseEntity.accepted().body(Map.of(
                 "message", "인증 코드 발송 완료",

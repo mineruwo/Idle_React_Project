@@ -24,7 +24,7 @@ api.interceptors.response.use((res) => res, async (error) => {
 
   const shouldTryRefresh =
     (!isAuthApi && status === 401) ||
-    (!isAuthApi && status === 403 && urlPath === "/auth/auto");
+    (!isAuthApi && status === 403 && urlPath === "/auth/me");
 
   if (!shouldTryRefresh) {
     throw error;

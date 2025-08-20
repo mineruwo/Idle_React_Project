@@ -1,26 +1,24 @@
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
 import CssBaseline from '@mui/material/CssBaseline';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import Divider from '@mui/material/Divider';
 import FormLabel from '@mui/material/FormLabel';
 import FormControl from '@mui/material/FormControl';
 import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import ForgotPasswordComponent from '../modal/ForgotPasswordModal';
 import AppTheme from '../../../theme/muitheme/AppTheme';
 import { GoogleIcon, KakaoIcon, PinkTruckIcon } from './IconComponent';
 import useCustomMove from '../../../hooks/useCustomMove';
-import { checkAccount, login } from '../../../api/loginApi';
+import { login } from '../../../api/loginApi';
 import { UserCard as Card, UserContainer as SignInContainer } from '../../../theme/User/UserCard';
 import { useState } from 'react';
+import ForgotPasswordModal from '../modal/ForgotPasswordModal';
 import { useAuth } from '../../../auth/AuthProvider';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { replace } from 'react-router-dom';
 
 
-export default function SignIn(props) {
+export default function LoginComponent(props) {
     const [emailError, setEmailError] = useState(false);
     const [emailErrorMessage, setEmailErrorMessage] = useState('');
     const [passwordError, setPasswordError] = useState(false);
@@ -29,14 +27,12 @@ export default function SignIn(props) {
     const [id, setId] = useState("");
     const [forgotOpen, setForgotOpen] = useState(false);
 
-    const { refreshAuth } = useAuth(); //
-
-    const navigate = useNavigate();
+    const { refreshAuth } = useAuth();
 
     const {
-        shipperMoveToDashBoard,
-        carOwnerMoveToDashboard,
-        moveToSignUpPage
+        moveToSignUpPage,
+        moveToNewPassword,
+        moveToMyPageByRole
     } = useCustomMove();
 
     // 유효성 검사
@@ -68,46 +64,28 @@ export default function SignIn(props) {
         return isValid;
     };
 
-    // 로그인 API 호출
-    const loginApi = async () => {
-        try {
-            const result = await login({
-                passwordEnc: password,
-                id
-            });
-            alert("로그인 성공");
-
-            const customRole = result.role;
-            await refreshAuth();
-
-            if (customRole === "shipper") {
-                shipperMoveToDashBoard();
-            } else if (customRole === "carrier") {
-                carOwnerMoveToDashboard();
-            } else {
-                alert("알 수 없는 사용자입니다");
-            }
-        } catch (err) {
-            alert(err.message);
-        }
-    }
-
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-
+    const handleSubmit = async (e) => {
+        e.preventDefault();
         if (!validateInputs()) return;
 
-        // ID & 암호 체크
-        const isValidAccount = await checkAccount(id, password); // ID
-        if (isValidAccount === false) {
-            alert("존재하지 않는 ID 입니다");
-            return;
-        }
-
         try {
-            await loginApi();
+            const res = await login({ id, passwordEnc: password });
+
+            const role = res?.role;
+            if (role) {
+                moveToMyPageByRole(role);
+            } else {
+                console.warn("login 응답에 role이 없어 라우팅을 건너뜁니다");
+            }
+
+            await refreshAuth(true);
         } catch (err) {
-            alert(err.message || "로그인 실패");
+            const status = err?.response?.status;
+            if (status === 401 || status === 403) {
+                alert("ID 또는 비밀번호가 틀렸습니다");
+            } else {
+                alert(err?.message || "로그인 중 오류가 발생했습니다");
+            }
         }
     };
 
@@ -171,17 +149,13 @@ export default function SignIn(props) {
                                 color={passwordError ? 'error' : 'primary'}
                             />
                         </FormControl>
-                        <FormControlLabel
-                            control={<Checkbox value="remember" color="primary" />}
-                            label="자동 로그인"
-                        />
-                        <ForgotPasswordComponent
+
+                        <ForgotPasswordModal
                             open={forgotOpen}
                             handleClose={() => setForgotOpen(false)}
-                            onVerified={({ email, token }) => {
-                                navigate(`/newPassword?token=${encodeURIComponent(token)}`);
-                            }}
+                            onVerified={({ token }) => moveToNewPassword(token, { replace: true })}
                         />
+                        <br></br>
                         <Button
                             type="submit"
                             fullWidth
@@ -192,6 +166,7 @@ export default function SignIn(props) {
                         <Link component="button" type="button" onClick={() => setForgotOpen(true)} variant="body2" sx={{ alignSelf: 'center' }}>
                             비밀번호 찾기
                         </Link>
+                        <br></br>
                     </Box>
                     <Divider>
                         <Typography sx={{ color: 'text.secondary' }}>SNS 로그인</Typography>

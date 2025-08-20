@@ -1,7 +1,6 @@
 package com.fullstack.repository;
 
 import com.fullstack.entity.CustomerEntity;
-import com.fullstack.model.CustomerDTO;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -42,9 +41,11 @@ public interface CustomerRepository extends JpaRepository<CustomerEntity, Intege
     @Query("""
       update CustomerEntity c
          set c.resetUsed = true
-       where c.resetTokenHash = :hash and c.resetUsed = false
+       where c.resetTokenHash = :hash
+         and (c.resetUsed = false or c.resetUsed is null)
+         and c.resetExpiresAt > :now
     """)
-    int markResetTokenUsed(@Param("hash") String hash);
+    int markResetTokenUsed(@Param("hash") String hash, @Param("now") LocalDateTime now);
 	
 	
     Optional<CustomerEntity> findByCustomName(String customName);
@@ -55,9 +56,13 @@ public interface CustomerRepository extends JpaRepository<CustomerEntity, Intege
 	
 	Optional<CustomerEntity> findByResetTokenHash(String resetTokenHash);
 	
+	Optional<CustomerEntity> findByResetTokenHashAndResetUsedFalseAndResetExpiresAtAfter(
+		    String resetTokenHash, LocalDateTime now);
+	
 	boolean existsById(String id);
 
     boolean existsByNickname(String nickname);
     
     boolean existsByNicknameAndIdNot(String nickname, String id);
+    
 }
