@@ -199,87 +199,84 @@ const ShipperPointComponent = ({ nickname, userId, userEmail }) => {
             <div className="payment-method-section sp-point-management-section">
                 <h2 className="sp-page-title">결제 수단</h2>
                 <div className="payment-method-details-content">
-                    <div className="payment-group">
-                        <h3 className="payment-group-title">일반결제</h3>
-                        <div className="pay-method-list easy-payment-options">
-                            <label
-                                className={`payment-option ${
-                                    selectedPaymentType === "card"
-                                        ? "selected"
-                                        : ""
-                                }`}
-                            >
-                                <input
-                                    type="radio"
-                                    name="paymentType"
-                                    value="card"
-                                    checked={selectedPaymentType === "card"}
-                                    onChange={(e) =>
-                                        setSelectedPaymentType(e.target.value)
-                                    }
-                                />
-                                <span>일반결제</span>
-                            </label>
-                        </div>
-                    </div>
-                    <div className="payment-group">
-                        <h3 className="payment-group-title">간편결제</h3>
-                        <div className="pay-method-list easy-payment-options">
-                            <label
-                                className={`payment-option ${
-                                    selectedPaymentType === "kakaopay"
-                                        ? "selected"
-                                        : ""
-                                }`}
-                            >
-                                <input
-                                    type="radio"
-                                    name="paymentType"
-                                    value="kakaopay"
-                                    checked={selectedPaymentType === "kakaopay"}
-                                    onChange={(e) =>
-                                        setSelectedPaymentType(e.target.value)
-                                    }
-                                />
-                                <span>카카오페이</span>
-                            </label>
-                            <label
-                                className={`payment-option ${
-                                    selectedPaymentType === "tosspay"
-                                        ? "selected"
-                                        : ""
-                                }`}
-                            >
-                                <input
-                                    type="radio"
-                                    name="paymentType"
-                                    value="tosspay"
-                                    checked={selectedPaymentType === "tosspay"}
-                                    onChange={(e) =>
-                                        setSelectedPaymentType(e.target.value)
-                                    }
-                                />
-                                <span>토스페이</span>
-                            </label>
-                            <label
-                                className={`payment-option ${
-                                    selectedPaymentType === "payco"
-                                        ? "selected"
-                                        : ""
-                                }`}
-                            >
-                                <input
-                                    type="radio"
-                                    name="paymentType"
-                                    value="payco"
-                                    checked={selectedPaymentType === "payco"}
-                                    onChange={(e) =>
-                                        setSelectedPaymentType(e.target.value)
-                                    }
-                                />
-                                <span>페이코</span>
-                            </label>
-                        </div>
+                    
+                    <div className="pay-method-list vertical-payment-options">
+                        <label
+                            className={`payment-option ${
+                                selectedPaymentType === "kakaopay"
+                                    ? "selected"
+                                    : ""
+                            }`}
+                        >
+                            <input
+                                type="radio"
+                                name="paymentType"
+                                value="kakaopay"
+                                checked={selectedPaymentType === "kakaopay"}
+                                onChange={(e) =>
+                                    setSelectedPaymentType(e.target.value)
+                                }
+                            />
+                            <span>카카오페이</span>
+                            <span className="checkmark">✔</span>
+                        </label>
+                        <label
+                            className={`payment-option ${
+                                selectedPaymentType === "tosspay"
+                                    ? "selected"
+                                    : ""
+                            }`}
+                        >
+                            <input
+                                type="radio"
+                                name="paymentType"
+                                value="tosspay"
+                                checked={selectedPaymentType === "tosspay"}
+                                onChange={(e) =>
+                                    setSelectedPaymentType(e.target.value)
+                                }
+                            />
+                            <span>토스페이</span>
+                            <span className="checkmark">✔</span>
+                        </label>
+                        <label
+                            className={`payment-option ${
+                                selectedPaymentType === "payco"
+                                    ? "selected"
+                                    : ""
+                            }`}
+                        >
+                            <input
+                                type="radio"
+                                name="paymentType"
+                                value="payco"
+                                checked={selectedPaymentType === "payco"}
+                                onChange={(e) =>
+                                    setSelectedPaymentType(e.target.value)
+                                }
+                            />
+                            <span>페이코</span>
+                            <span className="checkmark">✔</span>
+                        </label>
+                        <label
+                            className={`payment-option ${
+                                selectedPaymentType === "card"
+                                    ? "selected"
+                                    : ""
+                            }`}
+                        >
+                            <input
+                                type="radio"
+                                name="paymentType"
+                                value="card"
+                                checked={selectedPaymentType === "card"}
+                                onChange={(e) =>
+                                    setSelectedPaymentType(e.target.value)
+                                }
+                            />
+                            <span>일반결제</span>
+                            <span className="checkmark">✔</span>
+                        </label>
                     </div>
                 </div>
             </div>

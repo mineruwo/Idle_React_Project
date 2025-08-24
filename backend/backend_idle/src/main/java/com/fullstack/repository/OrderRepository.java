@@ -2,6 +2,7 @@
 package com.fullstack.repository;
 
 import com.fullstack.entity.Order;
+import com.fullstack.model.enums.OrderStatus; // Added import
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,7 +25,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     /** 상태만 조회 */
     @Query("select o.status from Order o where o.id = :orderId")
-    String findStatusOnly(@Param("orderId") Long orderId);
+    OrderStatus findStatusOnly(@Param("orderId") Long orderId);
 
     /** 기본 목록: 최신순 (서비스에서 Sort.by(DESC, "createdAt")로 대체 가능) */
     List<Order> findAllByOrderByCreatedAtDesc();
@@ -43,7 +44,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
          where lower(coalesce(o.orderNo, ''))         like lower(concat('%', :q, '%'))
             or lower(coalesce(o.departure, ''))       like lower(concat('%', :q, '%'))
             or lower(coalesce(o.arrival, ''))         like lower(concat('%', :q, '%'))
-            or lower(coalesce(o.status, ''))          like lower(concat('%', :q, '%'))
+            or lower(o.status)          like lower(concat('%', :q, '%'))
             or lower(coalesce(o.vehicle, ''))         like lower(concat('%', :q, '%'))
             or lower(coalesce(o.cargoType, ''))       like lower(concat('%', :q, '%'))
             or lower(coalesce(o.cargoSize, ''))       like lower(concat('%', :q, '%'))
@@ -53,10 +54,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> searchLatest(@Param("q") String q);
 
 	// ✅ 추가: 상태별 카운트
-	long countByAssignedDriverIdAndStatus(Long assignedDriverId, String status);
+	long countByAssignedDriverIdAndStatus(Long assignedDriverId, OrderStatus status);
 
 	// ✅ 추가: 진행중 최근 5건
-	List<Order> findTop5ByAssignedDriverIdAndStatusOrderByUpdatedAtDesc(Long assignedDriverId, String status);
+	List<Order> findTop5ByAssignedDriverIdAndStatusOrderByUpdatedAtDesc(Long assignedDriverId, OrderStatus status);
 
 	// (선택) 일자별 운송건수 필요 시 JPQL/네이티브로 추가 가능
 	@Query("""
@@ -67,4 +68,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 			""")
 	List<Object[]> countDailyByDriver(@Param("driverId") Long driverId, @Param("start") LocalDateTime start,
 			@Param("end") LocalDateTime end);
+
+    List<Order> findByShipperIdOrderByCreatedAtDesc(String shipperId);
 }

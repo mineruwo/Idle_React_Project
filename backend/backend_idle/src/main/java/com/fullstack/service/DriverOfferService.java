@@ -7,6 +7,7 @@ import com.fullstack.entity.Order;
 import com.fullstack.model.DriverOfferCreateRequest;
 import com.fullstack.model.DriverOfferResponse;
 import com.fullstack.model.OfferAssignRequest;
+import com.fullstack.model.enums.OrderStatus; // Added import
 import com.fullstack.repository.CustomerRepository;
 import com.fullstack.repository.DriverOfferRepository;
 import com.fullstack.repository.OrderRepository;
@@ -68,7 +69,7 @@ public class DriverOfferService {
         Long assigned = (offer.getDriver() != null && offer.getDriver().getIdNum() != null)
                 ? offer.getDriver().getIdNum().longValue() : null;
         order.setAssignedDriverId(assigned);
-        order.setStatus("ASSIGNED");
+        order.setStatus(OrderStatus.READY);
 
         // 다른 PENDING 거절
         driverOfferRepository.rejectOthers(order.getId(), offer.getId());
@@ -82,7 +83,7 @@ public class DriverOfferService {
         Order order = orderRepository.findById(req.getOrderId())
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + req.getOrderId()));
 
-        if ("ASSIGNED".equalsIgnoreCase(order.getStatus())) {
+        if (OrderStatus.READY.equals(order.getStatus()) || OrderStatus.ONGOING.equals(order.getStatus())) {
             throw new IllegalStateException("Order already assigned");
         }
 
@@ -104,7 +105,7 @@ public class DriverOfferService {
         offer.setStatus(DriverOffer.Status.ACCEPTED);
         order.setDriverPrice(offer.getPrice());
         order.setAssignedDriverId(driver.getIdNum().longValue());
-        order.setStatus("ASSIGNED");
+        order.setStatus(OrderStatus.READY);
 
         // 다른 PENDING 거절
         driverOfferRepository.rejectOthers(order.getId(), offer.getId());

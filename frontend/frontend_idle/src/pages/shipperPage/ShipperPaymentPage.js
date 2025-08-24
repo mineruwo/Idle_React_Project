@@ -1,8 +1,11 @@
 import { useAuth } from "../../auth/AuthProvider";
+import { useLocation } from "react-router-dom";
 import ShipperPaymentComponent from "../../layouts/components/shipperComponent/ShipperPaymentComponent";
 
 const ShipperPaymentPage = () => {
     const { profile, loading, authenticated } = useAuth();
+    const location = useLocation();
+    const { orderData } = location.state || {};
 
     if (loading) {
         return <div> 로딩 중...</div>;
@@ -20,6 +23,7 @@ const ShipperPaymentPage = () => {
                 nickname={nickname}
                 userId={idNum}
                 userEmail={id}
+                orderData={orderData}
             />
         </div>
     );

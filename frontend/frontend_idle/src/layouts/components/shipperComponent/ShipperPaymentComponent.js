@@ -12,7 +12,41 @@ import {
 import useCustomMove from "../../../hooks/useCustomMove";
 import { useSearchParams } from "react-router-dom";
 
-const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
+const packingKeyToText = {
+    special: "특수포장",
+    normal: "일반포장",
+    expensive: "고가화물",
+    fragile: "파손위험물",
+};
+
+const prettyPacking = (val) => {
+    if (!val) return "-";
+    try {
+        if (typeof val === "string" && val.trim().startsWith("{")) {
+            const obj = JSON.parse(val);
+            const keys = Object.entries(obj)
+                .filter(([, v]) => !!v)
+                .map(([k]) => packingKeyToText[k] || k);
+            return keys.length ? keys.join(", ") : "-";
+        }
+    } catch {}
+    const keys = Array.isArray(val)
+        ? val
+        : String(val)
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean);
+    return keys.length
+        ? keys.map((k) => packingKeyToText[k] || k).join(", ")
+        : "-";
+};
+
+const ShipperPaymentComponent = ({
+    nickname,
+    userId,
+    userEmail,
+    orderData,
+}) => {
     const [currentPoints, setCurrentPoints] = useState(0);
     const [usePoints, setUsePoints] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -25,32 +59,49 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
     const [searchParams] = useSearchParams();
 
     useEffect(() => {
-        const orderId = searchParams.get("orderId");
-        if (orderId) {
-            getOrderById(orderId)
-                .then((data) => {
-                    if (data.status === "PAYMENT_PENDING") {
-                        const formattedOrder = {
-                            orderId: data.id,
-                            itemName: data.cargoType
-                                ? `${data.cargoType} 운송 서비스`
-                                : "화물 운송 서비스",
-                            amount: data.driverPrice,
-                            ...data,
-                        };
-                        setOrderList([formattedOrder]);
-                    } else {
-                        setMessage("이 주문은 결제 대기 상태가 아닙니다.");
+        if (orderData) {
+            if (orderData.status === "PAYMENT_PENDING") {
+                const formattedOrder = {
+                    orderId: orderData.id,
+                    itemName: orderData.cargoType
+                        ? `${orderData.cargoType} 운송 서비스`
+                        : "화물 운송 서비스",
+                    amount: orderData.driverPrice,
+                    ...orderData,
+                };
+                setOrderList([formattedOrder]);
+            } else {
+                setMessage("이 주문은 결제 대기 상태가 아닙니다.");
+                setOrderList([]);
+            }
+        } else {
+            const orderId = searchParams.get("orderId");
+            if (orderId) {
+                getOrderById(orderId)
+                    .then((data) => {
+                        if (data.status === "PAYMENT_PENDING") {
+                            const formattedOrder = {
+                                orderId: data.id,
+                                itemName: data.cargoType
+                                    ? `${data.cargoType} 운송 서비스`
+                                    : "화물 운송 서비스",
+                                amount: data.driverPrice,
+                                ...data,
+                            };
+                            setOrderList([formattedOrder]);
+                        } else {
+                            setMessage("이 주문은 결제 대기 상태가 아닙니다.");
+                            setOrderList([]);
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("주문 정보 조회 실패:", error);
+                        setMessage("주문 정보를 불러오는데 실패했습니다.");
                         setOrderList([]);
-                    }
-                })
-                .catch((error) => {
-                    console.error("주문 정보 조회 실패:", error);
-                    setMessage("주문 정보를 불러오는데 실패했습니다.");
-                    setOrderList([]);
-                });
+                    });
+            }
         }
-    }, [searchParams]);
+    }, [orderData, searchParams]);
 
     useEffect(() => {
         const getUserPoints = async () => {
@@ -102,11 +153,12 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                 if (response.success) {
                     const paymentInfo = {
                         merchantUid: response.merchantUid,
-                        itemName: orderList.length > 1
-                            ? `${orderList[0].itemName} 외 ${
-                                  orderList.length - 1
-                              }건`
-                            : orderList[0].itemName,
+                        itemName:
+                            orderList.length > 1
+                                ? `${orderList[0].itemName} 외 ${
+                                      orderList.length - 1
+                                  }건`
+                                : orderList[0].itemName,
                         amount: response.amount,
                         paidAt: response.paidAt,
                         pgProvider: "points",
@@ -153,7 +205,7 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                                   orderList.length - 1
                               }건`
                             : orderList[0].itemName,
-                    amount: amountToPayExternally, // 외부 결제 금액
+                    amount: amountToPayExternally,
                     buyerName: nickname,
                     buyerEmail: userEmail,
                     userId: userId,
@@ -213,7 +265,6 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                                         pgProvider: pgProviderForBackend,
                                     };
 
-                                    // 주문 상태 업데이트 호출 부분에 try-catch 추가
                                     try {
                                         await updateOrderStatus(
                                             orderList[0].orderId,
@@ -253,7 +304,6 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                                 setIsLoading(false);
                             }
                         } else {
-                            // 결제 실패 또는 취소 시
                             await failPayment(rsp.merchant_uid);
                             setMessage(`결제 실패: ${rsp.error_msg}`);
                             setIsLoading(false);
@@ -296,11 +346,11 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                                     </li>
                                     <li>
                                         <span>출발지</span>
-                                        <span>{order.origin}</span>
+                                        <span>{order.departure}</span>
                                     </li>
                                     <li>
                                         <span>도착지</span>
-                                        <span>{order.destination}</span>
+                                        <span>{order.arrival}</span>
                                     </li>
                                     <li>
                                         <span>화물 종류</span>
@@ -310,7 +360,7 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                                 <ul className="order-info-table">
                                     <li>
                                         <span>크기</span>
-                                        <span>{order.size}</span>
+                                        <span>{order.cargoSize}</span>
                                     </li>
                                     <li>
                                         <span>무게</span>
@@ -318,11 +368,16 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                                     </li>
                                     <li>
                                         <span>차량 종류</span>
-                                        <span>{order.vehicleType}</span>
+                                        <span>{order.vehicle}</span>
                                     </li>
                                     <li>
                                         <span>포장 여부</span>
-                                        <span>{order.isPackaged}</span>
+                                        <span>
+                                            {prettyPacking(
+                                                order.packingOptions ??
+                                                    order.packingOption
+                                            )}
+                                        </span>
                                     </li>
                                 </ul>
                             </div>
@@ -376,101 +431,83 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                 <div className="spp-payment-method-section spp-point-management-section">
                     <h2 className="spp-page-title">결제 수단</h2>
                     <div className="payment-method-details-content">
-                        <div className="payment-group">
-                            <h3 className="payment-group-title">일반결제</h3>
-                            <div className="pay-method-list easy-payment-options">
-                                <label
-                                    className={`payment-option ${
-                                        selectedPaymentType === "card"
-                                            ? "selected"
-                                            : ""
-                                    }`}
-                                >
-                                    <input
-                                        type="radio"
-                                        name="paymentType"
-                                        value="card"
-                                        checked={selectedPaymentType === "card"}
-                                        onChange={(e) =>
-                                            setSelectedPaymentType(
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                    <span>일반결제</span>
-                                </label>
-                            </div>
-                        </div>
-                        <div className="payment-group">
-                            <h3 className="payment-group-title">간편결제</h3>
-                            <div className="pay-method-list easy-payment-options">
-                                <label
-                                    className={`payment-option ${
-                                        selectedPaymentType === "kakaopay"
-                                            ? "selected"
-                                            : ""
-                                    }`}
-                                >
-                                    <input
-                                        type="radio"
-                                        name="paymentType"
-                                        value="kakaopay"
-                                        checked={
-                                            selectedPaymentType === "kakaopay"
-                                        }
-                                        onChange={(e) =>
-                                            setSelectedPaymentType(
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                    <span>카카오페이</span>
-                                </label>
-                                <label
-                                    className={`payment-option ${
-                                        selectedPaymentType === "tosspay"
-                                            ? "selected"
-                                            : ""
-                                    }`}
-                                >
-                                    <input
-                                        type="radio"
-                                        name="paymentType"
-                                        value="tosspay"
-                                        checked={
-                                            selectedPaymentType === "tosspay"
-                                        }
-                                        onChange={(e) =>
-                                            setSelectedPaymentType(
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                    <span>토스페이</span>
-                                </label>
-                                <label
-                                    className={`payment-option ${
-                                        selectedPaymentType === "payco"
-                                            ? "selected"
-                                            : ""
-                                    }`}
-                                >
-                                    <input
-                                        type="radio"
-                                        name="paymentType"
-                                        value="payco"
-                                        checked={
-                                            selectedPaymentType === "payco"
-                                        }
-                                        onChange={(e) =>
-                                            setSelectedPaymentType(
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                    <span>페이코</span>
-                                </label>
-                            </div>
+                        <div className="pay-method-list vertical-payment-options">
+                            <label
+                                className={`payment-option ${
+                                    selectedPaymentType === "kakaopay"
+                                        ? "selected"
+                                        : ""
+                                }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="paymentType"
+                                    value="kakaopay"
+                                    checked={selectedPaymentType === "kakaopay"}
+                                    onChange={(e) =>
+                                        setSelectedPaymentType(e.target.value)
+                                    }
+                                />
+                                <span>카카오페이</span>
+                                <span className="checkmark">✔</span>
+                            </label>
+                            <label
+                                className={`payment-option ${
+                                    selectedPaymentType === "tosspay"
+                                        ? "selected"
+                                        : ""
+                                }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="paymentType"
+                                    value="tosspay"
+                                    checked={selectedPaymentType === "tosspay"}
+                                    onChange={(e) =>
+                                        setSelectedPaymentType(e.target.value)
+                                    }
+                                />
+                                <span>토스페이</span>
+                                <span className="checkmark">✔</span>
+                            </label>
+                            <label
+                                className={`payment-option ${
+                                    selectedPaymentType === "payco"
+                                        ? "selected"
+                                        : ""
+                                }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="paymentType"
+                                    value="payco"
+                                    checked={selectedPaymentType === "payco"}
+                                    onChange={(e) =>
+                                        setSelectedPaymentType(e.target.value)
+                                    }
+                                />
+                                <span>페이코</span>
+                                <span className="checkmark">✔</span>
+                            </label>
+                            <label
+                                className={`payment-option ${
+                                    selectedPaymentType === "card"
+                                        ? "selected"
+                                        : ""
+                                }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="paymentType"
+                                    value="card"
+                                    checked={selectedPaymentType === "card"}
+                                    onChange={(e) =>
+                                        setSelectedPaymentType(e.target.value)
+                                    }
+                                />
+                                <span>일반결제</span>
+                                <span className="checkmark">✔</span>
+                            </label>
                         </div>
                     </div>
                 </div>

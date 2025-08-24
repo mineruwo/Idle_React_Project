@@ -45,8 +45,14 @@ public class SecurityConfig {
                 // 프리플라이트
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // 공개 API (읽기/검색/배정 등)
-                .requestMatchers("/api/orders/**").permitAll()
+                // 주문 생성은 SHIPPER 만 가능
+                .requestMatchers(HttpMethod.POST, "/api/orders").hasRole("SHIPPER")
+
+                // 내 주문 목록은 인증된 사용자만
+                .requestMatchers(HttpMethod.GET, "/api/orders/my").authenticated()
+
+                // 나머지 주문 관련 GET 요청은 공개
+                .requestMatchers(HttpMethod.GET, "/api/orders/**").permitAll()
 
                 // 입찰 API (현재 전부 공개, 운영 시 필요에 따라 롤 제한)
                 .requestMatchers("/api/offers/**").permitAll()
@@ -56,7 +62,6 @@ public class SecurityConfig {
 
                 // 관리자(요구 반영: 공개, 운영 전환 시 제한 권장)
                 .requestMatchers(
-                    "/api/orders/**",   // 🚚 오더 등록/조회/삭제 전부 허용
                     "/api/auth/login",
                     "/api/auth/refresh",
                     "/api/auth/logout",

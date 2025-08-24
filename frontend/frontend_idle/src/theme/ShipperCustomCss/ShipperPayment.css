@@ -104,6 +104,9 @@
 
 .order-info-table li span:last-child {
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .payment-btn {
@@ -195,9 +198,11 @@
 }
 
 .pay-method-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
+    display: grid; /* Changed to grid for 2x2 layout */
+    grid-template-columns: repeat(2, 1fr); /* 2 columns, equal width */
+    gap: 1rem; /* Gap between grid items */
+    justify-items: center; /* Center items within their grid cells */
+    align-items: start; /* Align rows to the start */
 }
 
 .pay-method-list label {
@@ -342,76 +347,64 @@
     }
 }
 
-.easy-payment-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-top: 15px;
-}
+/* Removed .easy-payment-options as it's no longer needed */
 
 .payment-option {
-    flex: 1;
-    min-width: 100px;
-    padding: 10px;
+    flex: none; /* Remove flex: 1 */
+    width: 100%; /* Make each option take full width */
+    max-width: 300px; /* Reverted max-width to previous size */
+    min-width: unset; /* Remove min-width */
+    padding: 15px; /* Increased padding for better touch targets */
     border: 2px solid #eee;
     border-radius: 8px;
-    text-align: center;
+    text-align: left; /* Align text to left */
     cursor: pointer;
     transition: all 0.3s ease;
     background-color: #fff;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
     display: flex;
-    flex-direction: column;
+    flex-direction: row; /* Keep row for content inside option */
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start; /* Align content to start */
     font-weight: 500;
     color: #555;
+    position: relative; /* For checkmark positioning */
 }
 
 .payment-option:hover {
-    border-color: #f3c7d3;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-color: #e0b0c0; /* Slightly darker pink on hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* More pronounced shadow */
+    transform: translateY(-2px); /* Slight lift effect */
 }
 
 .payment-option.selected {
-    border-color: #f3c7d3;
-    background-color: #fff0f5; /* Lighter pink background */
-    color: #f3c7d3;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    border-color: #f3c7d3; /* Keep original selected border color */
+    background-color: #f3c7d3; /* Solid pink background for selected */
+    color: #fff; /* White text for selected */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Stronger shadow for selected */
+    transform: translateY(-2px); /* Keep lift effect */
+}
+
+.payment-option .checkmark {
+    position: absolute;
+    top: 50%;
+    right: 15px; /* Position checkmark to the right */
+    transform: translateY(-50%);
+    color: #fff; /* White checkmark */
+    font-size: 1.5em; /* Larger checkmark */
+    display: none; /* Hidden by default */
+}
+
+.payment-option.selected .checkmark {
+    display: block; /* Show checkmark when selected */
 }
 
 .payment-option input[type="radio"] {
-    display: none; /* Hide the actual radio button */
+    margin-right: 10px; /* Add some space between radio and text */
 }
 
-.payment-option span {
-    margin-top: 5px;
-    font-size: 1em;
-}
 
-.order-item {
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid #eee;
-}
 
-.order-item:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-}
 
-.payment-group {
-    margin-bottom: 1.5rem;
-}
 
-.payment-group:last-child {
-    margin-bottom: 0;
-}
 
-.payment-group-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #e0e0e0;
-}

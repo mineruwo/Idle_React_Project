@@ -1,16 +1,28 @@
 package com.fullstack.entity;
 
-import jakarta.persistence.*;
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import com.fullstack.model.enums.OrderStatus; // Added import
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.security.SecureRandom;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(
@@ -34,6 +46,7 @@ public class Order {
     /** 주문번호: 영문+숫자, ODR- 접두어 */
     @Column(name = "order_no", length = 40, nullable = false, unique = true)
     private String orderNo;
+
 
     /** 금액/평균가 */
     @Column(name = "proposed_price")
@@ -71,12 +84,16 @@ public class Order {
     private String packingOption;         // VARCHAR (콤마 문자열)
 
     /** 상태 */
-    @Builder.Default
-    private String status = "OPEN";       // OPEN/ASSIGNED/...
+	@Enumerated(EnumType.STRING) // Added annotation
+	@Builder.Default
+	private OrderStatus status = OrderStatus.CREATED; // Changed type and default value
 
     /** 배정 정보 */
     @Column(name = "assigned_driver_id")
     private Long assignedDriverId;        // BIGINT
+
+    @Column(name = "shipper_id")
+    private String shipperId;             // 화주 ID
 
 
     /** 타임스탬프 */
@@ -92,8 +109,8 @@ public class Order {
     @PrePersist
     public void ensureOrderNo() {
         // 상태 기본값 보정
-        if (this.status == null || this.status.isBlank()) {
-            this.status = "OPEN";
+        if (this.status == null) { // Check for null directly for enum
+            this.status = OrderStatus.CREATED; // Set default to CREATED enum
         }
         // 주문번호 없으면 생성
         if (this.orderNo == null || this.orderNo.isBlank()) {

@@ -401,6 +401,8 @@ const OrderBoard = () => {
                   {o.orderNo || "-"}
                 </OrderNoBadge>
 
+                {o.shipperNickname && <p>화주: {o.shipperNickname}</p>} {/* Add this line */}
+
                 <InfoGrid>
                   <Col>
                     <SubLabel>화물 종류</SubLabel>
@@ -612,7 +614,7 @@ const OrderBoard = () => {
 
             {selected?.status === "PAYMENT_PENDING" && selected?.driverPrice != null && (
                 <Section style={{ marginTop: 16 }}>
-                    <AcceptBtn onClick={() => shipperMoveToPayment(selected.id)}>
+                    <AcceptBtn onClick={() => shipperMoveToPayment(selected)}>
                         {Number(selected.driverPrice).toLocaleString()}원 결제하기
                     </AcceptBtn>
                 </Section>

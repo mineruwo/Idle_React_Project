@@ -15,6 +15,7 @@ import com.fullstack.model.PaymentRequestDTO;
 import com.fullstack.model.PaymentResponseDTO;
 import com.fullstack.model.PaymentVerificationDTO;
 import com.fullstack.model.PointUsageRequestDTO;
+import com.fullstack.model.enums.OrderStatus; // Added import
 import com.fullstack.repository.CustomerRepository;
 import com.fullstack.repository.PaymentRepository;
 import com.fullstack.repository.PointHistoryRepository;
@@ -403,7 +404,7 @@ public class PaymentServiceImpl implements PaymentService {
         pointHistoryRepository.save(history);
 
         // 3. 주문 상태 변경
-        order.setStatus("READY");
+        order.setStatus(OrderStatus.READY);
         orderRepository.save(order);
 
         // 4. PaymentResponseDTO 생성 및 반환
