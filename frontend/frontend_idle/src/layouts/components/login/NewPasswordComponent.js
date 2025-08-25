@@ -22,7 +22,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import AppTheme from "../../../theme/muitheme/AppTheme";
 import { UserCard as Card, UserContainer as SignInContainer } from "../../../theme/User/UserCard";
 import api from "../../../api/authApi";
-import { PinkTruckIcon } from "./IconComponent";
+import { PinkTruckIcon } from "../common/IconComponent";
 
 // 비밀번호 정책 체크
 function checkPasswordRules(pw = "") {

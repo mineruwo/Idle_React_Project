@@ -31,6 +31,28 @@ export function GoogleIcon() {
     );
 }
 
+export function NaverIcon() {
+    return (
+        <SvgIcon>
+            <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                {/* 초록색 배경 */}
+                <rect width="16" height="16" rx="2" fill="#03C75A" />
+                {/* 흰색 N */}
+                <path
+                    d="M4 4.5H6.4L9.6 8.7V4.5H12v7h-2.4L6.4 7.3v4.2H4v-7z"
+                    fill="white"
+                />
+            </svg>
+        </SvgIcon>
+    );
+}
+
 export function KakaoIcon(props) {
     return (
         <SvgIcon {...props}>

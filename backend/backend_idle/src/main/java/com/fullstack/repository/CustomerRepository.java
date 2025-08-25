@@ -59,6 +59,8 @@ public interface CustomerRepository extends JpaRepository<CustomerEntity, Intege
 	Optional<CustomerEntity> findByResetTokenHashAndResetUsedFalseAndResetExpiresAtAfter(
 		    String resetTokenHash, LocalDateTime now);
 	
+	Optional<CustomerEntity> findBySnsLoginProviderAndSnsProviderId(String provider, String providerId);
+	
 	boolean existsById(String id);
 
     boolean existsByNickname(String nickname);

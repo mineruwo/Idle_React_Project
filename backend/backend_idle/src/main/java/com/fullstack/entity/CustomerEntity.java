@@ -35,7 +35,7 @@ public class CustomerEntity {
 	@Column(name = "ID", nullable = false)
 	private String id;
 
-	@Column(name = "PASSWORD_ENC", nullable = false)
+	@Column(name = "PASSWORD_ENC")
 	private String passwordEnc;
 
 	@Column(name = "CUSTOM_NAME")
@@ -85,7 +85,7 @@ public class CustomerEntity {
 	private String resetTokenHash;
 	@Column(name = "RESET_EXPIRES_AT")
 	private LocalDateTime resetExpiresAt;
-	@Column(name = "RESET_USED") // nullable = false 
+	@Column(name = "RESET_USED")
 	private Boolean resetUsed = false;
 	
 }

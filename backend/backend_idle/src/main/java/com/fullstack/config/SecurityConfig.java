@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -16,22 +16,24 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.fullstack.security.jwt.JWTFilter;
+import com.fullstack.security.jwt.OAuth2SuccessHandler;
+import com.fullstack.service.CustomOAuth2UserService;
 
+import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity(prePostEnabled = true)
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JWTFilter jwtFilter;
+	private final JWTFilter jwtFilter;
+	private final CustomOAuth2UserService customOAuth2UserService;
+	private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
-    SecurityConfig(JWTFilter jwtFilter) {
-        this.jwtFilter = jwtFilter;
-    }
-
-    @Bean
+	@Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -43,6 +45,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/api/orders/**",   // 🚚 오더 등록/조회/삭제 전부 허용
+                    "/auth/**",   
                     "/api/auth/login",
                     "/api/auth/refresh",
                     "/api/auth/logout",
@@ -58,15 +61,26 @@ public class SecurityConfig {
                     "/api/customer/**", // 고객 관련 API
                     "/api/payment/**",
                     "/api/admin/chat-sessions/**", // 채팅 세션 관련 API 허용
-                    "/api/email/**"
+                    "/api/email/**",
+                    "/oauth2/**", "/login/oauth2/**", "/oauth2/authorization/**"
                 ).permitAll()
                 .requestMatchers(
                         "/api/auth/me"
                 ).authenticated()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/reset-password").permitAll()
+                
                 .anyRequest().authenticated()
             )
+            
+            .oauth2Login(o -> o
+                    .authorizationEndpoint(a -> a.baseUri("/oauth2/authorization"))
+                    .redirectionEndpoint(r -> r.baseUri("/login/oauth2/code/*"))
+                    .userInfoEndpoint(u -> u.userService(customOAuth2UserService))
+                    .successHandler(oAuth2SuccessHandler)
+                )
+            
+            
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
            
@@ -74,24 +88,23 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.asList(
-            "http://localhost:3000", // 로컬 프론트 주소
-            "https://idle-react-project-front.onrender.com" // 배포된 프론트 주소
-        ));
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(Arrays.asList("*"));
-        config.setAllowCredentials(true); // 쿠키 전달 허용 (withCredentials: true 필요할 경우)
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration config = new CorsConfiguration();
+		config.setAllowedOrigins(Arrays.asList("http://localhost:3000", // 로컬 프론트 주소
+				"https://idle-react-project-front.onrender.com" // 배포된 프론트 주소
+		));
+		config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		config.setAllowedHeaders(Arrays.asList("*"));
+		config.setAllowCredentials(true); // 쿠키 전달 허용 (withCredentials: true 필요할 경우)
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", config);
+		return source;
+	}
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 }
