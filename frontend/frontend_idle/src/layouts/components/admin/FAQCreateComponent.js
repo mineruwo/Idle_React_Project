@@ -1,19 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { createFAQ } from '../../../api/adminApi';
+import Modal from '../common/Modal';
 import '../../../theme/admin.css';
 import { useNavigate } from 'react-router-dom';
 
 const FAQCreateComponent = () => {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
-  const adminId = useSelector(state => state.adminLogin.id);
-  const [writerAdminId, setWriterAdminId] = useState(adminId);
+  const { id: writerAdminId } = useSelector(state => state.adminLogin);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    setWriterAdminId(adminId);
-  }, [adminId]);
+  const [modalState, setModalState] = useState({ show: false, message: "" });
+
+  const showModal = (message) => {
+    setModalState({ show: true, message });
+  };
+
+  const closeModal = () => {
+    setModalState({ ...modalState, show: false });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,16 +31,20 @@ const FAQCreateComponent = () => {
 
     try {
       await createFAQ(newFAQ);
-      alert('FAQ가 성공적으로 등록되었습니다.');
-      navigate('/admin/faqs');
+      showModal('FAQ가 성공적으로 등록되었습니다.');
+      setQuestion('');
+      setAnswer('');
+      // navigate('/admin/faqs'); // Navigate after user closes modal
     } catch (error) {
       console.error('Error creating FAQ:', error);
-      alert('FAQ 등록에 실패했습니다.');
+      const errorMessage = error.response ? error.response.data : error.message;
+      showModal(`FAQ 등록에 실패했습니다: ${errorMessage}`);
     }
   };
 
   return (
     <div className="admin-container">
+        <Modal show={modalState.show} message={modalState.message} onClose={closeModal} />
         <div className="admin-header">
             <h2>새 FAQ 작성</h2>
         </div>

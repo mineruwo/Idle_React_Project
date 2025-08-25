@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { fetchOrders } from "../../api/orderApi";
 import { fetchOffersByOrder, acceptOffer, fetchAssignment, createOffer } from "../../api/offerApi";
 
-/* ========================= 라벨 매핑 ========================= */
+/* ===== 라벨 매핑 ===== */
 const LABEL = {
   cargoType: {
     box: "박스",
@@ -44,7 +44,7 @@ const packingKeyToText = {
   fragile: "파손위험물",
 };
 
-/* ========================= 유틸 ========================= */
+/* ===== 유틸 ===== */
 const fmtDate = (v) => {
   try {
     const d = new Date(v);
@@ -73,7 +73,6 @@ const fmtDateTime = (v) => {
   }
 };
 
-// 포장 문자열/JSON/배열 모두 안전하게 변환
 const prettyPacking = (val) => {
   if (!val) return "-";
   try {
@@ -101,30 +100,42 @@ const n = (v, def = 0) => {
 
 const isImmediateOf = (o) => (o?.isImmediate ?? o?.immediate) === true;
 
-/* ========================= 컴포넌트 ========================= */
+/** 파생 상태: 배정 여부 */
+const isAssigned = (order, assign) =>
+  Boolean((assign && assign.assignedDriverId != null) || (order && order.assignedDriverId != null));
+
+/** 한국어 상태 라벨 (배정 우선) */
+const statusK = (order, assign) => {
+  if (isAssigned(order, assign)) return "완료";
+  const s = String(order?.status || "").toUpperCase();
+  if (s === "PAYMENT_PENDING" || s === "CREATED") return "결제대기";
+  return "입찰중";
+};
+
+/* ===== 컴포넌트 ===== */
 const OrderBoard = () => {
   const { shipperMoveToPayment } = useCustomMove();
   const [orders, setOrders] = useState([]);
   const [selected, setSelected] = useState(null);
   const [panelOpen, setPanelOpen] = useState(false);
 
-  // 입찰/배정 상태
+  // 입찰/배정
   const [offers, setOffers] = useState([]);
   const [assignment, setAssignment] = useState({ assignedDriverId: null, driverPrice: null, status: null });
   const [loadingOffers, setLoadingOffers] = useState(false);
 
-  // 개발/운영 공용: 입찰 입력 (driverId는 백엔드가 세팅)
+  // 입찰 입력
   const [bidPrice, setBidPrice] = useState("");
   const [bidMemo, setBidMemo] = useState("");
 
   // 검색/필터
   const [q, setQ] = useState("");
-  const [immediateFilter, setImmediateFilter] = useState("all"); // all | immediate | reserved
-  const [vehicleFilter, setVehicleFilter] = useState(""); // '', '1ton', ...
+  const [immediateFilter, setImmediateFilter] = useState("all");
+  const [vehicleFilter, setVehicleFilter] = useState("");
 
   // 정렬
-  const [sortKey, setSortKey] = useState("latest"); // latest | distance | avgPrice
-  const [sortDir, setSortDir] = useState("asc"); // asc | desc (latest는 내부 고정)
+  const [sortKey, setSortKey] = useState("latest");
+  const [sortDir, setSortDir] = useState("asc");
 
   // 페이지네이션
   const [page, setPage] = useState(1);
@@ -133,7 +144,7 @@ const OrderBoard = () => {
   const panelRef = useRef(null);
   const cardRefs = useRef({});
 
-  /* ====== 목록 로드 ====== */
+  /* 목록 */
   useEffect(() => {
     (async () => {
       try {
@@ -145,7 +156,7 @@ const OrderBoard = () => {
     })();
   }, []);
 
-  /* ====== 카드 선택 시 우측패널로 스크롤 보정 + 입찰/배정 로드 ====== */
+  /* 입찰/배정 로드 */
   const loadOfferAndAssignment = async (orderId) => {
     setLoadingOffers(true);
     try {
@@ -165,7 +176,6 @@ const OrderBoard = () => {
     setSelected(o);
     setPanelOpen(true);
 
-    // 패널 위치 스크롤 보정
     requestAnimationFrame(() => {
       const el = cardRefs.current[o.id];
       if (!el || !panelRef.current) return;
@@ -175,7 +185,6 @@ const OrderBoard = () => {
       window.scrollTo({ top: targetTop, behavior: "smooth" });
     });
 
-    // 입찰/배정 로드
     await loadOfferAndAssignment(o.id);
   };
 
@@ -192,7 +201,9 @@ const OrderBoard = () => {
     if (!selected) return;
     try {
       await acceptOffer(offerId);
-      await loadOfferAndAssignment(selected.id); // 확정 후 재조회 → 뱃지/목록 갱신
+      // ✅ 낙관적 갱신: 결제대기로 전환 (버튼 바로 노출)
+      setSelected((prev) => (prev ? { ...prev, status: "PAYMENT_PENDING" } : prev));
+      await loadOfferAndAssignment(selected.id);
       alert("입찰 확정 완료");
     } catch (e) {
       console.error("입찰 확정 실패:", e);
@@ -200,7 +211,6 @@ const OrderBoard = () => {
     }
   };
 
-  // ✅ 입찰 등록 (driverId 전송 안 함)
   const handleBid = async () => {
     if (!selected) return;
     const priceNum = Number(bidPrice);
@@ -209,6 +219,10 @@ const OrderBoard = () => {
       return;
     }
     try {
+      console.log( "selected.id =>>>>>" + selected.id);
+      console.log( "priceNum =>>>>>" + priceNum);
+      console.log( "bidMemo =>>>>>" + selected.id);
+      
       await createOffer({ orderId: selected.id, price: priceNum, memo: bidMemo || "" });
       setBidPrice("");
       setBidMemo("");
@@ -222,7 +236,7 @@ const OrderBoard = () => {
 
   const todayStr = useMemo(() => fmtDate(new Date()), []);
 
-  // 검색/필터
+  /* 검색/필터 */
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     const matchText = (text) => String(text || "").toLowerCase().includes(needle);
@@ -243,7 +257,7 @@ const OrderBoard = () => {
       const packingText = prettyPacking(o.packingOptions ?? o.packingOption);
 
       return (
-        matchText(o.orderNo) || // ✅ 주문번호로도 검색
+        matchText(o.orderNo) ||
         matchText(o.departure) ||
         matchText(o.arrival) ||
         matchText(o.status) ||
@@ -256,7 +270,7 @@ const OrderBoard = () => {
     });
   }, [orders, q, immediateFilter, vehicleFilter]);
 
-  // 정렬
+  /* 정렬 */
   const sorted = useMemo(() => {
     const arr = [...filtered];
     if (sortKey === "latest") {
@@ -267,32 +281,27 @@ const OrderBoard = () => {
       });
       return arr;
     }
-
     if (sortKey === "distance") {
       arr.sort((a, b) => (sortDir === "asc" ? n(a.distance) - n(b.distance) : n(b.distance) - n(a.distance)));
       return arr;
     }
-
     if (sortKey === "avgPrice") {
       const getPrice = (o) => n(o.avgPrice, n(o.proposedPrice, n(o.driverPrice, 0)));
       arr.sort((a, b) => (sortDir === "asc" ? getPrice(a) - getPrice(b) : getPrice(b) - getPrice(a)));
       return arr;
     }
-
     return arr;
   }, [filtered, sortKey, sortDir]);
 
-  // 페이지네이션
+  /* 페이지네이션 */
   const total = sorted.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
-  // ✅ 보드 진입 시 무조건 최상단으로
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     requestAnimationFrame(() => window.scrollTo(0, 0));
   }, []);
 
-  // 필터/정렬이 바뀌면 1페이지로
   useEffect(() => {
     setPage(1);
   }, [q, immediateFilter, vehicleFilter, sortKey, sortDir, pageSize]);
@@ -308,25 +317,28 @@ const OrderBoard = () => {
     setVehicleFilter("");
   };
 
+  /* 파생값 (우측 패널에서 재사용) */
+  const currentStatus = String(assignment?.status ?? selected?.status ?? "").toUpperCase();
+  const confirmedPrice = assignment?.driverPrice ?? selected?.driverPrice;
+  const assignedDriver = assignment?.assignedDriverId ?? selected?.assignedDriverId;
+
   return (
     <PageWrap>
       <ListArea data-panel-open={panelOpen}>
         <Header>오더 게시판</Header>
 
-        {/* ===== 검색/필터 바 ===== */}
+        {/* 검색/필터 */}
         <FilterBar>
           <SearchInput
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="주문번호/출발/도착/화물/차량/포장/상태 검색..."
           />
-
           <SelectBox value={immediateFilter} onChange={(e) => setImmediateFilter(e.target.value)}>
             <option value="all">전체(즉시+예약)</option>
             <option value="immediate">즉시</option>
             <option value="reserved">예약</option>
           </SelectBox>
-
           <SelectBox value={vehicleFilter} onChange={(e) => setVehicleFilter(e.target.value)}>
             <option value="">차량 전체</option>
             <option value="1ton">1톤 트럭</option>
@@ -335,11 +347,10 @@ const OrderBoard = () => {
             <option value="top">탑차</option>
             <option value="cold">냉장/냉동차</option>
           </SelectBox>
-
           <ResetBtn onClick={resetFilters}>초기화</ResetBtn>
         </FilterBar>
 
-        {/* ===== 정렬/페이지 사이드 컨트롤 ===== */}
+        {/* 정렬/페이지 */}
         <ControlsRow>
           <SortGroup>
             <SortLabel>정렬</SortLabel>
@@ -348,7 +359,6 @@ const OrderBoard = () => {
               <option value="distance">거리</option>
               <option value="avgPrice">평균가</option>
             </SelectBox>
-
             {sortKey !== "latest" && (
               <SelectBox value={sortDir} onChange={(e) => setSortDir(e.target.value)}>
                 <option value="asc">오름차순</option>
@@ -387,19 +397,15 @@ const OrderBoard = () => {
                 onClick={() => handleSelect(o)}
                 data-selected={selected?.id === o.id}
               >
-                {/* 1행: 출발 → 도착 + 우측 상태 */}
                 <RowBetween>
                   <FromTo>
-                    <Strong>출발</Strong> {o.departure} &nbsp;→&nbsp;
-                    <Strong>도착</Strong> {o.arrival}
+                    <Strong>출발</Strong> {o.departure} &nbsp;→&nbsp; <Strong>도착</Strong> {o.arrival}
                   </FromTo>
-                  <RightMeta>{o.status || "READY"}</RightMeta>
+                  {/* 목록에선 배정 여부를 알 수 없으니 주문 상태만 기반 */}
+                  <RightMeta>{statusK(o, null)}</RightMeta>
                 </RowBetween>
 
-                {/* 2행: 주문번호 배지 (출발/도착 아래에 항상 노출) */}
-                <OrderNoBadge title={o.orderNo || ""}>
-                  {o.orderNo || "-"}
-                </OrderNoBadge>
+                <OrderNoBadge title={o.orderNo || ""}>{o.orderNo || "-"}</OrderNoBadge>
 
                 <InfoGrid>
                   <Col>
@@ -427,20 +433,15 @@ const OrderBoard = () => {
                     <SubValue>{immediate ? "즉시" : o.reservedDate ? fmtDateTime(o.reservedDate) : "-"}</SubValue>
                   </Col>
                 </InfoGrid>
-
-                {/* 등록일 표시는 제거. 필요 시 아래 주석 해제 */}
-                {/* <DateWrap>{o.createdAt ? fmtDate(o.createdAt) : "-"}</DateWrap> */}
               </Card>
             );
           })}
         </CardList>
 
-        {/* ===== 페이지네이션 ===== */}
         <Pagination>
           <PageBtn disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
             ← 이전
           </PageBtn>
-
           <PageNumbers>
             {Array.from({ length: totalPages }, (_, i) => i + 1)
               .slice(Math.max(0, page - 3), Math.max(0, page - 3) + 5)
@@ -450,7 +451,6 @@ const OrderBoard = () => {
                 </PageNumber>
               ))}
           </PageNumbers>
-
           <PageBtn disabled={page === totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>
             다음 →
           </PageBtn>
@@ -466,11 +466,11 @@ const OrderBoard = () => {
 
         {selected ? (
           <>
-            {/* ===== 배정 뱃지 헤더 ===== */}
+            {/* 배정 뱃지 */}
             <BadgeRow>
-              {assignment?.assignedDriverId ? (
+              {isAssigned(selected, assignment) ? (
                 <Badge>
-                  배정: Driver #{assignment.assignedDriverId} / {Number(assignment.driverPrice ?? 0).toLocaleString()}원
+                  배정: Driver #{assignedDriver} / {Number(confirmedPrice ?? 0).toLocaleString()}원
                 </Badge>
               ) : (
                 <BadgeGray>미배정</BadgeGray>
@@ -479,7 +479,7 @@ const OrderBoard = () => {
 
             <Section>
               <SectionTitle>
-                화물 상세 정보 <StatusTag>{selected.status || "READY"}</StatusTag>
+                화물 상세 정보 <StatusTag>{statusK(selected, assignment)}</StatusTag>
               </SectionTitle>
               <Row>
                 <Key>주문번호</Key>
@@ -521,15 +521,15 @@ const OrderBoard = () => {
 
             <Section>
               <SectionTitle>배정된 기사</SectionTitle>
-              {assignment?.assignedDriverId ? (
+              {isAssigned(selected, assignment) ? (
                 <div>
                   <Row>
                     <Key>Driver ID</Key>
-                    <Val>{assignment.assignedDriverId}</Val>
+                    <Val>{assignedDriver}</Val>
                   </Row>
                   <Row>
                     <Key>확정가</Key>
-                    <Val>{Number(assignment.driverPrice ?? 0).toLocaleString()} 원</Val>
+                    <Val>{confirmedPrice != null ? `${Number(confirmedPrice).toLocaleString()} 원` : "-"}</Val>
                   </Row>
                 </div>
               ) : (
@@ -554,7 +554,7 @@ const OrderBoard = () => {
                         <small style={{ marginLeft: 8, opacity: 0.7 }}>({o.status})</small>
                       </div>
                       <AcceptBtn
-                        disabled={!!assignment?.assignedDriverId || o.status !== "PENDING"}
+                        disabled={isAssigned(selected, assignment) || o.status !== "PENDING"}
                         onClick={() => handleAccept(o.id)}
                       >
                         입찰 확정
@@ -564,8 +564,8 @@ const OrderBoard = () => {
                 </OfferList>
               )}
 
-              {/* 입찰 등록 (driverId는 전송하지 않음) */}
-              {selected?.status !== "ASSIGNED" && (
+              {/* 입찰 등록 */}
+              {!isAssigned(selected, assignment) && (
                 <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                   <Muted>입찰 등록:</Muted>
                   <input
@@ -591,13 +591,7 @@ const OrderBoard = () => {
               <SectionTitle>운임 정보</SectionTitle>
               <Row>
                 <Key>기사 제안가</Key>
-                <Val>
-                  {assignment?.driverPrice != null
-                    ? `${Number(assignment.driverPrice).toLocaleString()} 원`
-                    : selected.driverPrice
-                    ? `${Number(selected.driverPrice).toLocaleString()} 원`
-                    : "-"}
-                </Val>
+                <Val>{confirmedPrice != null ? `${Number(confirmedPrice).toLocaleString()} 원` : "-"}</Val>
               </Row>
               <Row>
                 <Key>화주 제안가</Key>
@@ -610,12 +604,13 @@ const OrderBoard = () => {
               <RightHint>예상 거리 {selected.distance != null ? `${Number(selected.distance).toFixed(2)}km` : "-"}</RightHint>
             </Section>
 
-            {selected?.status === "PAYMENT_PENDING" && selected?.driverPrice != null && (
-                <Section style={{ marginTop: 16 }}>
-                    <AcceptBtn onClick={() => shipperMoveToPayment(selected.id)}>
-                        {Number(selected.driverPrice).toLocaleString()}원 결제하기
-                    </AcceptBtn>
-                </Section>
+            {/* ✅ assignment/selected 어느 쪽이든 결제대기면 버튼 노출 */}
+            {currentStatus === "PAYMENT_PENDING" && confirmedPrice != null && (
+              <Section style={{ marginTop: 16 }}>
+                <AcceptBtn onClick={() => shipperMoveToPayment(selected.id)}>
+                  {Number(confirmedPrice).toLocaleString()}원 결제하기
+                </AcceptBtn>
+              </Section>
             )}
           </>
         ) : null}
@@ -626,7 +621,7 @@ const OrderBoard = () => {
 
 export default OrderBoard;
 
-/* ========================= 스타일 (핑크 테마, 반응형 보강) ========================= */
+/* ===== 스타일 (생략 없이 포함: 기존과 동일) ===== */
 const PINK = {
   bg: "#fff7fb",
   cardBorder: "#f9d8e8",
@@ -824,7 +819,6 @@ const RightMeta = styled.span`
   font-weight: 800;
 `;
 
-/* ✅ 주문번호 배지 */
 const OrderNoBadge = styled.div`
   display: inline-block;
   margin: 2px 0 10px;
@@ -865,13 +859,6 @@ const SubValue = styled.div`
   font-size: 15px;
   color: ${PINK.text};
   font-weight: 700;
-`;
-
-const DateWrap = styled.div`
-  margin-top: 10px;
-  text-align: right;
-  font-size: 12px;
-  color: ${PINK.subText};
 `;
 
 const Pagination = styled.div`
@@ -1037,14 +1024,13 @@ const Muted = styled.div`
   color: ${PINK.subText};
 `;
 
-/* ====== 추가: 배정 뱃지 & 입찰 리스트 스타일 ====== */
 const BadgeRow = styled.div`
   display: flex;
   justify-content: flex-end;
   margin: 10px 6px 0;
 `;
 const Badge = styled.span`
-  background: #113F67;
+  background: #113f67;
   color: #fff;
   padding: 6px 10px;
   border-radius: 8px;

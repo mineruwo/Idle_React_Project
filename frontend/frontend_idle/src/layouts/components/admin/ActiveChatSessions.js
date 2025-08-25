@@ -1,62 +1,43 @@
-import { useState, useEffect } from 'react';
+import usePollingData from '../../../hooks/usePollingData';
+import { API_ENDPOINTS } from '../../../constants/api';
+import { POLLING_INTERVAL } from '../../../constants/app';
+
+const fetchActiveChatSessions = async () => {
+  const response = await fetch(API_ENDPOINTS.ADMIN_CHAT_SESSIONS);
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+  }
+  return response.json();
+};
 
 function ActiveChatSessions() {
-  const [sessions, setSessions] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchSessions = async () => {
-      console.log('Fetching active chat sessions...');
-      try {
-        const response = await fetch('/api/admin/chat-sessions'); 
-        if (!response.ok) {
-          const errorText = await response.text(); 
-          console.error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-        }
-        const data = await response.json();
-        console.log('Received active chat sessions data:', data);
-        setSessions(data);
-      } catch (e) {
-        console.error('Error fetching active chat sessions:', e);
-        setError(e);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSessions();
-    // 5초마다 새로고침 (선택 사항)
-    const intervalId = setInterval(fetchSessions, 5000); 
-
-    return () => clearInterval(intervalId); 
-  }, []);
+  const { data: sessions, loading, error } = usePollingData(fetchActiveChatSessions, POLLING_INTERVAL, {});
 
   if (loading) {
-    return <div>Loading active chat sessions...</div>;
+    return <div>로딩 중...</div>;
   }
 
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return <div>오류 발생: {error.message}</div>;
   }
 
   return (
     <div>
-      <h2>Active Chat Sessions</h2>
+      <h2>활성 채팅 세션</h2>
       {Object.keys(sessions).length === 0 ? (
-        <p>No active chat sessions found.</p>
+        <p>활성 채팅 세션이 없습니다.</p>
       ) : (
         <ul>
           {Object.entries(sessions).map(([chatRoomId, sessionIds]) => (
             <li key={chatRoomId}>
-              <strong>Chat Room ID: {chatRoomId}</strong>
+              <strong>채팅방 ID: {chatRoomId}</strong>
               <ul>
                 {sessionIds.length === 0 ? (
-                  <li>No sessions in this room.</li>
+                  <li>이 방에는 세션이 없습니다.</li>
                 ) : (
                   sessionIds.map((sessionId) => (
-                    <li key={sessionId}>Session ID: {sessionId}</li>
+                    <li key={sessionId}>세션 ID: {sessionId}</li>
                   ))
                 )}
               </ul>

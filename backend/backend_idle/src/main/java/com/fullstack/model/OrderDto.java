@@ -12,7 +12,7 @@ public class OrderDto {
     private Integer proposedPrice;      // 화주 제안가
     private Long driverPrice;           // 기사 제안가
     private Long avgPrice;
-    private String packingOptions; // JSON 문자열로 체크된 포장 옵션들
+    private String packingOptions;      // JSON 문자열로 체크된 포장 옵션들
 
     private String departure;           // 출발지
     private String arrival;             // 도착지
@@ -33,7 +33,7 @@ public class OrderDto {
 
     public static OrderDto fromEntity(Order entity) {
         OrderDto dto = new OrderDto();
-        dto.setId(entity.getId()); // Add this line
+        dto.setId(entity.getId());
         dto.setProposedPrice(entity.getProposedPrice());
         dto.setDriverPrice(entity.getDriverPrice());
         dto.setAvgPrice(entity.getAvgPrice());
@@ -42,7 +42,7 @@ public class OrderDto {
         dto.setArrival(entity.getArrival());
         dto.setDistance(entity.getDistance());
         dto.setReservedDate(entity.getReservedDate());
-        dto.setImmediate(entity.getIsImmediate());
+        dto.setImmediate(entity.isImmediate());   // ✅ 수정된 부분
         dto.setWeight(entity.getWeight());
         dto.setVehicle(entity.getVehicle());
         dto.setCargoType(entity.getCargoType());
