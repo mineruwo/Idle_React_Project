@@ -1,12 +1,28 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import useCustomMove from '../../hooks/useCustomMove';
 import './../../theme/ShipperCustomCss/ShipperPaymentSuccessPage.css';
+import { getOrderById } from "../../api/paymentApi"; // API 함수 임포트
 
 const ShipperPaymentSuccessPage = () => {
     const { shipperMoveToOrderBoard, moveToMainPage } = useCustomMove();
     const location = useLocation();
-    const { paymentInfo } = location.state || {};
+    const { paymentInfo, orderId } = location.state || {}; // state에서 orderId 추출
+    const [orderInfo, setOrderInfo] = useState(null); // 주문 정보 상태
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        if (orderId) {
+            getOrderById(orderId)
+                .then(data => {
+                    setOrderInfo(data);
+                })
+                .catch(err => {
+                    console.error("주문 정보 조회 실패:", err);
+                    setError("주문 정보를 불러오는 데 실패했습니다.");
+                });
+        }
+    }, [orderId]);
 
     if (!paymentInfo) {
         return (
@@ -14,6 +30,18 @@ const ShipperPaymentSuccessPage = () => {
                 <div className="spp-success-card">
                     <h2>잘못된 접근입니다.</h2>
                     <p>결제 정보를 찾을 수 없습니다.</p>
+                    <button onClick={moveToMainPage} className="spp-success-btn">메인으로 돌아가기</button>
+                </div>
+            </div>
+        );
+    }
+    
+    if (error) {
+        return (
+            <div className="spp-success-container">
+                <div className="spp-success-card">
+                    <h2>오류</h2>
+                    <p>{error}</p>
                     <button onClick={moveToMainPage} className="spp-success-btn">메인으로 돌아가기</button>
                 </div>
             </div>
@@ -35,7 +63,8 @@ const ShipperPaymentSuccessPage = () => {
                 <div className="spp-success-summary">
                     <h2 className="spp-summary-title">결제 요약</h2>
                     <ul>
-                        <li><strong>주문 번호:</strong> <span>{paymentInfo.merchantUid}</span></li>
+                        {/* orderInfo가 있으면 orderId를, 없으면 이전처럼 merchantUid를 표시 */}
+                        <li><strong>주문 번호:</strong> <span>{orderInfo ? orderInfo.orderNo : paymentInfo.merchantUid}</span></li>
                         <li><strong>상품명:</strong> <span>{paymentInfo.itemName}</span></li>
                         <li><strong>결제 금액:</strong> <span>{paymentInfo.amount?.toLocaleString()}원</span></li>
                         <li><strong>결제 일시:</strong> <span>{new Date(paymentInfo.paidAt).toLocaleString()}</span></li>
