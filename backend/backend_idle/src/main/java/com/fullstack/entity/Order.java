@@ -91,22 +91,6 @@ public class Order {
 	@Builder.Default
 	private OrderStatus status = OrderStatus.CREATED; // Changed type and default value
 
-    /* ===================== 경로/정보 ===================== */
-    private String departure;           // 출발지
-    private String arrival;             // 도착지
-    private double distance;            // 거리(km 등)
-
-    private String reservedDate;        // 예약 시간(문자열 보관 중이면 그대로 둠)
-
-    // ⚠️ 서비스에서 dto.isImmediate()를 호출하므로 필드명은 isImmediate 그대로 유지
-    private boolean isImmediate;        // 즉시 여부
-
-    private String weight;              // 무게
-    private String vehicle;             // 차량 종류
-    private String cargoType;           // 화물 종류
-    private String cargoSize;           // 화물 크기
-    private String packingOption;       // 포장 옵션(콤마 문자열/요약)
-
     /* ===================== 배정 정보 ===================== */
     // 배정된 기사 ID (없으면 null)
     @Column(name = "assigned_driver_id")
@@ -149,13 +133,6 @@ public class Order {
         return sb.toString();
     }
 
-    // INSERT 직전(order_no가 비어 있으면) 자동 생성
-    @PrePersist
-    public void ensureOrderNo() {
-        if (this.orderNo == null || this.orderNo.isBlank()) {
-            // ODR- + 10자리(필요 시 길이 조절)
-            this.orderNo = "ODR-" + randomCode(10);
-        }
-    }
+
 
 }

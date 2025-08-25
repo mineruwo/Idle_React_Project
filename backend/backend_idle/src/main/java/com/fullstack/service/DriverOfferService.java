@@ -97,10 +97,6 @@ public class DriverOfferService {
                 ? offer.getDriver().getIdNum().longValue() : null;
         order.setAssignedDriverId(assigned);
         order.setStatus(OrderStatus.READY);
-
-        // ✅ 결제대기로 전환 (버튼 노출 조건 충족)
-        order.setStatus("PAYMENT_PENDING");
-
         // 다른 PENDING 전부 거절
         driverOfferRepository.rejectOthers(order.getId(), offer.getId());
 
@@ -141,10 +137,8 @@ public class DriverOfferService {
         offer.setStatus(DriverOffer.Status.ACCEPTED);
         order.setDriverPrice(offer.getPrice());
         order.setAssignedDriverId(driver.getIdNum().longValue());
-        order.setStatus(OrderStatus.READY);
-
         // ✅ 결제대기 전환
-        order.setStatus("PAYMENT_PENDING");
+        order.setStatus(OrderStatus.PAYMENT_PENDING);
 
         driverOfferRepository.rejectOthers(order.getId(), offer.getId());
 

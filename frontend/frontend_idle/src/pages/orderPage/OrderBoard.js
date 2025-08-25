@@ -134,11 +134,7 @@ const OrderBoard = () => {
         status: null,
     });
     const [loadingOffers, setLoadingOffers] = useState(false);
-  // 입찰/배정
-  const [offers, setOffers] = useState([]);
-  const [assignment, setAssignment] = useState({ assignedDriverId: null, driverPrice: null, status: null });
-  const [loadingOffers, setLoadingOffers] = useState(false);
-
+    
     // 개발/운영 공용: 입찰 입력 (driverId는 백엔드가 세팅)
     const [bidPrice, setBidPrice] = useState("");
     const [bidMemo, setBidMemo] = useState("");
