@@ -17,6 +17,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+
 @Entity
 @Table(name = "inquiry")
 @Data
@@ -27,7 +28,6 @@ public class Inquiry {
 
         @Id
     @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @Column(name = "inquiry_id")
     private UUID inquiryId;
 

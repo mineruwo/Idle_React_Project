@@ -49,7 +49,7 @@ public class OrderDto {
         dto.setArrival(entity.getArrival());
         dto.setDistance(entity.getDistance());
         dto.setReservedDate(entity.getReservedDate());
-        dto.setImmediate(entity.isImmediate());   // ✅ 수정된 부분
+        dto.setImmediate(entity.getIsImmediate());   // ✅ 수정된 부분
         dto.setWeight(entity.getWeight());
         dto.setVehicle(entity.getVehicle());
         dto.setCargoType(entity.getCargoType());

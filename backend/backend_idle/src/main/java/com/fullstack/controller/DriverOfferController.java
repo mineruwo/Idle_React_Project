@@ -1,9 +1,11 @@
 // src/main/java/com/fullstack/controller/DriverOfferController.java
 package com.fullstack.controller;
 
+import com.fullstack.entity.CustomerEntity;
 import com.fullstack.model.DriverOfferCreateRequest;
 import com.fullstack.model.DriverOfferResponse;
 import com.fullstack.model.OfferAssignRequest;
+import com.fullstack.repository.CustomerRepository;
 import com.fullstack.service.DriverOfferService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,7 @@ import java.util.List;
 public class DriverOfferController {
 
     private final DriverOfferService driverOfferService;
+    private final CustomerRepository customerRepository;
 
     /**
      * (기사) 입찰 생성
@@ -29,10 +32,17 @@ public class DriverOfferController {
     @ResponseStatus(HttpStatus.CREATED)
     public DriverOfferResponse create(
             @RequestBody DriverOfferCreateRequest req,
-            @AuthenticationPrincipal(expression = "idNum") Integer driverIdNum
+            @AuthenticationPrincipal String userEmail
     ) {
-    	
-    	
+        if (userEmail == null) {
+            throw new UnauthorizedException("로그인이 필요합니다.");
+        }
+
+        CustomerEntity driver = customerRepository.findActiveByEmail(userEmail)
+                .orElseThrow(() -> new UnauthorizedException("사용자 정보를 찾을 수 없습니다."));
+
+        Integer driverIdNum = driver.getIdNum();
+        
         if (driverIdNum == null) {
             // 프론트/인터셉터에서 401 처리하기 좋도록 명확한 상태코드 사용
             throw new UnauthorizedException("로그인이 필요합니다.");
