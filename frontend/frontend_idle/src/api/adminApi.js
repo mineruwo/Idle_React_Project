@@ -74,6 +74,16 @@ export const getCustomerList = async (params = {}) => {
     }
 };
 
+export const getCustomerById = async (id) => {
+    try {
+        const response = await adminApi.get(`/admin/customers/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Failed to fetch customer with id ${id}:`, error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
 export const createCustomer = async (customerData) => {
     try {
         const response = await adminApi.post(`/admin/customers`, customerData);

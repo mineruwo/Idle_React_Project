@@ -1,5 +1,6 @@
 package com.fullstack.controller;
 
+import com.fullstack.entity.CustomerEntity;
 import com.fullstack.entity.Faq;
 import com.fullstack.entity.Notice;
 import com.fullstack.model.AdminDTO;
@@ -135,6 +136,21 @@ public class AdminController {
                 .createdAt(customer.getCreatedAt())
                 .customName(customer.getCustomName()).build());
         return ResponseEntity.ok(customerPage);
+    }
+
+    @GetMapping("/customers/{id}")
+    @PreAuthorize("hasAnyRole('DEV_ADMIN', 'ADMIN', 'ALL_PERMISSION', 'MANAGER_COUNSELING')")
+    public ResponseEntity<CustomerDTO> getCustomerById(@PathVariable Long id) {
+        CustomerEntity customerEntity = customerService.getCustomerById(id);
+        CustomerDTO customerDTO = new CustomerDTO();
+        customerDTO.setId(customerEntity.getId());
+        customerDTO.setCustomName(customerEntity.getCustomName());
+        customerDTO.setRole(customerEntity.getRole());
+        customerDTO.setPhone(customerEntity.getPhone());
+        customerDTO.setNickname(customerEntity.getNickname());
+        customerDTO.setCreatedAt(customerEntity.getCreatedAt());
+        customerDTO.setUserPoint(customerEntity.getUserPoint());
+        return ResponseEntity.ok(customerDTO);
     }
 
     @PostMapping("/accounts")

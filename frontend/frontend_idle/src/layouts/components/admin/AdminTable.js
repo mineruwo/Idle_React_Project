@@ -18,15 +18,15 @@ export const AdminTable = ({ data, columns, sortConfig, onSort, emptyMessage, on
         <tbody>
             {data.length > 0 ? (
                 data.map((item) => (
-                    <React.Fragment key={item.idIndex || item.id}>
-                        <tr className="admin-table-row" onClick={() => onRowClick && onRowClick(item.idIndex || item.id)}>
+                    <React.Fragment key={item.idIndex || item.id || item.inquiryId}>
+                        <tr className="admin-table-row" onClick={() => onRowClick && onRowClick(item)}>
                             {columns.map(col => (
-                                <td key={`${item.idIndex || item.id}-${col.key}`}>
+                                <td key={`${item.idIndex || item.id || item.inquiryId}-${col.key}`}>
                                     {col.render ? col.render(item) : item[col.key]}
                                 </td>
                             ))}
                         </tr>
-                        {selectedRowId === (item.idIndex || item.id) && renderExpandedContent && (
+                        {selectedRowId === (item.idIndex || item.id || item.inquiryId) && renderExpandedContent && (
                             <tr className="admin-content-row">
                                 {renderExpandedContent(item)}
                             </tr>

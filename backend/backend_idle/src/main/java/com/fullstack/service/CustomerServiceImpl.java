@@ -253,4 +253,10 @@ public class CustomerServiceImpl implements CustomerService {
 		return customerEntity.getUserPoint();
 	}
 
+    @Override
+    public CustomerEntity getCustomerById(Long id) {
+        return customerRepository.findById(id.intValue())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found"));
+    }
+
 }
