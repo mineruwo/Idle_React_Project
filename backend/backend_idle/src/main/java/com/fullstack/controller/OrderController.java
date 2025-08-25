@@ -82,7 +82,8 @@ public class OrderController {
 
     // 주문 상태 업데이트
     @PutMapping("/{id}/status")
-    public ResponseEntity<Void> updateOrderStatus(@PathVariable("id") Long id, @RequestBody OrderStatus status) { // Changed parameter type
+    public ResponseEntity<Void> updateOrderStatus(@PathVariable("id") Long id, @RequestBody OrderStatus status, Authentication authentication) { // Changed parameter type
+        log.info("User authorities: {}", authentication.getAuthorities());
         orderService.updateOrderStatus(id, status);
         return ResponseEntity.ok().build();
     }

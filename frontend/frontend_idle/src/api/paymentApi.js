@@ -2,19 +2,18 @@ import axios from "axios";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
+// 백엔드와 쿠키를 주고받기 위해 withCredentials를 기본값으로 설정한 단일 인스턴스
 const paymentApi = axios.create({
     baseURL: API_BASE_URL,
+    withCredentials: true,
 });
 
 export const payWithPoints = async ({ userId, points }) => {
     try {
-        const response = await paymentApi.post(
-            '/payment/use',
-            {
-                userId: userId,
-                points: points,
-            }
-        );
+        const response = await paymentApi.post("/payment/use", {
+            userId: userId,
+            points: points,
+        });
         return response.data;
     } catch (error) {
         const message =
@@ -26,7 +25,7 @@ export const payWithPoints = async ({ userId, points }) => {
 export const payOrderWithPoints = async (paymentData) => {
     try {
         const response = await paymentApi.post(
-            '/payment/point-only',
+            "/payment/point-only",
             paymentData
         );
         return response.data;
@@ -41,10 +40,7 @@ export const payOrderWithPoints = async (paymentData) => {
 export const preparePayment = async (paymentData) => {
     console.log("paymentData:", paymentData);
     try {
-        const response = await paymentApi.post(
-            '/payment/prepare',
-            paymentData
-        );
+        const response = await paymentApi.post("/payment/prepare", paymentData);
         return response.data;
     } catch (error) {
         const message =
@@ -57,7 +53,7 @@ export const preparePayment = async (paymentData) => {
 export const verifyPayment = async (verificationData) => {
     try {
         const response = await paymentApi.post(
-            '/payment/verify',
+            "/payment/verify",
             verificationData
         );
         return response.data;
@@ -72,7 +68,7 @@ export const verifyPayment = async (verificationData) => {
 export const verifyPointCharge = async (verificationData) => {
     try {
         const response = await paymentApi.post(
-            '/payment/verify-charge',
+            "/payment/verify-charge",
             verificationData
         );
         return response.data;
@@ -86,12 +82,7 @@ export const verifyPointCharge = async (verificationData) => {
 
 export const fetchUserPoints = async () => {
     try {
-        const response = await paymentApi.get(
-            '/customer/user/points',
-            {
-                withCredentials: true,
-            }
-        );
+        const response = await paymentApi.get("/customer/user/points");
         return response.data;
     } catch (error) {
         const message =
@@ -103,10 +94,9 @@ export const fetchUserPoints = async () => {
 
 export const failPayment = async (merchantUid) => {
     try {
-        const response = await paymentApi.post(
-            '/payment/fail',
-            { merchantUid }
-        );
+        const response = await paymentApi.post("/payment/fail", {
+            merchantUid,
+        });
         return response.data;
     } catch (error) {
         throw new Error(
@@ -117,12 +107,7 @@ export const failPayment = async (merchantUid) => {
 
 export const getOrderById = async (orderId) => {
     try {
-        const response = await axios.get(
-            `${API_BASE_URL}/orders/${orderId}`,
-            {
-                withCredentials: true,
-            }
-        );
+        const response = await paymentApi.get(`/orders/${orderId}`);
         return response.data;
     } catch (error) {
         console.error(`ID ${orderId} 주문 정보 조회 실패:`, error);
@@ -134,14 +119,13 @@ export const getOrderById = async (orderId) => {
 
 export const updateOrderStatus = async (orderId, status) => {
     try {
-        const response = await axios.put(
-            `${API_BASE_URL}/orders/${orderId}/status`,
+        const response = await paymentApi.put(
+            `/orders/${orderId}/status`,
             status, // Send status directly as request body
             {
                 headers: {
-                    'Content-Type': 'text/plain' // Backend expects String, not JSON
+                    "Content-Type": "text/plain", // Backend expects String, not JSON
                 },
-                withCredentials: true
             }
         );
         return response.data;

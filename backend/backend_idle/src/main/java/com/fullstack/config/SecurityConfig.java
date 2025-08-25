@@ -48,6 +48,8 @@ public class SecurityConfig {
                 // 주문 생성은 SHIPPER 만 가능
                 .requestMatchers(HttpMethod.POST, "/api/orders").hasRole("SHIPPER")
 
+                .requestMatchers(HttpMethod.PUT, "/api/orders/**").hasRole("SHIPPER")
+
                 // 내 주문 목록은 인증된 사용자만
                 .requestMatchers(HttpMethod.GET, "/api/orders/my").authenticated()
 

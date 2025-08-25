@@ -7,6 +7,8 @@ import com.fullstack.model.enums.OrderStatus; // Added import
 import com.fullstack.repository.OrderRepository;
 import com.fullstack.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 
 import com.fullstack.entity.CustomerEntity;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class OrderService {

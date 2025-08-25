@@ -266,6 +266,10 @@ const ShipperPaymentComponent = ({
                                     };
 
                                     try {
+                                        console.log(
+                                            "Updating order status for order ID:",
+                                            orderList[0].orderId
+                                        );
                                         await updateOrderStatus(
                                             orderList[0].orderId,
                                             "READY"
