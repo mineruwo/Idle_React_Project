@@ -53,20 +53,6 @@ public class CustomOAuth2UserServiceImpl implements CustomOAuth2UserService {
                 customerRepository.save(existing);
             }
         }
-
-        // 3) 그래도 없으면 신규 생성
-        if (existing == null) {
-            CustomerEntity created = CustomerEntity.builder()
-                    .id(email)                       // 네가 쓰는 id(email)
-                    .customName(name)
-                    .nickname(name)
-                    .role("shipper")                 // 기본 롤 지정(혹은 최초 로그인시 선택 흐름)
-                    .snsLoginProvider(provider)
-                    .snsProviderId(providerId)
-                    .isLefted(false)
-                    .build();
-            existing = customerRepository.save(created);
-        }
         
         // 여기서 권한/Principal 구성
         Collection<? extends GrantedAuthority> authorities =

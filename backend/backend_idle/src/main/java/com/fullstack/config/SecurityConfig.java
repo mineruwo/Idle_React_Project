@@ -17,6 +17,12 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.fullstack.security.jwt.JWTFilter;
+import com.fullstack.security.jwt.OAuth2SuccessHandler;
+import com.fullstack.service.CustomOAuth2UserService;
+
+import lombok.RequiredArgsConstructor;
+
 import java.util.Arrays;
 
 @Configuration
@@ -28,10 +34,6 @@ public class SecurityConfig {
 	private final JWTFilter jwtFilter;
 	private final CustomOAuth2UserService customOAuth2UserService;
 	private final OAuth2SuccessHandler oAuth2SuccessHandler;
-
-    public SecurityConfig(JWTFilter jwtFilter) {
-        this.jwtFilter = jwtFilter;
-    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -84,7 +86,7 @@ public class SecurityConfig {
                     "/api/payment/**",
                     "/api/admin/chat-sessions/**", // 채팅 세션 관련 API 허용
                     "/api/email/**",
-                    "/oauth2/**", "/login/oauth2/**", "/oauth2/authorization/**"
+                    "/oauth2/**", "/login/oauth2/**", "/oauth2/authorization/**",
                     "/api/reviews/target/**" // 특정 대상의 리뷰 목록 조회는 누구나 가능
                 ).permitAll()
                 .requestMatchers(
@@ -107,8 +109,6 @@ public class SecurityConfig {
             
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-            // JWT 필터 장착 (UsernamePasswordAuthenticationFilter 앞)
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
