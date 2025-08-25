@@ -8,15 +8,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fullstack.entity.CustomerEntity;
+import com.fullstack.entity.Order;
 import com.fullstack.entity.PaymentEntity;
 import com.fullstack.entity.PointHistory;
-import com.fullstack.model.PaymentRequestDto;
-import com.fullstack.model.PaymentResponseDto;
-import com.fullstack.model.PaymentVerificationDto;
-import com.fullstack.model.PointUsageRequestDto;
+import com.fullstack.model.PaymentRequestDTO;
+import com.fullstack.model.PaymentResponseDTO;
+import com.fullstack.model.PaymentVerificationDTO;
+import com.fullstack.model.PointUsageRequestDTO;
+import com.fullstack.model.enums.OrderStatus; // Added import
 import com.fullstack.repository.CustomerRepository;
 import com.fullstack.repository.PaymentRepository;
 import com.fullstack.repository.PointHistoryRepository;
+import com.fullstack.repository.OrderRepository;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.response.IamportResponse;
@@ -35,6 +38,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final CustomerRepository customerRepository;
     private final PointHistoryRepository pointHistoryRepository;
+    private final OrderRepository orderRepository;
 
     @Value("${portone.api.key}")
     private String portoneApiKey;
@@ -49,16 +53,13 @@ public class PaymentServiceImpl implements PaymentService {
         this.iamportClient = new IamportClient(portoneApiKey, portoneApiSecret);
     }
 
-    // 결제 요청 정보 저장 (프론트에서 결제창 띄우기 전 호출)
     @Override
     @Transactional
-    public PaymentResponseDto preparePayment(PaymentRequestDto requestDto) {
-        // 이미 존재하는 merchant_uid인지 확인 (옵션)
+    public PaymentResponseDTO preparePayment(PaymentRequestDTO requestDto) {
         Optional<PaymentEntity> existingPayment = paymentRepository.findByMerchantUid(requestDto.getMerchantUid());
         if (existingPayment.isPresent()) {
-            // 이미 결제 요청된 주문번호라면 에러 처리 또는 기존 정보 업데이트
-            return new PaymentResponseDto(false, "이미 요청된 주문번호입니다.", null, requestDto.getMerchantUid(), null, null,
-                    null);
+            return new PaymentResponseDTO(false, "이미 요청된 주문번호입니다.", null, requestDto.getMerchantUid(), null, null,
+                    null, null);
         }
 
         PaymentEntity paymentEntity = new PaymentEntity();
@@ -70,18 +71,18 @@ public class PaymentServiceImpl implements PaymentService {
         paymentEntity.setPaymentStatus("READY"); // 결제 준비 상태
         paymentEntity.setRequestedAt(LocalDateTime.now());
         
-        // 사용자 정보 설정
         log.info("preparePayment: Request userId: {}", requestDto.getUserId());
         CustomerEntity customer = customerRepository.findById(requestDto.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + requestDto.getUserId()));
         paymentEntity.setCustomer(customer);
-        paymentEntity.setPointsUsed(requestDto.getPointsToUse()); // 사용된 포인트 저장
-        paymentEntity.setPgProvider(requestDto.getPgProvider()); // PG사 정보 저장
+        paymentEntity.setPointsUsed(requestDto.getPointsToUse());
+        paymentEntity.setPgProvider(requestDto.getPgProvider());
         log.info("preparePayment: PaymentEntity customer ID set to: {}", paymentEntity.getCustomer().getIdNum());
+        log.info("preparePayment: PaymentEntity PointsToUse set to: {}", paymentEntity.getPointsUsed());
 
         paymentRepository.save(paymentEntity);
 
-        PaymentResponseDto responseDto = new PaymentResponseDto();
+        PaymentResponseDTO responseDto = new PaymentResponseDTO();
         responseDto.setSuccess(true);
         responseDto.setMessage("결제 요청 정보가 성공적으로 저장되었습니다.");
         responseDto.setMerchantUid(paymentEntity.getMerchantUid());
@@ -90,18 +91,16 @@ public class PaymentServiceImpl implements PaymentService {
         return responseDto;
     }
 
-    // 결제 검증 (프론트에서 결제 완료 후 호출)
     @Override
     @Transactional
-    public PaymentResponseDto verifyPayment(PaymentVerificationDto verificationDto) {
+    public PaymentResponseDTO verifyPayment(PaymentVerificationDTO verificationDto) {
         String impUid = verificationDto.getImpUid();
         String merchantUid = verificationDto.getMerchantUid();
 
-        PaymentResponseDto responseDto = new PaymentResponseDto();
+        PaymentResponseDTO responseDto = new PaymentResponseDTO();
         responseDto.setMerchantUid(merchantUid);
         responseDto.setImpUid(impUid);
 
-        // 1. DB에서 주문 정보 조회
         Optional<PaymentEntity> optionalPayment = paymentRepository.findByMerchantUid(merchantUid);
         if (optionalPayment.isEmpty()) {
             responseDto.setSuccess(false);
@@ -113,11 +112,9 @@ public class PaymentServiceImpl implements PaymentService {
         PaymentEntity storedPayment = optionalPayment.get();
 
         try {
-            // 2. 포트원에서 결제 정보 조회
             IamportResponse<Payment> portoneResponse = iamportClient.paymentByImpUid(impUid);
             Payment portonePaymentData = portoneResponse.getResponse();
 
-            // 3. 결제 금액 및 상태 검증
             if (storedPayment.getAmount().longValue() != portonePaymentData.getAmount().longValue()) {
                 responseDto.setSuccess(false);
                 responseDto.setMessage("결제 금액이 일치하지 않습니다. 위조된 결제 시도.");
@@ -135,37 +132,21 @@ public class PaymentServiceImpl implements PaymentService {
                 return responseDto;
             }
 
-            // 4. 모든 검증 성공 시 DB 업데이트
             storedPayment.setImpUid(impUid);
             storedPayment.setPaymentStatus("PAID");
             storedPayment.setPaidAt(LocalDateTime.now());
             paymentRepository.save(storedPayment);
 
-            // 포인트 사용 로직 호출
             if (storedPayment.getPointsUsed() != null && storedPayment.getPointsUsed() > 0) {
                 if (storedPayment.getCustomer() == null) {
                     log.error("verifyPayment: Customer entity is null for merchantUid: {}", merchantUid);
-                    // 여기서 더 이상 진행하지 않고, 필요하다면 오류 응답을 반환하거나 다른 처리를 할 수 있습니다.
-                    // 현재는 NullPointerException을 방지하고 로그를 남기는 데 집중합니다.
                 } else {
                     log.info("verifyPayment: Calling usePoints for userId: {} with points: {}", storedPayment.getCustomer().getIdNum(), storedPayment.getPointsUsed());
-                    PointUsageRequestDto pointUsageRequest = new PointUsageRequestDto();
-                    pointUsageRequest.setUserId(storedPayment.getCustomer().getIdNum()); // 이 부분을 다시 수정
+                    PointUsageRequestDTO pointUsageRequest = new PointUsageRequestDTO();
+                    pointUsageRequest.setUserId(storedPayment.getCustomer().getIdNum());
                     pointUsageRequest.setPoints(storedPayment.getPointsUsed());
                     usePoints(pointUsageRequest);
                     log.info("verifyPayment: usePoints method called successfully.");
-                }
-            }
-
-            // 새로운 포인트 충전 로직 추가: 결제 금액이 있고, 사용된 포인트가 없거나 0인 경우 (포인트 충전으로 간주)
-            if (storedPayment.getAmount() != null && storedPayment.getAmount() > 0 &&
-                (storedPayment.getPointsUsed() == null || storedPayment.getPointsUsed() == 0)) {
-                if (storedPayment.getCustomer() == null) {
-                    log.error("verifyPayment: Customer entity is null for merchantUid: {} when trying to add points", merchantUid);
-                } else {
-                    log.info("verifyPayment: Calling addPoints for userId: {} with amount: {}", storedPayment.getCustomer().getIdNum(), storedPayment.getAmount());
-                    addPoints(storedPayment.getCustomer().getIdNum(), storedPayment.getAmount().intValue());
-                    log.info("verifyPayment: addPoints method called successfully.");
                 }
             }
 
@@ -193,12 +174,93 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
-    // 포인트 사용 로직
     @Override
     @Transactional
-    public void usePoints(PointUsageRequestDto requestDto) {
+    public PaymentResponseDTO verifyAndChargePoints(PaymentVerificationDTO verificationDto) {
+        String impUid = verificationDto.getImpUid();
+        String merchantUid = verificationDto.getMerchantUid();
+
+        PaymentResponseDTO responseDto = new PaymentResponseDTO();
+        responseDto.setMerchantUid(merchantUid);
+        responseDto.setImpUid(impUid);
+
+        Optional<PaymentEntity> optionalPayment = paymentRepository.findByMerchantUid(merchantUid);
+        if (optionalPayment.isEmpty()) {
+            responseDto.setSuccess(false);
+            responseDto.setMessage("주문 정보를 찾을 수 없습니다.");
+            responseDto.setPaymentStatus("FAILED");
+            return responseDto;
+        }
+
+        PaymentEntity storedPayment = optionalPayment.get();
+
+        try {
+            IamportResponse<Payment> portoneResponse = iamportClient.paymentByImpUid(impUid);
+            Payment portonePaymentData = portoneResponse.getResponse();
+
+            if (storedPayment.getAmount().longValue() != portonePaymentData.getAmount().longValue()) {
+                responseDto.setSuccess(false);
+                responseDto.setMessage("결제 금액이 일치하지 않습니다. 위조된 결제 시도.");
+                storedPayment.setPaymentStatus("FAILED");
+                paymentRepository.save(storedPayment);
+                log.warn("결제 금액 불일치: DB 금액 {}, 포트원 금액 {}", storedPayment.getAmount(), portonePaymentData.getAmount());
+                return responseDto;
+            }
+
+            if (!"paid".equals(portonePaymentData.getStatus())) {
+                responseDto.setSuccess(false);
+                responseDto.setMessage("결제가 완료되지 않았습니다. 현재 상태: " + portonePaymentData.getStatus());
+                storedPayment.setPaymentStatus(portonePaymentData.getStatus().toUpperCase());
+                paymentRepository.save(storedPayment);
+                return responseDto;
+            }
+
+            storedPayment.setImpUid(impUid);
+            storedPayment.setPaymentStatus("PAID");
+            storedPayment.setPaidAt(LocalDateTime.now());
+            paymentRepository.save(storedPayment);
+
+            // 포인트 충전 로직
+            if ("포인트 충전".equals(storedPayment.getItemName())) {
+                if (storedPayment.getCustomer() == null) {
+                    log.error("verifyAndChargePoints: Customer entity is null for merchantUid: {}", merchantUid);
+                } else {
+                    log.info("verifyAndChargePoints: Calling addPoints for userId: {} with amount: {}", storedPayment.getCustomer().getIdNum(), storedPayment.getAmount().intValue());
+                    addPoints(storedPayment.getCustomer().getIdNum(), storedPayment.getAmount().intValue());
+                    log.info("verifyAndChargePoints: addPoints method called successfully.");
+                }
+            } else {
+                log.warn("verifyAndChargePoints: itemName is not '포인트 충전'. itemName: {}", storedPayment.getItemName());
+            }
+
+            responseDto.setSuccess(true);
+            responseDto.setMessage("결제가 성공적으로 완료되고 포인트가 충전되었습니다.");
+            responseDto.setAmount(storedPayment.getAmount());
+            responseDto.setPaymentStatus(storedPayment.getPaymentStatus());
+
+            return responseDto;
+
+        } catch (IamportResponseException e) {
+            log.error("PortOne API 오류: {}", e.getMessage());
+            responseDto.setSuccess(false);
+            responseDto.setMessage("결제 검증 중 오류가 발생했습니다. (API 통신 에러)");
+            storedPayment.setPaymentStatus("FAILED");
+            paymentRepository.save(storedPayment);
+            return responseDto;
+        } catch (IOException e) {
+            log.error("PortOne 통신 오류: {}", e.getMessage());
+            responseDto.setSuccess(false);
+            responseDto.setMessage("결제 검증 중 오류가 발생했습니다. (통신 에러)");
+            storedPayment.setPaymentStatus("FAILED");
+            paymentRepository.save(storedPayment);
+            return responseDto;
+        }
+    }
+
+    @Override
+    @Transactional
+    public void usePoints(PointUsageRequestDTO requestDto) {
         log.info("Entering usePoints method for userId: {} with points: {}", requestDto.getUserId(), requestDto.getPoints());
-        // 1. 사용자 조회
         CustomerEntity customer = customerRepository.findById(requestDto.getUserId())
                 .orElseThrow(() -> {
                     log.error("사용자를 찾을 수 없습니다: {}", requestDto.getUserId());
@@ -206,34 +268,30 @@ public class PaymentServiceImpl implements PaymentService {
                 });
         log.info("usePoints: Found customer with ID: {} and current points: {}", customer.getIdNum(), customer.getUserPoint());
 
-        // 2. 포인트 검증
         int pointsToUse = requestDto.getPoints();
         if (customer.getUserPoint() < pointsToUse) {
             log.error("포인트가 부족합니다. 현재 포인트: {}, 사용 요청 포인트: {}", customer.getUserPoint(), pointsToUse);
             throw new IllegalStateException("포인트가 부족합니다.");
         }
 
-        // 3. 사용자 포인트 차감
         log.info("usePoints: Before point deduction, customer {} points: {}", customer.getIdNum(), customer.getUserPoint());
         int newBalance = customer.getUserPoint() - pointsToUse;
         customer.setUserPoint(newBalance);
         customerRepository.save(customer);
         log.info("usePoints: After point deduction and save, customer {} new balance: {}", customer.getIdNum(), customer.getUserPoint());
 
-        // 4. 포인트 사용 내역 기록
         PointHistory history = PointHistory.builder()
                 .customer(customer)
                 .transactionType("USE")
                 .amount(-pointsToUse)
                 .balanceAfter(newBalance)
-                .description("상품 구매") // 설명은 필요에 따라 변경
+                .description("상품 구매")
                 .build();
         log.info("usePoints: PointHistory object created: {}", history);
         pointHistoryRepository.save(history);
         log.info("포인트 사용 내역 기록 완료: {}", history);
     }
 
-    // 포인트 충전 로직
     @Override
     @Transactional
     public void addPoints(Integer userId, int amount) {
@@ -293,6 +351,73 @@ public class PaymentServiceImpl implements PaymentService {
         } else {
             log.warn("failPayment: merchantUid '{}'의 결제 상태가 'READY'가 아니므로(현재 상태: {}) 변경하지 않습니다.", merchantUid, payment.getPaymentStatus());
         }
+    }
+
+    @Override
+    @Transactional
+    public PaymentResponseDTO processPointOnlyPayment(PointUsageRequestDTO requestDto) {
+        Integer userId = requestDto.getUserId();
+        Integer orderId = requestDto.getOrderId();
+        int pointsToUse = requestDto.getPoints();
+
+        CustomerEntity customer = customerRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
+
+        Order order = orderRepository.findById(orderId.longValue())
+                .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다: " + orderId));
+
+        if (order.getDriverPrice() != pointsToUse) {
+            throw new IllegalStateException("주문 금액과 사용 포인트가 일치하지 않습니다.");
+        }
+
+        if (customer.getUserPoint() < pointsToUse) {
+            throw new IllegalStateException("포인트가 부족합니다.");
+        }
+
+        // 1. PaymentEntity 생성 및 저장
+        PaymentEntity payment = new PaymentEntity();
+        payment.setMerchantUid("point_only_" + order.getId() + "_" + System.currentTimeMillis());
+        payment.setItemName(order.getCargoType() != null ? order.getCargoType() + " 운송 서비스" : "화물 운송 서비스");
+        payment.setAmount(0L);
+        payment.setBuyerName(customer.getNickname());
+        payment.setBuyerEmail(customer.getId());
+        payment.setPaymentStatus("PAID");
+        payment.setPaidAt(LocalDateTime.now());
+        payment.setCustomer(customer);
+        payment.setPointsUsed(pointsToUse);
+        payment.setPgProvider("points"); // PG사를 'points'로 명시
+
+        paymentRepository.save(payment);
+
+        // 2. 포인트 차감 및 히스토리 기록
+        int newBalance = customer.getUserPoint() - pointsToUse;
+        customer.setUserPoint(newBalance);
+        customerRepository.save(customer);
+
+        PointHistory history = PointHistory.builder()
+                .customer(customer)
+                .transactionType("USE")
+                .amount(-pointsToUse)
+                .balanceAfter(newBalance)
+                .description(order.getId() + "번 주문 전액 포인트 결제")
+                .build();
+        pointHistoryRepository.save(history);
+
+        // 3. 주문 상태 변경
+        order.setStatus(OrderStatus.READY);
+        orderRepository.save(order);
+
+        // 4. PaymentResponseDTO 생성 및 반환
+        PaymentResponseDTO responseDto = new PaymentResponseDTO();
+        responseDto.setSuccess(true);
+        responseDto.setMessage("전액 포인트 결제가 성공적으로 완료되었습니다.");
+        responseDto.setMerchantUid(payment.getMerchantUid());
+        responseDto.setImpUid(null); // 외부 결제 imp_uid는 없음
+        responseDto.setAmount(payment.getAmount());
+        responseDto.setPaymentStatus(payment.getPaymentStatus());
+        responseDto.setPaidAt(payment.getPaidAt().toString());
+
+        return responseDto;
     }
 }
      

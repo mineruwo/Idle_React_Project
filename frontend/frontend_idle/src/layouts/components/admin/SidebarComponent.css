@@ -66,6 +66,12 @@
   }
 }
 
+@media (max-width: 767px) {
+  .sidebar {
+    padding-top: 80px;
+  }
+}
+
 .submenu-list {
   list-style: none;
   padding: 0;

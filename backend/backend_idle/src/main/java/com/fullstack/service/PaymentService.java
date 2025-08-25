@@ -1,19 +1,23 @@
 package com.fullstack.service;
 
-import com.fullstack.model.PaymentRequestDto;
-import com.fullstack.model.PaymentResponseDto;
-import com.fullstack.model.PaymentVerificationDto;
-import com.fullstack.model.PointUsageRequestDto;
+import com.fullstack.model.PaymentRequestDTO;
+import com.fullstack.model.PaymentResponseDTO;
+import com.fullstack.model.PaymentVerificationDTO;
+import com.fullstack.model.PointUsageRequestDTO;
 
 public interface PaymentService {
 
-    PaymentResponseDto preparePayment(PaymentRequestDto requestDto);
+    PaymentResponseDTO preparePayment(PaymentRequestDTO requestDto);
 
-    PaymentResponseDto verifyPayment(PaymentVerificationDto verificationDto);
+    PaymentResponseDTO verifyPayment(PaymentVerificationDTO verificationDto);
 
-    void usePoints(PointUsageRequestDto requestDto);
+    PaymentResponseDTO verifyAndChargePoints(PaymentVerificationDTO verificationDto);
+
+    void usePoints(PointUsageRequestDTO requestDto);
 
     void addPoints(Integer userId, int amount);
 
     void failPayment(String merchantUid);
+
+    PaymentResponseDTO processPointOnlyPayment(PointUsageRequestDTO requestDto);
 }

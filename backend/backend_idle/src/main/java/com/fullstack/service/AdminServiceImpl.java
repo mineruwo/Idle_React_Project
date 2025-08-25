@@ -3,7 +3,12 @@ package com.fullstack.service;
 import com.fullstack.entity.Admin;
 import com.fullstack.model.AdminDTO;
 import com.fullstack.repository.AdminRepository;
+
+import jakarta.persistence.criteria.Predicate;
+
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit; // Added import
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -12,6 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 
 @Service
 @RequiredArgsConstructor
@@ -51,8 +59,77 @@ public class AdminServiceImpl implements AdminService {
 	 */
 
     @Override
-    public Page<AdminDTO> getAdminList(Pageable pageable) {
-        Page<Admin> adminPage = adminRepository.findAll(pageable);
+    public Page<AdminDTO> getAdminList(Pageable pageable, String role, String searchType, String searchQuery) {
+        Specification<Admin> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Role filter
+            if (role != null && !role.isEmpty()) {
+                predicates.add(cb.equal(root.get("role"), role));
+            }
+
+            // Search filter
+            if (searchQuery != null && !searchQuery.isEmpty()) {
+                switch (searchType) {
+                    case "adminId":
+                        predicates.add(cb.like(root.get("adminId"), "%" + searchQuery + "%"));
+                        break;
+                    case "name":
+                        predicates.add(cb.like(root.get("name"), "%" + searchQuery + "%"));
+                        break;
+                    case "emplId":
+                        predicates.add(cb.like(root.get("emplId"), "%" + searchQuery + "%"));
+                        break;
+                }
+            }
+
+            // Exclude deleted admins
+            predicates.add(cb.isFalse(root.get("isDel")));
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Page<Admin> adminPage = adminRepository.findAll(spec, pageable);
+        return adminPage.map(this::entityToDto);
+    }
+
+    private LocalDateTime calculateDateTime(String dateRange) {
+        LocalDateTime now = LocalDateTime.now();
+        switch (dateRange) {
+            case "1day":
+                return now.minus(1, ChronoUnit.DAYS);
+            case "1week":
+                return now.minus(1, ChronoUnit.WEEKS);
+            case "1month":
+                return now.minus(1, ChronoUnit.MONTHS);
+            default:
+                return LocalDateTime.MIN; // No date filter
+        }
+    }
+
+    @Override
+    public Page<AdminDTO> getRecentlyCreatedAdmins(Pageable pageable, String dateRange) {
+        LocalDateTime filterDateTime = calculateDateTime(dateRange);
+        Specification<Admin> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isFalse(root.get("isDel")));
+            predicates.add(cb.greaterThanOrEqualTo(root.get("regDate"), filterDateTime));
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        Page<Admin> adminPage = adminRepository.findAll(spec, pageable);
+        return adminPage.map(this::entityToDto);
+    }
+
+    @Override
+    public Page<AdminDTO> getRecentlyDeletedAdmins(Pageable pageable, String dateRange) {
+        LocalDateTime filterDateTime = calculateDateTime(dateRange);
+        Specification<Admin> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isTrue(root.get("isDel")));
+            predicates.add(cb.greaterThanOrEqualTo(root.get("delDate"), filterDateTime));
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        Page<Admin> adminPage = adminRepository.findAll(spec, pageable);
         return adminPage.map(this::entityToDto);
     }
 

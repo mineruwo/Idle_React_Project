@@ -50,10 +50,10 @@ export const createAdmin = async (adminData) => {
     }
 };
 
-export const getAdminList = async (page = 0, size = 10) => {
+export const getAdminList = async (params = {}) => {
     try {
         const response = await adminApi.get(`/admin/accounts`, {
-            params: { page, size },
+            params: params,
         });
         return response.data;
     } catch (error) {
@@ -62,10 +62,10 @@ export const getAdminList = async (page = 0, size = 10) => {
     }
 };
 
-export const getCustomerList = async (page = 0, size = 10) => {
+export const getCustomerList = async (params = {}) => {
     try {
         const response = await adminApi.get(`/admin/customers`, {
-            params: { page, size },
+            params: params,
         });
         return response.data;
     } catch (error) {
@@ -140,6 +140,117 @@ export const fetchCustomerRecentInquiries = async (customerId) => {
         return response.data;
     } catch (error) {
         console.error(`Failed to fetch recent inquiries for customer ${customerId}:`, error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+// FAQ Management
+export const getAllFAQs = async () => {
+    try {
+        const response = await adminApi.get(`/admin/faqs`);
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch FAQs:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const createFAQ = async (faqData) => {
+    try {
+        const response = await adminApi.post(`/admin/faqs`, faqData);
+        return response.data;
+    } catch (error) {
+        console.error('FAQ creation failed:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const updateFAQ = async (faqId, faqData) => {
+    try {
+        const response = await adminApi.put(`/admin/faqs/${faqId}`, faqData);
+        return response.data;
+    } catch (error) {
+        console.error('FAQ update failed:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const deleteFAQ = async (faqId) => {
+    try {
+        const response = await adminApi.delete(`/admin/faqs/${faqId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Failed to delete FAQ:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const toggleFAQActive = async (faqId) => {
+    try {
+        const response = await adminApi.patch(`/admin/faqs/${faqId}/toggle`, {});
+        return response.data;
+    } catch (error) {
+        console.error('Failed to toggle FAQ activation:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const getRecentlyCreatedAdmins = async (size, page, dateRange) => {
+    try {
+        const response = await adminApi.get(`/admin/dashboard/recent-admins/created`, { params: { size, page, dateRange } });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch recently created admins:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const getRecentlyDeletedAdmins = async (size, page, dateRange) => {
+    try {
+        const response = await adminApi.get(`/admin/dashboard/recent-admins/deleted`, { params: { size, page, dateRange } });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch recently deleted admins:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const getRecentlyCreatedCustomers = async (size, page, dateRange) => {
+    try {
+        const response = await adminApi.get(`/admin/dashboard/recent-customers/created`, { params: { size, page, dateRange } });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch recently created customers:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const getRecentlyDeletedCustomers = async (size, page, dateRange) => {
+    try {
+        const response = await adminApi.get(`/admin/dashboard/recent-customers/deleted`, { params: { size, page, dateRange } });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch recently deleted customers:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const getDailyCustomerCreationCounts = async (year, month) => {
+    try {
+        const response = await adminApi.get(`/admin/dashboard/customer-creation-counts`, { params: { year, month } });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch daily customer creation counts:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const getDailyCustomerDeletionCounts = async (year, month) => {
+    try {
+        const response = await adminApi.get(`/admin/dashboard/customer-deletion-counts`, { params: { year, month } });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch daily customer deletion counts:', error.response ? error.response.data : error.message);
         throw error;
     }
 };

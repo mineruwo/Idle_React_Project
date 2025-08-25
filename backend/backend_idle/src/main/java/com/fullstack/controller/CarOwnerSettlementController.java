@@ -12,6 +12,7 @@ import com.fullstack.model.CarOwnerSettlementDTO.SettlementSummaryCardResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,11 +29,15 @@ public class CarOwnerSettlementController {
     @GetMapping
     public Page<SettlementSummaryResponse> list(
             @AuthenticationPrincipal String ownerId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String status,                 // REQUESTED/APPROVED/PAID/CANCELED
-            @RequestParam(required = false) LocalDate from,               // yyyy-MM-dd
-            @RequestParam(required = false) LocalDate to                  // yyyy-MM-dd
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "status", required = false) String status, // REQUESTED/APPROVED/PAID/CANCELED
+            @RequestParam(name = "from", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate from, // yyyy-MM-dd
+            @RequestParam(name = "to", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate to    // yyyy-MM-dd
     ) {
         return settlementService.list(ownerId, page, size, status, from, to);
     }

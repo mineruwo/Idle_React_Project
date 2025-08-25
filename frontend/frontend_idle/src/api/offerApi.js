@@ -21,7 +21,7 @@ export const fetchAssignment = (orderId) =>
 
 // (기사) 입찰 생성 — driverId는 안 보냄 (로그인에서 추출)
 export const createOffer = ({ orderId, price, memo }) =>
-  client.post(`/offers`, { orderId, price, memo });
+  client.post(`/offers/add`, { orderId, price, memo });
 
 // (화주) 기사 선택 → 등록+배정 한 번에
 export const assignOfferDirect = ({ orderId, driverId, price, memo }) =>

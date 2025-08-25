@@ -1,9 +1,17 @@
+.admin-header-nav {
+    width: calc(100% - 250px);
+    margin-left: 250px;
+    display: flex;
+    align-items: center;
+}
+
 .admin-header-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
     padding: 0 10px; /* 좌우 패딩 추가 */
+    min-height: 60px;
 }
 
 .header-left-section, .header-right-section {

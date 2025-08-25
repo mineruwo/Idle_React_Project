@@ -2,24 +2,20 @@ package com.fullstack.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import org.springframework.http.HttpMethod;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import com.fullstack.security.jwt.JWTFilter;
-import com.fullstack.security.jwt.OAuth2SuccessHandler;
-import com.fullstack.service.CustomOAuth2UserService;
-
-import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 
@@ -33,9 +29,14 @@ public class SecurityConfig {
 	private final CustomOAuth2UserService customOAuth2UserService;
 	private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
-	@Bean
+    public SecurityConfig(JWTFilter jwtFilter) {
+        this.jwtFilter = jwtFilter;
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            // CORS & CSRF
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable()) // CSRF 보호 비활성화 (API 서버)
             .httpBasic(httpBasic -> httpBasic.disable()) // HTTP Basic 인증 비활성화
@@ -43,6 +44,27 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함
             //.anonymous(anonymous -> anonymous.disable()) // 익명 비활성화
             .authorizeHttpRequests(auth -> auth
+                // 프리플라이트
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                // 주문 생성은 SHIPPER 만 가능
+                .requestMatchers(HttpMethod.POST, "/api/orders").hasRole("SHIPPER")
+
+                .requestMatchers(HttpMethod.PUT, "/api/orders/**").hasRole("SHIPPER")
+
+                // 내 주문 목록은 인증된 사용자만
+                .requestMatchers(HttpMethod.GET, "/api/orders/my").authenticated()
+
+                // 나머지 주문 관련 GET 요청은 공개
+                .requestMatchers(HttpMethod.GET, "/api/orders/**").permitAll()
+
+                // 입찰 API (현재 전부 공개, 운영 시 필요에 따라 롤 제한)
+                .requestMatchers("/api/offers/**").permitAll()
+
+                // 인증/토큰 관련
+                .requestMatchers("/api/auth/**").permitAll()
+
+                // 관리자(요구 반영: 공개, 운영 전환 시 제한 권장)
                 .requestMatchers(
                     "/api/orders/**",   // 🚚 오더 등록/조회/삭제 전부 허용
                     "/auth/**",   
@@ -63,9 +85,11 @@ public class SecurityConfig {
                     "/api/admin/chat-sessions/**", // 채팅 세션 관련 API 허용
                     "/api/email/**",
                     "/oauth2/**", "/login/oauth2/**", "/oauth2/authorization/**"
+                    "/api/reviews/target/**" // 특정 대상의 리뷰 목록 조회는 누구나 가능
                 ).permitAll()
                 .requestMatchers(
-                        "/api/auth/me"
+                    "/api/auth/me",
+                    "/api/reviews"     // 리뷰 작성 및 삭제는 인증된 사용자만 가능
                 ).authenticated()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/reset-password").permitAll()
@@ -83,7 +107,8 @@ public class SecurityConfig {
             
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-           
+            // JWT 필터 장착 (UsernamePasswordAuthenticationFilter 앞)
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

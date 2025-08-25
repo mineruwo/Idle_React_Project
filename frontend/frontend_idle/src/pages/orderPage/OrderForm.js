@@ -207,7 +207,7 @@ const OrderForm = () => {
         cargoType,
         cargoSize,
 
-        status: "등록완료",
+        status: "CREATED",
       };
 
       const saved = await saveOrder(payload); // 저장된 Order( id 포함 ) 반환 가정

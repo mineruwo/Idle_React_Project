@@ -1,39 +1,107 @@
 import { useState, useEffect } from "react";
 import "../../../theme/ShipperCustomCss/ShipperPayment.css";
 import {
-    payWithPoints,
+    payOrderWithPoints,
     preparePayment,
     verifyPayment,
     fetchUserPoints,
     failPayment,
+    getOrderById,
+    updateOrderStatus,
 } from "../../../api/paymentApi";
 import useCustomMove from "../../../hooks/useCustomMove";
+import { useSearchParams } from "react-router-dom";
 
-const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
+const packingKeyToText = {
+    special: "특수포장",
+    normal: "일반포장",
+    expensive: "고가화물",
+    fragile: "파손위험물",
+};
+
+const prettyPacking = (val) => {
+    if (!val) return "-";
+    try {
+        if (typeof val === "string" && val.trim().startsWith("{")) {
+            const obj = JSON.parse(val);
+            const keys = Object.entries(obj)
+                .filter(([, v]) => !!v)
+                .map(([k]) => packingKeyToText[k] || k);
+            return keys.length ? keys.join(", ") : "-";
+        }
+    } catch {}
+    const keys = Array.isArray(val)
+        ? val
+        : String(val)
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean);
+    return keys.length
+        ? keys.map((k) => packingKeyToText[k] || k).join(", ")
+        : "-";
+};
+
+const ShipperPaymentComponent = ({
+    nickname,
+    userId,
+    userEmail,
+    orderData,
+}) => {
     const [currentPoints, setCurrentPoints] = useState(0);
-    const [usePoints, setUsePoints] = useState(""); // 사용할 포인트 입력 값
+    const [usePoints, setUsePoints] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [selectedPaymentType, setSelectedPaymentType] = useState("card");
 
     const { shipperMoveToPaymentSuccess } = useCustomMove();
 
-    const [orderList, setOrderList] = useState([
-        {
-            orderId: "ORD123456789",
-            itemName: "화물 운송 서비스",
-            amount: 50000,
-        },
-    ]);
+    const [orderList, setOrderList] = useState([]);
+    const [searchParams] = useSearchParams();
 
-    const addOrder = () => {
-        const newOrder = {
-            orderId: `ORD${Math.floor(Math.random() * 1000000000)}`,
-            itemName: "추가된 운송 서비스",
-            amount: Math.floor(Math.random() * 100000) + 10000,
-        };
-        setOrderList((prevList) => [...prevList, newOrder]);
-    };
+    useEffect(() => {
+        if (orderData) {
+            if (orderData.status === "PAYMENT_PENDING") {
+                const formattedOrder = {
+                    orderId: orderData.id,
+                    itemName: orderData.cargoType
+                        ? `${orderData.cargoType} 운송 서비스`
+                        : "화물 운송 서비스",
+                    amount: orderData.driverPrice,
+                    ...orderData,
+                };
+                setOrderList([formattedOrder]);
+            } else {
+                setMessage("이 주문은 결제 대기 상태가 아닙니다.");
+                setOrderList([]);
+            }
+        } else {
+            const orderId = searchParams.get("orderId");
+            if (orderId) {
+                getOrderById(orderId)
+                    .then((data) => {
+                        if (data.status === "PAYMENT_PENDING") {
+                            const formattedOrder = {
+                                orderId: data.id,
+                                itemName: data.cargoType
+                                    ? `${data.cargoType} 운송 서비스`
+                                    : "화물 운송 서비스",
+                                amount: data.driverPrice,
+                                ...data,
+                            };
+                            setOrderList([formattedOrder]);
+                        } else {
+                            setMessage("이 주문은 결제 대기 상태가 아닙니다.");
+                            setOrderList([]);
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("주문 정보 조회 실패:", error);
+                        setMessage("주문 정보를 불러오는데 실패했습니다.");
+                        setOrderList([]);
+                    });
+            }
+        }
+    }, [orderData, searchParams]);
 
     useEffect(() => {
         const getUserPoints = async () => {
@@ -56,19 +124,19 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
     };
 
     const handlePayment = async () => {
-        const pointsToApply = parseInt(usePoints, 10) || 0;
+        const pointsToUse = parseInt(usePoints, 10) || 0;
         const totalOrderAmount = totalAmount;
 
-        if (pointsToApply < 0) {
+        if (pointsToUse < 0) {
             setMessage("사용할 포인트는 0 이상이어야 합니다.");
             return;
         }
-        if (pointsToApply > currentPoints) {
+        if (pointsToUse > currentPoints) {
             setMessage("보유 포인트보다 많은 포인트를 사용할 수 없습니다.");
             return;
         }
 
-        const amountToPayExternally = totalOrderAmount - pointsToApply;
+        const amountToPayExternally = totalOrderAmount - pointsToUse;
 
         setIsLoading(true);
         setMessage("결제 처리중...");
@@ -76,19 +144,26 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
         try {
             if (amountToPayExternally <= 0) {
                 // 전액 포인트로 결제
-                const response = await payWithPoints({
+                const response = await payOrderWithPoints({
                     userId: userId,
-                    points: totalOrderAmount, // 주문 금액만큼 포인트 사용
+                    orderId: orderList[0].orderId,
+                    points: totalOrderAmount,
                 });
 
                 if (response.success) {
-                    setMessage(
-                        `${totalOrderAmount.toLocaleString()}P 포인트로 결제가 완료되었습니다.`
-                    );
-                    setCurrentPoints(
-                        (prevPoints) => prevPoints - totalOrderAmount
-                    );
-                    setUsePoints(""); // 사용 포인트 초기화
+                    const paymentInfo = {
+                        merchantUid: response.merchantUid,
+                        itemName:
+                            orderList.length > 1
+                                ? `${orderList[0].itemName} 외 ${
+                                      orderList.length - 1
+                                  }건`
+                                : orderList[0].itemName,
+                        amount: response.amount,
+                        paidAt: response.paidAt,
+                        pgProvider: "points",
+                    };
+                    shipperMoveToPaymentSuccess({ paymentInfo });
                 } else {
                     setMessage(`포인트 결제 실패: ${response.message}`);
                 }
@@ -130,11 +205,12 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                                   orderList.length - 1
                               }건`
                             : orderList[0].itemName,
-                    amount: amountToPayExternally, // 외부 결제 금액
+                    amount: amountToPayExternally,
                     buyerName: nickname,
                     buyerEmail: userEmail,
                     userId: userId,
                     pgProvider: pgProviderForBackend,
+                    pointsToUse: pointsToUse,
                 });
 
                 if (!prepareResponse.success) {
@@ -189,24 +265,32 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                                         pgProvider: pgProviderForBackend,
                                     };
 
-                                    // 외부 결제 성공 후 포인트 차감
-                                    if (pointsToApply > 0) {
-                                        const pointDeductionResponse =
-                                            await payWithPoints({
-                                                userId: userId,
-                                                points: pointsToApply,
-                                            });
-                                        if (pointDeductionResponse.success) {
-                                            setCurrentPoints(
-                                                (prevPoints) =>
-                                                    prevPoints - pointsToApply
-                                            );
-                                            setUsePoints("");
-                                        } else {
-                                            setMessage(
-                                                `포인트 차감 실패: ${pointDeductionResponse.message}`
-                                            );
-                                        }
+                                    try {
+                                        console.log(
+                                            "Updating order status for order ID:",
+                                            orderList[0].orderId
+                                        );
+                                        await updateOrderStatus(
+                                            orderList[0].orderId,
+                                            "READY"
+                                        );
+                                        console.log("주문 상태 업데이트 성공!");
+                                    } catch (statusUpdateError) {
+                                        console.error(
+                                            "주문 상태 업데이트 실패:",
+                                            statusUpdateError
+                                        );
+                                        setMessage(
+                                            `주문 상태 업데이트 실패: ${statusUpdateError.message}`
+                                        );
+                                    }
+
+                                    if (pointsToUse > 0) {
+                                        setCurrentPoints(
+                                            (prevPoints) =>
+                                                prevPoints - pointsToUse
+                                        );
+                                        setUsePoints("");
                                     }
                                     shipperMoveToPaymentSuccess({
                                         paymentInfo,
@@ -224,7 +308,6 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                                 setIsLoading(false);
                             }
                         } else {
-                            // 결제 실패 또는 취소 시
                             await failPayment(rsp.merchant_uid);
                             setMessage(`결제 실패: ${rsp.error_msg}`);
                             setIsLoading(false);
@@ -248,17 +331,15 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
     return (
         <div className="spp-point-layout-container">
             <div className="left-sections-wrapper">
-                <button onClick={addOrder} style={{ marginBottom: "1rem" }}>
-                    주문 정보 추가 테스트
-                </button>
-                {/* 주문 정보 섹션 */}
                 <div className="order-info-section">
                     <h2 className="spp-page-title">주문 정보</h2>
                     {orderList.map((order) => (
                         <div className="order-item" key={order.orderId}>
                             <div className="order-amount">
                                 <span>{order.orderId}</span>
-                                <span>{order.amount.toLocaleString()}원</span>
+                                <span>
+                                    {(order.amount || 0).toLocaleString()}원
+                                </span>
                             </div>
 
                             <div className="order-details-wrap">
@@ -269,11 +350,11 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                                     </li>
                                     <li>
                                         <span>출발지</span>
-                                        <span>{order.origin}</span>
+                                        <span>{order.departure}</span>
                                     </li>
                                     <li>
                                         <span>도착지</span>
-                                        <span>{order.destination}</span>
+                                        <span>{order.arrival}</span>
                                     </li>
                                     <li>
                                         <span>화물 종류</span>
@@ -283,7 +364,7 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                                 <ul className="order-info-table">
                                     <li>
                                         <span>크기</span>
-                                        <span>{order.size}</span>
+                                        <span>{order.cargoSize}</span>
                                     </li>
                                     <li>
                                         <span>무게</span>
@@ -291,11 +372,16 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                                     </li>
                                     <li>
                                         <span>차량 종류</span>
-                                        <span>{order.vehicleType}</span>
+                                        <span>{order.vehicle}</span>
                                     </li>
                                     <li>
                                         <span>포장 여부</span>
-                                        <span>{order.isPackaged}</span>
+                                        <span>
+                                            {prettyPacking(
+                                                order.packingOptions ??
+                                                    order.packingOption
+                                            )}
+                                        </span>
                                     </li>
                                 </ul>
                             </div>
@@ -303,7 +389,6 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                     ))}
                 </div>
 
-                {/* 포인트 사용 섹션 */}
                 <div className="point-usage-section spp-point-management-section">
                     <h2 className="spp-page-title">포인트 사용</h2>
                     <div className="point-usage-details-content">
@@ -350,101 +435,83 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                 <div className="spp-payment-method-section spp-point-management-section">
                     <h2 className="spp-page-title">결제 수단</h2>
                     <div className="payment-method-details-content">
-                        <div className="payment-group">
-                            <h3 className="payment-group-title">일반결제</h3>
-                            <div className="pay-method-list easy-payment-options">
-                                <label
-                                    className={`payment-option ${
-                                        selectedPaymentType === "card"
-                                            ? "selected"
-                                            : ""
-                                    }`}
-                                >
-                                    <input
-                                        type="radio"
-                                        name="paymentType"
-                                        value="card"
-                                        checked={selectedPaymentType === "card"}
-                                        onChange={(e) =>
-                                            setSelectedPaymentType(
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                    <span>일반결제</span>
-                                </label>
-                            </div>
-                        </div>
-                        <div className="payment-group">
-                            <h3 className="payment-group-title">간편결제</h3>
-                            <div className="pay-method-list easy-payment-options">
-                                <label
-                                    className={`payment-option ${
-                                        selectedPaymentType === "kakaopay"
-                                            ? "selected"
-                                            : ""
-                                    }`}
-                                >
-                                    <input
-                                        type="radio"
-                                        name="paymentType"
-                                        value="kakaopay"
-                                        checked={
-                                            selectedPaymentType === "kakaopay"
-                                        }
-                                        onChange={(e) =>
-                                            setSelectedPaymentType(
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                    <span>카카오페이</span>
-                                </label>
-                                <label
-                                    className={`payment-option ${
-                                        selectedPaymentType === "tosspay"
-                                            ? "selected"
-                                            : ""
-                                    }`}
-                                >
-                                    <input
-                                        type="radio"
-                                        name="paymentType"
-                                        value="tosspay"
-                                        checked={
-                                            selectedPaymentType === "tosspay"
-                                        }
-                                        onChange={(e) =>
-                                            setSelectedPaymentType(
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                    <span>토스페이</span>
-                                </label>
-                                <label
-                                    className={`payment-option ${
-                                        selectedPaymentType === "payco"
-                                            ? "selected"
-                                            : ""
-                                    }`}
-                                >
-                                    <input
-                                        type="radio"
-                                        name="paymentType"
-                                        value="payco"
-                                        checked={
-                                            selectedPaymentType === "payco"
-                                        }
-                                        onChange={(e) =>
-                                            setSelectedPaymentType(
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                    <span>페이코</span>
-                                </label>
-                            </div>
+                        <div className="pay-method-list vertical-payment-options">
+                            <label
+                                className={`payment-option ${
+                                    selectedPaymentType === "kakaopay"
+                                        ? "selected"
+                                        : ""
+                                }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="paymentType"
+                                    value="kakaopay"
+                                    checked={selectedPaymentType === "kakaopay"}
+                                    onChange={(e) =>
+                                        setSelectedPaymentType(e.target.value)
+                                    }
+                                />
+                                <span>카카오페이</span>
+                                <span className="checkmark">✔</span>
+                            </label>
+                            <label
+                                className={`payment-option ${
+                                    selectedPaymentType === "tosspay"
+                                        ? "selected"
+                                        : ""
+                                }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="paymentType"
+                                    value="tosspay"
+                                    checked={selectedPaymentType === "tosspay"}
+                                    onChange={(e) =>
+                                        setSelectedPaymentType(e.target.value)
+                                    }
+                                />
+                                <span>토스페이</span>
+                                <span className="checkmark">✔</span>
+                            </label>
+                            <label
+                                className={`payment-option ${
+                                    selectedPaymentType === "payco"
+                                        ? "selected"
+                                        : ""
+                                }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="paymentType"
+                                    value="payco"
+                                    checked={selectedPaymentType === "payco"}
+                                    onChange={(e) =>
+                                        setSelectedPaymentType(e.target.value)
+                                    }
+                                />
+                                <span>페이코</span>
+                                <span className="checkmark">✔</span>
+                            </label>
+                            <label
+                                className={`payment-option ${
+                                    selectedPaymentType === "card"
+                                        ? "selected"
+                                        : ""
+                                }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="paymentType"
+                                    value="card"
+                                    checked={selectedPaymentType === "card"}
+                                    onChange={(e) =>
+                                        setSelectedPaymentType(e.target.value)
+                                    }
+                                />
+                                <span>일반결제</span>
+                                <span className="checkmark">✔</span>
+                            </label>
                         </div>
                     </div>
                 </div>

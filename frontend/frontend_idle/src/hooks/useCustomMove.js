@@ -17,8 +17,10 @@ const useCustomMove = () => {
         navigate({ pathname: `/shipper/orderBoard` });
     };
 
-    const shipperMoveToPayment = () => {
-        navigate({ pathname: `/shipper/payment` });
+    const shipperMoveToPayment = (orderData) => {
+        navigate({
+            pathname: `/shipper/payment`,
+        }, { state: { orderData } });
     };
 
     const shipperMoveToPaymentSuccess = (state) => {
@@ -31,6 +33,14 @@ const useCustomMove = () => {
 
     const shipperMoveToPoint = () => {
         navigate({ pathname: `/shipper/point` });
+    };
+
+    const shipperMoveToOrderHistory = () => {
+        navigate({ pathname: `/shipper/orderHistory` });
+    };
+
+    const shipperMoveToInquiries = () => {
+        navigate({ pathname: `/shipper/inquiries` });
     };
 
     const carOwnerMoveToDashboard = () => navigate("/carPage");
@@ -100,6 +110,8 @@ const useCustomMove = () => {
         shipperMoveToReview,
         shipperMoveToPoint,
         shipperMoveToPaymentSuccess,
+        shipperMoveToOrderHistory,
+        shipperMoveToInquiries,
         carOwnerMoveToDashboard,
         carOwnerMoveToProfile,
         carOwnerMoveToEditProfile,

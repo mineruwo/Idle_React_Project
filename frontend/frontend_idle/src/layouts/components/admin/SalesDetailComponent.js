@@ -1,4 +1,5 @@
 import React from 'react';
+import { AdminTable } from './AdminTable'; // Reusing AdminTable
 import '../../../theme/admin.css';
 
 const SalesDetailComponent = () => {
@@ -9,33 +10,26 @@ const SalesDetailComponent = () => {
         { id: 'TX12347', date: '2023-10-26', amount: '78,000원', customer: 'newUser', status: '완료' },
     ];
 
+    const salesColumns = [
+        { header: '거래 ID', key: 'id', sortable: true, render: (item) => item.id },
+        { header: '날짜', key: 'date', sortable: true, render: (item) => item.date },
+        { header: '금액', key: 'amount', sortable: true, render: (item) => item.amount },
+        { header: '고객', key: 'customer', sortable: true, render: (item) => item.customer },
+        { header: '상태', key: 'status', sortable: true, render: (item) => item.status },
+    ];
+
     return (
         <div className="admin-container">
             <div className="admin-header">
                 <h2>매출 상세 보기</h2>
             </div>
-            <table className="admin-table">
-                <thead>
-                    <tr>
-                        <th>거래 ID</th>
-                        <th>날짜</th>
-                        <th>금액</th>
-                        <th>고객</th>
-                        <th>상태</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {salesData.map(sale => (
-                        <tr key={sale.id} className="admin-table-row">
-                            <td>{sale.id}</td>
-                            <td>{sale.date}</td>
-                            <td>{sale.amount}</td>
-                            <td>{sale.customer}</td>
-                            <td>{sale.status}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <AdminTable
+                data={salesData}
+                columns={salesColumns}
+                sortConfig={{ key: 'id', direction: 'asc' }} // Mock sort config
+                onSort={() => {}} // Mock onSort
+                emptyMessage="등록된 매출 데이터가 없습니다."
+            />
         </div>
     );
 };

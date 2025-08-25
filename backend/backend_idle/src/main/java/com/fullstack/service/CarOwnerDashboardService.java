@@ -1,10 +1,18 @@
 package com.fullstack.service;
 
 
-import com.fullstack.model.CarOwnerDashboardDTO;
+import com.fullstack.model.CarOwnerDashboardDTO.DashboardSummaryDTO;
+import com.fullstack.model.CarOwnerDashboardDTO.DeliveryItemDTO;
+import com.fullstack.model.CarOwnerDashboardDTO.SalesChartDTO;
+import com.fullstack.model.CarOwnerDashboardDTO.WarmthDTO;
 
+import java.util.List;
 
 public interface CarOwnerDashboardService {
-    CarOwnerDashboardDTO getDashboard(String ownerId);
+    DashboardSummaryDTO getSummary(String ownerId);
+    List<DeliveryItemDTO> getDeliveries(String ownerId);
+    List<SalesChartDTO> getSalesChart(String ownerId);
+    WarmthDTO getWarmth(String ownerId);
+    
 }
 

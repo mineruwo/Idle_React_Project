@@ -17,4 +17,5 @@ public class NoticeDTO {
     private String title;
     private LocalDateTime updatedAt;
     private String writerAdminId;
+    private Integer viewCount; // New field
 }
