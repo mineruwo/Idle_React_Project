@@ -7,15 +7,17 @@ import com.fullstack.service.CarOwnerProfileService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
-import org.springframework.http.HttpStatus;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+
 
 @RestController
 @RequestMapping("/api/car-owner/profile")
 @RequiredArgsConstructor
+@Log4j2
 public class CarOwnerProfileController {
 
     private final CarOwnerProfileService profileService;
@@ -27,25 +29,27 @@ public class CarOwnerProfileController {
     }
     
     @GetMapping("/me")
-    public CarOwnerProfileDTO getCurrentUser(org.springframework.security.core.Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()
-            || "anonymousUser".equals(authentication.getPrincipal())) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                org.springframework.http.HttpStatus.UNAUTHORIZED, "UNAUTHENTICATED");
-        }
-        String userId = authentication.getName(); // JWTFilter에서 principal로 넣은 값
-        return profileService.getProfile(userId);
+    @org.springframework.security.access.prepost.PreAuthorize("isAuthenticated()")
+    public CarOwnerProfileDTO getCurrentUser(@AuthenticationPrincipal String loginId) {
+        log.info("[PROFILE] principal(loginId)={}", loginId);
+        return profileService.getProfile(loginId);
     }
 
     @PutMapping
+    @org.springframework.security.access.prepost.PreAuthorize("isAuthenticated()")
     public CarOwnerProfileDTO update(@AuthenticationPrincipal String loginId,
                                      @Valid @RequestBody CarOwnerProfileModifyDTO req) {
         return profileService.updateProfile(loginId, req);
     }
 
     @GetMapping("/availability/nickname")
+    @org.springframework.security.access.prepost.PreAuthorize("isAuthenticated()")
     public boolean nicknameAvailable(@AuthenticationPrincipal String loginId,
-                                     @RequestParam String nickname) {
-        return profileService.isNicknameAvailable(loginId, nickname);
+                                     @jakarta.validation.constraints.NotBlank
+                                     @RequestParam("nickname") String nickname) {
+        // 입력 정규화 권장: 공백 제거/정책 적용
+        
+        return profileService.isNicknameAvailable(loginId, nickname.trim());
+        // 또는 Map.of("ok", result)로 응답 형태 고정 가능
     }
 }

@@ -6,34 +6,51 @@ import {
     verifyPayment,
     fetchUserPoints,
     failPayment,
+    getOrderById,
+    updateOrderStatus,
 } from "../../../api/paymentApi";
 import useCustomMove from "../../../hooks/useCustomMove";
+import { useSearchParams } from "react-router-dom";
 
 const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
     const [currentPoints, setCurrentPoints] = useState(0);
-    const [usePoints, setUsePoints] = useState(""); // 사용할 포인트 입력 값
+    const [usePoints, setUsePoints] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [selectedPaymentType, setSelectedPaymentType] = useState("card");
 
     const { shipperMoveToPaymentSuccess } = useCustomMove();
 
-    const [orderList, setOrderList] = useState([
-        {
-            orderId: "ORD123456789",
-            itemName: "화물 운송 서비스",
-            amount: 50000,
-        },
-    ]);
+    const [orderList, setOrderList] = useState([]);
+    const [searchParams] = useSearchParams();
 
-    const addOrder = () => {
-        const newOrder = {
-            orderId: `ORD${Math.floor(Math.random() * 1000000000)}`,
-            itemName: "추가된 운송 서비스",
-            amount: Math.floor(Math.random() * 100000) + 10000,
-        };
-        setOrderList((prevList) => [...prevList, newOrder]);
-    };
+    useEffect(() => {
+        const orderId = searchParams.get("orderId");
+        if (orderId) {
+            getOrderById(orderId)
+                .then((data) => {
+                    if (data.status === "PAYMENT_PENDING") {
+                        const formattedOrder = {
+                            orderId: data.id,
+                            itemName: data.cargoType
+                                ? `${data.cargoType} 운송 서비스`
+                                : "화물 운송 서비스",
+                            amount: data.driverPrice,
+                            ...data,
+                        };
+                        setOrderList([formattedOrder]);
+                    } else {
+                        setMessage("이 주문은 결제 대기 상태가 아닙니다.");
+                        setOrderList([]);
+                    }
+                })
+                .catch((error) => {
+                    console.error("주문 정보 조회 실패:", error);
+                    setMessage("주문 정보를 불러오는데 실패했습니다.");
+                    setOrderList([]);
+                });
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         const getUserPoints = async () => {
@@ -56,19 +73,19 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
     };
 
     const handlePayment = async () => {
-        const pointsToApply = parseInt(usePoints, 10) || 0;
+        const pointsToUse = parseInt(usePoints, 10) || 0;
         const totalOrderAmount = totalAmount;
 
-        if (pointsToApply < 0) {
+        if (pointsToUse < 0) {
             setMessage("사용할 포인트는 0 이상이어야 합니다.");
             return;
         }
-        if (pointsToApply > currentPoints) {
+        if (pointsToUse > currentPoints) {
             setMessage("보유 포인트보다 많은 포인트를 사용할 수 없습니다.");
             return;
         }
 
-        const amountToPayExternally = totalOrderAmount - pointsToApply;
+        const amountToPayExternally = totalOrderAmount - pointsToUse;
 
         setIsLoading(true);
         setMessage("결제 처리중...");
@@ -88,7 +105,7 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                     setCurrentPoints(
                         (prevPoints) => prevPoints - totalOrderAmount
                     );
-                    setUsePoints(""); // 사용 포인트 초기화
+                    setUsePoints("");
                 } else {
                     setMessage(`포인트 결제 실패: ${response.message}`);
                 }
@@ -135,6 +152,7 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                     buyerEmail: userEmail,
                     userId: userId,
                     pgProvider: pgProviderForBackend,
+                    pointsToUse: pointsToUse,
                 });
 
                 if (!prepareResponse.success) {
@@ -189,24 +207,21 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                                         pgProvider: pgProviderForBackend,
                                     };
 
-                                    // 외부 결제 성공 후 포인트 차감
-                                    if (pointsToApply > 0) {
-                                        const pointDeductionResponse =
-                                            await payWithPoints({
-                                                userId: userId,
-                                                points: pointsToApply,
-                                            });
-                                        if (pointDeductionResponse.success) {
-                                            setCurrentPoints(
-                                                (prevPoints) =>
-                                                    prevPoints - pointsToApply
-                                            );
-                                            setUsePoints("");
-                                        } else {
-                                            setMessage(
-                                                `포인트 차감 실패: ${pointDeductionResponse.message}`
-                                            );
-                                        }
+                                    // 주문 상태 업데이트 호출 부분에 try-catch 추가
+                                    try {
+                                        await updateOrderStatus(orderList[0].orderId, "PAYMENT_COMPLETED");
+                                        console.log("주문 상태 업데이트 성공!");
+                                    } catch (statusUpdateError) {
+                                        console.error("주문 상태 업데이트 실패:", statusUpdateError);
+                                        setMessage(`주문 상태 업데이트 실패: ${statusUpdateError.message}`);
+                                    }
+
+                                    if (pointsToUse > 0) {
+                                        setCurrentPoints(
+                                            (prevPoints) =>
+                                                prevPoints - pointsToUse
+                                        );
+                                        setUsePoints("");
                                     }
                                     shipperMoveToPaymentSuccess({
                                         paymentInfo,
@@ -248,17 +263,15 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
     return (
         <div className="spp-point-layout-container">
             <div className="left-sections-wrapper">
-                <button onClick={addOrder} style={{ marginBottom: "1rem" }}>
-                    주문 정보 추가 테스트
-                </button>
-                {/* 주문 정보 섹션 */}
+                
+
                 <div className="order-info-section">
                     <h2 className="spp-page-title">주문 정보</h2>
                     {orderList.map((order) => (
                         <div className="order-item" key={order.orderId}>
                             <div className="order-amount">
                                 <span>{order.orderId}</span>
-                                <span>{order.amount.toLocaleString()}원</span>
+                                <span>{(order.amount || 0).toLocaleString()}원</span>
                             </div>
 
                             <div className="order-details-wrap">
@@ -303,7 +316,6 @@ const ShipperPaymentComponent = ({ nickname, userId, userEmail }) => {
                     ))}
                 </div>
 
-                {/* 포인트 사용 섹션 */}
                 <div className="point-usage-section spp-point-management-section">
                     <h2 className="spp-page-title">포인트 사용</h2>
                     <div className="point-usage-details-content">

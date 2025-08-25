@@ -26,7 +26,8 @@ public interface CustomerService {
 
 	public CustomerDTO createCustomer(CustomerDTO dto);
 	
-	Integer getPoints(String id);
+	public Integer getPoints(String id);
+
 
     Page<CustomerDTO> getRecentlyCreatedCustomers(Pageable pageable, String dateRange); // Modified
     Page<CustomerDTO> getRecentlyDeletedCustomers(Pageable pageable, String dateRange); // Modified

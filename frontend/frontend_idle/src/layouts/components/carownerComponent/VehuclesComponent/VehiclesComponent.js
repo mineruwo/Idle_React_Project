@@ -146,7 +146,7 @@ const VehicleListRegister = () => {
                     <td>{v.plateNumber}</td>
                     <td>{v.type}</td>
                     <td>{v.model ?? "-"}</td>
-                    <td>{v.capacity != null ? v.capacity : "-"}</td>
+                    <td>{v.capacity}</td>
                     <td>{v.status ?? "-"}</td>
                     <td>{v.registeredAt?.replace?.("T", " ") ?? "-"}</td>
                     <td><button className="edit-btn" onClick={() => openEdit(v)}>수정</button></td>

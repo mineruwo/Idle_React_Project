@@ -1,7 +1,6 @@
 package com.fullstack.repository;
 
 import com.fullstack.entity.CustomerEntity;
-import com.fullstack.model.CustomerDTO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -35,29 +34,24 @@ public interface CustomerRepository extends JpaRepository<CustomerEntity, Intege
     boolean existsByNicknameAndLoginIdNot(@Param("nickname") String nickname,
                                           @Param("loginId") String loginId);
     
-    @Query("""
-    	    select c from CustomerEntity c
-    	     where c.id = :email and (c.isLefted = false or c.isLefted is null)
-    	  """)
-    Optional<CustomerEntity> findActiveByEmail(@Param("email") String email);
-    
-    
-    @Modifying
-    @Query("""
-      update CustomerEntity c
-         set c.resetUsed = true
-       where c.resetTokenHash = :hash and c.resetUsed = false
-    """)
-    int markResetTokenUsed(@Param("hash") String hash);
+    @Query("select c.nickname from CustomerEntity c where c.id = :ownerId")
+    Optional<String> findNicknameByOwnerId(@Param("ownerId") String ownerId);
 	
-	
-    Optional<CustomerEntity> findByCustomName(String customName);
+    @Query("""
+            select c from CustomerEntity c
+             where c.id = :email and (c.isLefted = false or c.isLefted is null)
+          """)
+     Optional<CustomerEntity> findActiveByEmail(@Param("email") String email);
+
 
 	Optional<CustomerEntity> findById(String id);
 	
 	Optional<CustomerEntity> findByNickname(String nickname);
 	
 	Optional<CustomerEntity> findByResetTokenHash(String resetTokenHash);
+	
+	Optional<CustomerEntity> findByResetTokenHashAndResetUsedFalseAndResetExpiresAtAfter(
+		    String resetTokenHash, LocalDateTime now);
 	
 	boolean existsById(String id);
 

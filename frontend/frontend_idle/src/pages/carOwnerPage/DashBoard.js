@@ -1,67 +1,25 @@
-
-
-import BubbleAnimation from "../../layouts/components/carownerComponent/common/BubbleAnimation";
-import NaviTap from "../../layouts/components/carownerComponent/common/NaviTap";
-import DashboardHeader from "../../layouts/components/carownerComponent/DashComponent/DashboardHeader";
-import DeliveryList from "../../layouts/components/carownerComponent/DashComponent/DeliveryList";
-import SalesChart from "../../layouts/components/carownerComponent/DashComponent/SalesChart"
-import Footer from "../../layouts/components/common/Footer";
+import React from "react";
 import GNB from "../../layouts/components/common/GNB";
-
-
+import NaviTap from "../../layouts/components/carownerComponent/common/NaviTap";
+import Footer from "../../layouts/components/common/Footer";
+import CarOwnerDashboard from "../../layouts/components/carownerComponent/DashComponent/CarOwnerDashboardComponent";
 
 const CarDashpage = () => {
+  return (
+    <div>
+      {/* 상단 고정 메뉴: 기존 className 유지 */}
+      <div className="topmenu sticky-top">
+        <GNB />
+        <NaviTap />
+      </div>
 
+      {/* 본문: 우리가 만든 대시보드(내부에서 dashboard-container 등 className 사용) */}
+      <CarOwnerDashboard />
 
-    const chartData = [
-        { day: 1, sales: 10000, deliveries: 8 },
-        { day: 7, sales: 18000, deliveries: 10 },
-        { day: 13, sales: 14000, deliveries: 9 },
-        { day: 19, sales: 26000, deliveries: 13 },
-        { day: 25, sales: 31000, deliveries: 15 },
-        { day: 30, sales: 40000, deliveries: 18 },
-    ];
-
-    const deliveries = [
-        { deliveryNum: "000-00-00", status: "배송중", transport_type: "냉동", from: "서울", s_date: "2024-05-01", to: "부산", date: "2024-05-02" },
-        { deliveryNum: "000-00-00", status: "배송중", transport_type: "냉동", from: "인천", s_date: "2024-05-03", to: "대구", date: "2024-05-04" },
-        { deliveryNum: "000-00-00", status: "배송중", transport_type: "냉동", from: "대전", s_date: "2024-05-04", to: "광주", date: "2024-05-05" },
-        { deliveryNum: "000-00-00", status: "배송 예정", transport_type: "냉동", from: "광주", s_date: "2024-05-06", to: "인천", date: "2024-05-07" },
-        { deliveryNum: "000-00-00", status: "배송 예정", transport_type: "냉동", from: "인천", s_date: "2024-05-07", to: "대전", date: "2024-05-08" },
-    ];
-
-
-    return (
-        <div>
-            
-            <div className="topmenu sticky-top">
-                
-                <GNB />
-                <NaviTap />
-            </div>
-            
-            <div className="dashboard-container">
-                <div className="dashborad-firstcontainer">
-                    <DashboardHeader
-                        name="홍길동"
-                        completed={12}
-                        inProgress={3}
-                        scheduled={2}
-                        total={17}
-                        revenue={2400000}
-                        commission={10}
-                        settlement={2160000}
-                    />
-                    <SalesChart data={chartData} />
-                </div>
-                
-            </div>
-            <div>
-                <DeliveryList deliveries={deliveries} />
-            </div>
-            <Footer />
-        </div>
-    );
+      {/* 하단 푸터: 위치 그대로 */}
+      <Footer />
+    </div>
+  );
 };
 
 export default CarDashpage;

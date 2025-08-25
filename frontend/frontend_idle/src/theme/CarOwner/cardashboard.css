@@ -53,6 +53,7 @@ body {
   min-height: 100%;
   display: flex;
   flex-direction: column;
+  height: 442.2px;
 }
 
 /* header-box 너비 조정 */
@@ -139,10 +140,14 @@ body {
 }
 
 /* 배송 리스트 */
+.delivery-box{
+  border: 1px solid #f3c7d3;
+}
 .delivery-box h2 {
   margin-bottom: 16px;
   font-size: 1.2rem;
   color: var(--font-main);
+  
 }
 
 .delivery-box table {
@@ -150,17 +155,19 @@ body {
   border-collapse: collapse;
   background-color: #ffffff;
   font-size: 0.95rem;
+  
+  border-radius: 12px;
 }
 
 .delivery-box th,
 .delivery-box td {
-  border: 1px solid #dee2e6;
+  border-radius: 12px;
   padding: 10px;
   text-align: center;
 }
 
 .delivery-box th {
-  background-color: #e9f0f7;
+  border: 1px solid #ffffff;
   font-weight: 600;
   color: #333;
 }
@@ -175,15 +182,20 @@ body {
   margin-bottom: 12px;
   color: var(--font-main);
 }
+.chart-box{
+  border: 1px solid #f3c7d3;
+}
+
+
 
 /* 리차트 범례 폰트 보정 (옵션) */
 .recharts-legend-item-text {
   font-size: 0.9rem !important;
   color: var(--font-sub);
 }
-.componentdiv{
-    z-index: 1;
-}
+
 .warminfo{
     margin-top: 40px;
 }
+
+/*애니메이션 인데스 조정*/

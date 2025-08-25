@@ -5,15 +5,20 @@ import com.fullstack.entity.DriverOffer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
 public interface DriverOfferRepository extends JpaRepository<DriverOffer, Long> {
 
-    List<DriverOffer> findByOrder_IdOrderByCreatedAtDesc(Long orderId);
+    /** 특정 오더의 입찰 목록 (최신순) */
+    List<DriverOffer> findByOrder_IdOrderByCreatedAtDesc(@Param("orderId") Long orderId);
 
-    // 선택된 offer 제외한 나머지 PENDING → REJECTED
-    @Modifying
+    /**
+     * 선택된 offer(acceptedId)를 제외한 같은 주문의 나머지 PENDING들을 REJECTED로 일괄 변경
+     * - 서비스 레이어(@Transactional) 안에서 호출되어야 함
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
         update DriverOffer o
            set o.status = com.fullstack.entity.DriverOffer$Status.REJECTED
@@ -21,5 +26,6 @@ public interface DriverOfferRepository extends JpaRepository<DriverOffer, Long> 
            and o.id <> :acceptedId
            and o.status = com.fullstack.entity.DriverOffer$Status.PENDING
         """)
-    int rejectOthers(Long orderId, Long acceptedId);
+    int rejectOthers(@Param("orderId") Long orderId,
+                     @Param("acceptedId") Long acceptedId);
 }

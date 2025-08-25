@@ -36,7 +36,6 @@ public class CustomerServiceImpl implements CustomerService {
 
 	private final CustomerRepository customerRepository;
 	private final PasswordEncoder passwordEncoder;
-	private final JWTUtil jwtUtil;
 
 	// 로그인
 	@Override

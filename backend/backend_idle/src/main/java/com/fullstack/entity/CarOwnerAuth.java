@@ -3,6 +3,7 @@ package com.fullstack.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -22,7 +23,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class TransportAuth {
+public class CarOwnerAuth {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,9 +46,10 @@ public class TransportAuth {
 	
 	@OneToOne
 	@JoinColumn(name = "vehicle_id")
-	private TransferVehicle vehicle;
+	private CarOwnerVehicles vehicle;
 	
-	@OneToOne(mappedBy = "transportAuth", cascade = CascadeType.ALL)
+	@OneToOne(optional = false, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name = "business_license_id", unique = true, nullable = false)
 	private BusinessLicense businessLicense;
 
 	@OneToOne(mappedBy = "transportAuth", cascade = CascadeType.ALL)

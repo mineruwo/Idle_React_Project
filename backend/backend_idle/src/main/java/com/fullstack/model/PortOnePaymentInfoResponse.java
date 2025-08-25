@@ -18,8 +18,7 @@ public class PortOnePaymentInfoResponse {
         private String merchant_uid;
         private String pay_method;
         private Long amount;
-        private String status; // paid, ready, cancelled, failed 등
-        // ... 기타 결제 정보
+        private String status;
     }
 	
 }

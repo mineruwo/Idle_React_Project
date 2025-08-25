@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -43,7 +44,7 @@ public class DriverLicense {
     @Column(name = "VERIFIED_AT")
     private LocalDateTime verifiedAt;
 
-    @OneToOne
-    @JoinColumn(name = "transport_auth_id", nullable = false)
-    private TransportAuth transportAuth;
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "transport_auth_id", unique = true, nullable = false)
+    private CarOwnerAuth transportAuth;
 }
