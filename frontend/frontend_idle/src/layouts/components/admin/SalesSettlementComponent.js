@@ -1,4 +1,5 @@
 import React from 'react';
+import { AdminTable } from './AdminTable'; // Reusing AdminTable
 import '../../../theme/admin.css';
 
 const SalesSettlementComponent = () => {
@@ -8,32 +9,26 @@ const SalesSettlementComponent = () => {
         { id: 'SETTLE-002', period: '2023-10-16 ~ 2023-10-31', amount: '2,300,000원', status: '진행중' },
     ];
 
+    const settlementColumns = [
+        { header: '정산 ID', key: 'id', sortable: true, render: (item) => item.id },
+        { header: '정산 기간', key: 'period', sortable: true, render: (item) => item.period },
+        { header: '정산 금액', key: 'amount', sortable: true, render: (item) => item.amount },
+        { header: '상태', key: 'status', sortable: true, render: (item) => item.status },
+    ];
+
     return (
         <div className="admin-container">
             <div className="admin-header">
                 <h2>매출 정산 관리</h2>
                 <button className="admin-primary-btn">새 정산 생성</button>
             </div>
-            <table className="admin-table">
-                <thead>
-                    <tr>
-                        <th>정산 ID</th>
-                        <th>정산 기간</th>
-                        <th>정산 금액</th>
-                        <th>상태</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {settlementData.map(settlement => (
-                        <tr key={settlement.id} className="admin-table-row">
-                            <td>{settlement.id}</td>
-                            <td>{settlement.period}</td>
-                            <td>{settlement.amount}</td>
-                            <td>{settlement.status}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <AdminTable
+                data={settlementData}
+                columns={settlementColumns}
+                sortConfig={{ key: 'id', direction: 'asc' }} // Mock sort config
+                onSort={() => {}} // Mock onSort
+                emptyMessage="등록된 정산 데이터가 없습니다."
+            />
         </div>
     );
 };

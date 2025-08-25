@@ -1,59 +1,72 @@
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useState, Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllFAQs, deleteFAQ, toggleFAQActive } from '../../../api/adminApi';
+import useDashboardData from '../../../hooks/useDashboardData';
+import Modal from '../common/Modal';
 import '../../../theme/admin.css';
 
 const FAQManagementComponent = () => {
-    const [faqs, setFaqs] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const { data: faqs, loading, error, fetchData } = useDashboardData(getAllFAQs);
     const [expandedId, setExpandedId] = useState(null);
+    const [modalState, setModalState] = useState({ show: false, message: "", onConfirm: null, showCancel: false });
 
-    useEffect(() => {
-        fetchFAQs();
-    }, []);
+    const showModal = (message, onConfirm = null, showCancel = false) => {
+        setModalState({ show: true, message, onConfirm, showCancel });
+    };
 
-    const fetchFAQs = async () => {
-        try {
-            setLoading(true);
-            const data = await getAllFAQs();
-            setFaqs(data);
-        } catch (err) {
-            setError(err);
-        } finally {
-            setLoading(false);
-        }
+    const closeModal = () => {
+        setModalState({ ...modalState, show: false });
     };
 
     const handleRowClick = (id) => {
         setExpandedId(expandedId === id ? null : id);
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('정말로 이 FAQ를 삭제하시겠습니까? 데이터는 복구할 수 없습니다.')) {
-            try {
-                await deleteFAQ(id);
-                alert('FAQ가 삭제되었습니다.');
-                fetchFAQs(); // Refresh list
-            } catch (err) {
-                alert('삭제에 실패했습니다.');
-            }
+    const handleDeleteConfirm = async (id) => {
+        try {
+            await deleteFAQ(id);
+            showModal('FAQ가 삭제되었습니다.');
+            fetchData(); // Refresh list
+        } catch (err) {
+            showModal('삭제에 실패했습니다.');
         }
     };
 
-    const handleToggle = async (id) => {
+    const handleDelete = (id) => {
+        showModal('정말로 이 FAQ를 삭제하시겠습니까? 데이터는 복구할 수 없습니다.', () => handleDeleteConfirm(id), true);
+    };
+
+    const handleToggleConfirm = async (id) => {
         const faq = faqs.find(f => f.id === id);
         const action = faq.is_del ? '활성화' : '비활성화';
-        if (window.confirm(`이 FAQ를 ${action}하시겠습니까?`)) {
-            try {
-                await toggleFAQActive(id);
-                alert(`FAQ가 ${action}되었습니다.`);
-                fetchFAQs(); // Refresh list
-            } catch (err) {
-                alert(`${action}에 실패했습니다.`);
-            }
+        try {
+            await toggleFAQActive(id);
+            showModal(`FAQ가 ${action}되었습니다.`);
+            fetchData(); // Refresh list
+        } catch (err) {
+            showModal(`${action}에 실패했습니다.`);
         }
     };
+
+    const handleToggle = (id) => {
+        const faq = faqs.find(f => f.id === id);
+        const action = faq.is_del ? '활성화' : '비활성화';
+        showModal(`이 FAQ를 ${action}하시겠습니까?`, () => handleToggleConfirm(id), true);
+    };
+
+    const columns = [
+        { header: '번호', key: 'id', render: (item) => item.id },
+        { header: '질문', key: 'question', render: (item) => item.question },
+        { header: '상태', key: 'is_del', render: (item) => (item.is_del ? '비활성' : '활성') },
+        { header: '조회수', key: 'viewCount', render: (item) => item.viewCount },
+        {
+            header: '관리',
+            key: 'actions',
+            render: (item) => (
+                <Link to={`/admin/faqs/edit/${item.id}`} className="admin-action-btn admin-modify-btn">수정</Link>
+            ),
+        },
+    ];
 
     if (loading) {
         return <div>로딩 중...</div>;
@@ -65,6 +78,13 @@ const FAQManagementComponent = () => {
 
     return (
         <div className="admin-container">
+            <Modal 
+                show={modalState.show} 
+                message={modalState.message} 
+                onClose={closeModal} 
+                onConfirm={modalState.onConfirm} 
+                showCancel={modalState.showCancel} 
+            />
             <div className="admin-header">
                 <h2>자주 묻는 질문 관리</h2>
                 <Link to="/admin/faqs/create" className="admin-primary-btn">
@@ -74,11 +94,7 @@ const FAQManagementComponent = () => {
             <table className="admin-table">
                 <thead>
                     <tr>
-                        <th>번호</th>
-                        <th>질문</th>
-                        <th>상태</th>
-                        <th>조회수</th>
-                        <th>관리</th>
+                        {columns.map(col => <th key={col.key}>{col.header}</th>)}
                     </tr>
                 </thead>
                 <tbody>
@@ -86,17 +102,13 @@ const FAQManagementComponent = () => {
                         faqs.map(faq => (
                             <Fragment key={faq.id}>
                                 <tr className={`admin-table-row ${faq.is_del ? 'deactivated' : ''}`} onClick={() => handleRowClick(faq.id)}>
-                                    <td>{faq.id}</td>
-                                    <td>{faq.question}</td>
-                                    <td>{faq.is_del ? '비활성' : '활성'}</td>
-                                    <td>{faq.viewCount}</td>
-                                    <td>
-                                        <Link to={`/admin/faqs/edit/${faq.id}`} className="admin-action-btn admin-modify-btn">수정</Link>
-                                    </td>
+                                    {columns.map(col => (
+                                        <td key={`${faq.id}-${col.key}`}>{col.render ? col.render(faq) : faq[col.key]}</td>
+                                    ))}
                                 </tr>
                                 {expandedId === faq.id && (
                                     <tr className="admin-content-row">
-                                        <td colSpan="5">
+                                        <td colSpan={columns.length}>
                                             <div className="admin-content-box">
                                                 <strong>답변:</strong>
                                                 <p style={{ marginTop: '5px' }}>{faq.answer}</p>
@@ -114,7 +126,7 @@ const FAQManagementComponent = () => {
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="4">등록된 FAQ가 없습니다.</td>
+                            <td colSpan={columns.length}>등록된 FAQ가 없습니다.</td>
                         </tr>
                     )}
                 </tbody>
