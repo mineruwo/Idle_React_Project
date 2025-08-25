@@ -70,6 +70,8 @@ public class JWTFilter extends OncePerRequestFilter {
                             List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
                         );
 
+                    log.info("JWTFilter: Setting Authentication. User: {}, Role: {}, Authorities: {}", id, role, authToken.getAuthorities());
+
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                     log.debug("JWT 인증 세팅 완료: id={}, role={}", id, role);
                 } else {

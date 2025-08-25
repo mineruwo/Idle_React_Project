@@ -7,6 +7,7 @@ import com.fullstack.entity.Order;
 import com.fullstack.model.DriverOfferCreateRequest;
 import com.fullstack.model.DriverOfferResponse;
 import com.fullstack.model.OfferAssignRequest;
+import com.fullstack.model.enums.OrderStatus; // Added import
 import com.fullstack.repository.CustomerRepository;
 import com.fullstack.repository.DriverOfferRepository;
 import com.fullstack.repository.OrderRepository;
@@ -95,6 +96,7 @@ public class DriverOfferService {
         Long assigned = (offer.getDriver() != null && offer.getDriver().getIdNum() != null)
                 ? offer.getDriver().getIdNum().longValue() : null;
         order.setAssignedDriverId(assigned);
+        order.setStatus(OrderStatus.READY);
 
         // ✅ 결제대기로 전환 (버튼 노출 조건 충족)
         order.setStatus("PAYMENT_PENDING");
@@ -118,9 +120,8 @@ public class DriverOfferService {
         Order order = orderRepository.findById(req.getOrderId())
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + req.getOrderId()));
 
-        String os = String.valueOf(order.getStatus()).toUpperCase();
-        if ("PAYMENT_PENDING".equals(os) || "ASSIGNED".equals(os) || "COMPLETED".equals(os)) {
-            throw new IllegalStateException("이미 배정된 주문입니다.");
+        if (OrderStatus.READY.equals(order.getStatus()) || OrderStatus.ONGOING.equals(order.getStatus())) {
+            throw new IllegalStateException("Order already assigned");
         }
 
         CustomerEntity driver = customerRepository.findById(req.getDriverId())
@@ -140,6 +141,7 @@ public class DriverOfferService {
         offer.setStatus(DriverOffer.Status.ACCEPTED);
         order.setDriverPrice(offer.getPrice());
         order.setAssignedDriverId(driver.getIdNum().longValue());
+        order.setStatus(OrderStatus.READY);
 
         // ✅ 결제대기 전환
         order.setStatus("PAYMENT_PENDING");

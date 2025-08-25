@@ -1,0 +1,121 @@
+.review-dashboard-card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+.review-dashboard-header h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.review-dashboard-header p {
+    margin: 0;
+    color: #555;
+}
+
+.review-dashboard-header .highlight {
+    color: #007bff;
+    font-weight: bold;
+}
+
+.review-dashboard-tabs {
+    margin-top: 20px;
+    border-bottom: 2px solid #eee;
+    display: flex;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #777;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px; /* 하단 테두리와 겹치도록 조정 */
+}
+
+.tab-button.active {
+    color: #007bff;
+    border-bottom-color: #007bff;
+    font-weight: bold;
+}
+
+.review-dashboard-content {
+    padding-top: 20px;
+}
+
+.review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.review-item {
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background-color: #fafafa;
+}
+
+.review-item.pending {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.review-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.review-item-info .date,
+.review-item-info .stars {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.review-item .stars {
+    color: #f5c518;
+}
+
+.review-content {
+    margin-top: 8px;
+    font-style: italic;
+    color: #444;
+}
+
+.write-review-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.write-review-btn:hover {
+    background-color: #0056b3;
+}
+
+.see-more-link {
+    text-align: right;
+    margin-top: 15px;
+}
+
+.see-more-link a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.see-more-link a:hover {
+    text-decoration: underline;
+}

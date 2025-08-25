@@ -15,11 +15,10 @@ const useCustomMove = () => {
         navigate({ pathname: `/shipper/orderBoard` });
     };
 
-    const shipperMoveToPayment = (orderId) => {
+    const shipperMoveToPayment = (orderData) => {
         navigate({
             pathname: `/shipper/payment`,
-            search: `?orderId=${orderId}`,
-        });
+        }, { state: { orderData } });
     };
 
     const shipperMoveToPaymentSuccess = (state) => {

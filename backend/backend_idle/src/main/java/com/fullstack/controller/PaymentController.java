@@ -37,7 +37,7 @@ public class PaymentController {
 		} catch (Exception e) {
 			log.error("결제 준비 중 오류 발생", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new PaymentResponseDTO(false,
-					"결제 준비 중 서버 오류가 발생했습니다.", null, requestDto.getMerchantUid(), null, null, null));
+					"결제 준비 중 서버 오류가 발생했습니다.", null, requestDto.getMerchantUid(), null, null, null, null));
 		}
 
 	}
@@ -56,7 +56,25 @@ public class PaymentController {
 			log.error("결제 검증 중 오류 발생", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(new PaymentResponseDTO(false, "결제 검증 중 서버 오류가 발생했습니다.", null,
-							verificationDto.getMerchantUid(), verificationDto.getImpUid(), null, null));
+							verificationDto.getMerchantUid(), verificationDto.getImpUid(), null, null, null));
+		}
+	}
+
+	@PostMapping("/verify-charge")
+	public ResponseEntity<PaymentResponseDTO> verifyAndChargePoints(@RequestBody PaymentVerificationDTO verificationDto) {
+		log.info("포인트 충전 검증 요청: {}", verificationDto);
+		try {
+			PaymentResponseDTO response = paymentService.verifyAndChargePoints(verificationDto);
+			if (response.isSuccess()) {
+				return ResponseEntity.ok(response);
+			} else {
+				return ResponseEntity.badRequest().body(response);
+			}
+		} catch (Exception e) {
+			log.error("포인트 충전 검증 중 오류 발생", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(new PaymentResponseDTO(false, "포인트 충전 검증 중 서버 오류가 발생했습니다.", null,
+							verificationDto.getMerchantUid(), verificationDto.getImpUid(), null, null, null));
 		}
 	}
 
@@ -75,7 +93,24 @@ public class PaymentController {
 					.body(Map.of("success", false, "message", "서버 오류로 인해 포인트 사용에 실패했습니다."));
 		}
 	}
-	
+
+	@PostMapping("/point-only")
+	public ResponseEntity<PaymentResponseDTO> payWithPointsOnly(@RequestBody PointUsageRequestDTO requestDto) {
+		log.info("전액 포인트 결제 요청: {}", requestDto);
+		try {
+			PaymentResponseDTO response = paymentService.processPointOnlyPayment(requestDto);
+			if (response.isSuccess()) {
+				return ResponseEntity.ok(response);
+			} else {
+				return ResponseEntity.badRequest().body(response);
+			}
+		} catch (Exception e) {
+			log.error("전액 포인트 결제 처리 중 오류 발생", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(new PaymentResponseDTO(false, "전액 포인트 결제 처리 중 서버 오류가 발생했습니다.", null, null, null, null, null, null));
+		}
+	}
+
     @PostMapping("/fail")
     public ResponseEntity<?> failPayment(@RequestBody Map<String, String> requestBody) {
         String merchantUid = requestBody.get("merchantUid");
