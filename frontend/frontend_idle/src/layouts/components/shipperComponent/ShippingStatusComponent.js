@@ -1,23 +1,61 @@
 import React, { useState, useEffect } from "react";
 import "../../../theme/ShipperCustomCss/ShippingStatus.css";
+import { fetchMyOrders } from "../../../api/orderApi";
+import { useAuth } from "../../../auth/AuthProvider";
 
 const ShippingStatusComponent = () => {
     const [shippingData, setShippingData] = useState([]);
+    const { authenticated } = useAuth();
+
+    const STATUS_MAP = {
+        CREATED: "오더신청",
+        PAYMENT_PENDING: "결제대기",
+        READY: "운송준비중",
+        ONGOING: "운송중",
+        COMPLETED: "운송완료",
+        CANCELED: "취소됨",
+        NONE: "상태없음",
+    };
+
+    const getStatusDescription = (status) => {
+        switch (status) {
+            case "CREATED":
+                return "화물 운송 오더가 접수되었습니다.";
+            case "PAYMENT_PENDING":
+                return "결제가 대기 중입니다.";
+            case "READY":
+                return "운송 준비 중입니다.";
+            case "ONGOING":
+                return "화물이 운송 중입니다.";
+            case "COMPLETED":
+                return "운송이 완료되었습니다.";
+            case "CANCELED":
+                return "오더가 취소되었습니다.";
+            case "NONE":
+                return "상태 정보가 없습니다.";
+            default:
+                return "상태 정보가 업데이트되었습니다.";
+        }
+    };
 
     useEffect(() => {
-        // API 호출을 시뮬레이션하기 위해 목업 데이터를 설정합니다.
-        const mockData = [
-            { id: 1, order: "주문 1 (오더신청)", status: "오더신청" },
-            { id: 2, order: "주문 2 (차주 연결)", status: "차주 연결" },
-            { id: 3, order: "주문 3 (운송준비중)", status: "운송준비중" },
-            { id: 4, order: "주문 4 (운송중)", status: "운송중" },
-            { id: 5, order: "주문 5 (운송완료)", status: "운송완료" },
-            { id: 6, order: "주문 6 (오더신청)", status: "오더신청" },
-            { id: 7, order: "주문 7 (운송중)", status: "운송중" },
-            { id: 8, order: "주문 8 (운송완료)", status: "운송완료" },
-        ];
-        setShippingData(mockData);
-    }, []);
+        if (!authenticated) {
+            setShippingData([]);
+            return;
+        }
+
+        const fetchShippingData = async () => {
+            try {
+                const data = await fetchMyOrders(); // 내 오더만 가져오기
+                setShippingData(Array.isArray(data) ? data : []);
+            } catch (error) {
+                console.error("Failed to fetch shipping data:", error);
+                setShippingData([]);
+            }
+        };
+
+        fetchShippingData();
+    }, [authenticated]);
 
     const steps = [
         {
@@ -251,91 +289,39 @@ const ShippingStatusComponent = () => {
         },
     ];
 
-    useEffect(() => {
-        // API 호출을 시뮬레이션하기 위해 목업 데이터를 설정합니다.
-        const mockData = [
-            {
-                id: 1,
-                order: "주문 1 (오더신청)",
-                orderNumber: "ORD-001", // New field
-                status: "오더신청",
-                logs: [
-                    { status: "오더신청", timestamp: "2025-08-10 10:00", description: "화물 운송 오더가 접수되었습니다." }
-                ]
-            },
-            {
-                id: 2,
-                order: "주문 2 (차주 연결)",
-                orderNumber: "ORD-002", // New field
-                status: "차주 연결",
-                logs: [
-                    { status: "오더신청", timestamp: "2025-08-09 09:00", description: "화물 운송 오더가 접수되었습니다." },
-                    { status: "차주 연결", timestamp: "2025-08-09 11:00", description: "차주가 배정되어 운송을 준비합니다." }
-                ]
-            },
-            {
-                id: 3,
-                order: "주문 3 (운송준비중)",
-                orderNumber: "ORD-003", // New field
-                status: "운송준비중",
-                logs: [
-                    { status: "오더신청", timestamp: "2025-08-08 14:00", description: "화물 운송 오더가 접수되었습니다." },
-                    { status: "차주 연결", timestamp: "2025-08-08 16:00", description: "차주가 배정되어 운송을 준비합니다." },
-                    { status: "운송준비중", timestamp: "2025-08-08 18:00", description: "화물 상차를 위해 이동 중입니다." }
-                ]
-            },
-            {
-                id: 4,
-                order: "주문 4 (운송중)",
-                orderNumber: "ORD-004", // New field
-                status: "운송중",
-                logs: [
-                    { status: "오더신청", timestamp: "2025-08-07 10:00", description: "화물 운송 오더가 접수되었습니다." },
-                    { status: "차주 연결", timestamp: "2025-08-07 12:00", description: "차주가 배정되어 운송을 준비합니다." },
-                    { status: "운송준비중", timestamp: "2025-08-07 14:00", description: "화물 상차를 위해 이동 중입니다." },
-                    { status: "운송중", timestamp: "2025-08-07 16:00", description: "화물이 목적지로 운송 중입니다." }
-                ]
-            },
-            {
-                id: 5,
-                order: "주문 5 (운송완료)",
-                orderNumber: "ORD-005", // New field
-                status: "운송완료",
-                logs: [
-                    { status: "오더신청", timestamp: "2025-08-06 09:00", description: "화물 운송 오더가 접수되었습니다." },
-                    { status: "차주 연결", timestamp: "2025-08-06 11:00", description: "차주가 배정되어 운송을 준비합니다." },
-                    { status: "운송준비중", timestamp: "2025-08-06 13:00", description: "화물 상차를 위해 이동 중입니다." },
-                    { status: "운송중", timestamp: "2025-08-06 15:00", description: "화물이 목적지로 운송 중입니다." },
-                    { status: "운송완료", timestamp: "2025-08-06 17:00", description: "운송지에 화물이 도착하였습니다." }
-                ]
-            },
-        ];
-        setShippingData(mockData);
-    }, []);
-
     return (
         <div className="shipping-status-container">
             {shippingData.map((order) => {
-                const currentStep = steps.find(step => step.name === order.status)?.id || 1;
+                const currentStep =
+                    steps.find((step) => step.name === STATUS_MAP[order.status])
+                        ?.id || 1;
                 return (
                     <div key={order.id} className="shipping-status-card">
-                        <h3>주문 번호: {order.orderNumber}</h3>
+                        <h3>주문 번호: {order.orderNo}</h3>
                         <ul className="steps">
                             {steps.map((step) => (
                                 <li
                                     key={step.id}
                                     className={`steps-segment ${
-                                        step.id < currentStep ? "is-completed" : ""
+                                        step.id < currentStep
+                                            ? "is-completed"
+                                            : ""
                                     } ${
-                                        step.id === currentStep ? "is-active" : ""
+                                        step.id === currentStep
+                                            ? "is-active"
+                                            : ""
                                     }`}
                                 >
                                     <span
                                         className={`steps-marker ${
-                                            currentStep < step.id ? "is-hollow" : ""
+                                            currentStep < step.id
+                                                ? "is-hollow"
+                                                : ""
                                         }`}
                                     >
-                                        <span className="icon">{step.icon}</span>
+                                        <span className="icon">
+                                            {step.icon}
+                                        </span>
                                     </span>
                                     <div className="steps-content">
                                         <p className="heading">{step.name}</p>
@@ -345,21 +331,35 @@ const ShippingStatusComponent = () => {
                         </ul>
                         <div className="shipping-details">
                             <div className="status-section">
-                                <h2>현재 상태: {order.status}</h2>
                                 <div className="status-logs">
                                     <div className="log-headers">
-                                        <span className="log-header-item">시간</span>
-                                        <span className="log-header-item">진행상태</span>
-                                        <span className="log-header-item">내용</span>
+                                        <span className="log-header-item">
+                                            시간
+                                        </span>
+                                        <span className="log-header-item">
+                                            진행상태
+                                        </span>
+                                        <span className="log-header-item">
+                                            내용
+                                        </span>
                                     </div>
                                     <ul>
-                                        {order.logs.map((log, index) => (
-                                            <li key={index}>
-                                                <span className="log-timestamp">{log.timestamp}</span>
-                                                <span className="log-status">{log.status}</span>
-                                                <span className="log-description">{log.description}</span>
-                                            </li>
-                                        ))}
+                                        {/* Generate a single log entry for the current status */}
+                                        <li key={order.id}>
+                                            <span className="log-timestamp">
+                                                {new Date().toLocaleString()}{" "}
+                                                {/* Current time */}
+                                            </span>
+                                            <span className="log-status">
+                                                {STATUS_MAP[order.status] ||
+                                                    order.status}
+                                            </span>
+                                            <span className="log-description">
+                                                {getStatusDescription(
+                                                    order.status
+                                                )}
+                                            </span>
+                                        </li>
                                     </ul>
                                 </div>
                             </div>

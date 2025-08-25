@@ -1,96 +1,122 @@
 
-import { useState, useEffect, Fragment } from "react";
+import { useState, Fragment } from "react";
 import { getCustomerList } from "../../../api/adminApi";
 import Modal from "../common/Modal";
 import PaginationComponent from "../common/PaginationComponent";
-import '../../../theme/admin.css'; // 공통 CSS 임포트
+import usePaginatedData from "../../../hooks/usePaginatedData";
+import { CUSTOMER_ROLE_OPTIONS } from "../../../constants/roles";
+import { AdminTable } from './AdminTable';
+import { AdminControls } from './AdminControls';
+import '../../../theme/admin.css';
 
 const CustomerAccountListComponent = () => {
-    const [customerList, setCustomerList] = useState([]);
-    const [page, setPage] = useState(0);
-    const [size, setSize] = useState(10);
-    const [totalPages, setTotalPages] = useState(0);
-    const [showModal, setShowModal] = useState(false);
-    const [modalMessage, setModalMessage] = useState("");
+    const { 
+        data: customerList,
+        page,
+        totalPages,
+        loading,
+        error,
+        handlePageChange,
+        handleFilterChange,
+        handleSort,
+        handleSearch,
+        sortConfig,
+        filters,
+        search,
+    } = usePaginatedData(getCustomerList, {
+        filters: { role: '' },
+        sortConfig: { key: 'id', direction: 'asc' },
+        search: { query: '', type: 'id' },
+    });
+
+    const [modalState, setModalState] = useState({ show: false, message: "" });
     const [selectedCustomerId, setSelectedCustomerId] = useState(null);
 
-    useEffect(() => {
-        fetchCustomerList();
-    }, [page, size]);
-
-    const fetchCustomerList = async () => {
-        try {
-            const response = await getCustomerList(page, size);
-            setCustomerList(response.content);
-            setTotalPages(response.totalPages);
-        } catch (error) {
-            console.error("Failed to fetch customer list:", error);
-            setModalMessage("고객 목록을 불러오는데 실패했습니다: " + (error.response ? error.response.data : error.message));
-            setShowModal(true);
-        }
+    const showModal = (message) => {
+        setModalState({ show: true, message });
     };
 
-    const handlePageChange = (newPage) => {
-        setPage(newPage);
+    const closeModal = () => {
+        setModalState({ ...modalState, show: false });
     };
 
     const handleRowClick = (customerId) => {
         setSelectedCustomerId(selectedCustomerId === customerId ? null : customerId);
     };
 
-    const closeModal = () => {
-        setShowModal(false);
-    };
+    const customerTableColumns = [
+        { header: 'ID', key: 'id', sortable: true },
+        { header: '이름', key: 'customName', sortable: true },
+        {
+            header: '가입일',
+            key: 'createdAt',
+            sortable: true,
+            render: (item) => new Date(item.createdAt).toLocaleDateString()
+        },
+        { header: '역할', key: 'role', sortable: true },
+    ];
+
+    const searchOptions = [
+        { value: "id", label: "ID" },
+        { value: "customName", label: "이름" },
+        { value: "phone", label: "전화번호" },
+        { value: "nickname", label: "닉네임" },
+    ];
+
+    if (loading) {
+        return <div>로딩 중...</div>;
+    }
+
+    if (error) {
+        return <div className="error-message">오류 발생: {error.message}</div>;
+    }
 
     return (
         <div className="admin-container">
-            <Modal show={showModal} message={modalMessage} onClose={closeModal} />
+            <Modal show={modalState.show} message={modalState.message} onClose={closeModal} />
             <div className="admin-header">
                 <h2>고객 계정 목록</h2>
-                {/* <Link to="/admin/customer-accounts/create" className="admin-primary-btn">새 고객 생성</Link> */}
             </div>
 
-            <table className="admin-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>이름</th>
-                        <th>가입일</th>
-                        <th>역할</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {customerList.length > 0 ? (
-                        customerList.map((customer) => (
-                            <Fragment key={customer.id}>
-                                <tr className="admin-table-row" onClick={() => handleRowClick(customer.id)}>
-                                    <td>{customer.id}</td>
-                                    <td>{customer.customName}</td>
-                                    <td>{new Date(customer.createdAt).toLocaleDateString()}</td>
-                                    <td>{customer.role}</td>
-                                </tr>
-                                {selectedCustomerId === customer.id && (
-                                    <tr className="admin-content-row">
-                                        <td colSpan="4">
-                                            <div className="admin-content-box">
-                                                <p><strong>상세 정보:</strong></p>
-                                                <p>여기에 상세 정보가 표시됩니다.</p>
-                                            </div>
-                                            <div className="admin-actions">
-                                                <button className="admin-action-btn admin-modify-btn">수정</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                )}
-                            </Fragment>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="4">고객 계정이 없습니다.</td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
+            <AdminControls
+                roleFilter={filters.role}
+                setRoleFilter={(value) => handleFilterChange({ role: value })}
+                searchQuery={search.query}
+                setSearchQuery={(value) => handleSearch({ ...search, query: value })}
+                searchType={search.type}
+                setSearchType={(value) => handleSearch({ ...search, type: value })}
+                handleSearch={(e) => { e.preventDefault(); handleSearch(search); }}
+                roles={CUSTOMER_ROLE_OPTIONS}
+                searchOptions={searchOptions}
+            />
+
+            <AdminTable
+                data={customerList}
+                columns={customerTableColumns}
+                sortConfig={sortConfig}
+                onSort={handleSort}
+                emptyMessage="고객 계정이 없습니다."
+                onRowClick={handleRowClick}
+                selectedRowId={selectedCustomerId}
+                renderExpandedContent={(customer) => (
+                    <td colSpan={customerTableColumns.length}>
+                        <div className="admin-content-box">
+                            <p><strong>상세 정보:</strong></p>
+                            <p>전화번호: {customer.phone}</p>
+                            <p>닉네임: {customer.nickname}</p>
+                            <p>이메일: {customer.email}</p>
+                            <p>주소: {customer.address}</p>
+                            <p>가입일: {new Date(customer.createdAt).toLocaleString()}</p>
+                            <p>최근 로그인: {customer.lastLogin ? new Date(customer.lastLogin).toLocaleString() : 'N/A'}</p>
+                            <p>탈퇴일: {customer.leftedAt ? new Date(customer.leftedAt).toLocaleString() : 'N/A'}</p>
+                        </div>
+                        <div className="admin-actions">
+                            <button className="admin-action-btn admin-modify-btn">수정</button>
+                            {/* Add more action buttons here */}
+                        </div>
+                    </td>
+                )}
+            />
 
             <PaginationComponent
                 currentPage={page}

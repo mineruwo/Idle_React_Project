@@ -26,6 +26,7 @@ public class CarOwnerVehiclesServiceImpl implements CarOwnerVehiclesService {
     @Override
     public Page<VehicleSummaryResponse> list(String ownerId, int page, int size) {
         Page<CarOwnerVehicles> p = repo.findByOwnerIdOrderByPrimaryDescIdDesc(ownerId, PageRequest.of(page, size));
+        System.out.println("차량리스트 불러오는중? ==========================" + p);
         return p.map(this::toSummary);
     }
 
@@ -103,6 +104,9 @@ public class CarOwnerVehiclesServiceImpl implements CarOwnerVehiclesService {
         dto.setId(v.getId());
         dto.setPlateNumber(v.getPlateNumber());
         dto.setType(v.getType());
+        dto.setCapacity(v.getCapacity());
+        dto.setModel(v.getModel());
+        dto.setRegisteredAt(v.getRegisteredAt());
         dto.setPrimary(v.isPrimary());
         dto.setStatus(v.getStatus());
         return dto;

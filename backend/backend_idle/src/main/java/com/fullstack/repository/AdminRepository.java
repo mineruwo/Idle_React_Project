@@ -6,7 +6,9 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-public interface AdminRepository extends JpaRepository<Admin, Integer> {
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor; // Import this
+
+public interface AdminRepository extends JpaRepository<Admin, Integer>, JpaSpecificationExecutor<Admin> { // Add JpaSpecificationExecutor
 
     Optional<Admin> findByAdminIdAndIsDelFalse(String adminId);
 

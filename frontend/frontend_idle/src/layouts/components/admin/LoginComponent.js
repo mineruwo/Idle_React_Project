@@ -4,79 +4,86 @@ import { adminLogin } from "../../../slices/adminLoginSlice";
 import { loginAdmin } from "../../../api/adminApi";
 import useCustomMove from "../../../hooks/useCustomMove";
 import Modal from "../common/Modal";
-import '../../../theme/admin.css'; // 공통 CSS 파일 import
+import '../../../theme/admin.css';
+
+const initialState = {
+    id: "",
+    password: "",
+};
 
 const LoginComponent = () => {
-    const [id, setId] = useState("");
-    const [password, setPassword] = useState("");
-    const [showModal, setShowModal] = useState(false);
-    const [modalMessage, setModalMessage] = useState("");
-    const [autoClose, setAutoClose] = useState(null);
+    const [loginInfo, setLoginInfo] = useState(initialState);
+    const [modalState, setModalState] = useState({ show: false, message: "", autoClose: null });
 
     const dispatch = useDispatch();
     const { moveToAdminPage } = useCustomMove();
 
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setLoginInfo({ ...loginInfo, [name]: value });
+    };
+
+    const showModal = (message, autoClose = null) => {
+        setModalState({ show: true, message, autoClose });
+    };
+
     const handleLogin = async () => {
+        const { id, password } = loginInfo;
         if (!id) {
-            setModalMessage("아이디를 입력해주세요.");
-            setShowModal(true);
-            setAutoClose(null);
+            showModal("아이디를 입력해주세요.");
             return;
         }
         if (!password) {
-            setModalMessage("비밀번호를 입력해주세요.");
-            setShowModal(true);
-            setAutoClose(null);
+            showModal("비밀번호를 입력해주세요.");
             return;
         }
 
         try {
             const result = await loginAdmin(id, password);
             dispatch(adminLogin(result));
-            setModalMessage("관리자 로그인 성공!");
-            setShowModal(true);
-            setAutoClose(1500);
+            showModal("관리자 로그인 성공!", 1500);
         } catch (error) {
             console.error("Login failed:", error);
-            setModalMessage("로그인 실패: " + (error.response ? error.response.data : error.message));
-            setShowModal(true);
-            setAutoClose(null);
+            const errorMessage = error.response ? error.response.data : error.message;
+            showModal(`로그인 실패: ${errorMessage}`);
         }
     };
 
     const closeModal = () => {
-        setShowModal(false);
+        setModalState({ ...modalState, show: false });
     };
 
     const handleConfirm = () => {
-        setShowModal(false);
-        if (modalMessage === "관리자 로그인 성공!") {
+        closeModal();
+        if (modalState.message === "관리자 로그인 성공!") {
             moveToAdminPage();
         }
     }
 
     return (
         <div className="login-page-container">
-            <Modal show={showModal} message={modalMessage} onClose={closeModal} onConfirm={handleConfirm} autoCloseDelay={autoClose} />
+            <Modal show={modalState.show} message={modalState.message} onClose={closeModal} onConfirm={handleConfirm} autoCloseDelay={modalState.autoClose} />
             <div className="login-form-box">
                 <h2 className="login-header">관리자 로그인</h2>
                 <form>
                     <div className="admin-form-group">
-                        <label htmlFor="idInput">아이디</label>
+                        <label htmlFor="id">아이디</label>
                         <input
                             type="text"
-                            id="idInput"
-                            value={id}
-                            onChange={(e) => setId(e.target.value)}
+                            id="id"
+                            name="id"
+                            value={loginInfo.id}
+                            onChange={handleChange}
                         />
                     </div>
                     <div className="admin-form-group">
-                        <label htmlFor="passwordInput">비밀번호</label>
+                        <label htmlFor="password">비밀번호</label>
                         <input
                             type="password"
-                            id="passwordInput"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            id="password"
+                            name="password"
+                            value={loginInfo.password}
+                            onChange={handleChange}
                         />
                     </div>
                     <button

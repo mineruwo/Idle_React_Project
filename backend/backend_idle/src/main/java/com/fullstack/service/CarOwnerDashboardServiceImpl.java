@@ -1,90 +1,137 @@
 package com.fullstack.service;
 
-import com.fullstack.model.CarOwnerDashboardDTO;
-import com.fullstack.model.CarOwnerDashboardDTO.RecentOrderItem;
-import com.fullstack.model.CarOwnerDashboardDTO.RecentSettlementItem;
-import com.fullstack.model.CarOwnerOrderListDTO;
-import com.fullstack.repository.CarOwnerOrderListRepository;
-import com.fullstack.entity.CarOwnerOrderList;
-import com.fullstack.entity.CarOwnerOrderList.Status;
-import com.fullstack.entity.CarOwnerSettlement;
-import com.fullstack.repository.CarOwnerSettlementRepository;
-
+import com.fullstack.entity.Order;
+import com.fullstack.model.CarOwnerDashboardDTO.DashboardSummaryDTO;
+import com.fullstack.model.CarOwnerDashboardDTO.DeliveryItemDTO;
+import com.fullstack.model.CarOwnerDashboardDTO.SalesChartDTO;
+import com.fullstack.model.CarOwnerDashboardDTO.WarmthDTO;
+import com.fullstack.model.enums.OrderStatus; // Added import
+import com.fullstack.repository.CarOwnerDashboardPaymentRepository;
+import com.fullstack.repository.CustomerRepository;
+import com.fullstack.repository.OrderRepository;   // ✅ 새로 주입
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.stream.Collectors;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class CarOwnerDashboardServiceImpl implements CarOwnerDashboardService {
 
-    private final CarOwnerOrderListRepository orderRepository;
-    private final CarOwnerSettlementRepository settlementRepository;
+    private final OrderRepository orderRepository;                         // ✅ 변경
+    private final CarOwnerDashboardPaymentRepository paymentRepo;          // 매출은 기존 그대로 (customer.id 기준)
+    private final CustomerRepository customerRepository;
+
+    private static final DateTimeFormatter DF = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final int DEFAULT_COMMISSION_RATE = 10; // %
+
+    /** 로그인 이메일 -> 기사키(assignedDriverId로 쓰일 idNum Long) */
+    private Long resolveDriverKey(String ownerId) {
+        return customerRepository.findByLoginId(ownerId)
+                .map(c -> c.getIdNum() == null ? null : c.getIdNum().longValue())
+                .orElse(null);
+    }
 
     @Transactional(readOnly = true)
     @Override
-    public CarOwnerDashboardDTO getDashboard(String ownerId) {
+    public DashboardSummaryDTO getSummary(String ownerId) {
+        Long driverKey = resolveDriverKey(ownerId);
+        log.info("[DASH] ownerId={}, driverKey={}", ownerId, driverKey);
+        long completed  = driverKey == null ? 0 : orderRepository.countByAssignedDriverIdAndStatus(driverKey, OrderStatus.COMPLETED);
+        long inProgress = driverKey == null ? 0 : orderRepository.countByAssignedDriverIdAndStatus(driverKey, OrderStatus.ONGOING);
+        long scheduled  = driverKey == null ? 0 : orderRepository.countByAssignedDriverIdAndStatus(driverKey, OrderStatus.CREATED);
+        long total      = completed + inProgress + scheduled;
 
+        // 닉네임 표시
+        String displayName = customerRepository.findNicknameByOwnerId(ownerId).orElse(ownerId);
+
+        // 매출(결제)은 기존처럼 ownerId(=customer.id, 이메일) 기준
         LocalDate today = LocalDate.now();
-        LocalDateTime startOfToday = today.atStartOfDay();
-        LocalDateTime startOfMonth = today.withDayOfMonth(1).atStartOfDay();
+        LocalDateTime start = today.withDayOfMonth(1).atStartOfDay();
+        LocalDateTime end   = today.withDayOfMonth(today.lengthOfMonth()).atTime(LocalTime.MAX);
+        long revenue = Optional.ofNullable(paymentRepo.sumMonthlyRevenue(ownerId, start, end)).orElse(0L);
+        int commissionRate = DEFAULT_COMMISSION_RATE;
+        long settlement = Math.round(revenue * (100 - commissionRate) / 100.0);
 
-        long totalOrders       = orderRepository.countByOwnerId(ownerId);
-        long ongoingOrders     = orderRepository.countByOwnerIdAndStatus(ownerId, Status.ONGOING);
-        long completedToday    = orderRepository.countByOwnerIdAndStatusAndUpdatedAtBetween(
-                ownerId, Status.COMPLETED, startOfToday, LocalDateTime.now());
-        long canceledThisMonth = orderRepository.countByOwnerIdAndStatusAndUpdatedAtBetween(
-                ownerId, Status.CANCELED, startOfMonth, LocalDateTime.now());
-
-        // 정산(정책에 따라 완료건 합계 or 정산 테이블 합계)
-        long todayEarnings   = settlementRepository.sumAmountByOwnerIdAndCreatedAtBetween(
-                ownerId, startOfToday, LocalDateTime.now());
-        long monthEarnings   = settlementRepository.sumAmountByOwnerIdAndCreatedAtBetween(
-                ownerId, startOfMonth, LocalDateTime.now());
-        long unsettledAmount = settlementRepository.sumUnsettledAmountByOwnerId(ownerId);
-
-        var recentOrders = orderRepository.findTop5ByOwnerIdOrderByUpdatedAtDesc(ownerId)
-                .stream().map(this::toRecentOrder).collect(Collectors.toList());
-
-        var recentSettlements = settlementRepository.findTop5ByOwnerIdOrderByCreatedAtDesc(ownerId)
-                .stream().map(this::toRecentSettlement).collect(Collectors.toList());
-
-        CarOwnerDashboardDTO dto = new CarOwnerDashboardDTO();
-        dto.setTotalOrders(totalOrders);
-        dto.setOngoingOrders(ongoingOrders);
-        dto.setCompletedToday(completedToday);
-        dto.setCanceledThisMonth(canceledThisMonth);
-        dto.setTodayEarnings(todayEarnings);
-        dto.setMonthEarnings(monthEarnings);
-        dto.setUnsettledAmount(unsettledAmount);
-        dto.setRecentOrders(recentOrders);
-        dto.setRecentSettlements(recentSettlements);
-        dto.setUnreadNotifications(0); // 알림 시스템 붙이면 교체
-        return dto;
+        return DashboardSummaryDTO.builder()
+                .name(displayName)
+                .nickname(displayName)
+                .completed((int) completed)
+                .inProgress((int) inProgress)
+                .scheduled((int) scheduled)
+                .total((int) total)
+                .revenue(revenue)
+                .commission(commissionRate)
+                .settlement(settlement)
+                .build();
     }
 
-    private RecentOrderItem toRecentOrder(CarOwnerOrderList o) {
-        RecentOrderItem r = new RecentOrderItem();
-        r.setOrderId(o.getId());
-        r.setStatus( o.getStatus() != null ? o.getStatus().name() : null );
-        r.setCargoType(o.getCargoType());
-        r.setRoute(o.getDeparture() + "→" + o.getArrival());
-        r.setPrice(o.getFinalPrice()); // 혹은 proposedPrice
-        r.setUpdatedAt(o.getUpdatedAt());
-        return r;
+    @Transactional(readOnly = true)
+    @Override
+    public List<SalesChartDTO> getSalesChart(String ownerId) {
+        // 매출 라인은 기존 결제기반 그대로 사용 (필요 시 Order기반 운송건수로 보강 가능)
+        LocalDate today = LocalDate.now();
+        LocalDate first = today.withDayOfMonth(1);
+        LocalDate last  = today.withDayOfMonth(today.lengthOfMonth());
+        LocalDateTime start = first.atStartOfDay();
+        LocalDateTime end   = last.atTime(LocalTime.MAX);
+
+        Map<String, Long> salesMap = new LinkedHashMap<>();
+        paymentRepo.sumDailyRevenue(ownerId, start, end).forEach(row -> {
+            String day = (String) row[0];
+            Long sum   = (Long)   row[1];
+            salesMap.put(day, sum == null ? 0L : sum);
+        });
+
+        // 운송건수는 간단히 0으로 채우거나, Order 기반 일집계 쿼리 추가해서 채우세요.
+        List<SalesChartDTO> out = new ArrayList<>();
+        LocalDate d = first;
+        while (!d.isAfter(last)) {
+            String key = DF.format(d);
+            out.add(SalesChartDTO.builder()
+                    .day(key)
+                    .sales(salesMap.getOrDefault(key, 0L))
+                    .deliveries(0) // 필요시 OrderRepository에 daily count 쿼리 추가하여 채우기
+                    .build());
+            d = d.plusDays(1);
+        }
+        return out;
     }
 
-    private RecentSettlementItem toRecentSettlement(CarOwnerSettlement s) {
-        RecentSettlementItem r = new RecentSettlementItem();
-        r.setSettlementId(s.getId());
-        r.setAmount(s.getAmount());
-        r.setStatus(s.getStatus() != null ? s.getStatus().name() : null);
-        r.setCreatedAt(s.getCreatedAt());
-        return r;
+    @Transactional(readOnly = true)
+    @Override
+    public WarmthDTO getWarmth(String ownerId) {
+        Long driverKey = resolveDriverKey(ownerId);
+        int completed = (int) (driverKey == null ? 0 :
+                orderRepository.countByAssignedDriverIdAndStatus(driverKey, OrderStatus.COMPLETED));
+        int late = 0; // 실제 예정/도착 시간이 생기면 로직 교체
+        return new WarmthDTO(completed, late);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<DeliveryItemDTO> getDeliveries(String ownerId) {
+        Long driverKey = resolveDriverKey(ownerId);
+        if (driverKey == null) return List.of();
+
+        return orderRepository
+                .findTop5ByAssignedDriverIdAndStatusOrderByUpdatedAtDesc(driverKey, OrderStatus.ONGOING) // Changed status literal
+                .stream()
+                .map(o -> DeliveryItemDTO.builder()
+                        .id(o.getId())
+                        .deliveryNum(String.valueOf(o.getId()))
+                        .status(o.getStatus().name()) // Converted to enum name
+                        .transport_type(o.getCargoType())
+                        .from(o.getDeparture())
+                        .s_date(o.getUpdatedAt() == null ? null : o.getUpdatedAt().toLocalDate().toString())
+                        .to(o.getArrival())
+                        .build())
+                .toList();
     }
 }

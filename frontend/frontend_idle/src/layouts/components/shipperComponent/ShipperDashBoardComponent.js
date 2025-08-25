@@ -3,10 +3,10 @@ import useCustomMove from "../../../hooks/useCustomMove";
 import "../../../theme/ShipperCustomCss/ShipperDashBoard.css";
 import ShippingStatusComponent from "./ShippingStatusComponent";
 import { fetchUserPoints } from "../../../api/paymentApi";
+import ShipperReviewDashboard from "./ShipperReviewDashboard";
 
 const ShipperDashBoardComponent = (userId) => {
-    const { shipperMoveToDetails, shipperMoveToPoint, shipperMoveToReview } =
-        useCustomMove();
+    const { shipperMoveToDetails, shipperMoveToPoint } = useCustomMove();
 
     const [currentPoints, setCurrentPoints] = useState(0);
 
@@ -46,15 +46,19 @@ const ShipperDashBoardComponent = (userId) => {
                     </div>
                 </div>
                 <div className="card">
-                    <div className="card-title">후기</div>
-                    <div className="card-content">평점 4.8 ★</div>
+                    <div className="card-title">내 문의 내역</div>
+                    <div className="card-content">3건</div>
                     <div className="card-desc">
-                        최근 후기 3개, 후기 작성 가능
+                        최근 문의: 답변 완료 2, 답변 대기 1
                     </div>
-                    <div className="card-action" onClick={shipperMoveToReview}>
-                        내 후기 보기
+                    <div className="card-action">
+                        상세보기
                     </div>
                 </div>
+            </div>
+            <div className="dashboard-row-1">
+                {/* 새로운 후기 관리 컴포넌트를 여기에 추가 */}
+                <ShipperReviewDashboard />
             </div>
             <div className="dashboard-row-1">
                 <div className="card card-full-width">

@@ -1,14 +1,82 @@
 import React from 'react';
-import { renderAccountPanel } from '../../../utils/dashboardUtils'; // 유틸리티 함수 임포트
-import { Paper } from '@mui/material'; // Import Paper component
-import './AdminAccountDashboard.css'; // Import CSS file
+import { renderAccountPanel } from '../../../utils/dashboardUtils';
+import { Paper } from '@mui/material';
+import './AdminAccountDashboard.css';
+import { getRecentlyCreatedAdmins, getRecentlyDeletedAdmins } from '../../../api/adminApi';
+import useAdminAccountsData from '../../../hooks/useAdminAccountsData';
+
+const pageSize = 5; // Max rows per table
 
 const AdminAccountDashboard = () => {
+    const { 
+        data: createdAdmins,
+        loading: createdLoading,
+        error: createdError,
+        page: createdAdminsPage,
+        totalPages: createdAdminsTotalPages,
+        dateRange: createdAdminsDateRange,
+        handlePageChange: handleCreatedAdminsPageChange,
+        handleDateRangeChange: handleCreatedAdminsDateRangeChange,
+    } = useAdminAccountsData(getRecentlyCreatedAdmins, pageSize);
+
+    const { 
+        data: deletedAdmins,
+        loading: deletedLoading,
+        error: deletedError,
+        page: deletedAdminsPage,
+        totalPages: deletedAdminsTotalPages,
+        dateRange: deletedAdminsDateRange,
+        handlePageChange: handleDeletedAdminsPageChange,
+        handleDateRangeChange: handleDeletedAdminsDateRangeChange,
+    } = useAdminAccountsData(getRecentlyDeletedAdmins, pageSize);
+
+    if (createdLoading || deletedLoading) {
+        return (
+            <Paper className="admin-dashboard-paper">
+                <div className="admin-dashboard-content">
+                    <div>로딩 중...</div>
+                </div>
+            </Paper>
+        );
+    }
+
+    if (createdError || deletedError) {
+        return (
+            <Paper className="admin-dashboard-paper">
+                <div className="admin-dashboard-content">
+                    <div className="error-message">{createdError || deletedError}</div>
+                </div>
+            </Paper>
+        );
+    }
+
     return (
-        <Paper className="admin-dashboard-paper"> {/* Applied className */}
-            <div className="admin-dashboard-content"> {/* Applied className */}
-                {renderAccountPanel('최근 생성된 관리자 계정', '생성일')}
-                {renderAccountPanel('최근 삭제된 관리자 계정', '삭제일')}
+        <Paper className="admin-dashboard-paper">
+            <div className="admin-dashboard-content">
+                <div className="recent-accounts-panels-container">
+                    {renderAccountPanel(
+                        '최근 생성된 관리자 계정',
+                        '생성일',
+                        createdAdmins,
+                        'admin',
+                        createdAdminsDateRange,
+                        handleCreatedAdminsDateRangeChange,
+                        createdAdminsPage,
+                        createdAdminsTotalPages,
+                        handleCreatedAdminsPageChange
+                    )}
+                    {renderAccountPanel(
+                        '최근 삭제된 관리자 계정',
+                        '삭제일',
+                        deletedAdmins,
+                        'admin',
+                        deletedAdminsDateRange,
+                        handleDeletedAdminsDateRangeChange,
+                        deletedAdminsPage,
+                        deletedAdminsTotalPages,
+                        handleDeletedAdminsPageChange
+                    )}
+                </div>
             </div>
         </Paper>
     );

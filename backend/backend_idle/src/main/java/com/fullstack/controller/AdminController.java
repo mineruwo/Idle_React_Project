@@ -1,5 +1,6 @@
 package com.fullstack.controller;
 
+import com.fullstack.entity.Faq;
 import com.fullstack.entity.Notice;
 import com.fullstack.model.AdminDTO;
 import com.fullstack.model.AdminLoginRequestDTO;
@@ -16,8 +17,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import com.fullstack.model.CustomerDTO;
+import com.fullstack.model.FaqDTO;
 import com.fullstack.model.NoticeDTO;
 import com.fullstack.service.CustomerService;
+import com.fullstack.service.FaqService;
 import com.fullstack.service.NoticeService;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,6 +55,9 @@ public class AdminController {
 
     @Autowired
     private NoticeService noticeService;
+    
+    @Autowired
+    private FaqService faqService;
 
     @Autowired
     private ChatSessionService chatSessionService;
@@ -108,14 +114,22 @@ public class AdminController {
 
     @GetMapping("/accounts")
     @PreAuthorize("hasRole('DEV_ADMIN') or hasRole('ADMIN') or hasRole('ALL_PERMISSION')")
-    public ResponseEntity<Page<AdminDTO>> getAdminList(Pageable pageable) {
-        Page<AdminDTO> adminPage = adminService.getAdminList(pageable);
+    public ResponseEntity<Page<AdminDTO>> getAdminList(
+            Pageable pageable,
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) String searchType,
+            @RequestParam(required = false) String searchQuery) {
+        Page<AdminDTO> adminPage = adminService.getAdminList(pageable, role, searchType, searchQuery);
         return ResponseEntity.ok(adminPage);
     }
 
-    @GetMapping("/customers")
-    public ResponseEntity<Page<CustomerDTO>> getCustomerList(Pageable pageable) {
-        Page<CustomerDTO> customerPage = customerService.getCustomers(pageable).map(customer -> new CustomerDTO().builder()
+        @GetMapping("/customers")
+    public ResponseEntity<Page<CustomerDTO>> getCustomerList(
+            Pageable pageable,
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) String searchType,
+            @RequestParam(required = false) String searchQuery) {
+        Page<CustomerDTO> customerPage = customerService.getCustomers(pageable, role, searchType, searchQuery).map(customer -> new CustomerDTO().builder()
                 .id(customer.getId())
                 .role(customer.getRole())
                 .createdAt(customer.getCreatedAt())
@@ -161,6 +175,132 @@ public class AdminController {
     public ResponseEntity<List<Notice>> getAllNotices() {
         List<Notice> notices = noticeService.getAllNotices();
         return ResponseEntity.ok(notices);
+    }
+
+    @GetMapping("/notices/{id}")
+    public ResponseEntity<Notice> getNoticeById(@PathVariable Long id) {
+        Notice notice = noticeService.getNoticeById(id);
+        if (notice != null) {
+            return ResponseEntity.ok(notice);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/faqs")
+    public ResponseEntity<List<Faq>> getAllFAQs() {
+        List<Faq> faqs = faqService.getAllFAQs();
+        return ResponseEntity.ok(faqs);
+    }
+
+    @GetMapping("/faqs/{id}")
+    public ResponseEntity<Faq> getFaqById(@PathVariable Long id) {
+        Faq faq = faqService.getFaqById(id);
+        if (faq != null) {
+            return ResponseEntity.ok(faq);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/dashboard/recent-admins/created")
+    public ResponseEntity<Page<AdminDTO>> getRecentlyCreatedAdmins(
+            Pageable pageable,
+            @RequestParam(defaultValue = "1day") String dateRange) {
+        Page<AdminDTO> admins = adminService.getRecentlyCreatedAdmins(pageable, dateRange);
+        return ResponseEntity.ok(admins);
+    }
+
+    @GetMapping("/dashboard/recent-admins/deleted")
+    public ResponseEntity<Page<AdminDTO>> getRecentlyDeletedAdmins(
+            Pageable pageable,
+            @RequestParam(defaultValue = "1day") String dateRange) {
+        Page<AdminDTO> admins = adminService.getRecentlyDeletedAdmins(pageable, dateRange);
+        return ResponseEntity.ok(admins);
+    }
+
+    @GetMapping("/dashboard/recent-customers/created")
+    public ResponseEntity<Page<CustomerDTO>> getRecentlyCreatedCustomers(
+            Pageable pageable,
+            @RequestParam(defaultValue = "1day") String dateRange) {
+        Page<CustomerDTO> customers = customerService.getRecentlyCreatedCustomers(pageable, dateRange);
+        return ResponseEntity.ok(customers);
+    }
+
+    @GetMapping("/dashboard/recent-customers/deleted")
+    public ResponseEntity<Page<CustomerDTO>> getRecentlyDeletedCustomers(
+            Pageable pageable,
+            @RequestParam(defaultValue = "1day") String dateRange) {
+        Page<CustomerDTO> customers = customerService.getRecentlyDeletedCustomers(pageable, dateRange);
+        return ResponseEntity.ok(customers);
+    }
+
+    @GetMapping("/dashboard/customer-creation-counts")
+    public ResponseEntity<Map<String, Long>> getDailyCustomerCreationCounts(
+            @RequestParam int year,
+            @RequestParam int month) {
+        Map<String, Long> counts = customerService.getDailyCustomerCreationCounts(year, month);
+        return ResponseEntity.ok(counts);
+    }
+
+    @GetMapping("/dashboard/customer-deletion-counts")
+    public ResponseEntity<Map<String, Long>> getDailyCustomerDeletionCounts(
+            @RequestParam int year,
+            @RequestParam int month) {
+        Map<String, Long> counts = customerService.getDailyCustomerDeletionCounts(year, month);
+        return ResponseEntity.ok(counts);
+    }
+
+    @PostMapping("/faqs")
+    @PreAuthorize("hasRole('MANAGER_COUNSELING') or hasRole('DEV_ADMIN') or hasRole('ALL_PERMISSION')")
+    public ResponseEntity<?> createFAQ(@RequestBody FaqDTO faqDTO) {
+        try {
+            Faq createdFaq = faqService.createFAQ(faqDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdFaq);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating FAQ: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/faqs/{id}")
+    @PreAuthorize("hasRole('MANAGER_COUNSELING') or hasRole('DEV_ADMIN') or hasRole('ALL_PERMISSION')")
+    public ResponseEntity<?> updateFAQ(@PathVariable Long id, @RequestBody FaqDTO faqDTO) {
+        try {
+            Faq updatedFaq = faqService.updateFAQ(id, faqDTO);
+            if (updatedFaq != null) {
+                return ResponseEntity.ok(updatedFaq);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating FAQ: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/faqs/{id}")
+    @PreAuthorize("hasRole('MANAGER_COUNSELING') or hasRole('DEV_ADMIN') or hasRole('ALL_PERMISSION')")
+    public ResponseEntity<?> deleteFAQ(@PathVariable Long id) {
+        try {
+            faqService.deleteFAQ(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting FAQ: " + e.getMessage());
+        }
+    }
+
+    @PatchMapping("/faqs/{id}/toggle")
+    @PreAuthorize("hasRole('MANAGER_COUNSELING') or hasRole('DEV_ADMIN') or hasRole('ALL_PERMISSION')")
+    public ResponseEntity<?> toggleFAQActive(@PathVariable Long id) {
+        try {
+            Faq updatedFaq = faqService.toggleFAQActive(id);
+            if (updatedFaq != null) {
+                return ResponseEntity.ok(updatedFaq);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error toggling FAQ activation: " + e.getMessage());
+        }
     }
 
     // Test API for PathVariable

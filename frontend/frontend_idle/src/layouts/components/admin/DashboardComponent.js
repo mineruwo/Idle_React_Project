@@ -3,6 +3,9 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import AdminAccountDashboard from './AdminAccountDashboard';
 import CustomerAccountDashboard from './CustomerAccountDashboard';
+import RecentAdminAccountsDashboard from './RecentAdminAccountsDashboard'; // New import
+import RecentCustomerAccountsDashboard from './RecentCustomerAccountsDashboard'; // New import
+import NoticeAndFaqDashboard from './NoticeAndFaqDashboard';
 import '../../../theme/admin.css';
 
 const DashboardComponent = () => {
@@ -58,7 +61,7 @@ const DashboardComponent = () => {
 
         {accessibleMenus.includes('공지 사항 관리') && (
             <DashboardSection title="공지 사항 관리">
-                <p>공지 사항 관련 내용이 여기에 표시됩니다.</p>
+                <NoticeAndFaqDashboard />
             </DashboardSection>
         )}
 

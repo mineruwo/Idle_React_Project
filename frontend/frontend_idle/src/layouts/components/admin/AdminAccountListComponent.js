@@ -1,83 +1,103 @@
-
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { getAdminList } from "../../../api/adminApi";
 import Modal from "../common/Modal";
 import PaginationComponent from "../common/PaginationComponent";
-import '../../../theme/admin.css'; // 공통 CSS 임포트
+import usePaginatedData from "../../../hooks/usePaginatedData";
+import { ROLE_OPTIONS } from "../../../constants/roles";
+import { AdminTable } from "./AdminTable";
+import { AdminControls } from "./AdminControls";
+import '../../../theme/admin.css';
 
 const AdminAccountListComponent = () => {
-    const [adminList, setAdminList] = useState([]);
-    const [page, setPage] = useState(0);
-    const [size, setSize] = useState(10);
-    const [totalPages, setTotalPages] = useState(0);
-    const [showModal, setShowModal] = useState(false);
-    const [modalMessage, setModalMessage] = useState("");
+    const { 
+        data: adminList,
+        page,
+        totalPages,
+        loading,
+        error,
+        handlePageChange,
+        handleFilterChange,
+        handleSort,
+        handleSearch,
+        sortConfig,
+        filters,
+        search,
+    } = usePaginatedData(getAdminList, {
+        filters: { role: '' },
+        sortConfig: { key: 'idIndex', direction: 'asc' },
+        search: { query: '', type: 'adminId' },
+    });
 
-    useEffect(() => {
-        fetchAdminList();
-    }, [page, size]);
+    const [modalState, setModalState] = useState({ show: false, message: "" });
 
-    const fetchAdminList = async () => {
-        try {
-            const response = await getAdminList(page, size);
-            setAdminList(response.content);
-            setTotalPages(response.totalPages);
-        } catch (error) {
-            console.error("Failed to fetch admin list:", error);
-            setModalMessage("관리자 목록을 불러오는데 실패했습니다: " + (error.response ? error.response.data : error.message));
-            setShowModal(true);
-        }
-    };
-
-    const handlePageChange = (newPage) => {
-        setPage(newPage);
+    const showModal = (message) => {
+        setModalState({ show: true, message });
     };
 
     const closeModal = () => {
-        setShowModal(false);
+        setModalState({ ...modalState, show: false });
     };
+
+    const adminTableColumns = [
+        { header: 'ID', key: 'idIndex', sortable: true },
+        { header: '아이디', key: 'adminId', sortable: true },
+        { header: '이름', key: 'name', sortable: true },
+        { header: '역할', key: 'role', sortable: true },
+        { header: '사번', key: 'emplId', sortable: true },
+        {
+            header: '등록일',
+            key: 'regDate',
+            sortable: true,
+            render: (item) => new Date(item.regDate).toLocaleDateString()
+        },
+        {
+            header: '삭제여부',
+            key: 'del',
+            sortable: false,
+            render: (item) => (item.del ? "Yes" : "No")
+        },
+    ];
+
+    const searchOptions = [
+        { value: "adminId", label: "아이디" },
+        { value: "name", label: "이름" },
+        { value: "emplId", label: "사번" },
+    ];
+
+    if (loading) {
+        return <div>로딩 중...</div>;
+    }
+
+    if (error) {
+        return <div className="error-message">오류 발생: {error.message}</div>;
+    }
 
     return (
         <div className="admin-container">
-            <Modal show={showModal} message={modalMessage} onClose={closeModal} />
+            <Modal show={modalState.show} message={modalState.message} onClose={closeModal} />
             <div className="admin-header">
                 <h2>관리자 계정 목록</h2>
-                {/* You can add a create button here if needed, for example: */}
-                {/* <Link to="/admin/admin-accounts/create" className="admin-primary-btn">새 관리자 생성</Link> */}
             </div>
 
-            <table className="admin-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>아이디</th>
-                        <th>이름</th>
-                        <th>역할</th>
-                        <th>사번</th>
-                        <th>등록일</th>
-                        <th>삭제여부</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {adminList.length > 0 ? (
-                        adminList.map((admin) => (
-                            <tr key={admin.idIndex} className="admin-table-row">
-                                <td>{admin.idIndex}</td>
-                                <td>{admin.adminId}</td>
-                                <td>{admin.name}</td>
-                                <td>{admin.role}</td>
-                                <td>{admin.emplId}</td>
-                                <td>{new Date(admin.regDate).toLocaleDateString()}</td>
-                                <td>{admin.del ? "Yes" : "No"}</td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="7">관리자 계정이 없습니다.</td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
+            <AdminControls
+                roleFilter={filters.role}
+                setRoleFilter={(value) => handleFilterChange({ role: value })}
+                searchQuery={search.query}
+                setSearchQuery={(value) => handleSearch({ ...search, query: value })}
+                searchType={search.type}
+                setSearchType={(value) => handleSearch({ ...search, type: value })}
+                handleSearch={(e) => { e.preventDefault(); handleSearch(search); }}
+                roles={ROLE_OPTIONS}
+                searchOptions={searchOptions}
+            />
+
+            <AdminTable
+                data={adminList}
+                columns={adminTableColumns}
+                sortConfig={sortConfig}
+                onSort={handleSort}
+                emptyMessage="관리자 계정이 없습니다."
+            />
 
             <PaginationComponent
                 currentPage={page}

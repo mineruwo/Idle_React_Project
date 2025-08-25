@@ -38,11 +38,15 @@ public class Notice {
     @Column(name = "writer_admin_id", nullable = false)
     private String writerAdminId;
 
+    @Column(name = "view_count", nullable = false) // New field
+    private Integer viewCount;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         this.isDel = false; // Default value for is_del
+        this.viewCount = 0; // Default value for viewCount
     }
 
     @PreUpdate
