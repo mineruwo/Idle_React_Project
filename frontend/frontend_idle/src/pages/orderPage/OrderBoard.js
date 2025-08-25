@@ -259,8 +259,8 @@ const OrderBoard = () => {
     const arr = [...filtered];
     if (sortKey === "latest") {
       arr.sort((a, b) => {
-        const ta = new Date(a.createdAt || a.date || 0).getTime();
-        const tb = new Date(b.createdAt || b.date || 0).getTime();
+        const ta = new Date(a.createdAt || 0).getTime();
+        const tb = new Date(b.createdAt || 0).getTime();
         return tb - ta; // desc
       });
       return arr;
