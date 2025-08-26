@@ -53,7 +53,7 @@ public final class CarOwnerDashboardDTO {
     public static class SalesChartDTO {
         private String day;        // yyyy-MM-dd
         private long sales;        // 해당일 매출
-        private int deliveries;    // 해당일 운송건수
+        private Long deliveries;    // 해당일 운송건수
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
