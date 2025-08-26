@@ -18,7 +18,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.fullstack.security.jwt.JWTFilter;
-import com.fullstack.security.jwt.OAuth2SuccessHandler;
+import com.fullstack.security.oauth.OAuth2SuccessHandler;
 import com.fullstack.service.CustomOAuth2UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -102,7 +102,7 @@ public class SecurityConfig {
                 
                 .anyRequest().authenticated()
             )
-            
+            // sns 로그인 페이지 연결
             .oauth2Login(o -> o
                     .authorizationEndpoint(a -> a.baseUri("/oauth2/authorization"))
                     .redirectionEndpoint(r -> r.baseUri("/login/oauth2/code/*"))

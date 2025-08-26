@@ -2,6 +2,7 @@ package com.fullstack.service;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -30,40 +31,68 @@ public class CustomOAuth2UserServiceImpl implements CustomOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest req) throws OAuth2AuthenticationException {
 		DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
 		OAuth2User user = delegate.loadUser(req);
-
-		Map<String, Object> attr = user.getAttributes();
 		
-        String provider = req.getClientRegistration().getRegistrationId(); // "google"
-        String providerId = (String) attr.get("sub");
-        String email = (String) attr.get("email");
-        String name = (String) attr.get("name");
-        Boolean emailVerified = (Boolean) attr.getOrDefault("email_verified", false);
-
-        // 1) provider+providerId 로 기존 계정 찾기
-        CustomerEntity existing = customerRepository.findBySnsLoginProviderAndSnsProviderId(provider, providerId)
-                .orElse(null);
-
-        // 2) 없으면 email 로 기존 로컬 계정/다른 SNS 계정과 연결 시도
-        if (existing == null && email != null) {
-            existing = customerRepository.findById(email).orElse(null);
-            if (existing != null) {
-                // 이미 로컬로 가입한 유저 → SNS 연동
-                existing.setSnsLoginProvider(provider);
-                existing.setSnsProviderId(providerId);
-                customerRepository.save(existing);
-            }
-        }
+        String provider = req.getClientRegistration().getRegistrationId();
+		Map<String, Object> attrs = new LinkedHashMap<>(user.getAttributes());
         
-        // 여기서 권한/Principal 구성
+		String providerId = extractProviderId(provider, attrs);
+	    String email = extractEmail(provider, attrs);
+
+        CustomerEntity linked = (providerId == null) ? null
+                : customerRepository.findBySnsLoginProviderAndSnsProviderId(provider, providerId).orElse(null);
+
+        CustomerEntity localByEmail = (email == null) ? null
+                : customerRepository.findById(email).orElse(null);
+        
+        attrs.put("provider", provider);
+        attrs.put("providerId", providerId);
+        attrs.put("resolvedEmail", email);       
+        attrs.put("existingLinkedUser", linked != null);
+        attrs.put("emailUserExists", localByEmail != null);
+
         Collection<? extends GrantedAuthority> authorities =
-                (existing == null)
-                ? Collections.<GrantedAuthority>emptyList()
-                : Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + existing.getRole().toUpperCase()));
+                (linked == null)
+                	? Collections.<GrantedAuthority>emptyList()
+                	: Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + linked.getRole().toUpperCase()));
         
         String nameAttributeKey = req.getClientRegistration()
                 .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
         
-        return new DefaultOAuth2User(authorities, attr, nameAttributeKey); 
+        return new DefaultOAuth2User(authorities, attrs, nameAttributeKey); 
+    }
+	
+	private String extractProviderId(String provider, Map<String, Object> attrs) {
+        switch (provider) {
+            case "google":
+                return (String) attrs.get("sub");
+            case "kakao": {
+                Object id = attrs.get("id");
+                return (id != null) ? String.valueOf(id) : null;
+            }
+            case "naver": {
+                Map<?, ?> resp = (Map<?, ?>) attrs.get("response");
+                return (resp != null) ? (String) resp.get("id") : null;
+            }
+            default:
+                return null;
+        }
+    }
+
+    private String extractEmail(String provider, Map<String, Object> attrs) {
+        switch (provider) {
+            case "google":
+                return (String) attrs.get("email");
+            case "kakao": {
+                Map<?, ?> account = (Map<?, ?>) attrs.get("kakao_account");
+                return (account != null) ? (String) account.get("email") : null;
+            }
+            case "naver": {
+                Map<?, ?> resp = (Map<?, ?>) attrs.get("response");
+                return (resp != null) ? (String) resp.get("email") : null;
+            }
+            default:
+                return null;
+        }
     }
 
 }
