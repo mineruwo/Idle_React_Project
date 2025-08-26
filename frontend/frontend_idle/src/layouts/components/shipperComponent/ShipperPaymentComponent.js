@@ -155,7 +155,7 @@ const ShipperPaymentComponent = ({
                         merchantUid: response.merchantUid,
                         itemName:
                             orderList.length > 1
-                                ? `${orderList[0].itemName} 외 ${
+                                ? `${orderList[0].itemName} 외 ${ 
                                       orderList.length - 1
                                   }건`
                                 : orderList[0].itemName,
@@ -163,7 +163,31 @@ const ShipperPaymentComponent = ({
                         paidAt: response.paidAt,
                         pgProvider: "points",
                     };
-                    shipperMoveToPaymentSuccess({ paymentInfo });
+
+                    try {
+                        console.log(
+                            "Updating order status for order ID:",
+                            orderList[0].orderId
+                        );
+                        await updateOrderStatus(
+                            orderList[0].orderId,
+                            "READY"
+                        );
+                        console.log("주문 상태 업데이트 성공!");
+                    } catch (statusUpdateError) {
+                        console.error(
+                            "주문 상태 업데이트 실패:",
+                            statusUpdateError
+                        );
+                        setMessage(
+                            `주문 상태 업데이트 실패: ${statusUpdateError.message}`
+                        );
+                    }
+
+                    shipperMoveToPaymentSuccess({
+                        paymentInfo,
+                        orderId: orderList[0].orderId,
+                    });
                 } else {
                     setMessage(`포인트 결제 실패: ${response.message}`);
                 }
@@ -294,6 +318,7 @@ const ShipperPaymentComponent = ({
                                     }
                                     shipperMoveToPaymentSuccess({
                                         paymentInfo,
+                                        orderId: orderList[0].orderId, // 주문 ID 추가
                                     });
                                 } else {
                                     setMessage(

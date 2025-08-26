@@ -18,6 +18,7 @@ public class ReviewResponseDTO {
     private String content;
     private String authorNickname;
     private String targetNickname;
+    private Integer targetId; // ADDED
     private LocalDateTime createdAt;
 
     public static ReviewResponseDTO fromEntity(ReviewEntity entity) {
@@ -27,6 +28,7 @@ public class ReviewResponseDTO {
                 .content(entity.getContent())
                 .authorNickname(entity.getAuthor() != null ? entity.getAuthor().getNickname() : null)
                 .targetNickname(entity.getTarget() != null ? entity.getTarget().getNickname() : null)
+                .targetId(entity.getTarget() != null ? entity.getTarget().getIdNum() : null) // ADDED
                 .createdAt(entity.getCreatedAt())
                 .build();
     }

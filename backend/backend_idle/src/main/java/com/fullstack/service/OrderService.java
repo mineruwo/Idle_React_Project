@@ -113,6 +113,7 @@ public class OrderService {
     /** 주문 상태 업데이트 */
     @Transactional
     public Order updateOrderStatus(Long orderId, OrderStatus newStatus) { // Changed parameter type
+        log.info("OrderService: Updating order status for ID: {} to {}", orderId, newStatus); // ADD THIS LINE
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + orderId));
         

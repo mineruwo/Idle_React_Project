@@ -18,9 +18,12 @@ const useCustomMove = () => {
     };
 
     const shipperMoveToPayment = (orderData) => {
-        navigate({
-            pathname: `/shipper/payment`,
-        }, { state: { orderData } });
+        navigate(
+            {
+                pathname: `/shipper/payment`,
+            },
+            { state: { orderData } }
+        );
     };
 
     const shipperMoveToPaymentSuccess = (state) => {
@@ -88,6 +91,7 @@ const useCustomMove = () => {
     const moveToNewPassword = (token, { replace = false } = {}) => {
         if (!token) return;
         navigate("/newPassword", { state: { token }, replace });
+
     };
 
     // 외부 이동

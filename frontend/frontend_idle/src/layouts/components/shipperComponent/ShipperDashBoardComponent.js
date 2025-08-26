@@ -4,11 +4,66 @@ import "../../../theme/ShipperCustomCss/ShipperDashBoard.css";
 import ShippingStatusComponent from "./ShippingStatusComponent";
 import { fetchUserPoints } from "../../../api/paymentApi";
 import ShipperReviewDashboard from "./ShipperReviewDashboard";
+import { fetchMyOrders } from "../../../api/orderApi";
 
 const ShipperDashBoardComponent = (userId) => {
-    const { shipperMoveToDetails, shipperMoveToPoint } = useCustomMove();
+    const { shipperMoveToPoint, shipperMoveToOrderHistory } = useCustomMove();
 
     const [currentPoints, setCurrentPoints] = useState(0);
+    const [totalOrders, setTotalOrders] = useState(0);
+    const [inProgressOrders, setInProgressOrders] = useState(0);
+    const [completedOrders, setCompletedOrders] = useState(0);
+    const [cancelledOrders, setCancelledOrders] = useState(0);
+
+    useEffect(() => {
+        const loadOrderCounts = async () => {
+            try {
+                const allOrders = await fetchMyOrders();
+                let created = 0;
+                let paymentPending = 0;
+                let ready = 0;
+                let ongoing = 0;
+                let completed = 0;
+                let cancelled = 0;
+
+                allOrders.forEach(order => {
+                    switch (order.status) {
+                        case 'CREATED':
+                            created++;
+                            break;
+                        case 'PAYMENT_PENDING':
+                            paymentPending++;
+                            break;
+                        case 'READY':
+                            ready++;
+                            break;
+                        case 'ONGOING':
+                            ongoing++;
+                            break;
+                        case 'COMPLETED':
+                            completed++;
+                            break;
+                        case 'CANCELLED': // Assuming 'CANCELLED' is a possible status
+                            cancelled++;
+                            break;
+                        default:
+                            break;
+                    }
+                });
+
+                setTotalOrders(allOrders.length);
+                setInProgressOrders(created + paymentPending + ready + ongoing);
+                setCompletedOrders(completed);
+                setCancelledOrders(cancelled);
+
+            } catch (error) {
+                console.error("Failed to fetch order counts:", error);
+                // Optionally set error state for display
+            }
+        };
+
+        loadOrderCounts();
+    }, []); // Empty dependency array to run once on mount
 
     useEffect(() => {
         const getUserPoints = async () => {
@@ -28,11 +83,11 @@ const ShipperDashBoardComponent = (userId) => {
             <div className="dashboard-row-3">
                 <div className="card">
                     <div className="card-title">오더상세</div>
-                    <div className="card-content">11건</div>
+                    <div className="card-content">{totalOrders}건</div>
                     <div className="card-desc">
-                        최근 오더: 진행중 2, 완료 8, 취소 1
+                        최근 오더: 진행중 {inProgressOrders}, 완료 {completedOrders}, 취소 {cancelledOrders}
                     </div>
-                    <div className="card-action" onClick={shipperMoveToDetails}>
+                    <div className="card-action" onClick={shipperMoveToOrderHistory}>
                         상세보기
                     </div>
                 </div>

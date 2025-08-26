@@ -13,10 +13,13 @@ import com.fullstack.repository.DriverOfferRepository;
 import com.fullstack.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class DriverOfferService {
@@ -77,7 +80,7 @@ public class DriverOfferService {
     public DriverOfferResponse accept(Long offerId) {
         if (offerId == null) throw new IllegalArgumentException("offerId가 필요합니다.");
 
-        DriverOffer offer = driverOfferRepository.findById(offerId)
+        DriverOffer offer = driverOfferRepository.findByIdWithDriver(offerId) // Use new method
                 .orElseThrow(() -> new IllegalArgumentException("Offer not found: " + offerId));
 
         Order order = offer.getOrder();
@@ -96,7 +99,7 @@ public class DriverOfferService {
         Long assigned = (offer.getDriver() != null && offer.getDriver().getIdNum() != null)
                 ? offer.getDriver().getIdNum().longValue() : null;
         order.setAssignedDriverId(assigned);
-        order.setStatus(OrderStatus.READY);
+        order.setStatus(OrderStatus.PAYMENT_PENDING);
         // 다른 PENDING 전부 거절
         driverOfferRepository.rejectOthers(order.getId(), offer.getId());
 

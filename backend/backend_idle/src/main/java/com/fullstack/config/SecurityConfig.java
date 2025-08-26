@@ -61,6 +61,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/orders/**").permitAll()
 
                 // 입찰 API (현재 전부 공개, 운영 시 필요에 따라 롤 제한)
+                .requestMatchers(HttpMethod.POST, "/api/offers/{offerId}/accept").hasRole("SHIPPER")
+                // 나머지 입찰 API는 공개 (필요에 따라 롤 제한)
                 .requestMatchers("/api/offers/**").permitAll()
 
                 // 인증/토큰 관련

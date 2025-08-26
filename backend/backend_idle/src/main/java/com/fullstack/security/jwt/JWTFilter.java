@@ -74,8 +74,11 @@ public class JWTFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        final String uri = request.getRequestURI();
-        log.debug("JWTFilter handling uri={}", uri);
+
+        log.info("JWTFilter: Request received for URI: {} and Method: {}", request.getRequestURI(), request.getMethod()); // ADD THIS LINE
+
+        final String method = request.getMethod();
+        final String uri    = request.getRequestURI();
 
         // 1) 쿠키 → 2) Authorization 헤더(Bearer) 순으로 추출
         String token = extractTokenFromCookies(request);
@@ -93,11 +96,15 @@ public class JWTFilter extends OncePerRequestFilter {
                             null,
                             List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
                         );
-                        SecurityContextHolder.getContext().setAuthentication(auth);
-                        log.debug("JWT 인증 세팅 완료: id={}, role={}", id, role);
-                    } else {
-                        log.debug("JWT subject(id) 없음 → 비인증으로 진행");
-                    }
+
+
+                    log.info("JWTFilter: Setting Authentication. User: {}, Role: {}, Authorities: {}", id, role, authToken.getAuthorities());
+
+                    log.info("JWTFilter: Attempting to set Authentication. User: {}, Role: {}, Authorities: {}", id, role, authToken.getAuthorities()); // ADD THIS LINE
+
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                    log.debug("JWT 인증 세팅 완료: id={}, role={}", id, role);
+                    
                 } else {
                     log.debug("JWT 검증 실패(만료/서명오류 등) → 비인증으로 진행");
                 }

@@ -1,139 +1,189 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import "../../../theme/ShipperCustomCss/ShipperReview.css";
-import { createReview, getReviewsByTarget, deleteReview, getMyReviews } from '../../../api/reviewApi'; // API 함수 임포트
-import { useAuth } from '../../../auth/AuthProvider'; // 사용자 정보 가져오기
+import {
+    createReview,
+    getReviewsByTarget,
+    deleteReview,
+    getMyReviews,
+} from "../../../api/reviewApi";
+import { useAuth } from "../../../auth/AuthProvider";
+import { fetchMyOrders } from "../../../api/orderApi";
 
 const ShipperReviewComponent = () => {
-    const { profile } = useAuth(); // 현재 로그인된 사용자 정보
-    const currentUserId = profile?.idNum; // 현재 사용자의 idNum (화주 ID)
+    const { profile } = useAuth();
+    const currentUserId = profile?.idNum;
+    const location = useLocation();
 
-    const [reviews, setReviews] = useState([]); // 초기 리뷰 목록을 빈 배열로 설정
-    const [isLoading, setIsLoading] = useState(true); // 로딩 상태
-    const [error, setError] = useState(null); // 에러 상태
+    useEffect(() => {
+        if (location.state && location.state.orderId) {
+            setSelectedOrder(location.state.orderId);
+        }
+    }, [location.state]);
 
-    // Mock order data - In a real application, this would come from an API
-    // 실제로는 화주가 완료한 오더 목록을 백엔드에서 가져와야 합니다.
-    const [orders, setOrders] = useState([
-        { orderId: 'ORD001', description: '서울-부산 운송', driverId: 37, driverName: '김차주' }, // driverId는 CustomerEntity의 idNum이라고 가정
-        { orderId: 'ORD002', description: '인천-대구 운송', driverId: 25, driverName: '이차주' },
-        { orderId: 'ORD003', description: '광주-대전 운송', driverId: null , driverName: '배차 전' },
-    ]);
+    const [reviews, setReviews] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    const [selectedOrder, setSelectedOrder] = useState(''); // Stores the selected orderId
-    const [targetDriverId, setTargetDriverId] = useState(null); // 리뷰 대상 차주의 idNum
-    const [targetDriverName, setTargetDriverName] = useState('선택된 차주 없음');
+    const [orders, setOrders] = useState([]);
+
+    const [selectedOrder, setSelectedOrder] = useState("");
+    const [targetDriverId, setTargetDriverId] = useState(null);
+    const [targetDriverName, setTargetDriverName] =
+        useState("선택된 차주 없음");
 
     const ratingRef = useRef();
     const reviewRef = useRef();
 
-    // 선택된 오더에 따라 차주 정보 업데이트
     useEffect(() => {
-        const order = orders.find(o => o.orderId === selectedOrder);
+        const order = orders.find((o) => o.orderId === selectedOrder);
         if (order && order.driverId) {
             setTargetDriverId(order.driverId);
             setTargetDriverName(order.driverName);
         } else {
             setTargetDriverId(null);
-            setTargetDriverName('선택된 차주 없음');
+            setTargetDriverName("선택된 차주 없음");
         }
     }, [selectedOrder, orders]);
 
-    // 컴포넌트 마운트 시 내가 쓴 리뷰 목록 불러오기
-    useEffect(() => {
-        const fetchMyReviews = async () => {
-            try {
-                setIsLoading(true);
-                const data = await getMyReviews();
-                setReviews(data);
-            } catch (err) {
-                setError('리뷰를 불러오는데 실패했습니다.');
-                console.error('Failed to fetch reviews:', err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    const loadCompletedOrdersForReview = async (currentReviews) => {
+        try {
+            const allOrders = await fetchMyOrders();
+            const reviewedDriverIds = new Set(
+                currentReviews.map((review) => review.targetId)
+            );
+            const unreviewedCompletedOrders = allOrders
+                .filter(
+                    (order) =>
+                        order.status === "COMPLETED" &&
+                        order.assignedDriverId != null &&
+                        !reviewedDriverIds.has(order.assignedDriverId)
+                )
+                .map((order) => ({
+                    orderId: order.id,
+                    description: `${order.departure} -> ${order.arrival}`,
+                    driverId: order.assignedDriverId,
+                    driverName: `Driver #${order.assignedDriverId}`,
+                    completedDate: new Date(order.createdAt).toLocaleDateString(
+                        "ko-KR"
+                    ),
+                }));
+            setOrders(unreviewedCompletedOrders);
+        } catch (err) {
+            console.error("Failed to fetch reviewable orders:", err);
+            setError("리뷰 가능한 오더를 불러오는데 실패했습니다.");
+        }
+    };
 
-        fetchMyReviews();
-    }, []); // 컴포넌트가 처음 마운트될 때만 실행
+    useEffect(() => {
+        const initialLoad = async () => {
+            const initialReviews = await fetchMyReviews();
+            await loadCompletedOrdersForReview(initialReviews);
+        };
+        initialLoad();
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!selectedOrder || !targetDriverId || targetDriverName === '배차 전' || targetDriverName === '선택된 차주 없음') {
-            alert('리뷰를 작성할 오더를 선택하거나, 배차된 기사가 있는 오더를 선택해주세요.');
+        if (!selectedOrder) {
+            alert("리뷰를 작성할 오더를 선택해주세요.");
             return;
         }
+
+        const selectedOrderObject = orders.find(
+            (o) => o.orderId === Number(selectedOrder)
+        );
+
+        if (!selectedOrderObject || selectedOrderObject.driverId == null) {
+            alert("배차된 기사가 있는 오더를 선택해주세요.");
+            return;
+        }
+
+        setTargetDriverId(selectedOrderObject.driverId);
+        setTargetDriverName(selectedOrderObject.driverName);
 
         const reviewContent = reviewRef.current.value;
         const reviewRating = parseInt(ratingRef.current.value);
 
-        if (!reviewContent || reviewContent.trim() === '') {
-            alert('리뷰 내용을 입력해주세요.');
+        if (!reviewContent || reviewContent.trim() === "") {
+            alert("리뷰 내용을 입력해주세요.");
             return;
         }
         if (isNaN(reviewRating) || reviewRating < 1 || reviewRating > 5) {
-            alert('유효한 평점을 선택해주세요.');
+            alert("유효한 평점을 선택해주세요.");
             return;
         }
 
         try {
             setIsLoading(true);
             const newReviewData = {
-                targetId: targetDriverId, // CustomerEntity의 idNum
+                targetId: selectedOrderObject.driverId,
                 rating: reviewRating,
                 content: reviewContent,
-                // orderId: selectedOrder, // 백엔드 ReviewRequestDto에 orderId 필드가 없으므로 주석 처리
+                orderId: selectedOrder,
             };
-            
+
             await createReview(newReviewData);
-            alert('리뷰가 성공적으로 등록되었습니다.');
+            alert("리뷰가 성공적으로 등록되었습니다.");
 
-            // 리뷰 등록 후 목록 갱신 (여기서는 임시로 첫 번째 드라이버의 리뷰를 다시 불러옴)
-            // 실제로는 해당 오더의 리뷰만 갱신하거나, 모든 리뷰를 다시 불러와야 합니다.
-            const data = await getMyReviews();
-            setReviews(data);
+            const updatedReviews = await fetchMyReviews();
 
-            // 폼 초기화
+            await loadCompletedOrdersForReview(updatedReviews);
+
             if (reviewRef.current) {
-                reviewRef.current.value = '';
+                reviewRef.current.value = "";
             }
             if (ratingRef.current) {
-                ratingRef.current.value = '5';
+                ratingRef.current.value = "5";
             }
-            setSelectedOrder('');
+            setSelectedOrder("");
             setTargetDriverId(null);
-            setTargetDriverName('선택된 차주 없음');
-
+            setTargetDriverName("선택된 차주 없음");
         } catch (err) {
-            setError('리뷰 등록에 실패했습니다.');
-            console.error('Failed to create review:', err);
+            setError("리뷰 등록에 실패했습니다.");
+            console.error("Failed to create review:", err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const fetchMyReviews = async () => {
+        try {
+            setIsLoading(true);
+            const data = await getMyReviews();
+            setReviews(data);
+            return data;
+        } catch (err) {
+            setError("리뷰를 불러오는데 실패했습니다.");
+            console.error("Failed to fetch reviews:", err);
+            return [];
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleDelete = async (reviewId) => {
-        if (!window.confirm('정말로 이 리뷰를 삭제하시겠습니까?')) {
+        if (!window.confirm("정말로 이 리뷰를 삭제하시겠습니까?")) {
             return;
         }
         try {
             setIsLoading(true);
             await deleteReview(reviewId);
-            alert('리뷰가 성공적으로 삭제되었습니다.');
-            // 삭제 후 목록 갱신
+            alert("리뷰가 성공적으로 삭제되었습니다.");
             const data = await getMyReviews();
             setReviews(data);
         } catch (err) {
-            setError('리뷰 삭제에 실패했습니다.');
-            console.error('Failed to delete review:', err);
+            setError("리뷰 삭제에 실패했습니다.");
+            console.error("Failed to delete review:", err);
         } finally {
             setIsLoading(false);
         }
     };
 
     const renderStars = (rating) => {
-        const fullStars = '★'.repeat(rating);
-        const emptyStars = '☆'.repeat(5 - rating);
+        const fullStars = "★".repeat(rating);
+        const emptyStars = "☆".repeat(5 - rating);
         return fullStars + emptyStars;
     };
 
@@ -142,7 +192,11 @@ const ShipperReviewComponent = () => {
     }
 
     if (error) {
-        return <div className="review-rating-page" style={{ color: 'red' }}>오류: {error}</div>;
+        return (
+            <div className="review-rating-page" style={{ color: "red" }}>
+                오류: {error}
+            </div>
+        );
     }
 
     return (
@@ -157,13 +211,20 @@ const ShipperReviewComponent = () => {
                             리뷰 대상 오더:
                             <select
                                 value={selectedOrder}
-                                onChange={(e) => setSelectedOrder(e.target.value)}
+                                onChange={(e) =>
+                                    setSelectedOrder(e.target.value)
+                                }
                                 required
                             >
                                 <option value="">오더를 선택해주세요</option>
                                 {orders.map((order) => (
-                                    <option key={order.orderId} value={order.orderId}>
-                                        {order.description} (기사: {order.driverName})
+                                    <option
+                                        key={order.orderId}
+                                        value={order.orderId}
+                                    >
+                                        {order.description} (기사:{" "}
+                                        {order.driverName} / ID:{" "}
+                                        {order.driverId})
                                     </option>
                                 ))}
                             </select>
@@ -171,7 +232,11 @@ const ShipperReviewComponent = () => {
                         <p>선택된 차주: {targetDriverName}</p>
                         <label>
                             평점 :
-                            <select name="rating" ref={ratingRef} defaultValue="5">
+                            <select
+                                name="rating"
+                                ref={ratingRef}
+                                defaultValue="5"
+                            >
                                 <option value="5">★★★★★ (5)</option>
                                 <option value="4">★★★★☆ (4)</option>
                                 <option value="3">★★★☆☆ (3)</option>
@@ -185,7 +250,9 @@ const ShipperReviewComponent = () => {
                             ref={reviewRef}
                             required
                         ></textarea>
-                        <button type="submit" disabled={isLoading}>등록</button>
+                        <button type="submit" disabled={isLoading}>
+                            등록
+                        </button>
                     </form>
                 </div>
 
@@ -195,16 +262,35 @@ const ShipperReviewComponent = () => {
                         <p>아직 작성된 리뷰가 없습니다.</p>
                     ) : (
                         reviews.map((review) => (
-                            <div className="review-item" key={review.id}> {/* key를 review.id로 변경 */}
+                            <div className="review-item" key={review.id}>
+                                {" "}
                                 <div className="review-header">
-                                    <span className="reviewer-name">{review.authorNickname}</span>
-                                    <span className="driver-name">({review.targetNickname} 대상)</span>
-                                    <span className="stars">{renderStars(review.rating)}</span>
-                                    <span className="date">{new Date(review.createdAt).toLocaleDateString()}</span> {/* 날짜 형식 변경 */}
-                                    {/* 현재 로그인된 사용자가 작성한 리뷰만 삭제 버튼 표시 */}
-                                    {profile && review.authorNickname === profile.nickname && (
-                                        <button onClick={() => handleDelete(review.id)} className="delete-btn">삭제</button>
-                                    )}
+                                    <span className="reviewer-name">
+                                        {review.authorNickname}
+                                    </span>
+                                    <span className="driver-name">
+                                        ({review.targetNickname} 대상)
+                                    </span>
+                                    <span className="stars">
+                                        {renderStars(review.rating)}
+                                    </span>
+                                    <span className="date">
+                                        {new Date(
+                                            review.createdAt
+                                        ).toLocaleDateString()}
+                                    </span>{" "}
+                                    {profile &&
+                                        review.authorNickname ===
+                                            profile.nickname && (
+                                            <button
+                                                onClick={() =>
+                                                    handleDelete(review.id)
+                                                }
+                                                className="delete-btn"
+                                            >
+                                                삭제
+                                            </button>
+                                        )}
                                 </div>
                                 <div className="review-content">
                                     {review.content}

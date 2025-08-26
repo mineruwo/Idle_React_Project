@@ -1,30 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; // Added useLocation
 import "../../../theme/ShipperCustomCss/ShipperReviewDashBoard.css"; // CSS 파일을 임포트합니다.
 import { getMyReviews } from "../../../api/reviewApi"; // 내가 쓴 리뷰 API
-// import { getPendingReviews } from '../../../api/orderApi'; // 작성할 리뷰 API (가상)
-
-// 임시 목업 데이터
-const mockPendingReviews = [
-    {
-        orderId: "ORD004",
-        description: "부산 → 강릉",
-        driverName: "강기사",
-        completedDate: "2025.08.22",
-    },
-    {
-        orderId: "ORD005",
-        description: "대전 → 서울",
-        driverName: "오기사",
-        completedDate: "2025.08.21",
-    },
-    {
-        orderId: "ORD006",
-        description: "대구 → 인천",
-        driverName: "최기사",
-        completedDate: "2025.08.20",
-    },
-];
+import { fetchMyOrders } from "../../../api/orderApi"; // Added
 
 const ShipperReviewDashboard = () => {
     const [activeTab, setActiveTab] = useState("pending"); // 'pending' 또는 'completed'
@@ -32,22 +10,60 @@ const ShipperReviewDashboard = () => {
     const [myReviews, setMyReviews] = useState([]);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        // TODO: API가 준비되면 실제 API 호출로 교체
-        // getPendingReviews().then(setPendingReviews);
-        setPendingReviews(mockPendingReviews);
+    
 
-        getMyReviews()
-            .then((data) => {
-                // 최근 5개만 표시
-                setMyReviews(data.slice(0, 5));
-            })
-            .catch((err) => {
-                console.error(
-                    "내가 작성한 리뷰를 가져오는 데 실패했습니다.",
-                    err
-                );
-            });
+    useEffect(() => {
+        const loadReviewData = async () => {
+            try {
+                const [allOrders, myReviewsData] = await Promise.all([
+                    fetchMyOrders(),
+                    getMyReviews(),
+                ]);
+
+                // Process myReviewsData to get a set of reviewed driver IDs
+                const reviewedDriverIds = new Set(myReviewsData.map(review => review.targetId));
+
+                // Filter COMPLETED orders that have an assigned driver and haven't been reviewed yet
+                const unreviewedCompletedOrders = allOrders
+                    .filter(order => 
+                        order.status === 'COMPLETED' && 
+                        order.assignedDriverId != null &&
+                        !reviewedDriverIds.has(order.assignedDriverId) // Check if driver has been reviewed
+                    )
+                    .map(order => ({
+                        orderId: order.id,
+                        description: `${order.departure} → ${order.arrival}`,
+                        driverId: order.assignedDriverId,
+                        driverName: `Driver #${order.assignedDriverId}`,
+                        completedDate: new Date(order.createdAt).toLocaleDateString('ko-KR'),
+                    }));
+
+                setPendingReviews(unreviewedCompletedOrders);
+                setMyReviews(myReviewsData.slice(0, 5)); // Still show only recent 5 for my reviews
+
+            } catch (err) {
+                console.error("리뷰 데이터를 가져오는 데 실패했습니다.", err);
+                // Optionally set error state for display
+            }
+        };
+
+        // Initial load
+        loadReviewData();
+
+        // Re-fetch data when the window gains focus or tab becomes visible
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                loadReviewData();
+            }
+        };
+
+        window.addEventListener('focus', loadReviewData);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            window.removeEventListener('focus', loadReviewData);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
     }, []);
 
     const handleWriteReview = (orderId) => {
