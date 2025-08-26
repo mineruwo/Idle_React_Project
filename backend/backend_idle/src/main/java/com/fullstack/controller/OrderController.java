@@ -85,9 +85,16 @@ public class OrderController {
 
     // 주문 상태 업데이트
     @PutMapping("/{id}/status")
-    public ResponseEntity<Void> updateOrderStatus(@PathVariable("id") Long id, @RequestBody OrderStatus status, Authentication authentication) { // Changed parameter type
+    public ResponseEntity<Void> updateOrderStatus(@PathVariable("id") Long id, @RequestBody String statusString, Authentication authentication) { // Changed parameter type
         log.info("User authorities: {}", authentication.getAuthorities());
-        orderService.updateOrderStatus(id, status);
-        return ResponseEntity.ok().build();
+        log.info("Received status string: {}", statusString); // Log the received string
+        try {
+            OrderStatus newStatus = OrderStatus.valueOf(statusString.toUpperCase()); // Convert to enum
+            orderService.updateOrderStatus(id, newStatus);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid OrderStatus received: {}", statusString, e);
+            return ResponseEntity.badRequest().build(); // Return 400 for invalid status
+        }
     }
 }

@@ -34,6 +34,8 @@ public class JWTFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
+        log.info("JWTFilter: Request received for URI: {} and Method: {}", request.getRequestURI(), request.getMethod()); // ADD THIS LINE
+
         final String method = request.getMethod();
         final String uri    = request.getRequestURI();
 
@@ -71,6 +73,8 @@ public class JWTFilter extends OncePerRequestFilter {
                         );
 
                     log.info("JWTFilter: Setting Authentication. User: {}, Role: {}, Authorities: {}", id, role, authToken.getAuthorities());
+
+                    log.info("JWTFilter: Attempting to set Authentication. User: {}, Role: {}, Authorities: {}", id, role, authToken.getAuthorities()); // ADD THIS LINE
 
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                     log.debug("JWT 인증 세팅 완료: id={}, role={}", id, role);

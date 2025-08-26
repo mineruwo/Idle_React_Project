@@ -31,7 +31,7 @@ public class ReviewServiceImpl implements ReviewService {
                 .orElseThrow(() -> new IllegalArgumentException("작성자 정보를 찾을 수 없습니다."));
 
         // 대상(차주) 정보 조회
-        CustomerEntity target = customerRepository.findById(requestDto.getTargetId())
+        CustomerEntity target = customerRepository.findById(requestDto.getTargetId().intValue())
                 .orElseThrow(() -> new IllegalArgumentException("리뷰 대상 정보를 찾을 수 없습니다."));
 
         // TODO: 비즈니스 로직 추가

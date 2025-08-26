@@ -19,6 +19,8 @@ public class OrderDto {
     private Long avgPrice;
     private String packingOptions;      // JSON 문자열로 체크된 포장 옵션들
 
+    private Long assignedDriverId; // Added: 배정된 기사 ID
+
     private String departure;           // 출발지
     private String arrival;             // 도착지
     private double distance;            // 거리
@@ -54,6 +56,7 @@ public class OrderDto {
         dto.setVehicle(entity.getVehicle());
         dto.setCargoType(entity.getCargoType());
         dto.setCargoSize(entity.getCargoSize());
+        dto.setAssignedDriverId(entity.getAssignedDriverId()); // Added: Map assignedDriverId
                 OrderStatus statusEnum = entity.getStatus(); // Changed type to OrderStatus
         String statusString = null; // Initialize to null
         if (statusEnum != null) {

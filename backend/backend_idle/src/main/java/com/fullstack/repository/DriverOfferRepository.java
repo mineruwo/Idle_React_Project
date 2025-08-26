@@ -8,8 +8,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface DriverOfferRepository extends JpaRepository<DriverOffer, Long> {
+
+    @Query("SELECT do FROM DriverOffer do JOIN FETCH do.driver WHERE do.id = :id")
+    Optional<DriverOffer> findByIdWithDriver(@Param("id") Long id);
 
     /** 특정 오더의 입찰 목록 (최신순) */
     List<DriverOffer> findByOrder_IdOrderByCreatedAtDesc(@Param("orderId") Long orderId);

@@ -1,45 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ShipperInvoiceComponent from '../../layouts/components/shipperComponent/ShipperInvoiceComponent';
 import '../../theme/ShipperCustomCss/ShipperOrderHistory.css';
+import { fetchMyOrders } from '../../api/orderApi';
 
-// Mock Data for Completed Deliveries
-const mockCompletedData = [
-  {
-    orderId: 'ORD123456789',
-    completionDate: '2023년 10월 27일',
-    itemName: '서울 강남구 -> 부산 해운대구',
-    amount: 55000,
-    driverName: '김기사',
-    vehicleNumber: '12가 3456',
-    status: 'INVOICE_ISSUED',
-    shipperName: '삼성전자', // 화주 정보 추가
-    shipperBizNum: '124-81-12345'
-  },
-  {
-    orderId: 'ORD123456790',
-    completionDate: '2023년 10월 25일',
-    itemName: '인천 연수구 -> 대구 수성구',
-    amount: 72000,
-    driverName: '이운전',
-    vehicleNumber: '34나 7890',
-    status: 'DELIVERY_COMPLETED',
-    shipperName: 'LG전자',
-    shipperBizNum: '129-81-12345'
-  },
-  {
-    orderId: 'ORD123456792',
-    completionDate: '2023년 8월 02일',
-    itemName: '서울 강서구 -> 경기 수원시 영통구',
-    amount: 35000,
-    driverName: '박기사',
-    vehicleNumber: '56다 1234',
-    status: 'DELIVERY_COMPLETED',
-    shipperName: 'SK하이닉스',
-    shipperBizNum: '134-81-12345'
-  },
-];
-
-// Modal Component
 const Modal = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
 
@@ -54,7 +17,28 @@ const Modal = ({ isOpen, onClose, children }) => {
 };
 
 const ShipperOrderHistoryPage = () => {
-  const [orders, setOrders] = useState(mockCompletedData);
+  const [orders, setOrders] = useState([]); // Initialize with empty array
+  const [loading, setLoading] = useState(true); // Add loading state
+  const [error, setError] = useState(null); // Add error state
+
+  useEffect(() => {
+    const loadCompletedOrders = async () => {
+      try {
+        setLoading(true);
+        const allOrders = await fetchMyOrders();
+        const completed = allOrders.filter(order => order.status === 'COMPLETED');
+        setOrders(completed);
+      } catch (err) {
+        console.error("Failed to fetch completed orders:", err);
+        setError("완료된 운송 내역을 불러오는 데 실패했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCompletedOrders();
+  }, []); // Empty dependency array means this runs once on mount
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
@@ -75,7 +59,19 @@ const ShipperOrderHistoryPage = () => {
   };
 
   const handleIssueInvoiceClick = (order) => {
-    setSelectedOrder(order);
+    // Combine real order data with mock shipper details for the invoice
+    const invoiceOrder = {
+      ...order,
+      // Add mock shipper details for invoice component
+      shipperCeo: '화주 대표명',
+      shipperBizNum: order.shipperBizNum || '화주 사업자번호', // Use real if available, else mock
+      shipperAddress: '화주 주소',
+      shipperBizType: '화주 업태',
+      shipperBizItem: '화주 종목',
+      itemName: order.itemName || `${order.departure} -> ${order.arrival}`, // Use real itemName or derive
+      shipperName: order.shipperNickname || '화주 상호명', // Use real nickname or mock
+    };
+    setSelectedOrder(invoiceOrder);
     setIsModalOpen(true);
   };
 
@@ -101,7 +97,7 @@ const ShipperOrderHistoryPage = () => {
                     {`담당기사: ${order.driverName} (${order.vehicleNumber}) / 주문번호: ${order.orderId}`}
                   </div>
                 </div>
-                <p className="item-amount">{order.amount.toLocaleString()}원</p>
+                <p className="item-amount">{(order.driverPrice || order.proposedPrice || 0).toLocaleString()}원</p>
               </div>
               <div className="card-actions">
                 <button 

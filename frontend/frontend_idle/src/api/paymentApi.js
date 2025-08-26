@@ -121,10 +121,10 @@ export const updateOrderStatus = async (orderId, status) => {
     try {
         const response = await paymentApi.put(
             `/orders/${orderId}/status`,
-            status, // Send status directly as request body
+            status, // Send status directly as a plain string
             {
                 headers: {
-                    "Content-Type": "text/plain", // Backend expects String, not JSON
+                    "Content-Type": "text/plain", // Change back to text/plain
                 },
             }
         );

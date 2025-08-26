@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import useCustomMove from "../../hooks/useCustomMove";
 import styled from "styled-components";
-import { fetchOrders } from "../../api/orderApi";
+import { fetchMyOrders } from "../../api/orderApi";
 import {
     fetchOffersByOrder,
     acceptOffer,
@@ -159,7 +159,7 @@ const OrderBoard = () => {
     useEffect(() => {
         (async () => {
             try {
-                const data = await fetchOrders();
+                const data = await fetchMyOrders();
                 setOrders(data || []);
             } catch (e) {
                 console.error("오더 목록 불러오기 실패:", e);
@@ -235,10 +235,19 @@ const OrderBoard = () => {
     if (!selected) return;
     try {
       await acceptOffer(offerId);
-      // ✅ 낙관적 갱신: 결제대기로 전환 (버튼 바로 노출)
+      alert("입찰 확정 완료"); // Move alert here for better flow
+
+      // Update the main orders list
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === selected.id ? { ...order, status: "PAYMENT_PENDING" } : order
+        )
+      );
+
+      // Update the selected order's status in the detail panel
       setSelected((prev) => (prev ? { ...prev, status: "PAYMENT_PENDING" } : prev));
-      await loadOfferAndAssignment(selected.id);
-      alert("입찰 확정 완료");
+
+      await loadOfferAndAssignment(selected.id); // This reloads offers and assignment for the selected order
     } catch (e) {
       console.error("입찰 확정 실패:", e);
       alert("입찰 확정에 실패했습니다.");
@@ -280,6 +289,9 @@ const OrderBoard = () => {
                 .includes(needle);
 
         return orders.filter((o) => {
+            // Completed orders should not be shown on the board
+            if (o.status === "COMPLETED") return false;
+
             const immediate = isImmediateOf(o);
 
             if (immediateFilter === "immediate" && !immediate) return false;
@@ -661,8 +673,9 @@ const OrderBoard = () => {
               )}
             </Section>
 
-                        <Section>
-                            <SectionTitle>입찰 목록</SectionTitle>
+                        {!isAssigned(selected, assignment) && (
+                            <Section>
+                                <SectionTitle>입찰 목록</SectionTitle>
 
               {loadingOffers ? (
                 <Muted>불러오는 중...</Muted>
@@ -689,7 +702,6 @@ const OrderBoard = () => {
               )}
 
               {/* 입찰 등록 */}
-              {!isAssigned(selected, assignment) && (
                 <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                   <Muted>입찰 등록:</Muted>
                   <input
@@ -708,8 +720,8 @@ const OrderBoard = () => {
                   />
                   <AcceptBtn onClick={handleBid}>등록</AcceptBtn>
                 </div>
-              )}
             </Section>
+                        )}
 
             <Section>
               <SectionTitle>운임 정보</SectionTitle>
