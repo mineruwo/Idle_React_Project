@@ -1,14 +1,26 @@
 // src/pages/orderPage/OrderBoard.js
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import useCustomMove from "../../hooks/useCustomMove";
-import styled from "styled-components";
 import { fetchOrders } from "../../api/orderApi";
+import styled from "styled-components";
 import {
   fetchOffersByOrder,
   acceptOffer,
   fetchAssignment,
   createOffer,
 } from "../../api/offerApi";
+
+// ===== 입찰 하한가 설정 =====
+const AVERAGE_PRICE_PER_KM = 3000;    // OrderForm과 동일
+const MIN_BID_RATE = 0.6;             // 평균가의 60% 하한
+
+const _num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+const basePriceFor = (o) =>
+  _num(o?.avgPrice) ||
+  (o?.distance ? Math.round(_num(o.distance) * AVERAGE_PRICE_PER_KM) : 0) ||
+  _num(o?.proposedPrice);
+
+const minDriverBid = (o) => Math.max(0, Math.floor(basePriceFor(o) * MIN_BID_RATE));
 
 /* ===== 라벨 매핑 ===== */
 const LABEL = {
@@ -105,14 +117,14 @@ const n = (v, def = 0) => {
 
 const isImmediateOf = (o) => (o?.isImmediate ?? o?.immediate) === true;
 
-/** 배정 여부(아이디 기준) */
+/** 배정 여부 */
 const isAssigned = (order, assign) =>
   Boolean(
     (assign && assign.assignedDriverId != null) ||
-    (order && order.assignedDriverId != null)
+      (order && order.assignedDriverId != null)
   );
 
-/** 카드 우측에 보이는 상태 라벨(한글) */
+/** 카드 상태 라벨 */
 const statusLabelK = (s) => {
   const t = String(s || "").toUpperCase();
   switch (t) {
@@ -128,7 +140,7 @@ const statusLabelK = (s) => {
   }
 };
 
-/** 상세 패널 제목 옆의 태그(우선순위 반영) */
+/** 상세 패널 상태 라벨 */
 const statusK = (order, assign) => {
   const s = String(order?.status || "").toUpperCase();
   if (s === "COMPLETED")        return "완료";
@@ -139,7 +151,7 @@ const statusK = (order, assign) => {
   return "입찰중";
 };
 
-/** 입찰 상태 한글 매핑 (✅ 새로 추가) */
+/** 입찰 상태 라벨 */
 const offerStatusLabelK = (s) => {
   const t = String(s || "").toUpperCase();
   switch (t) {
@@ -153,7 +165,7 @@ const offerStatusLabelK = (s) => {
   }
 };
 
-/** 입찰 가능 여부: 결제대기/완료/배정확정만 차단 */
+/** 입찰 가능 여부 */
 const canBid = (order, assign) => {
   const orderStatus = String(order?.status || "").toUpperCase();
   const assignStatus = String(assign?.status || "").toUpperCase();
@@ -169,7 +181,6 @@ const OrderBoard = () => {
   // 목록/선택
   const [orders, setOrders] = useState([]);
   const [selected, setSelected] = useState(null);
-  const [panelOpen, setPanelOpen] = useState(false);
 
   // 입찰/배정
   const [offers, setOffers] = useState([]);
@@ -184,23 +195,18 @@ const OrderBoard = () => {
   const [bidPrice, setBidPrice] = useState("");
   const [bidMemo, setBidMemo] = useState("");
 
-  // 검색/필터
+  // 검색/필터/정렬/페이지
   const [q, setQ] = useState("");
   const [immediateFilter, setImmediateFilter] = useState("all"); // all | immediate | reserved
-  const [vehicleFilter, setVehicleFilter] = useState(""); // '', '1ton', ...
-
-  // 정렬
-  const [sortKey, setSortKey] = useState("latest"); // latest | distance | avgPrice
-  const [sortDir, setSortDir] = useState("asc"); // asc | desc
-
-  // 페이지네이션
+  const [vehicleFilter, setVehicleFilter] = useState("");        // '', '1ton', ...
+  const [sortKey, setSortKey] = useState("latest");              // latest | distance | avgPrice
+  const [sortDir, setSortDir] = useState("asc");                 // asc | desc
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const panelRef = useRef(null);
   const cardRefs = useRef({});
 
-  /* ====== 목록 로드 ====== */
+  /* 목록 로드 */
   useEffect(() => {
     (async () => {
       try {
@@ -213,7 +219,7 @@ const OrderBoard = () => {
     })();
   }, []);
 
-  /* ====== 선택 시 입찰/배정 로드 ====== */
+  /* 선택 시 입찰/배정 로드 */
   const loadOfferAndAssignment = async (orderId) => {
     if (!orderId) {
       setOffers([]);
@@ -244,24 +250,17 @@ const OrderBoard = () => {
 
   const handleSelect = async (o) => {
     setSelected(o);
-    setPanelOpen(true);
-
-    // 패널 위치 스크롤 보정
+    // 스크롤 살짝 보정
     requestAnimationFrame(() => {
       const el = cardRefs.current[o.id];
-      if (!el || !panelRef.current) return;
-      const cardRect = el.getBoundingClientRect();
-      const panelRect = panelRef.current.getBoundingClientRect();
-      const targetTop =
-        window.scrollY + (cardRect.top - panelRect.top) + window.scrollY - 16;
-      window.scrollTo({ top: targetTop, behavior: "smooth" });
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      window.scrollTo({ top: Math.max(0, window.scrollY + rect.top - 20), behavior: "smooth" });
     });
-
     await loadOfferAndAssignment(o.id);
   };
 
   const handleBack = () => {
-    setPanelOpen(false);
     setSelected(null);
     setOffers([]);
     setAssignment({ assignedDriverId: null, driverPrice: null, status: null });
@@ -269,12 +268,10 @@ const OrderBoard = () => {
     setBidMemo("");
   };
 
-  // 입찰 확정
   const handleAccept = async (offerId) => {
     if (!selected) return;
     try {
       await acceptOffer(selected.id, offerId);
-      // 낙관적 갱신
       setSelected((prev) => (prev ? { ...prev, status: "PAYMENT_PENDING" } : prev));
       await loadOfferAndAssignment(selected.id);
       alert("입찰 확정 완료");
@@ -284,12 +281,16 @@ const OrderBoard = () => {
     }
   };
 
-  // 입찰 등록
   const handleBid = async () => {
     if (!selected) return;
     const priceNum = Number(bidPrice);
     if (!priceNum || priceNum <= 0) {
       alert("유효한 제안가를 입력하세요.");
+      return;
+    }
+    const floor = minDriverBid(selected);
+    if (priceNum < floor) {
+      alert(`최소 제안가는 ${floor.toLocaleString()}원 입니다.`);
       return;
     }
     try {
@@ -351,14 +352,12 @@ const OrderBoard = () => {
       });
       return arr;
     }
-
     if (sortKey === "distance") {
       arr.sort((a, b) =>
         sortDir === "asc" ? n(a.distance) - n(b.distance) : n(b.distance) - n(a.distance)
       );
       return arr;
     }
-
     if (sortKey === "avgPrice") {
       const getPrice = (o) => n(o.avgPrice, n(o.proposedPrice, n(o.driverPrice, 0)));
       arr.sort((a, b) => (sortDir === "asc" ? getPrice(a) - getPrice(b) : getPrice(b) - getPrice(a)));
@@ -370,17 +369,7 @@ const OrderBoard = () => {
   // 페이지네이션
   const total = sorted.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
-
-  // 보드 진입 시 최상단
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-    requestAnimationFrame(() => window.scrollTo(0, 0));
-  }, []);
-
-  // 필터/정렬 변경 시 1페이지
-  useEffect(() => {
-    setPage(1);
-  }, [q, immediateFilter, vehicleFilter, sortKey, sortDir, pageSize]);
+  useEffect(() => setPage(1), [q, immediateFilter, vehicleFilter, sortKey, sortDir, pageSize]);
 
   const paged = useMemo(() => {
     const start = (page - 1) * pageSize;
@@ -393,369 +382,263 @@ const OrderBoard = () => {
     setVehicleFilter("");
   };
 
-  /* 파생값 (우측 패널 재사용) */
+  // 파생값
   const confirmedPrice = assignment?.driverPrice ?? selected?.driverPrice;
   const assignedDriver = assignment?.assignedDriverId ?? selected?.assignedDriverId;
 
   return (
-    <PageWrap>
-      <ListArea data-panel-open={panelOpen}>
-        <Header>오더 게시판</Header>
+    <div style={{ padding: 16 }}>
+      <h1>오더 게시판</h1>
 
-        {/* ===== 검색/필터 바 ===== */}
-        <FilterBar>
-          <SearchInput
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="주문번호/출발/도착/화물/차량/포장/상태 검색..."
-          />
+      {/* 검색/필터 */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 140px 140px auto", gap: 8, maxWidth: 980 }}>
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="주문번호/출발/도착/화물/차량/포장/상태 검색..."
+        />
+        <select value={immediateFilter} onChange={(e) => setImmediateFilter(e.target.value)}>
+          <option value="all">전체(즉시+예약)</option>
+          <option value="immediate">즉시</option>
+          <option value="reserved">예약</option>
+        </select>
+        <select value={vehicleFilter} onChange={(e) => setVehicleFilter(e.target.value)}>
+          <option value="">차량 전체</option>
+          <option value="1ton">1톤 트럭</option>
+          <option value="2.5ton">2.5톤 트럭</option>
+          <option value="5ton">5톤 트럭</option>
+          <option value="top">탑차</option>
+          <option value="cold">냉장/냉동차</option>
+        </select>
+        <button onClick={resetFilters}>초기화</button>
+      </div>
 
-          <SelectBox value={immediateFilter} onChange={(e) => setImmediateFilter(e.target.value)}>
-            <option value="all">전체(즉시+예약)</option>
-            <option value="immediate">즉시</option>
-            <option value="reserved">예약</option>
-          </SelectBox>
+      {/* 정렬/페이지 */}
+      <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8, flexWrap: "wrap" }}>
+        <span>정렬</span>
+        <select value={sortKey} onChange={(e) => setSortKey(e.target.value)}>
+          <option value="latest">최신순</option>
+          <option value="distance">거리</option>
+          <option value="avgPrice">평균가</option>
+        </select>
+        {sortKey !== "latest" && (
+          <select value={sortDir} onChange={(e) => setSortDir(e.target.value)}>
+            <option value="asc">오름차순</option>
+            <option value="desc">내림차순</option>
+          </select>
+        )}
 
-          <SelectBox value={vehicleFilter} onChange={(e) => setVehicleFilter(e.target.value)}>
-            <option value="">차량 전체</option>
-            <option value="1ton">1톤 트럭</option>
-            <option value="2.5ton">2.5톤 트럭</option>
-            <option value="5ton">5톤 트럭</option>
-            <option value="top">탑차</option>
-            <option value="cold">냉장/냉동차</option>
-          </SelectBox>
+        <span style={{ marginLeft: 16 }}>페이지 당</span>
+        <select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))}>
+          <option value={5}>5</option>
+          <option value={10}>10</option>
+          <option value={20}>20</option>
+        </select>
+      </div>
 
-          <ResetBtn onClick={resetFilters}>초기화</ResetBtn>
-        </FilterBar>
+      <div style={{ marginTop: 6, fontSize: 12 }}>
+        총 {orders.length}건 중 <b>{filtered.length}</b>건(필터) → <b>{total}</b>건(정렬) 중{" "}
+        <b>{paged.length}</b>건 표기 (페이지 {page}/{totalPages})
+      </div>
 
-        {/* ===== 정렬/페이지 ===== */}
-        <ControlsRow>
-          <SortGroup>
-            <SortLabel>정렬</SortLabel>
-            <SelectBox value={sortKey} onChange={(e) => setSortKey(e.target.value)}>
-              <option value="latest">최신순</option>
-              <option value="distance">거리</option>
-              <option value="avgPrice">평균가</option>
-            </SelectBox>
+      {/* 카드 리스트 */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
+        {paged.map((o) => {
+          const cargoTypeLabel = LABEL.cargoType[o.cargoType] || o.cargoType || "-";
+          const sizeLabel = LABEL.cargoSize[o.cargoSize] || o.cargoSize || "-";
+          const weightLabel = LABEL.weight[o.weight] || o.weight || "-";
+          const vehicleLabel = LABEL.vehicle[o.vehicle] || o.vehicle || "-";
+          const immediate = isImmediateOf(o);
 
-            {sortKey !== "latest" && (
-              <SelectBox value={sortDir} onChange={(e) => setSortDir(e.target.value)}>
-                <option value="asc">오름차순</option>
-                <option value="desc">내림차순</option>
-              </SelectBox>
-            )}
-          </SortGroup>
-
-          <PageSizeGroup>
-            <SortLabel>페이지 당</SortLabel>
-            <SelectBox value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))}>
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-            </SelectBox>
-          </PageSizeGroup>
-        </ControlsRow>
-
-        <ResultMeta>
-          총 {orders.length}건 중 <strong>{filtered.length}</strong>
-          건(필터) → <strong>{total}</strong>건(정렬) 중 <strong>{paged.length}</strong>건 표시 (페이지 {page}/
-          {totalPages})
-        </ResultMeta>
-
-        <CardList>
-          {paged.map((o) => {
-            const cargoTypeLabel = LABEL.cargoType[o.cargoType] || o.cargoType || "-";
-            const sizeLabel = LABEL.cargoSize[o.cargoSize] || o.cargoSize || "-";
-            const weightLabel = LABEL.weight[o.weight] || o.weight || "-";
-            const vehicleLabel = LABEL.vehicle[o.vehicle] || o.vehicle || "-";
-            const immediate = isImmediateOf(o);
-
-            return (
-              <Card
-                key={o.id}
-                ref={(el) => (cardRefs.current[o.id] = el)}
-                onClick={() => handleSelect(o)}
-                data-selected={selected?.id === o.id}
-              >
-                {/* 1행: 출발 → 도착 + 상태 */}
-                <RowBetween>
-                  <FromTo>
-                    <Strong>출발</Strong> {o.departure} &nbsp;→&nbsp;
-                    <Strong>도착</Strong> {o.arrival}
-                  </FromTo>
-                  <RightMeta>{statusLabelK(o.status)}</RightMeta>
-                </RowBetween>
-
-                {/* 2행: 주문번호 배지 */}
-                <OrderNoBadge title={o.orderNo || ""}>{o.orderNo || "-"}</OrderNoBadge>
-
-                <InfoGrid>
-                  <Col>
-                    <SubLabel>화물 종류</SubLabel>
-                    <SubValue>{cargoTypeLabel}</SubValue>
-                  </Col>
-                  <Col>
-                    <SubLabel>크기</SubLabel>
-                    <SubValue>{sizeLabel}</SubValue>
-                  </Col>
-                  <Col>
-                    <SubLabel>무게</SubLabel>
-                    <SubValue>{weightLabel}</SubValue>
-                  </Col>
-                  <Col>
-                    <SubLabel>차량</SubLabel>
-                    <SubValue>{vehicleLabel}</SubValue>
-                  </Col>
-                  <Col>
-                    <SubLabel>포장</SubLabel>
-                    <SubValue>{prettyPacking(o.packingOptions ?? o.packingOption)}</SubValue>
-                  </Col>
-                  <Col>
-                    <SubLabel>예약 시간</SubLabel>
-                    <SubValue>
-                      {immediate ? "즉시" : o.reservedDate ? fmtDateTime(o.reservedDate) : "-"}
-                    </SubValue>
-                  </Col>
-                </InfoGrid>
-              </Card>
-            );
-          })}
-        </CardList>
-
-        {/* ===== 페이지네이션 ===== */}
-        <Pagination>
-          <PageBtn disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
-            ← 이전
-          </PageBtn>
-
-          <PageNumbers>
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .slice(Math.max(0, page - 3), Math.max(0, page - 3) + 5)
-              .map((p) => (
-                <PageNumber key={p} data-active={p === page} onClick={() => setPage(p)}>
-                  {p}
-                </PageNumber>
-              ))}
-          </PageNumbers>
-
-          <PageBtn disabled={page === totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>
-            다음 →
-          </PageBtn>
-        </Pagination>
-      </ListArea>
-
-      <DetailArea ref={panelRef} data-open={panelOpen}>
-        <DetailHeader>
-          <BackBtn onClick={handleBack}>← 뒤로가기</BackBtn>
-          <DetailTitle>오더 게시판</DetailTitle>
-          <Today>{todayStr}</Today>
-        </DetailHeader>
-
-        {selected ? (
-          <>
-            {/* ===== 배정 뱃지 헤더 ===== */}
-            <BadgeRow>
-              {canBid(selected, assignment) ? (
-                <BadgeGray>미배정</BadgeGray>
-              ) : (
-                <Badge>
-                  배정: 기사 #{assignment.assignedDriverId} /{" "}
-                  {Number(assignment.driverPrice ?? 0).toLocaleString()}원
-                </Badge>
-              )}
-            </BadgeRow>
-
-            <Section>
-              <SectionTitle>
-                화물 상세 정보 <StatusTag>{statusK(selected, assignment)}</StatusTag>
-              </SectionTitle>
-              <Row>
-                <Key>주문번호</Key>
-                <Val>{selected.orderNo || "-"}</Val>
-              </Row>
-              <Row>
-                <Key>출발지</Key>
-                <Val>{selected.departure}</Val>
-              </Row>
-              <Row>
-                <Key>도착지</Key>
-                <Val>{selected.arrival}</Val>
-              </Row>
-              <Row>
-                <Key>화물 종류</Key>
-                <Val>{LABEL.cargoType[selected.cargoType] || selected.cargoType || "-"}</Val>
-              </Row>
-              <Row>
-                <Key>크기</Key>
-                <Val>{LABEL.cargoSize[selected.cargoSize] || selected.cargoSize || "-"}</Val>
-              </Row>
-              <Row>
-                <Key>무게</Key>
-                <Val>{LABEL.weight[selected.weight] || selected.weight || "-"}</Val>
-              </Row>
-              <Row>
-                <Key>차량 종류</Key>
-                <Val>{LABEL.vehicle[selected.vehicle] || selected.vehicle || "-"}</Val>
-              </Row>
-              <Row>
-                <Key>포장 여부</Key>
-                <Val>{prettyPacking(selected.packingOptions ?? selected.packingOption)}</Val>
-              </Row>
-              <Row>
-                <Key>예약시간</Key>
-                <Val>
-                  {isImmediateOf(selected)
-                    ? "즉시"
-                    : selected.reservedDate
-                    ? fmtDateTime(selected.reservedDate)
-                    : "-"}
-                </Val>
-              </Row>
-            </Section>
-
-            <Section>
-              <SectionTitle>배정된 기사</SectionTitle>
-              {!canBid(selected, assignment) ? (
+          return (
+            <div
+              key={o.id}
+              ref={(el) => (cardRefs.current[o.id] = el)}
+              onClick={() => handleSelect(o)}
+              style={{ border: "1px solid #ddd", borderRadius: 8, padding: 12, cursor: "pointer" }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <div>
-                  <Row>
-                    <Key>기사 ID</Key>
-                    <Val>{assignedDriver}</Val>
-                  </Row>
-                  <Row>
-                    <Key>확정가</Key>
-                    <Val>
-                      {confirmedPrice != null
-                        ? `${Number(confirmedPrice).toLocaleString()} 원`
-                        : "-"}
-                    </Val>
-                  </Row>
+                  <b>출발</b> {o.departure} &nbsp;→&nbsp; <b>도착</b> {o.arrival}
                 </div>
-              ) : (
-                <Muted>아직 배정되지 않았습니다. 아래 입찰에서 확정하세요.</Muted>
-              )}
-            </Section>
+                <div>{statusLabelK(o.status)}</div>
+              </div>
+              <div style={{ marginTop: 6, fontSize: 12, color: "#555" }}>주문번호: {o.orderNo || "-"}</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, marginTop: 8 }}>
+                <div>화물: {cargoTypeLabel}</div>
+                <div>크기: {sizeLabel}</div>
+                <div>무게: {weightLabel}</div>
+                <div>차량: {vehicleLabel}</div>
+                <div>포장: {prettyPacking(o.packingOptions ?? o.packingOption)}</div>
+                <div>예약: {immediate ? "즉시" : o.reservedDate ? fmtDateTime(o.reservedDate) : "-"}</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
-            <Section>
-              <SectionTitle>입찰 목록</SectionTitle>
+      {/* 페이지네이션 */}
+      <div style={{ display: "flex", gap: 6, alignItems: "center", justifyContent: "center", margin: 12 }}>
+        <button disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
+          ← 이전
+        </button>
+        <div style={{ display: "flex", gap: 4 }}>
+          {Array.from({ length: totalPages }, (_, i) => i + 1)
+            .slice(Math.max(0, page - 3), Math.max(0, page - 3) + 5)
+            .map((p) => (
+              <button key={p} onClick={() => setPage(p)} disabled={p === page}>
+                {p}
+              </button>
+            ))}
+        </div>
+        <button disabled={page === totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>
+          다음 →
+        </button>
+      </div>
 
-              {loadingOffers ? (
-                <Muted>불러오는 중...</Muted>
-              ) : offers.length === 0 ? (
-                <Muted>입찰이 아직 없습니다.</Muted>
-              ) : (
-                <OfferList>
-                  {offers.map((o) => (
-                    <OfferItem key={o.id}>
-                      <div>
-                        <b>{o.driverNick ? o.driverNick : `기사 #${o.driverId}`}</b> ·{" "}
-                        {Number(o.price ?? 0).toLocaleString()}원
-                        <small style={{ marginLeft: 8, opacity: 0.7 }}>
-                          ({offerStatusLabelK(o.status)})
-                        </small>
-                      </div>
-                      <AcceptBtn
-                        disabled={!canBid(selected, assignment) || o.status !== "PENDING"}
-                        onClick={() => handleAccept(o.id)}
-                      >
-                        입찰 확정
-                      </AcceptBtn>
-                    </OfferItem>
-                  ))}
-                </OfferList>
-              )}
+      {/* 상세 패널 */}
+      {selected && (
+        <div style={{ marginTop: 16, padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <button onClick={handleBack}>← 뒤로가기</button>
+            <h2 style={{ margin: 0 }}>
+              화물 상세 정보 <span style={{ fontSize: 14 }}>({statusK(selected, assignment)})</span>
+            </h2>
+            <div style={{ fontSize: 12, color: "#666" }}>{todayStr}</div>
+          </div>
 
-              {/* 입찰 등록 */}
-              {canBid(selected, assignment) && (
+          <div style={{ marginTop: 10 }}>
+            <div>주문번호: {selected.orderNo || "-"}</div>
+            <div>출발지: {selected.departure}</div>
+            <div>도착지: {selected.arrival}</div>
+            <div>화물: {LABEL.cargoType[selected.cargoType] || selected.cargoType || "-"}</div>
+            <div>크기: {LABEL.cargoSize[selected.cargoSize] || selected.cargoSize || "-"}</div>
+            <div>무게: {LABEL.weight[selected.weight] || selected.weight || "-"}</div>
+            <div>차량: {LABEL.vehicle[selected.vehicle] || selected.vehicle || "-"}</div>
+            <div>포장: {prettyPacking(selected.packingOptions ?? selected.packingOption)}</div>
+            <div>
+              예약시간:{" "}
+              {isImmediateOf(selected) ? "즉시" : selected.reservedDate ? fmtDateTime(selected.reservedDate) : "-"}
+            </div>
+          </div>
+
+          <div style={{ marginTop: 16 }}>
+            <h3 style={{ margin: "8px 0" }}>배정 상태</h3>
+            {!canBid(selected, assignment) ? (
+              <>
+                <div>기사 ID: {assignedDriver}</div>
+                <div>
+                  확정가:{" "}
+                  {confirmedPrice != null ? `${Number(confirmedPrice).toLocaleString()} 원` : "-"}
+                </div>
+              </>
+            ) : (
+              <div>아직 배정되지 않았습니다. 아래 입찰에서 확정하세요.</div>
+            )}
+          </div>
+
+          <div style={{ marginTop: 16 }}>
+            <h3 style={{ margin: "8px 0" }}>입찰 목록</h3>
+            {loadingOffers ? (
+              <div>불러오는 중...</div>
+            ) : offers.length === 0 ? (
+              <div>입찰이 아직 없습니다.</div>
+            ) : (
+              offers.map((o) => (
                 <div
+                  key={o.id}
                   style={{
-                    marginTop: 10,
                     display: "flex",
-                    gap: 8,
-                    alignItems: "center",
-                    flexWrap: "wrap",
+                    justifyContent: "space-between",
+                    padding: 8,
+                    border: "1px solid #eee",
+                    borderRadius: 6,
+                    marginTop: 6,
                   }}
                 >
-                  <Muted>입찰 등록:</Muted>
-                  <input
-                    type="number"
-                    placeholder="제안가"
-                    value={bidPrice}
-                    onChange={(e) => setBidPrice(e.target.value)}
-                    style={{
-                      width: 120,
-                      padding: "6px 8px",
-                      borderRadius: 8,
-                      border: "1px solid #e5e9f2",
-                    }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="메모(선택)"
-                    value={bidMemo}
-                    onChange={(e) => setBidMemo(e.target.value)}
-                    style={{
-                      width: 260,
-                      padding: "6px 8px",
-                      borderRadius: 8,
-                      border: "1px solid #e5e9f2",
-                    }}
-                  />
-                  <AcceptBtn onClick={handleBid}>등록</AcceptBtn>
+                  <div>
+                    <b>{o.driverNick ? o.driverNick : `기사 #${o.driverId}`}</b> ·{" "}
+                    {Number(o.price ?? 0).toLocaleString()}원
+                    <small style={{ marginLeft: 8, opacity: 0.7 }}>
+                      ({offerStatusLabelK(o.status)})
+                    </small>
+                  </div>
+                  <div>
+                    <button
+                      disabled={!canBid(selected, assignment) || o.status !== "PENDING"}
+                      onClick={() => handleAccept(o.id)}
+                    >
+                      입찰 확정
+                    </button>
+                  </div>
                 </div>
-              )}
-            </Section>
-
-            <Section>
-              <SectionTitle>운임 정보</SectionTitle>
-              <Row>
-                <Key>기사 제안가</Key>
-                <Val>
-                  {assignment?.driverPrice != null
-                    ? `${Number(assignment.driverPrice).toLocaleString()} 원`
-                    : selected.driverPrice
-                    ? `${Number(selected.driverPrice).toLocaleString()} 원`
-                    : "-"}
-                </Val>
-              </Row>
-              <Row>
-                <Key>화주 제안가</Key>
-                <Val>
-                  {selected.proposedPrice
-                    ? `${Number(selected.proposedPrice).toLocaleString()} 원`
-                    : "-"}
-                </Val>
-              </Row>
-              <Row>
-                <Key>평균가</Key>
-                <Val>
-                  {selected.avgPrice
-                    ? `${Number(selected.avgPrice).toLocaleString()} 원`
-                    : "-"}
-                </Val>
-              </Row>
-              <RightHint>
-                예상 거리{" "}
-                {selected.distance != null
-                  ? `${Number(selected.distance).toFixed(2)}km`
-                  : "-"}
-              </RightHint>
-            </Section>
-
-            {selected?.status === "PAYMENT_PENDING" && selected?.driverPrice != null && (
-              <Section style={{ marginTop: 16 }}>
-                <AcceptBtn onClick={() => shipperMoveToPayment(selected)}>
-                  {Number(selected.driverPrice).toLocaleString()}원 결제하기
-                </AcceptBtn>
-              </Section>
+              ))
             )}
-          </>
-        ) : null}
-      </DetailArea>
-    </PageWrap>
+
+            {canBid(selected, assignment) && (
+              <div style={{ marginTop: 10, display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                <span>입찰 등록:</span>
+                <input
+                  type="number"
+                  placeholder={`제안가 (최소 ${minDriverBid(selected).toLocaleString()}원)`}
+                  value={bidPrice}
+                  onChange={(e) => setBidPrice(e.target.value)}
+                  style={{ width: 140 }}
+                />
+                <input
+                  type="text"
+                  placeholder="메모(선택)"
+                  value={bidMemo}
+                  onChange={(e) => setBidMemo(e.target.value)}
+                  style={{ width: 260 }}
+                />
+                <button onClick={handleBid}>등록</button>
+                <div style={{ fontSize: 12, color: "#666" }}>
+                  최소 제안가: {minDriverBid(selected).toLocaleString()}원
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginTop: 16 }}>
+            <h3 style={{ margin: "8px 0" }}>운임 정보</h3>
+            <div>
+              기사 제안가:{" "}
+              {assignment?.driverPrice != null
+                ? `${Number(assignment.driverPrice).toLocaleString()} 원`
+                : selected.driverPrice
+                ? `${Number(selected.driverPrice).toLocaleString()} 원`
+                : "-"}
+            </div>
+            <div>
+              화주 제안가:{" "}
+              {selected.proposedPrice ? `${Number(selected.proposedPrice).toLocaleString()} 원` : "-"}
+            </div>
+            <div>평균가: {selected.avgPrice ? `${Number(selected.avgPrice).toLocaleString()} 원` : "-"}</div>
+            <div style={{ fontSize: 12, color: "#666", marginTop: 4 }}>
+              예상 거리 {selected.distance != null ? `${Number(selected.distance).toFixed(2)}km` : "-"}
+            </div>
+          </div>
+
+          {selected?.status === "PAYMENT_PENDING" && selected?.driverPrice != null && (
+            <div style={{ marginTop: 16 }}>
+              <button onClick={() => shipperMoveToPayment(selected)}>
+                {Number(selected.driverPrice).toLocaleString()}원 결제하기
+              </button>
+            </div>
+          )}
+
+          <div style={{ marginTop: 12 }}>
+            <button onClick={handleBack}>← 목록으로</button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
 export default OrderBoard;
+
 
 /* ===== 스타일 ===== */
 const PINK = {
@@ -776,6 +659,13 @@ const PINK = {
   backBg: "#ffe6f2",
   backBgHover: "#ffd9ea",
 };
+
+// ===== 하한가 표시용 CSS =====
+const MinBidHint = styled.div`
+  font-size: 12px;
+  color: #9b7f8c;   /* 기존 서브 텍스트 색상 톤 */
+  margin-left: 6px;
+`;
 
 const PageWrap = styled.div`
   display: grid;
