@@ -28,6 +28,8 @@ public interface CustomerService {
 	
 	public Integer getPoints(String id);
 
+    public CustomerEntity getCustomerById(Long id);
+
 
     Page<CustomerDTO> getRecentlyCreatedCustomers(Pageable pageable, String dateRange); // Modified
     Page<CustomerDTO> getRecentlyDeletedCustomers(Pageable pageable, String dateRange); // Modified

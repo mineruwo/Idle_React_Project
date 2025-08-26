@@ -1,5 +1,6 @@
 package com.fullstack.controller;
 
+import com.fullstack.entity.CustomerEntity;
 import com.fullstack.entity.Faq;
 import com.fullstack.entity.Notice;
 import com.fullstack.model.AdminDTO;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMethod;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -34,11 +36,14 @@ import java.util.HashMap;
 import java.util.Map;
 import com.fullstack.service.ChatSessionService;
 import com.fullstack.model.ChatSessionDTO;
+import com.fullstack.model.DailyAnswerCountDTO;
+import com.fullstack.model.InquiryDTO;
+import com.fullstack.service.InquiryService;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH})
 public class AdminController {
 
     @Autowired
@@ -61,6 +66,9 @@ public class AdminController {
 
     @Autowired
     private ChatSessionService chatSessionService;
+
+    @Autowired
+    private InquiryService inquiryService;
 
     @PostMapping("/login")
     public ResponseEntity<AdminLoginResponseDTO> login(@RequestBody AdminLoginRequestDTO loginRequestDTO, HttpServletResponse response) {
@@ -137,6 +145,21 @@ public class AdminController {
         return ResponseEntity.ok(customerPage);
     }
 
+    @GetMapping("/customers/{id}")
+    @PreAuthorize("hasAnyRole('DEV_ADMIN', 'ADMIN', 'ALL_PERMISSION', 'MANAGER_COUNSELING')")
+    public ResponseEntity<CustomerDTO> getCustomerById(@PathVariable Long id) {
+        CustomerEntity customerEntity = customerService.getCustomerById(id);
+        CustomerDTO customerDTO = new CustomerDTO();
+        customerDTO.setId(customerEntity.getId());
+        customerDTO.setCustomName(customerEntity.getCustomName());
+        customerDTO.setRole(customerEntity.getRole());
+        customerDTO.setPhone(customerEntity.getPhone());
+        customerDTO.setNickname(customerEntity.getNickname());
+        customerDTO.setCreatedAt(customerEntity.getCreatedAt());
+        customerDTO.setUserPoint(customerEntity.getUserPoint());
+        return ResponseEntity.ok(customerDTO);
+    }
+
     @PostMapping("/accounts")
     @PreAuthorize("hasAuthority('ROLE_DEV_ADMIN') or hasAuthority('ROLE_ALL_PERMISSION')")
     public ResponseEntity<?> createAdmin(@RequestBody AdminDTO adminDTO) {
@@ -187,6 +210,58 @@ public class AdminController {
         }
     }
 
+    @GetMapping("/notices/edit/{id}")
+    @PreAuthorize("hasRole('MANAGER_COUNSELING') or hasRole('DEV_ADMIN') or hasRole('ALL_PERMISSION')")
+    public ResponseEntity<Notice> getNoticeForEdit(@PathVariable Long id) {
+        Notice notice = noticeService.getNoticeForEdit(id);
+        if (notice != null) {
+            return ResponseEntity.ok(notice);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/notices/{id}")
+    @PreAuthorize("hasRole('MANAGER_COUNSELING') or hasRole('DEV_ADMIN') or hasRole('ALL_PERMISSION')")
+    public ResponseEntity<?> updateNotice(@PathVariable Long id, @RequestBody NoticeDTO noticeDTO) {
+        try {
+            Notice updatedNotice = noticeService.updateNotice(id, noticeDTO);
+            if (updatedNotice != null) {
+                return ResponseEntity.ok(updatedNotice);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating notice: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/notices/{id}")
+    @PreAuthorize("hasRole('MANAGER_COUNSELING') or hasRole('DEV_ADMIN') or hasRole('ALL_PERMISSION')")
+    public ResponseEntity<?> deleteNotice(@PathVariable Long id) {
+        try {
+            noticeService.deleteNotice(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting notice: " + e.getMessage());
+        }
+    }
+
+    @PatchMapping("/notices/{id}/toggle")
+    @PreAuthorize("hasRole('MANAGER_COUNSELING') or hasRole('DEV_ADMIN') or hasRole('ALL_PERMISSION')")
+    public ResponseEntity<?> toggleNoticeActive(@PathVariable Long id) {
+        try {
+            Notice updatedNotice = noticeService.toggleNoticeActive(id);
+            if (updatedNotice != null) {
+                return ResponseEntity.ok(updatedNotice);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error toggling notice activation: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/faqs")
     public ResponseEntity<List<Faq>> getAllFAQs() {
         List<Faq> faqs = faqService.getAllFAQs();
@@ -196,6 +271,17 @@ public class AdminController {
     @GetMapping("/faqs/{id}")
     public ResponseEntity<Faq> getFaqById(@PathVariable Long id) {
         Faq faq = faqService.getFaqById(id);
+        if (faq != null) {
+            return ResponseEntity.ok(faq);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/faqs/edit/{id}")
+    @PreAuthorize("hasRole('MANAGER_COUNSELING') or hasRole('DEV_ADMIN') or hasRole('ALL_PERMISSION')")
+    public ResponseEntity<Faq> getFaqForEdit(@PathVariable Long id) {
+        Faq faq = faqService.getFaqForEdit(id);
         if (faq != null) {
             return ResponseEntity.ok(faq);
         } else {
@@ -374,5 +460,22 @@ public class AdminController {
     public ResponseEntity<Void> deleteChatSession(@PathVariable String chatRoomId) {
         chatSessionService.deleteChatSessionByChatRoomId(chatRoomId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/inquiries/daily-answers")
+    public ResponseEntity<List<DailyAnswerCountDTO>> getDailyAnswerCounts(
+            @RequestParam int year,
+            @RequestParam int month) {
+        List<DailyAnswerCountDTO> counts = inquiryService.getDailyAnswerCounts(year, month);
+        return ResponseEntity.ok(counts);
+    }
+
+    @GetMapping("/inquiries/my-history")
+    public ResponseEntity<List<InquiryDTO>> getInquiryDetailsByFilter(
+            @RequestParam String filter,
+            Authentication authentication) { // Added Authentication
+        String adminId = authentication.getName(); // Get adminId from authenticated user
+        List<InquiryDTO> inquiries = inquiryService.getInquiryDetailsByFilter(filter, adminId); // Pass adminId
+        return ResponseEntity.ok(inquiries);
     }
 }

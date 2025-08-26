@@ -1,4 +1,4 @@
-package com.idle.backend.websocket;
+package com.fullstack.websocket;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;

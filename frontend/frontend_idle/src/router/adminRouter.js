@@ -14,7 +14,9 @@ const MyInquiriesComponent = lazy(() => import("../layouts/components/admin/MyIn
 const NoticeListComponent = lazy(() => import("../layouts/components/admin/NoticeListComponent"));
 const FAQManagementComponent = lazy(() => import("../layouts/components/admin/FAQManagementComponent"));
 const NoticeCreateComponent = lazy(() => import("../layouts/components/admin/NoticeCreateComponent"));
+const NoticeEditComponent = lazy(() => import("../layouts/components/admin/NoticeEditComponent")); // Import the new component
 const FAQCreateComponent = lazy(() => import("../layouts/components/admin/FAQCreateComponent"));
+const FAQEditComponent = lazy(() => import("../layouts/components/admin/FAQEditComponent")); // Import the new component
 const LoginComponent = lazy(() => import("../layouts/components/admin/LoginComponent"));
 const ActiveChatSessionsList = lazy(() => import("../layouts/components/chat/ActiveChatSessionsList"));
 
@@ -66,6 +68,7 @@ const adminRoutes = [
         children: [
             { index: true, element: <NoticeListComponent /> },
             { path: "create", element: <NoticeCreateComponent /> },
+            { path: "edit/:id", element: <NoticeEditComponent /> }, // Add the new route
         ],
     },
     {
@@ -74,6 +77,7 @@ const adminRoutes = [
         children: [
             { index: true, element: <FAQManagementComponent /> },
             { path: "create", element: <FAQCreateComponent /> },
+            { path: "edit/:id", element: <FAQEditComponent /> }, // Add the new route
         ],
     },
         { path: "login", element: <LoginComponent /> },

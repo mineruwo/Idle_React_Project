@@ -1,6 +1,6 @@
-package com.fullstack.idle.dto.inquiry;
+package com.fullstack.model;
 
-import com.fullstack.idle.model.inquiry.InquiryStatus;
+import com.fullstack.model.InquiryStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,7 +21,7 @@ public class InquiryDTO {
     private String inquiryAnswer;
     private LocalDateTime createdAt;
     private LocalDateTime answeredAt;
-    private Long adminIdIndex;
+    
     private String adminId;
     private InquiryStatus status;
     private UUID reInquiryId;

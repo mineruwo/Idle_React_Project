@@ -29,3 +29,11 @@ export const checkAccount = async (id, password) => {
     return false;
   }
 };
+
+/**
+ * 🙋‍♂️ 내 정보 조회 (인증)
+ */
+export const getMe = async () => {
+    const { data } = await api.get("/auth/me");
+    return data;
+};

@@ -1,4 +1,4 @@
-package com.fullstack.idle.model.inquiry;
+package com.fullstack.model;
 
 public enum InquiryStatus {
     INQUIRY_PENDING, // 문의 대기 (최초, 디폴트)

@@ -146,7 +146,6 @@
 ## Command
 
 -   npm install @mui/material @emotion/react @emotion/styled @mui/icons-material
-
 -   npm i redux react-redux
 -   npm install redux
 -   npm install @reduxjs/toolkit react-redux
@@ -154,4 +153,6 @@
     import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"; : 임포트 형식
     https://recharts.org/en-US : doc웹주소
 -   npm install @stomp/stompjs sockjs-client
+-   yarn add react-quill quill
 -   npm add axios
+

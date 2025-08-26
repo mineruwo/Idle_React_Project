@@ -201,9 +201,7 @@ const ModalChatSession = ({ isOpen, onClose }) => {
                     const isMe = msg.sender === currentUser;
                     return (
                         <div key={index} className={`message-row ${isMe ? 'sent' : 'received'}`}>
-                            <div className="message-sender">
-                                {msg.sender}
-                            </div>
+                            
                             <div className={`message-bubble ${isMe ? 'sent' : 'received'}`}>
                                 {msg.content}
                             </div>

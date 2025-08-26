@@ -1,4 +1,4 @@
-package com.idle.backend.websocket;
+package com.fullstack.websocket;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

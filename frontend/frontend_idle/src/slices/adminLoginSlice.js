@@ -32,6 +32,7 @@ const initialState = {
     id: '',
     adminName: '',
     role: null, // 권한 필드 추가
+    idIndex: null, // adminIdIndex 필드 추가
     isAuthenticated: false,
     status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
     error: null
@@ -46,6 +47,7 @@ const adminLoginSlice = createSlice({
             state.id = data.adminId;
             state.adminName = data.name;
             state.role = data.role; // 권한 정보 저장
+            state.idIndex = data.idIndex; // idIndex 저장
             state.isAuthenticated = true;
             state.status = 'succeeded';
         }
@@ -62,6 +64,7 @@ const adminLoginSlice = createSlice({
                 state.id = action.payload.adminId;
                 state.adminName = action.payload.name;
                 state.role = action.payload.role; // 권한 정보 저장
+                state.idIndex = action.payload.idIndex; // idIndex 저장
             })
             .addCase(checkAuthStatus.rejected, (state, action) => {
                 state.status = 'failed';
@@ -77,6 +80,7 @@ const adminLoginSlice = createSlice({
                 state.id = '';
                 state.adminName = '';
                 state.role = null; // 권한 정보 초기화
+                state.idIndex = null; // idIndex 초기화
                 state.isAuthenticated = false;
                 state.error = null;
             })

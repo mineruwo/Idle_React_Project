@@ -111,7 +111,7 @@ const FAQManagementComponent = () => {
                                         <td colSpan={columns.length}>
                                             <div className="admin-content-box">
                                                 <strong>답변:</strong>
-                                                <p style={{ marginTop: '5px' }}>{faq.answer}</p>
+                                                <div style={{ marginTop: '5px' }} dangerouslySetInnerHTML={{ __html: faq.answer }}></div>
                                             </div>
                                             <div className="admin-actions">
                                                 <button onClick={() => handleDelete(faq.id)} className="admin-action-btn admin-delete-btn">삭제</button>

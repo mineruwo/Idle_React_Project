@@ -74,6 +74,16 @@ export const getCustomerList = async (params = {}) => {
     }
 };
 
+export const getCustomerById = async (id) => {
+    try {
+        const response = await adminApi.get(`/admin/customers/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Failed to fetch customer with id ${id}:`, error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
 export const createCustomer = async (customerData) => {
     try {
         const response = await adminApi.post(`/admin/customers`, customerData);
@@ -100,6 +110,36 @@ export const getAllNotices = async () => {
         return response.data;
     } catch (error) {
         console.error('Failed to fetch notices:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const getNoticeById = async (id) => {
+    try {
+        const response = await adminApi.get(`/admin/notices/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Failed to fetch notice with id ${id}:`, error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const getNoticeForEdit = async (id) => {
+    try {
+        const response = await adminApi.get(`/admin/notices/edit/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Failed to fetch notice for edit with id ${id}:`, error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const updateNotice = async (id, noticeData) => {
+    try {
+        const response = await adminApi.put(`/admin/notices/${id}`, noticeData);
+        return response.data;
+    } catch (error) {
+        console.error('Notice update failed:', error.response ? error.response.data : error.message);
         throw error;
     }
 };
@@ -151,6 +191,26 @@ export const getAllFAQs = async () => {
         return response.data;
     } catch (error) {
         console.error('Failed to fetch FAQs:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const getFaqById = async (id) => {
+    try {
+        const response = await adminApi.get(`/admin/faqs/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Failed to fetch FAQ with id ${id}:`, error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const getFaqForEdit = async (id) => {
+    try {
+        const response = await adminApi.get(`/admin/faqs/edit/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Failed to fetch FAQ for edit with id ${id}:`, error.response ? error.response.data : error.message);
         throw error;
     }
 };
@@ -251,6 +311,36 @@ export const getDailyCustomerDeletionCounts = async (year, month) => {
         return response.data;
     } catch (error) {
         console.error('Failed to fetch daily customer deletion counts:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const getAllInquiries = async (params = {}) => {
+    try {
+        const response = await adminApi.get(`/inquiries`, { params });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch inquiries:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const getDailyAnswerCounts = async (year, month) => {
+    try {
+        const response = await adminApi.get(`/admin/inquiries/daily-answers`, { params: { year, month } });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch daily answer counts:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const getDailyInquiryCounts = async (year, month) => {
+    try {
+        const response = await adminApi.get(`/inquiries/daily-counts`, { params: { year, month } });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch daily inquiry counts:', error.response ? error.response.data : error.message);
         throw error;
     }
 };

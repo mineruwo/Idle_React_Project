@@ -1,4 +1,4 @@
-package com.idle.backend.websocket;
+package com.fullstack.websocket;
 
 import org.springframework.context.ApplicationListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;

@@ -1,0 +1,51 @@
+/* NoticeComponent.css */
+
+.notice-item {
+    cursor: pointer;
+}
+
+.notice-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notice-header h5 {
+    flex-grow: 1;
+    margin-right: 10px; /* Space between title and date/arrow */
+}
+
+.notice-header small {
+    white-space: nowrap; /* Prevent date from wrapping */
+    margin-right: 10px; /* Space between date and arrow */
+}
+
+.arrow {
+    border: solid black;
+    border-width: 0 3px 3px 0;
+    display: inline-block;
+    padding: 3px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.arrow.up {
+    transform: rotate(-135deg);
+    -webkit-transform: rotate(-135deg);
+}
+
+.arrow.down {
+    transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+}
+
+.notice-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+}
+
+.notice-content.expanded {
+    max-height: 600px; /* Adjust as needed */
+    overflow-y: auto;
+    margin-top: 1rem; /* Add some margin when expanded */
+}
