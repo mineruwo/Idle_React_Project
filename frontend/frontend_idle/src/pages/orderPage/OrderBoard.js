@@ -2,13 +2,25 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import useCustomMove from "../../hooks/useCustomMove";
 import styled from "styled-components";
-import { fetchMyOrders } from "../../api/orderApi";
+import { fetchMyOrders , fetchOrders} from "../../api/orderApi";
 import {
     fetchOffersByOrder,
     acceptOffer,
     fetchAssignment,
     createOffer,
 } from "../../api/offerApi";
+
+// ===== 입찰 하한가 설정 =====
+const AVERAGE_PRICE_PER_KM = 3000;    // OrderForm과 동일
+const MIN_BID_RATE = 0.6;             // 평균가의 60% 하한
+
+const _num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+const basePriceFor = (o) =>
+  _num(o?.avgPrice) ||
+  (o?.distance ? Math.round(_num(o.distance) * AVERAGE_PRICE_PER_KM) : 0) ||
+  _num(o?.proposedPrice);
+
+const minDriverBid = (o) => Math.max(0, Math.floor(basePriceFor(o) * MIN_BID_RATE));
 
 /* ===== 라벨 매핑 ===== */
 const LABEL = {
@@ -109,14 +121,56 @@ const isImmediateOf = (o) => (o?.isImmediate ?? o?.immediate) === true;
 
 /** 파생 상태: 배정 여부 */
 const isAssigned = (order, assign) =>
-  Boolean((assign && assign.assignedDriverId != null) || (order && order.assignedDriverId != null));
+  Boolean(
+    (assign && assign.assignedDriverId != null) ||
+      (order && order.assignedDriverId != null)
+  );
 
-/** 한국어 상태 라벨 (배정 우선) */
+/** 카드 상태 라벨 */
+const statusLabelK = (s) => {
+  const t = String(s || "").toUpperCase();
+  switch (t) {
+    case "READY":            return "대기";
+    case "CREATED":          return "대기";
+    case "PAYMENT_PENDING":  return "결제대기";
+    case "ASSIGNED":         return "배정완료";
+    case "ONGOING":          return "진행중";
+    case "COMPLETED":        return "완료";
+    case "CANCELLED":
+    case "CANCELED":         return "취소";
+    default:                 return "대기";
+  }
+};
+
+/** 상세 패널 상태 라벨 */
 const statusK = (order, assign) => {
   if (isAssigned(order, assign)) return "완료";
   const s = String(order?.status || "").toUpperCase();
   if (s === "PAYMENT_PENDING" || s === "CREATED") return "결제대기";
   return "입찰중";
+};
+
+/** 입찰 상태 라벨 */
+const offerStatusLabelK = (s) => {
+  const t = String(s || "").toUpperCase();
+  switch (t) {
+    case "PENDING":   return "대기";
+    case "ACCEPTED":
+    case "CONFIRMED": return "확정";
+    case "REJECTED":  return "거절";
+    case "CANCELLED":
+    case "CANCELED":  return "취소";
+    default:          return "대기";
+  }
+};
+
+/** 입찰 가능 여부 */
+const canBid = (order, assign) => {
+  const orderStatus = String(order?.status || "").toUpperCase();
+  const assignStatus = String(assign?.status || "").toUpperCase();
+  const orderLocked = ["PAYMENT_PENDING", "COMPLETED"].includes(orderStatus);
+  const assignLocked = ["ASSIGNED", "CONFIRMED"].includes(assignStatus);
+  return !(orderLocked || assignLocked);
 };
 
 /* ===== 컴포넌트 ===== */
@@ -155,19 +209,20 @@ const OrderBoard = () => {
     const panelRef = useRef(null);
     const cardRefs = useRef({});
 
-    /* ====== 목록 로드 ====== */
-    useEffect(() => {
-        (async () => {
-            try {
-                const data = await fetchMyOrders();
-                setOrders(data || []);
-            } catch (e) {
-                console.error("오더 목록 불러오기 실패:", e);
-            }
-        })();
-    }, []);
+  /* 목록 로드 */
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetchOrders();
+        const list = Array.isArray(res?.data) ? res.data : res || [];
+        setOrders(list);
+      } catch (e) {
+        console.error("오더 목록 불러오기 실패:", e);
+      }
+    })();
+  }, []);
 
-    /* ====== 카드 선택 시 우측패널로 스크롤 보정 + 입찰/배정 로드 ====== */
+    /* 카드 선택 시 우측패널로 스크롤 보정 + 입찰/배정 로드 */
     const loadOfferAndAssignment = async (orderId) => {
         setLoadingOffers(true);
         try {
@@ -254,29 +309,29 @@ const OrderBoard = () => {
     }
   };
 
-    // ✅ 입찰 등록 (driverId 전송 안 함)
-    const handleBid = async () => {
-        if (!selected) return;
-        const priceNum = Number(bidPrice);
-        if (!priceNum || priceNum <= 0) {
-            alert("유효한 제안가를 입력하세요.");
-            return;
-        }
-        try {
-            await createOffer({
-                orderId: selected.id,
-                price: priceNum,
-                memo: bidMemo || "",
-            });
-            setBidPrice("");
-            setBidMemo("");
-            await loadOfferAndAssignment(selected.id);
-            alert("입찰이 등록되었습니다.");
-        } catch (e) {
-            console.error("입찰 등록 실패:", e);
-            alert("입찰 등록에 실패했습니다.");
-        }
-    };
+  const handleBid = async () => {
+    if (!selected) return;
+    const priceNum = Number(bidPrice);
+    if (!priceNum || priceNum <= 0) {
+      alert("유효한 제안가를 입력하세요.");
+      return;
+    }
+    const floor = minDriverBid(selected);
+    if (priceNum < floor) {
+      alert(`최소 제안가는 ${floor.toLocaleString()}원 입니다.`);
+      return;
+    }
+    try {
+      await createOffer(selected.id, { price: priceNum, memo: bidMemo || "" });
+      setBidPrice("");
+      setBidMemo("");
+      await loadOfferAndAssignment(selected.id);
+      alert("입찰이 등록되었습니다.");
+    } catch (e) {
+      console.error("입찰 등록 실패:", e);
+      alert("입찰 등록에 실패했습니다.");
+    }
+  };
 
     const todayStr = useMemo(() => fmtDate(new Date()), []);
 
@@ -323,40 +378,30 @@ const OrderBoard = () => {
         });
     }, [orders, q, immediateFilter, vehicleFilter]);
 
-    // 정렬
-    const sorted = useMemo(() => {
-        const arr = [...filtered];
-        if (sortKey === "latest") {
-            arr.sort((a, b) => {
-                const ta = new Date(a.createdAt || 0).getTime();
-                const tb = new Date(b.createdAt || 0).getTime();
-                return tb - ta; // desc
-            });
-            return arr;
-        }
-
-        if (sortKey === "distance") {
-            arr.sort((a, b) =>
-                sortDir === "asc"
-                    ? n(a.distance) - n(b.distance)
-                    : n(b.distance) - n(a.distance)
-            );
-            return arr;
-        }
-
-        if (sortKey === "avgPrice") {
-            const getPrice = (o) =>
-                n(o.avgPrice, n(o.proposedPrice, n(o.driverPrice, 0)));
-            arr.sort((a, b) =>
-                sortDir === "asc"
-                    ? getPrice(a) - getPrice(b)
-                    : getPrice(b) - getPrice(a)
-            );
-            return arr;
-        }
-
-        return arr;
-    }, [filtered, sortKey, sortDir]);
+  // 정렬
+  const sorted = useMemo(() => {
+    const arr = [...filtered];
+    if (sortKey === "latest") {
+      arr.sort((a, b) => {
+        const ta = new Date(a.createdAt || 0).getTime();
+        const tb = new Date(b.createdAt || 0).getTime();
+        return tb - ta; // desc
+      });
+      return arr;
+    }
+    if (sortKey === "distance") {
+      arr.sort((a, b) =>
+        sortDir === "asc" ? n(a.distance) - n(b.distance) : n(b.distance) - n(a.distance)
+      );
+      return arr;
+    }
+    if (sortKey === "avgPrice") {
+      const getPrice = (o) => n(o.avgPrice, n(o.proposedPrice, n(o.driverPrice, 0)));
+      arr.sort((a, b) => (sortDir === "asc" ? getPrice(a) - getPrice(b) : getPrice(b) - getPrice(a)));
+      return arr;
+    }
+    return arr;
+  }, [filtered, sortKey, sortDir]);
 
     // 페이지네이션
     const total = sorted.length;
@@ -668,83 +713,94 @@ const OrderBoard = () => {
                     <Val>{confirmedPrice != null ? `${Number(confirmedPrice).toLocaleString()} 원` : "-"}</Val>
                   </Row>
                 </div>
-              ) : (
-                <Muted>아직 배정되지 않았습니다. 아래 입찰에서 확정하세요.</Muted>
-              )}
-            </Section>
+              </>
+            ) : (
+              <div>아직 배정되지 않았습니다. 아래 입찰에서 확정하세요.</div>
+            )}
+          </div>
 
-                        {!isAssigned(selected, assignment) && (
-                            <Section>
-                                <SectionTitle>입찰 목록</SectionTitle>
-
-              {loadingOffers ? (
-                <Muted>불러오는 중...</Muted>
-              ) : offers.length === 0 ? (
-                <Muted>입찰이 아직 없습니다.</Muted>
-              ) : (
-                <OfferList>
-                  {offers.map((o) => (
-                    <OfferItem key={o.id}>
-                      <div>
-                        <b>{o.driverNick ? o.driverNick : `Driver #${o.driverId}`}</b> ·{" "}
-                        {Number(o.price ?? 0).toLocaleString()}원
-                        <small style={{ marginLeft: 8, opacity: 0.7 }}>({o.status})</small>
-                      </div>
-                      <AcceptBtn
-                        disabled={isAssigned(selected, assignment) || o.status !== "PENDING"}
-                        onClick={() => handleAccept(o.id)}
-                      >
-                        입찰 확정
-                      </AcceptBtn>
-                    </OfferItem>
-                  ))}
-                </OfferList>
-              )}
-
-              {/* 입찰 등록 */}
-                <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                  <Muted>입찰 등록:</Muted>
-                  <input
-                    type="number"
-                    placeholder="제안가"
-                    value={bidPrice}
-                    onChange={(e) => setBidPrice(e.target.value)}
-                    style={{ width: 120, padding: "6px 8px", borderRadius: 8, border: "1px solid #e5e9f2" }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="메모(선택)"
-                    value={bidMemo}
-                    onChange={(e) => setBidMemo(e.target.value)}
-                    style={{ width: 260, padding: "6px 8px", borderRadius: 8, border: "1px solid #e5e9f2" }}
-                  />
-                  <AcceptBtn onClick={handleBid}>등록</AcceptBtn>
+          <div style={{ marginTop: 16 }}>
+            <h3 style={{ margin: "8px 0" }}>입찰 목록</h3>
+            {loadingOffers ? (
+              <div>불러오는 중...</div>
+            ) : offers.length === 0 ? (
+              <div>입찰이 아직 없습니다.</div>
+            ) : (
+              offers.map((o) => (
+                <div
+                  key={o.id}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    padding: 8,
+                    border: "1px solid #eee",
+                    borderRadius: 6,
+                    marginTop: 6,
+                  }}
+                >
+                  <div>
+                    <b>{o.driverNick ? o.driverNick : `기사 #${o.driverId}`}</b> ·{" "}
+                    {Number(o.price ?? 0).toLocaleString()}원
+                    <small style={{ marginLeft: 8, opacity: 0.7 }}>
+                      ({offerStatusLabelK(o.status)})
+                    </small>
+                  </div>
+                  <div>
+                    <button
+                      disabled={!canBid(selected, assignment) || o.status !== "PENDING"}
+                      onClick={() => handleAccept(o.id)}
+                    >
+                      입찰 확정
+                    </button>
+                  </div>
                 </div>
-            </Section>
-                        )}
+              ))
+            )}
 
-            <Section>
-              <SectionTitle>운임 정보</SectionTitle>
-              <Row>
-                <Key>기사 제안가</Key>
-                <Val>
-                  {assignment?.driverPrice != null
-                    ? `${Number(assignment.driverPrice).toLocaleString()} 원`
-                    : selected.driverPrice
-                    ? `${Number(selected.driverPrice).toLocaleString()} 원`
-                    : "-"}
-                </Val>
-              </Row>
-              <Row>
-                <Key>화주 제안가</Key>
-                <Val>{selected.proposedPrice ? `${Number(selected.proposedPrice).toLocaleString()} 원` : "-"}</Val>
-              </Row>
-              <Row>
-                <Key>평균가</Key>
-                <Val>{selected.avgPrice ? `${Number(selected.avgPrice).toLocaleString()} 원` : "-"}</Val>
-              </Row>
-              <RightHint>예상 거리 {selected.distance != null ? `${Number(selected.distance).toFixed(2)}km` : "-"}</RightHint>
-            </Section>
+            {canBid(selected, assignment) && (
+              <div style={{ marginTop: 10, display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                <span>입찰 등록:</span>
+                <input
+                  type="number"
+                  placeholder={`제안가 (최소 ${minDriverBid(selected).toLocaleString()}원)`}
+                  value={bidPrice}
+                  onChange={(e) => setBidPrice(e.target.value)}
+                  style={{ width: 140 }}
+                />
+                <input
+                  type="text"
+                  placeholder="메모(선택)"
+                  value={bidMemo}
+                  onChange={(e) => setBidMemo(e.target.value)}
+                  style={{ width: 260 }}
+                />
+                <button onClick={handleBid}>등록</button>
+                <div style={{ fontSize: 12, color: "#666" }}>
+                  최소 제안가: {minDriverBid(selected).toLocaleString()}원
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginTop: 16 }}>
+            <h3 style={{ margin: "8px 0" }}>운임 정보</h3>
+            <div>
+              기사 제안가:{" "}
+              {assignment?.driverPrice != null
+                ? `${Number(assignment.driverPrice).toLocaleString()} 원`
+                : selected.driverPrice
+                ? `${Number(selected.driverPrice).toLocaleString()} 원`
+                : "-"}
+            </div>
+            <div>
+              화주 제안가:{" "}
+              {selected.proposedPrice ? `${Number(selected.proposedPrice).toLocaleString()} 원` : "-"}
+            </div>
+            <div>평균가: {selected.avgPrice ? `${Number(selected.avgPrice).toLocaleString()} 원` : "-"}</div>
+            <div style={{ fontSize: 12, color: "#666", marginTop: 4 }}>
+              예상 거리 {selected.distance != null ? `${Number(selected.distance).toFixed(2)}km` : "-"}
+            </div>
+          </div>
 
                         {selected?.status === "PAYMENT_PENDING" &&
                             selected?.driverPrice != null && (
@@ -770,6 +826,7 @@ const OrderBoard = () => {
 
 export default OrderBoard;
 
+
 /* ===== 스타일 (생략 없이 포함: 기존과 동일) ===== */
 const PINK = {
     bg: "#fff7fb",
@@ -789,6 +846,13 @@ const PINK = {
     backBg: "#ffe6f2",
     backBgHover: "#ffd9ea",
 };
+
+// ===== 하한가 표시용 CSS =====
+const MinBidHint = styled.div`
+  font-size: 12px;
+  color: #9b7f8c;   /* 기존 서브 텍스트 색상 톤 */
+  margin-left: 6px;
+`;
 
 const PageWrap = styled.div`
     display: grid;

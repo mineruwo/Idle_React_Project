@@ -1,5 +1,5 @@
 // src/pages/orderPage/OrderForm.jsx
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import styled from "styled-components";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -16,28 +16,61 @@ const PACK_LABELS = {
     fragile: "파손위험물",
 };
 
+/** ================= 요금/하한가 유틸 =================
+ * 기본요금 규칙:
+ *  - 10km까지 20,000원
+ *  - 이후 1km당 2,000원 추가 (올림 적용)
+ * 하한가 = max(20,000, baseFare * 0.7) → 100원 단위 반올림
+ */
+const calcBaseFare = (distanceKm) => {
+  const d = Number(distanceKm) || 0;
+  if (d <= 10) return 20000;
+  return 20000 + Math.ceil(d - 10) * 2000;
+};
+const getMinProposedPrice = (distanceKm) => {
+  const base = calcBaseFare(distanceKm);
+  const floor = Math.round((base * 0.7) / 100) * 100;
+  return Math.max(20000, floor);
+};
+
+/** 숫자 콤마 문자열 → 숫자 (빈값이면 null) */
+function parseProposedPriceNumber(str) {
+  const onlyNums = (str || "").replace(/[^0-9]/g, "");
+  return onlyNums ? Number(onlyNums) : null;
+}
+
 const OrderForm = () => {
     const mapRef = useRef(null);
     const navigate = useNavigate();
     const { shipperMoveToOrderBoard } = useCustomMove();
 
-    // 상태
-    const [proposedPrice, setProposedPrice] = useState(""); // 표시용(천단위 콤마)
-    const [departure, setDeparture] = useState("");
-    const [arrival, setArrival] = useState("");
-    const [distance, setDistance] = useState(null); // "10.76" 같은 문자열(km)
-    const [selectedDate, setSelectedDate] = useState(null);
-    const [isImmediate, setIsImmediate] = useState(true);
-    const [weight, setWeight] = useState("");
-    const [vehicle, setVehicle] = useState("");
-    const [cargoType, setCargoType] = useState("");
-    const [cargoSize, setCargoSize] = useState("");
-    const [packingOptions, setPackingOptions] = useState({
-        special: false,
-        normal: false,
-        expensive: false,
-        fragile: false,
-    });
+  // 상태
+  const [proposedPrice, setProposedPrice] = useState(""); // 표시용(천단위 콤마)
+  const [departure, setDeparture] = useState("");
+  const [arrival, setArrival] = useState("");
+  const [distance, setDistance] = useState(null); // "10.76" 같은 문자열(km)
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [isImmediate, setIsImmediate] = useState(true);
+  const [weight, setWeight] = useState("");
+  const [vehicle, setVehicle] = useState("");
+  const [cargoType, setCargoType] = useState("");
+  const [cargoSize, setCargoSize] = useState("");
+  const [packingOptions, setPackingOptions] = useState({
+    special: false,
+    normal: false,
+    expensive: false,
+    fragile: false,
+  });
+
+  // ===== 파생값: 하한가/검증 =====
+  const minProposed = useMemo(
+    () => (distance ? getMinProposedPrice(Number(distance)) : 20000),
+    [distance]
+  );
+  const isUnderMinProposed = useMemo(() => {
+    const n = parseProposedPriceNumber(proposedPrice);
+    return n !== null && n < minProposed;
+  }, [proposedPrice, minProposed]);
 
     // 다음(카카오) 주소 검색 팝업
     const handlePostcodePopup = (type) => {
@@ -50,15 +83,14 @@ const OrderForm = () => {
         }).open();
     };
 
-    // 제안가 입력(숫자만 + 콤마 표시)
-    const handleProposedPriceChange = (e) => {
-        const onlyNums = e.target.value.replace(/[^0-9]/g, "");
-        const formatted = onlyNums
-            ? Number(onlyNums).toLocaleString("ko-KR")
-            : "";
-        setProposedPrice(formatted);
-    };
-    const parseProposedPriceNumber = () => {
+  // 제안가 입력(숫자만 + 콤마 표시)
+  const handleProposedPriceChange = (e) => {
+    const onlyNums = e.target.value.replace(/[^0-9]/g, "");
+    const formatted = onlyNums ? Number(onlyNums).toLocaleString("ko-KR") : "";
+    setProposedPrice(formatted);
+  };
+
+  const parseProposedPriceNumber = () => {
         const onlyNums = (proposedPrice || "").replace(/[^0-9]/g, "");
         return onlyNums ? Number(onlyNums) : null;
     };
@@ -199,16 +231,34 @@ const OrderForm = () => {
         });
     }, [departure, arrival, weight, vehicle, cargoType, cargoSize]);
 
-    // 제출
-    const handleSubmit = async () => {
-        try {
-            const payload = {
-                // 금액
-                proposedPrice: parseProposedPriceNumber(),
-                driverPrice: null,
-                avgPrice: distance
-                    ? Math.round(Number(distance) * AVERAGE_PRICE_PER_KM)
-                    : null,
+  // 제출
+  const handleSubmit = async () => {
+    try {
+      // 필수값 검증
+      if (!departure || !arrival || !weight || !vehicle || !cargoType || !cargoSize) {
+        alert("필수 값을 모두 입력해 주세요.");
+        return;
+      }
+      if (!distance || Number(distance) <= 0) {
+        alert("지도에서 거리를 먼저 계산해 주세요.");
+        return;
+      }
+
+      const proposed = parseProposedPriceNumber(proposedPrice);
+      if (proposed === null) {
+        alert("가격 제안 값을 입력해 주세요.");
+        return;
+      }
+      if (proposed < minProposed) {
+        alert(`화주 제안가는 최소 ${minProposed.toLocaleString("ko-KR")}원 이상이어야 합니다.`);
+        return;
+      }
+
+      const payload = {
+        // 금액
+        proposedPrice: proposed,
+        driverPrice: null,
+        avgPrice: distance ? Math.round(Number(distance) * AVERAGE_PRICE_PER_KM) : null,
 
                 // 포장
                 packingOptions: JSON.stringify(packingOptions),
@@ -394,46 +444,47 @@ const OrderForm = () => {
 
                         <Divider />
 
-                        <div>
-                            <LineLabel>총 예상 운임:</LineLabel>
-                            <LineValue>
-                                {distance
-                                    ? `${(
-                                          Number(distance) *
-                                          AVERAGE_PRICE_PER_KM
-                                      ).toLocaleString("ko-KR")}원`
-                                    : "-"}
-                            </LineValue>
-                        </div>
+            <div>
+              <LineLabel>총 예상 운임:</LineLabel>
+              <LineValue>
+                {distance
+                  ? `${(Number(distance) * AVERAGE_PRICE_PER_KM).toLocaleString("ko-KR")}원`
+                  : "-"}
+              </LineValue>
+            </div>
 
-                        <div>
-                            <LineLabel>가격 제안:</LineLabel>
-                            <div style={{ marginTop: "8px" }}>
-                                <ProposalInput
-                                    type="text"
-                                    placeholder="직접 제안할 금액 입력"
-                                    value={proposedPrice}
-                                    onChange={handleProposedPriceChange}
-                                />
-                            </div>
-                        </div>
-                    </SummaryBox>
+            <div style={{ marginTop: 8 }}>
+              <LineLabel>권장 최소가(하한):</LineLabel>
+              <LineValue>{minProposed.toLocaleString("ko-KR")}원</LineValue>
+            </div>
 
-                    <ButtonRow>
-                        <BackButton onClick={() => navigate(-1)}>
-                            뒤로가기
-                        </BackButton>
-                        <SubmitButton
-                            onClick={handleSubmit}
-                            disabled={!distance}
-                        >
-                            오더 등록
-                        </SubmitButton>
-                    </ButtonRow>
-                </>
-            )}
-        </FormContainer>
-    );
+            <div>
+              <LineLabel>가격 제안:</LineLabel>
+              <div style={{ marginTop: "8px" }}>
+                <ProposalInput
+                  type="text"
+                  placeholder={`최소 ${minProposed.toLocaleString("ko-KR")}원 이상`}
+                  value={proposedPrice}
+                  onChange={handleProposedPriceChange}
+                  aria-invalid={isUnderMinProposed}
+                />
+                {isUnderMinProposed && (
+                  <WarnText>최소 {minProposed.toLocaleString("ko-KR")}원 이상 입력해 주세요.</WarnText>
+                )}
+              </div>
+            </div>
+          </SummaryBox>
+
+          <ButtonRow>
+            <BackButton onClick={() => navigate(-1)}>뒤로가기</BackButton>
+            <SubmitButton onClick={handleSubmit} disabled={!distance || isUnderMinProposed}>
+              오더 등록
+            </SubmitButton>
+          </ButtonRow>
+        </>
+      )}
+    </FormContainer>
+  );
 };
 
 export default OrderForm;
@@ -578,6 +629,18 @@ const ProposalInput = styled.input`
     }
 `;
 
+const WarnText = styled.p`
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #d1002e;
+`;
+
+const WarnText = styled.p`
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #d1002e;
+`;
+
 const ButtonRow = styled.div`
     display: flex;
     justify-content: center;
@@ -601,16 +664,18 @@ const BackButton = styled.button`
 `;
 
 const SubmitButton = styled.button`
-    padding: 0.6rem 1.6rem;
-    font-size: 0.95rem;
-    background-color: #f48fb1;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    min-width: 120px;
-    transition: all 0.2s ease-in-out;
-    &:hover {
-        background-color: #f48fb1;
-    }
+  padding: 0.6rem 1.6rem;
+  font-size: 0.95rem;
+  background-color: #f48fb1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  min-width: 120px;
+  transition: all 0.2s ease-in-out;
+  &:hover { background-color: #f48fb1; }
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 `;
