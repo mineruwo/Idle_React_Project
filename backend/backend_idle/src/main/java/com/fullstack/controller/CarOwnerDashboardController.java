@@ -21,30 +21,33 @@ import org.springframework.web.bind.annotation.*;
 @Log4j2
 public class CarOwnerDashboardController {
 
-	private final CarOwnerDashboardService dashboardService;
+    private final CarOwnerDashboardService dashboardService;
 
-	@GetMapping("/summary")
-	public DashboardSummaryDTO getSummary(@AuthenticationPrincipal String ownerId,
-			@RequestParam(defaultValue = "month") String period) {
+    @GetMapping("/summary")
+    public DashboardSummaryDTO getSummary(
+            @AuthenticationPrincipal String ownerId,
+            @RequestParam(name = "period", defaultValue = "month") String period  // ✅ name 지정
+    ) {
+        return dashboardService.getSummary(ownerId, period);
+    }
 
-		return dashboardService.getSummary(ownerId);
-	}
+    @GetMapping("/deliveries")
+    public List<DeliveryItemDTO> getDeliveries(@AuthenticationPrincipal String ownerId) {
+        log.info("[GET] /deliveries ownerId={}", ownerId);
+        return dashboardService.getDeliveries(ownerId);
+    }
 
-	@GetMapping("/deliveries")
-	public List<DeliveryItemDTO> getDeliveries(@AuthenticationPrincipal String ownerId) {
-		log.info("[GET] /deliveries ownerId={}", ownerId);
-		return dashboardService.getDeliveries(ownerId);
-	}
+    @GetMapping("/sales-chart")
+    public List<SalesChartDTO> getSalesChart(
+            @AuthenticationPrincipal String ownerId,
+            @RequestParam(name = "period", defaultValue = "month") String period  // ✅ name 지정
+    ) {
+        // period를 쓰실 계획이면 서비스 시그니처도 period 받도록 바꾸세요.
+        return dashboardService.getSalesChart(ownerId);
+    }
 
-	@GetMapping("/sales-chart")
-	public List<SalesChartDTO> getSalesChart(@AuthenticationPrincipal String ownerId,
-			@RequestParam(defaultValue = "month") String period) {
-		return dashboardService.getSalesChart(ownerId);
-	}
-
-	@GetMapping("/warmth")
-	public WarmthDTO getWarmth(@AuthenticationPrincipal String ownerId) {
-		return dashboardService.getWarmth(ownerId);
-	}
-
+    @GetMapping("/warmth")
+    public WarmthDTO getWarmth(@AuthenticationPrincipal String ownerId) {
+        return dashboardService.getWarmth(ownerId);
+    }
 }

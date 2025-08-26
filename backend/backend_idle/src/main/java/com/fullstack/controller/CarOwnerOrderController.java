@@ -1,6 +1,7 @@
 package com.fullstack.controller;
 
 import com.fullstack.model.CarOwnerOrderListDTO;
+import com.fullstack.model.enums.OrderStatus;
 import com.fullstack.service.CarOwnerOrderListService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -61,7 +62,7 @@ public class CarOwnerOrderController {
     public CarOwnerOrderListDTO.OrderDetailResponse changeStatus(
             @AuthenticationPrincipal String loginId,
             @PathVariable("orderId") Long orderId,
-            @RequestParam(name = "status") String status
+            @RequestParam(name = "status") OrderStatus status
     ) {
         return carOwnerOrderListService.changeStatus(loginId, orderId, status);
     }
