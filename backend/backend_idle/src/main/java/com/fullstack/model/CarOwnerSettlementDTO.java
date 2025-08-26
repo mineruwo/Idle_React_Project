@@ -1,52 +1,44 @@
 package com.fullstack.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.*;
-import lombok.*;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-/**
- * 정산(Settlement) 관련 DTO 묶음
- * 사용: SettlementDTO.CarOwnerSettlementDTO, SettlementDTO.SettlementDetailResponse 등
- */
 public final class CarOwnerSettlementDTO {
+    private CarOwnerSettlementDTO(){}
 
-    private CarOwnerSettlementDTO() {} // 인스턴스화 방지
-
-    // 생성/요청 DTO
+    // 생성(수동 추가가 필요할 때만 사용; 월 자동 동기화와 병행 가능)
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
     public static class SettlementCreate {
-        @NotNull
         private Long orderId;
-        @NotNull @Min(0)
-        private Integer amount;          // 정산 금액(원)
-        @Size(max = 200)
+        private Long amount;
         private String memo;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
     public static class SettlementMemoRequest {
-        @Size(max = 200)
         private String memo;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
     public static class SettlementPayRequest {
-        @Size(max = 100)
-        private String txRef;            // 이체 참고값(선택)
+        private String txRef;
     }
 
-    // 목록용 요약
+    // 목록 행 (프론트 fetchSettlements 반환값: Page<SettlementSummaryResponse>)
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
     public static class SettlementSummaryResponse {
-        private Long id;
+        private Long id;           // item id
         private Long orderId;
-        private Integer amount;
-        private String status; // REQUESTED/APPROVED/PAID/CANCELED
+        private Long amount;
+        private String status;     // 배치 상태를 내려줌(REQUESTED/APPROVED/PAID/CANCELED)
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-        private LocalDateTime createdAt;
+        private LocalDateTime requestedAt; // 배치 요청 시각
     }
 
     // 단건 상세
@@ -55,24 +47,22 @@ public final class CarOwnerSettlementDTO {
         private Long id;
         private String ownerId;
         private Long orderId;
-        private Integer amount;
-        private String status;
+        private Long amount;
+        private String status;     // 배치 상태
         private String memo;
         private String txRef;
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-        private LocalDateTime createdAt;
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-        private LocalDateTime updatedAt;
+        private LocalDateTime requestedAt;
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
         private LocalDateTime paidAt;
     }
 
-    // 대시보드 카드 요약
+    // 요약 카드 (/summary)
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
     public static class SettlementSummaryCardResponse {
         private long todayEarnings;
         private long monthEarnings;
         private long unsettledAmount;
-        private LocalDate month; // 기준 월 (예: 2025-08-01 형태로 월 키)
+        private LocalDate month;   // 2025-08-01 (월 첫날)
     }
 }

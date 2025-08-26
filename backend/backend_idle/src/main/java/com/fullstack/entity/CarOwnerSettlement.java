@@ -1,37 +1,51 @@
 package com.fullstack.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Table(name = "car_owner_settlement",
-       indexes = {
-           @Index(name = "idx_settlement_owner", columnList = "owner_id"),
-           @Index(name = "idx_settlement_order", columnList = "order_id"),
-           @Index(name = "idx_settlement_status", columnList = "status")
-       })
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Table(
+    name = "settlement",
+    indexes = { @Index(name = "ux_settlement_order", columnList = "order_id", unique = true) }
+)
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class CarOwnerSettlement {
 
-    public enum Status { REQUESTED, APPROVED, PAID, CANCELED }
-
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name="owner_id", nullable=false, length=50)
     private String ownerId;
 
-    @Column(name="order_id", nullable=false)
+    @Column(name="order_id")
     private Long orderId;
 
     @Column(name="amount", nullable=false)
-    private Integer amount;
+    private Long amount;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name="status", nullable=false, length=20)
-    private Status status;
+    // (선택) 단건 상태는 유지하되, 화면/집계는 배치 상태를 우선 사용
+    @Column(name="status", length=20)
+    private String status;
 
     @Column(name="memo", length=200)
     private String memo;
@@ -39,52 +53,24 @@ public class CarOwnerSettlement {
     @Column(name="tx_ref", length=100)
     private String txRef;
 
-    @Column(name="created_at", nullable=false)
+    @Column(name="created_at")
     private LocalDateTime createdAt;
 
-    @Column(name="updated_at", nullable=false)
+    @Column(name="updated_at")
     private LocalDateTime updatedAt;
 
     @Column(name="paid_at")
     private LocalDateTime paidAt;
 
-    @Version
-    private Long version; // 낙관적 락(동시 업데이트 방지)
+    @ManyToOne(optional = false)
+    @JoinColumn(name="batch_id")
+    private CarOwnerSettlementBatch batch;
 
     @PrePersist
     void prePersist() {
-        LocalDateTime now = LocalDateTime.now();
-        if (createdAt == null) createdAt = now;
-        if (updatedAt == null) updatedAt = now;
-        if (status == null) status = Status.REQUESTED;
+        if (createdAt == null) createdAt = LocalDateTime.now();
     }
 
     @PreUpdate
     void preUpdate() { updatedAt = LocalDateTime.now(); }
-
-    // 상태 전이 헬퍼
-    public void approve(String memo) {
-        if (status == Status.CANCELED || status == Status.PAID) {
-            throw new IllegalStateException("INVALID_STATE_TRANSITION");
-        }
-        this.status = Status.APPROVED;
-        if (memo != null) this.memo = memo;
-    }
-
-    public void pay(String txRef) {
-        if (status != Status.APPROVED && status != Status.REQUESTED) {
-            throw new IllegalStateException("INVALID_STATE_TRANSITION");
-        }
-        this.status = Status.PAID;
-        this.txRef = txRef;
-        this.paidAt = LocalDateTime.now();
-    }
-
-    public void cancel(String memo) {
-        if (status == Status.PAID) {
-            throw new IllegalStateException("ALREADY_PAID");
-        }
-        this.status = Status.CANCELED;
-        if (memo != null) this.memo = memo;
-    }
 }
