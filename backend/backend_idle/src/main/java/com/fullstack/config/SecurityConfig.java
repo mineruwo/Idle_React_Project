@@ -73,7 +73,8 @@ public class SecurityConfig {
                     "/api/payment/**",
                     "/api/admin/chat-sessions/**", // 채팅 세션 관련 API 허용
                     "/api/email/**",
-                    "/api/reviews/target/**" // 특정 대상의 리뷰 목록 조회는 누구나 가능
+                    "/api/reviews/target/**", // 특정 대상의 리뷰 목록 조회는 누구나 가능
+                    "/api/car-owner/**"
                 ).permitAll()
                 .requestMatchers(
                     "/api/auth/me",

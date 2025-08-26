@@ -9,7 +9,7 @@ import com.fullstack.model.CarOwnerDashboardDTO.WarmthDTO;
 import java.util.List;
 
 public interface CarOwnerDashboardService {
-    DashboardSummaryDTO getSummary(String ownerId);
+    DashboardSummaryDTO getSummary(String ownerId, String period);
     List<DeliveryItemDTO> getDeliveries(String ownerId);
     List<SalesChartDTO> getSalesChart(String ownerId);
     WarmthDTO getWarmth(String ownerId);

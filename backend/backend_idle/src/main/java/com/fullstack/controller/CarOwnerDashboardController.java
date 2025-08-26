@@ -1,6 +1,5 @@
 package com.fullstack.controller;
 
-
 import com.fullstack.model.CarOwnerDashboardDTO.DashboardSummaryDTO;
 import com.fullstack.model.CarOwnerDashboardDTO.DeliveryItemDTO;
 import com.fullstack.model.CarOwnerDashboardDTO.SalesChartDTO;
@@ -22,28 +21,30 @@ import org.springframework.web.bind.annotation.*;
 @Log4j2
 public class CarOwnerDashboardController {
 
-    private final CarOwnerDashboardService dashboardService;
+	private final CarOwnerDashboardService dashboardService;
 
-    @GetMapping("/summary")
-    public DashboardSummaryDTO getSummary(@AuthenticationPrincipal String ownerId) {
-    	log.info("[GET] /summary ownerId={}", ownerId);
-        return dashboardService.getSummary(ownerId);
-    }
+	@GetMapping("/summary")
+	public DashboardSummaryDTO getSummary(@AuthenticationPrincipal String ownerId,
+			@RequestParam(defaultValue = "month") String period) {
 
-    @GetMapping("/deliveries")
-    public List<DeliveryItemDTO> getDeliveries(
-            @AuthenticationPrincipal String ownerId) {
-    	 log.info("[GET] /deliveries ownerId={}", ownerId);
-        return dashboardService.getDeliveries(ownerId);
-    }
-    @GetMapping("/sales-chart")
-   public List<SalesChartDTO> getSalesChart(@AuthenticationPrincipal String ownerId) {
-        return dashboardService.getSalesChart(ownerId);
-    }
+		return dashboardService.getSummary(ownerId);
+	}
 
-    @GetMapping("/warmth")
-    public WarmthDTO getWarmth(@AuthenticationPrincipal String ownerId) {
-        return dashboardService.getWarmth(ownerId);
-    }
-    
+	@GetMapping("/deliveries")
+	public List<DeliveryItemDTO> getDeliveries(@AuthenticationPrincipal String ownerId) {
+		log.info("[GET] /deliveries ownerId={}", ownerId);
+		return dashboardService.getDeliveries(ownerId);
+	}
+
+	@GetMapping("/sales-chart")
+	public List<SalesChartDTO> getSalesChart(@AuthenticationPrincipal String ownerId,
+			@RequestParam(defaultValue = "month") String period) {
+		return dashboardService.getSalesChart(ownerId);
+	}
+
+	@GetMapping("/warmth")
+	public WarmthDTO getWarmth(@AuthenticationPrincipal String ownerId) {
+		return dashboardService.getWarmth(ownerId);
+	}
+
 }

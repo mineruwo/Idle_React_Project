@@ -33,9 +33,11 @@ public class JWTFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
-
+    	log.info(">>>>>>>>>>>>>> {} {}", request.getMethod(), request.getRequestURI());
         final String method = request.getMethod();
         final String uri    = request.getRequestURI();
+        log.info("cookieToken? {}", method != null);
+        log.info("headerToken? {}", uri != null);
 
         // 1) CORS 프리플라이트는 무조건 패스
         if ("OPTIONS".equalsIgnoreCase(method)) {
@@ -60,6 +62,7 @@ public class JWTFilter extends OncePerRequestFilter {
         if (token != null) {
             try {
                 if (jwtUtil.validateToken(token)) {
+                	log.info("validateToken = {}", jwtUtil);
                     String id   = jwtUtil.getId(token);
                     String role = jwtUtil.getRole(token);
 
