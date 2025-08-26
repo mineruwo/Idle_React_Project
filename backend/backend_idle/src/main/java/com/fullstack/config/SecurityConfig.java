@@ -10,6 +10,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -18,12 +22,15 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.fullstack.security.jwt.JWTFilter;
-import com.fullstack.security.jwt.OAuth2SuccessHandler;
+import com.fullstack.security.oauth.OAuth2SuccessHandler;
 import com.fullstack.service.CustomOAuth2UserService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
@@ -34,6 +41,7 @@ public class SecurityConfig {
 	private final JWTFilter jwtFilter;
 	private final CustomOAuth2UserService customOAuth2UserService;
 	private final OAuth2SuccessHandler oAuth2SuccessHandler;
+	private final ClientRegistrationRepository clientRegistrationRepository;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -87,7 +95,7 @@ public class SecurityConfig {
                     "/api/admin/chat-sessions/**", // 채팅 세션 관련 API 허용
                     "/api/email/**",
                     "/api/reviews/target/**", // 특정 대상의 리뷰 목록 조회는 누구나 가능
-                    "/api/car-owner/**"
+                    "/api/car-owner/**",
                     "/oauth2/**", "/login/oauth2/**", "/oauth2/authorization/**",
                     "/api/reviews/target/**" // 특정 대상의 리뷰 목록 조회는 누구나 가능
                 ).permitAll()
@@ -100,9 +108,9 @@ public class SecurityConfig {
                 
                 .anyRequest().authenticated()
             )
-            
+            // sns 로그인 페이지 연결
             .oauth2Login(o -> o
-                    .authorizationEndpoint(a -> a.baseUri("/oauth2/authorization"))
+            		.authorizationEndpoint(a -> a.authorizationRequestResolver(customResolver(clientRegistrationRepository)))
                     .redirectionEndpoint(r -> r.baseUri("/login/oauth2/code/*"))
                     .userInfoEndpoint(u -> u.userService(customOAuth2UserService))
                     .successHandler(oAuth2SuccessHandler)
@@ -133,5 +141,43 @@ public class SecurityConfig {
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
+	}
+	
+	@Bean
+	public OAuth2AuthorizationRequestResolver customResolver(ClientRegistrationRepository repo) {
+	    DefaultOAuth2AuthorizationRequestResolver delegate =
+	        new DefaultOAuth2AuthorizationRequestResolver(repo, "/oauth2/authorization");
+
+	    return new OAuth2AuthorizationRequestResolver() {
+	        
+	    	@Override
+	        public OAuth2AuthorizationRequest resolve(HttpServletRequest request) {
+	            OAuth2AuthorizationRequest original = delegate.resolve(request);
+	            return enhance(original, request);
+	        }
+
+	        @Override
+	        public OAuth2AuthorizationRequest resolve(HttpServletRequest request, String clientRegistrationId) {
+	            OAuth2AuthorizationRequest original = delegate.resolve(request, clientRegistrationId);
+	            return enhance(original, request);
+	        }
+
+	        private OAuth2AuthorizationRequest enhance(OAuth2AuthorizationRequest original, HttpServletRequest request) {
+	            if (original == null) return null;
+
+	            String flow = request.getParameter("flow");   // login | signup ...
+	            String next = request.getParameter("next");   // 돌아올 상대 경로
+
+	            Map<String, Object> add = new HashMap<>(original.getAdditionalParameters());
+	            add.put("flow", flow != null ? flow : "login");
+	            if (next != null && next.startsWith("/")) {   // 오픈 리다이렉트 방지
+	                add.put("next", next);
+	            }
+
+	            return OAuth2AuthorizationRequest.from(original)
+	                    .additionalParameters(add)
+	                    .build();
+	        }
+	    };
 	}
 }
