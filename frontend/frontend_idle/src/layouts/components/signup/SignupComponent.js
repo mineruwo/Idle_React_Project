@@ -9,7 +9,7 @@ import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import AppTheme from '../../../theme/muitheme/AppTheme';
-import { GoogleIcon, KakaoIcon, PinkTruckIcon } from '../login/IconComponent';
+import { GoogleIcon, KakaoIcon, NaverIcon, PinkTruckIcon } from '../common/IconComponent';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import useCustomMove from '../../../hooks/useCustomMove';
@@ -290,7 +290,7 @@ export default function SignUp(props) {
               회원가입
             </Button>
           </Box>
-          <Divider>
+          <Divider sx={{ mt: 2 }}>
             <Typography sx={{ color: 'text.secondary' }}>SNS 회원가입</Typography>
           </Divider>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -301,6 +301,14 @@ export default function SignUp(props) {
               startIcon={<GoogleIcon />}
             >
               구글 가입
+            </Button>
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={() => alert('Sign up with Naver')}
+              startIcon={<NaverIcon />}
+            >
+              네이버 가입
             </Button>
             <Button
               fullWidth

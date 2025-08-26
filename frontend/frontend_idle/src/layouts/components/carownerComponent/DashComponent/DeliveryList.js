@@ -1,39 +1,41 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { fetchDeliveries, patchOrderStatus, cancelOrder } from "../../../../api/CarOwnerApi/CarOwnerDashboard_deliveryApi";
+import {
+  fetchDeliveries,
+  patchOrderStatus,
+  cancelOrder,
+} from "../../../../api/CarOwnerApi/CarOwnerDashboard_deliveryApi";
 import "../../../../theme/CarOwner/cardashboard.css";
 
+/** 서버와 동일한 상태 문자열 사용 */
 const STATUS = {
-  CREATED: "CREATED",     // 준비(상차 전)
-  ONGOING: "ONGOING",     // 배송중
-  COMPLETED: "COMPLETED", // 완료
-  CANCELED: "CANCELED",   // 취소
+  READY: "READY",
+  ONGOING: "ONGOING",
+  COMPLETED: "COMPLETED",
+  CANCELED: "CANCELED",
 };
 
 const labelOf = (s) =>
-  s === STATUS.CREATED ? "🚚 상차 완료" :
+  s === STATUS.READY ? "🚚 상차 완료" :
   s === STATUS.ONGOING ? "✅ 배송 완료" :
   "완료됨";
 
 const nextStatusOf = (s) =>
-  s === STATUS.CREATED ? STATUS.ONGOING :
+  s === STATUS.READY ? STATUS.ONGOING :
   s === STATUS.ONGOING ? STATUS.COMPLETED :
   STATUS.COMPLETED;
 
 const canTransit = (cur, next) =>
-  (cur === STATUS.CREATED && next === STATUS.ONGOING) ||
+  (cur === STATUS.READY && next === STATUS.ONGOING) ||
   (cur === STATUS.ONGOING && next === STATUS.COMPLETED);
 
-const canCancelStatus = (s) => s === STATUS.CREATED || s === STATUS.ONGOING;
+const canCancelStatus = (s) => s === STATUS.READY || s === STATUS.ONGOING;
 
-// (UI 보조) 간단 당일 체크. 최종 검증은 서버에서 함.
+// (UI 보조) 간단 당일 체크. 최종 검증은 서버에서 수행됨.
 const isSameDayKST = (dateStr) => {
   if (!dateStr) return false;
-  const [y, m, d] = dateStr.split(/[ T:-]/).map(Number);
+  const [y, m, d] = dateStr.split(/[ T:-]/).map(Number); // yyyy-MM-dd[ ...]
   const now = new Date();
-  const yyyy = now.getFullYear();
-  const mm = now.getMonth() + 1;
-  const dd = now.getDate();
-  return y === yyyy && m === mm && d === dd;
+  return y === now.getFullYear() && m === (now.getMonth() + 1) && d === now.getDate();
 };
 
 export default function DeliveryList() {
@@ -41,18 +43,21 @@ export default function DeliveryList() {
   const [loadingIds, setLoadingIds] = useState(new Set());
   const [initialLoading, setInitialLoading] = useState(true);
 
+  const refetch = async () => {
+    setInitialLoading(true);
+    try {
+      const data = await fetchDeliveries();
+      setRows(Array.isArray(data) ? data : []);
+    } catch (e) {
+      alert(e.message || "배송 목록을 불러오지 못했습니다.");
+    } finally {
+      setInitialLoading(false);
+      setLoadingIds(new Set());
+    }
+  };
+
   useEffect(() => {
-    (async () => {
-      try {
-        setInitialLoading(true);
-        const data = await fetchDeliveries();
-        setRows(Array.isArray(data) ? data : []);
-      } catch (e) {
-        alert(e.message || "배송 목록을 불러오지 못했습니다.");
-      } finally {
-        setInitialLoading(false);
-      }
-    })();
+    refetch();
   }, []);
 
   const hasNoData = useMemo(() => !rows || rows.length === 0, [rows]);
@@ -60,21 +65,30 @@ export default function DeliveryList() {
   const onClickProceed = async (row) => {
     const id = row.id ?? row.deliveryNum;
     if (!id) return;
+
     const next = nextStatusOf(row.status);
     if (!canTransit(row.status, next)) return;
 
     const prev = row.status;
     setLoadingIds((s) => new Set([...s, id]));
-    setRows((prevRows) => prevRows.map(r => ((r.id ?? r.deliveryNum) === id ? { ...r, status: next } : r)));
+    // optimistic update
+    setRows((prevRows) =>
+      prevRows.map((r) =>
+        (r.id ?? r.deliveryNum) === id ? { ...r, status: next } : r
+      )
+    );
 
     try {
-      const updated = await patchOrderStatus(id, next);
-      setRows((prevRows) => prevRows.map(r =>
-        ((r.id ?? r.deliveryNum) === updated.id) ? { ...r, status: updated.status } : r
-      ));
+      await patchOrderStatus(id, next);
+      await refetch(); // 서버 상태로 재동기화
     } catch (e) {
       alert(e.message || "상태 업데이트 실패");
-      setRows((prevRows) => prevRows.map(r => ((r.id ?? r.deliveryNum) === id ? { ...r, status: prev } : r)));
+      // 롤백
+      setRows((prevRows) =>
+        prevRows.map((r) =>
+          (r.id ?? r.deliveryNum) === id ? { ...r, status: prev } : r
+        )
+      );
     } finally {
       setLoadingIds((s) => {
         const c = new Set(s);
@@ -93,22 +107,29 @@ export default function DeliveryList() {
 
     const prev = row.status;
     setLoadingIds((s) => new Set([...s, id]));
-    setRows((prevRows) => prevRows.map(r => ((r.id ?? r.deliveryNum) === id ? { ...r, status: STATUS.CANCELED } : r)));
+    // optimistic update
+    setRows((prevRows) =>
+      prevRows.map((r) =>
+        (r.id ?? r.deliveryNum) === id ? { ...r, status: STATUS.CANCELED } : r
+      )
+    );
 
     try {
-      const updated = await cancelOrder(id, reason);
-      setRows((prevRows) => prevRows.map(r =>
-        ((r.id ?? r.deliveryNum) === updated.id) ? { ...r, status: updated.status } : r
-      ));
+      await cancelOrder(id, reason);
+      await refetch(); // 서버 상태로 재동기화
     } catch (e) {
       const msg = e.message || "취소 실패";
       if (msg.includes("SAME_DAY_CANCEL_NOT_ALLOWED")) {
         alert("당일 취소는 고객센터를 통해서만 가능합니다.");
-        // window.location.href = "/support";
       } else {
         alert(msg);
       }
-      setRows((prevRows) => prevRows.map(r => ((r.id ?? r.deliveryNum) === id ? { ...r, status: prev } : r)));
+      // 롤백
+      setRows((prevRows) =>
+        prevRows.map((r) =>
+          (r.id ?? r.deliveryNum) === id ? { ...r, status: prev } : r
+        )
+      );
     } finally {
       setLoadingIds((s) => {
         const c = new Set(s);
@@ -120,7 +141,12 @@ export default function DeliveryList() {
 
   return (
     <div className="delivery-box">
-      <h2>배송중인 건</h2>
+      <div className="d-flex justify-content-between align-items-center">
+        <h2>배송중인 건</h2>
+        <button className="btn btn-outline-secondary" onClick={refetch} disabled={initialLoading}>
+          새로고침
+        </button>
+      </div>
 
       <table>
         <thead>
@@ -139,7 +165,8 @@ export default function DeliveryList() {
             <tr><td colSpan="7">불러오는 중...</td></tr>
           ) : hasNoData ? (
             <tr><td colSpan="7">진행중인 배송이 없습니다.</td></tr>
-          ) : rows.map((d) => {
+          ) : (
+            rows.map((d) => {
               const id = d.id ?? d.deliveryNum;
               const busy = loadingIds.has(id);
               const isDone = d.status === STATUS.COMPLETED;
@@ -162,10 +189,10 @@ export default function DeliveryList() {
                     ) : (
                       <div className="d-flex gap-2">
                         <button
-                          className={`btn ${d.status === STATUS.CREATED ? "btn-primary" : "btn-success"}`}
+                          className={`btn ${d.status === STATUS.READY ? "btn-primary" : "btn-success"}`}
                           disabled={busy}
                           onClick={() => onClickProceed(d)}
-                          title={d.status === STATUS.CREATED ? "상차 완료로 상태 변경" : "배송 완료로 상태 변경"}
+                          title={d.status === STATUS.READY ? "상차 완료로 상태 변경" : "배송 완료로 상태 변경"}
                         >
                           {busy ? "처리 중..." : labelOf(d.status)}
                         </button>
@@ -185,7 +212,8 @@ export default function DeliveryList() {
                   </td>
                 </tr>
               );
-            })}
+            })
+          )}
         </tbody>
       </table>
     </div>

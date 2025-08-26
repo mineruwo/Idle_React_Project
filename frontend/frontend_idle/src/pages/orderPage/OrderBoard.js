@@ -105,19 +105,61 @@ const n = (v, def = 0) => {
 
 const isImmediateOf = (o) => (o?.isImmediate ?? o?.immediate) === true;
 
-/** 배정 여부 */
+/** 배정 여부(아이디 기준) */
 const isAssigned = (order, assign) =>
   Boolean(
     (assign && assign.assignedDriverId != null) ||
-      (order && order.assignedDriverId != null)
+    (order && order.assignedDriverId != null)
   );
 
-/** 한국어 상태 라벨 (배정 우선) */
+/** 카드 우측에 보이는 상태 라벨(한글) */
+const statusLabelK = (s) => {
+  const t = String(s || "").toUpperCase();
+  switch (t) {
+    case "READY":            return "대기";
+    case "CREATED":          return "대기";
+    case "PAYMENT_PENDING":  return "결제대기";
+    case "ASSIGNED":         return "배정완료";
+    case "ONGOING":          return "진행중";
+    case "COMPLETED":        return "완료";
+    case "CANCELLED":
+    case "CANCELED":         return "취소";
+    default:                 return "대기";
+  }
+};
+
+/** 상세 패널 제목 옆의 태그(우선순위 반영) */
 const statusK = (order, assign) => {
-  if (isAssigned(order, assign)) return "완료";
   const s = String(order?.status || "").toUpperCase();
-  if (s === "PAYMENT_PENDING" || s === "CREATED") return "결제대기";
+  if (s === "COMPLETED")        return "완료";
+  if (s === "PAYMENT_PENDING")  return "결제대기";
+  if (s === "ONGOING")          return "진행중";
+  const hasDriver = (assign?.assignedDriverId ?? order?.assignedDriverId) != null;
+  if (hasDriver)                return "배정완료";
   return "입찰중";
+};
+
+/** 입찰 상태 한글 매핑 (✅ 새로 추가) */
+const offerStatusLabelK = (s) => {
+  const t = String(s || "").toUpperCase();
+  switch (t) {
+    case "PENDING":   return "대기";
+    case "ACCEPTED":
+    case "CONFIRMED": return "확정";
+    case "REJECTED":  return "거절";
+    case "CANCELLED":
+    case "CANCELED":  return "취소";
+    default:          return "대기";
+  }
+};
+
+/** 입찰 가능 여부: 결제대기/완료/배정확정만 차단 */
+const canBid = (order, assign) => {
+  const orderStatus = String(order?.status || "").toUpperCase();
+  const assignStatus = String(assign?.status || "").toUpperCase();
+  const orderLocked = ["PAYMENT_PENDING", "COMPLETED"].includes(orderStatus);
+  const assignLocked = ["ASSIGNED", "CONFIRMED"].includes(assignStatus);
+  return !(orderLocked || assignLocked);
 };
 
 /* ===== 컴포넌트 ===== */
@@ -129,7 +171,7 @@ const OrderBoard = () => {
   const [selected, setSelected] = useState(null);
   const [panelOpen, setPanelOpen] = useState(false);
 
-  // 입찰/배정 (✅ 중복 선언 제거)
+  // 입찰/배정
   const [offers, setOffers] = useState([]);
   const [assignment, setAssignment] = useState({
     assignedDriverId: null,
@@ -227,7 +269,7 @@ const OrderBoard = () => {
     setBidMemo("");
   };
 
-  // ✅ 입찰 확정 (orderId 포함)
+  // 입찰 확정
   const handleAccept = async (offerId) => {
     if (!selected) return;
     try {
@@ -242,7 +284,7 @@ const OrderBoard = () => {
     }
   };
 
-  // ✅ 입찰 등록 (driverId 전송 안 함)
+  // 입찰 등록
   const handleBid = async () => {
     if (!selected) return;
     const priceNum = Number(bidPrice);
@@ -351,8 +393,7 @@ const OrderBoard = () => {
     setVehicleFilter("");
   };
 
-  /* 파생값 (우측 패널에서 재사용) */
-  const currentStatus = String(assignment?.status ?? selected?.status ?? "").toUpperCase();
+  /* 파생값 (우측 패널 재사용) */
   const confirmedPrice = assignment?.driverPrice ?? selected?.driverPrice;
   const assignedDriver = assignment?.assignedDriverId ?? selected?.assignedDriverId;
 
@@ -442,7 +483,7 @@ const OrderBoard = () => {
                     <Strong>출발</Strong> {o.departure} &nbsp;→&nbsp;
                     <Strong>도착</Strong> {o.arrival}
                   </FromTo>
-                  <RightMeta>{o.status || "READY"}</RightMeta>
+                  <RightMeta>{statusLabelK(o.status)}</RightMeta>
                 </RowBetween>
 
                 {/* 2행: 주문번호 배지 */}
@@ -514,13 +555,13 @@ const OrderBoard = () => {
           <>
             {/* ===== 배정 뱃지 헤더 ===== */}
             <BadgeRow>
-              {assignment?.assignedDriverId ? (
+              {canBid(selected, assignment) ? (
+                <BadgeGray>미배정</BadgeGray>
+              ) : (
                 <Badge>
-                  배정: Driver #{assignment.assignedDriverId} /{" "}
+                  배정: 기사 #{assignment.assignedDriverId} /{" "}
                   {Number(assignment.driverPrice ?? 0).toLocaleString()}원
                 </Badge>
-              ) : (
-                <BadgeGray>미배정</BadgeGray>
               )}
             </BadgeRow>
 
@@ -574,16 +615,18 @@ const OrderBoard = () => {
 
             <Section>
               <SectionTitle>배정된 기사</SectionTitle>
-              {isAssigned(selected, assignment) ? (
+              {!canBid(selected, assignment) ? (
                 <div>
                   <Row>
-                    <Key>Driver ID</Key>
+                    <Key>기사 ID</Key>
                     <Val>{assignedDriver}</Val>
                   </Row>
                   <Row>
                     <Key>확정가</Key>
                     <Val>
-                      {confirmedPrice != null ? `${Number(confirmedPrice).toLocaleString()} 원` : "-"}
+                      {confirmedPrice != null
+                        ? `${Number(confirmedPrice).toLocaleString()} 원`
+                        : "-"}
                     </Val>
                   </Row>
                 </div>
@@ -604,12 +647,14 @@ const OrderBoard = () => {
                   {offers.map((o) => (
                     <OfferItem key={o.id}>
                       <div>
-                        <b>{o.driverNick ? o.driverNick : `Driver #${o.driverId}`}</b> ·{" "}
+                        <b>{o.driverNick ? o.driverNick : `기사 #${o.driverId}`}</b> ·{" "}
                         {Number(o.price ?? 0).toLocaleString()}원
-                        <small style={{ marginLeft: 8, opacity: 0.7 }}>({o.status})</small>
+                        <small style={{ marginLeft: 8, opacity: 0.7 }}>
+                          ({offerStatusLabelK(o.status)})
+                        </small>
                       </div>
                       <AcceptBtn
-                        disabled={isAssigned(selected, assignment) || o.status !== "PENDING"}
+                        disabled={!canBid(selected, assignment) || o.status !== "PENDING"}
                         onClick={() => handleAccept(o.id)}
                       >
                         입찰 확정
@@ -620,7 +665,7 @@ const OrderBoard = () => {
               )}
 
               {/* 입찰 등록 */}
-              {!isAssigned(selected, assignment) && (
+              {canBid(selected, assignment) && (
                 <div
                   style={{
                     marginTop: 10,
@@ -675,15 +720,24 @@ const OrderBoard = () => {
               <Row>
                 <Key>화주 제안가</Key>
                 <Val>
-                  {selected.proposedPrice ? `${Number(selected.proposedPrice).toLocaleString()} 원` : "-"}
+                  {selected.proposedPrice
+                    ? `${Number(selected.proposedPrice).toLocaleString()} 원`
+                    : "-"}
                 </Val>
               </Row>
               <Row>
                 <Key>평균가</Key>
-                <Val>{selected.avgPrice ? `${Number(selected.avgPrice).toLocaleString()} 원` : "-"}</Val>
+                <Val>
+                  {selected.avgPrice
+                    ? `${Number(selected.avgPrice).toLocaleString()} 원`
+                    : "-"}
+                </Val>
               </Row>
               <RightHint>
-                예상 거리 {selected.distance != null ? `${Number(selected.distance).toFixed(2)}km` : "-"}
+                예상 거리{" "}
+                {selected.distance != null
+                  ? `${Number(selected.distance).toFixed(2)}km`
+                  : "-"}
               </RightHint>
             </Section>
 
@@ -723,7 +777,6 @@ const PINK = {
   backBgHover: "#ffd9ea",
 };
 
-/* ... 이하 스타일은 네 코드 그대로 (변경 없음) ... */
 const PageWrap = styled.div`
   display: grid;
   grid-template-columns: 1fr 520px;
@@ -758,7 +811,6 @@ const Header = styled.h1`
   color: ${PINK.header};
 `;
 
-/* (생략된 스타일 전부 유지 — 너가 준 블록 그대로) */
 const FilterBar = styled.div`
   display: grid;
   grid-template-columns: 1fr 160px 160px auto;
@@ -769,8 +821,6 @@ const FilterBar = styled.div`
     grid-template-columns: 1fr;
   }
 `;
-
-/* ... 동일: SearchInput, SelectBox, ResetBtn, ControlsRow, SortGroup, PageSizeGroup ... */
 
 const SearchInput = styled.input`
   height: 42px;
@@ -873,7 +923,6 @@ const Card = styled.div`
   }
 `;
 
-/* ... 나머지 스타일 그대로 ... */
 const RowBetween = styled.div`
   display: flex;
   justify-content: space-between;

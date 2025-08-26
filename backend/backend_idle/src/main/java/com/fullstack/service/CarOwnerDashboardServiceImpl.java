@@ -19,19 +19,18 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-@Service
 @RequiredArgsConstructor
 @Log4j2
+@Service
 public class CarOwnerDashboardServiceImpl implements CarOwnerDashboardService {
 
-    private final OrderRepository orderRepository;                         // ✅ 변경
-    private final CarOwnerDashboardPaymentRepository paymentRepo;          // 매출은 기존 그대로 (customer.id 기준)
+    private final OrderRepository orderRepository;
     private final CustomerRepository customerRepository;
+    
 
     private static final DateTimeFormatter DF = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final int DEFAULT_COMMISSION_RATE = 10; // %
 
-    /** 로그인 이메일 -> 기사키(assignedDriverId로 쓰일 idNum Long) */
     private Long resolveDriverKey(String ownerId) {
         return customerRepository.findByLoginId(ownerId)
                 .map(c -> c.getIdNum() == null ? null : c.getIdNum().longValue())
@@ -40,24 +39,26 @@ public class CarOwnerDashboardServiceImpl implements CarOwnerDashboardService {
 
     @Transactional(readOnly = true)
     @Override
-    public DashboardSummaryDTO getSummary(String ownerId) {
+    public DashboardSummaryDTO getSummary(String ownerId, String period) {
         Long driverKey = resolveDriverKey(ownerId);
-        log.info("[DASH] ownerId={}, driverKey={}", ownerId, driverKey);
-        long completed  = driverKey == null ? 0 : orderRepository.countByAssignedDriverIdAndStatus(driverKey, OrderStatus.COMPLETED);
-        long inProgress = driverKey == null ? 0 : orderRepository.countByAssignedDriverIdAndStatus(driverKey, OrderStatus.ONGOING);
-        long scheduled  = driverKey == null ? 0 : orderRepository.countByAssignedDriverIdAndStatus(driverKey, OrderStatus.CREATED);
+        
+        DateRange dr = resolveRange(period);
+        LocalDateTime start = dr.startDate.atStartOfDay();
+        LocalDateTime end   = dr.endDate.atTime(LocalTime.MAX);
+
+        long completed  = driverKey == null ? 0 : orderRepository.countByAssignedDriverIdAndStatus(driverKey, "COMPLETED");
+        long inProgress = driverKey == null ? 0 : orderRepository.countByAssignedDriverIdAndStatus(driverKey, "ONGOING");
+        long scheduled  = driverKey == null ? 0 : orderRepository.countByAssignedDriverIdAndStatus(driverKey, "READY");
         long total      = completed + inProgress + scheduled;
 
-        // 닉네임 표시
-        String displayName = customerRepository.findNicknameByOwnerId(ownerId).orElse(ownerId);
+        // ✅ 이번달 매출: Order 기준(완료건의 driverPrice/proposedPrice 합)
+        long revenue = (driverKey == null) ? 0L
+                : Optional.ofNullable(orderRepository.sumRevenueByDriverBetween(driverKey, start, end)).orElse(0L);
 
-        // 매출(결제)은 기존처럼 ownerId(=customer.id, 이메일) 기준
-        LocalDate today = LocalDate.now();
-        LocalDateTime start = today.withDayOfMonth(1).atStartOfDay();
-        LocalDateTime end   = today.withDayOfMonth(today.lengthOfMonth()).atTime(LocalTime.MAX);
-        long revenue = Optional.ofNullable(paymentRepo.sumMonthlyRevenue(ownerId, start, end)).orElse(0L);
         int commissionRate = DEFAULT_COMMISSION_RATE;
         long settlement = Math.round(revenue * (100 - commissionRate) / 100.0);
+
+        String displayName = customerRepository.findNicknameByOwnerId(ownerId).orElse(ownerId);
 
         return DashboardSummaryDTO.builder()
                 .name(displayName)
@@ -66,7 +67,7 @@ public class CarOwnerDashboardServiceImpl implements CarOwnerDashboardService {
                 .inProgress((int) inProgress)
                 .scheduled((int) scheduled)
                 .total((int) total)
-                .revenue(revenue)
+                .revenue(revenue)          // ✅ 이제 Order 기반 금액이 채워짐
                 .commission(commissionRate)
                 .settlement(settlement)
                 .build();
@@ -75,31 +76,33 @@ public class CarOwnerDashboardServiceImpl implements CarOwnerDashboardService {
     @Transactional(readOnly = true)
     @Override
     public List<SalesChartDTO> getSalesChart(String ownerId) {
-        // 매출 라인은 기존 결제기반 그대로 사용 (필요 시 Order기반 운송건수로 보강 가능)
+        Long driverKey = resolveDriverKey(ownerId);
+
         LocalDate today = LocalDate.now();
         LocalDate first = today.withDayOfMonth(1);
         LocalDate last  = today.withDayOfMonth(today.lengthOfMonth());
         LocalDateTime start = first.atStartOfDay();
         LocalDateTime end   = last.atTime(LocalTime.MAX);
 
+        // ✅ 일자별 매출: Order 기반
         Map<String, Long> salesMap = new LinkedHashMap<>();
-        paymentRepo.sumDailyRevenue(ownerId, start, end).forEach(row -> {
-            String day = (String) row[0];
-            Long sum   = (Long)   row[1];
-            salesMap.put(day, sum == null ? 0L : sum);
-        });
+        if (driverKey != null) {
+            orderRepository.sumDailyRevenueByDriverBetween(driverKey, start, end).forEach(row -> {
+                String day = (String) row[0]; // "YYYY-MM-DD"
+                Long sum   = (Long)   row[1];
+                salesMap.put(day, sum == null ? 0L : sum);
+            });
+        }
 
-        // 운송건수는 간단히 0으로 채우거나, Order 기반 일집계 쿼리 추가해서 채우세요.
+        // 일자 채우기
         List<SalesChartDTO> out = new ArrayList<>();
-        LocalDate d = first;
-        while (!d.isAfter(last)) {
-            String key = DF.format(d);
+        for (LocalDate d = first; !d.isAfter(last); d = d.plusDays(1)) {
+            String key = d.format(DF);
             out.add(SalesChartDTO.builder()
                     .day(key)
                     .sales(salesMap.getOrDefault(key, 0L))
-                    .deliveries(0) // 필요시 OrderRepository에 daily count 쿼리 추가하여 채우기
+                    .deliveries(0) // 필요하면 일자별 운송건수 쿼리 추가
                     .build());
-            d = d.plusDays(1);
         }
         return out;
     }
@@ -120,6 +123,8 @@ public class CarOwnerDashboardServiceImpl implements CarOwnerDashboardService {
         Long driverKey = resolveDriverKey(ownerId);
         if (driverKey == null) return List.of();
 
+        List<String> statuses = List.of("READY", "ONGOING");
+
         return orderRepository
                 .findTop5ByAssignedDriverIdAndStatusOrderByUpdatedAtDesc(driverKey, OrderStatus.ONGOING) // Changed status literal
                 .stream()
@@ -134,4 +139,30 @@ public class CarOwnerDashboardServiceImpl implements CarOwnerDashboardService {
                         .build())
                 .toList();
     }
+    private static class DateRange {
+        final LocalDate startDate;
+        final LocalDate endDate;
+        DateRange(LocalDate s, LocalDate e) { this.startDate = s; this.endDate = e; }
+    }
+
+    private DateRange resolveRange(String period) {
+        LocalDate today = LocalDate.now();
+        switch ((period == null ? "month" : period).toLowerCase()) {
+            case "week":   // 이번 주 (월~일)
+                LocalDate monday = today.with(java.time.DayOfWeek.MONDAY);
+                LocalDate sunday = monday.plusDays(6);
+                return new DateRange(monday, sunday);
+
+            case "last7":  // 최근 7일 (오늘 포함)
+                return new DateRange(today.minusDays(6), today);
+
+            case "last30": // 최근 30일
+                return new DateRange(today.minusDays(29), today);
+
+            case "month":
+            default:       // 이번 달 (1일~말일)
+                LocalDate first = today.withDayOfMonth(1);
+                LocalDate last  = today.withDayOfMonth(today.lengthOfMonth());
+                return new DateRange(first, last);
+        }
 }
