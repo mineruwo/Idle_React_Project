@@ -433,4 +433,120 @@ body {
   min-width: 300px; /* Ensure minimum width */
 }
 
+/* Inquiry Detail Specific Styles */
+.inquiry-detail-card {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.detail-label {
+    font-weight: 700;
+    color: var(--admin-pink-strong);
+    font-size: 15px;
+    margin-bottom: 0;
+}
+
+.detail-value {
+    color: var(--admin-pink-text);
+    font-size: 15px;
+    margin-bottom: 0;
+    line-height: 1.6;
+}
+
+.detail-content {
+    padding: 12px;
+    background-color: var(--admin-pink-bg);
+    border: 1px solid var(--admin-pink-panel-border);
+    border-radius: 8px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--admin-pink-text);
+}
+
+.admin-textarea {
+    min-height: 150px;
+    padding: 12px;
+    border: 1px solid var(--admin-pink-panel-border);
+    border-radius: 8px;
+    font-size: 15px;
+    color: var(--admin-pink-text);
+    background-color: var(--admin-pink-bg);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+.admin-textarea:focus {
+    outline: none;
+    border-color: var(--admin-pink-strong);
+    box-shadow: 0 0 0 3px var(--admin-pink-back-bg);
+}
+
+.admin-button-secondary {
+    padding: 8px 16px;
+    background-color: transparent;
+    color: var(--admin-pink-strong);
+    border: 1px solid var(--admin-pink-strong);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.admin-button-secondary:hover {
+    background-color: var(--admin-pink-back-bg);
+    color: var(--admin-pink-header);
+    border-color: var(--admin-pink-header);
+}
+
+.admin-button-primary {
+    padding: 10px 20px;
+    background-color: var(--admin-pink-strong);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 700;
+    transition: background-color 0.3s ease;
+}
+
+.admin-button-primary:hover {
+    background-color: var(--admin-pink-header);
+}
+
+.recent-inquiries-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.recent-inquiry-item {
+    background-color: var(--admin-pink-bg);
+    border: 1px solid var(--admin-pink-panel-border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: var(--admin-pink-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.recent-inquiry-item:last-child {
+    margin-bottom: 0;
+}
+
 

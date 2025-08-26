@@ -21,7 +21,7 @@ public class InquiryDTO {
     private String inquiryAnswer;
     private LocalDateTime createdAt;
     private LocalDateTime answeredAt;
-    private Long adminIdIndex;
+    
     private String adminId;
     private InquiryStatus status;
     private UUID reInquiryId;

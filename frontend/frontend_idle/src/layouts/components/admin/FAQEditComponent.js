@@ -1,54 +1,57 @@
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
-import ReactQuill from 'react-quill'; // Import ReactQuill
-import 'react-quill/dist/quill.snow.css'; // Import Quill's CSS
-import { createFAQ } from '../../../api/adminApi';
-import Modal from '../common/Modal';
-import '../../../theme/admin.css';
-import { useNavigate } from 'react-router-dom';
 
-const FAQCreateComponent = () => {
+import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { useParams, useNavigate } from 'react-router-dom';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import { getFaqForEdit, updateFAQ } from '../../../api/adminApi';
+import '../../../theme/admin.css';
+
+const FAQEditComponent = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
-  const { id: writerAdminId } = useSelector(state => state.adminLogin);
-  const navigate = useNavigate();
+  const adminId = useSelector(state => state.adminLogin.id);
+  const [writerAdminId, setWriterAdminId] = useState('');
 
-  const [modalState, setModalState] = useState({ show: false, message: "" });
-
-  const showModal = (message) => {
-    setModalState({ show: true, message });
-  };
-
-  const closeModal = () => {
-    setModalState({ ...modalState, show: false });
-  };
+  useEffect(() => {
+    const fetchFaq = async () => {
+      try {
+        const faq = await getFaqForEdit(id);
+        setQuestion(faq.question);
+        setAnswer(faq.answer);
+        setWriterAdminId(faq.writerAdminId);
+      } catch (error) {
+        console.error('Error fetching FAQ:', error);
+        alert('FAQ 정보를 가져오는데 실패했습니다.');
+      }
+    };
+    fetchFaq();
+  }, [id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const newFAQ = {
+    const updatedFAQ = {
       question,
       answer,
-      writerAdminId,
+      writerAdminId: adminId, // 수정자는 현재 로그인한 관리자
     };
 
     try {
-      await createFAQ(newFAQ);
-      showModal('FAQ가 성공적으로 등록되었습니다.');
-      setQuestion('');
-      setAnswer('');
-      // navigate('/admin/faqs'); // Navigate after user closes modal
+      await updateFAQ(id, updatedFAQ);
+      alert('FAQ가 성공적으로 수정되었습니다.');
+      navigate('/admin/faqs');
     } catch (error) {
-      console.error('Error creating FAQ:', error);
-      const errorMessage = error.response ? error.response.data : error.message;
-      showModal(`FAQ 등록에 실패했습니다: ${errorMessage}`);
+      console.error('Error updating FAQ:', error);
+      alert('FAQ 수정에 실패했습니다.');
     }
   };
 
   return (
     <div className="admin-container">
-        <Modal show={modalState.show} message={modalState.message} onClose={closeModal} />
         <div className="admin-header">
-            <h2>새 FAQ 작성</h2>
+            <h2>FAQ 수정</h2>
         </div>
         <form onSubmit={handleSubmit} className="admin-form-container">
             <div className="admin-form-group">
@@ -64,9 +67,9 @@ const FAQCreateComponent = () => {
             <div className="admin-form-group">
                 <label htmlFor="answer">답변:</label>
                 <ReactQuill
-                    theme="snow" // Use 'snow' theme for a clean look
+                    theme="snow"
                     value={answer}
-                    onChange={setAnswer} // ReactQuill's onChange provides the HTML string directly
+                    onChange={setAnswer}
                     placeholder="답변 내용을 입력하세요..."
                     modules={{
                         toolbar: [
@@ -84,7 +87,7 @@ const FAQCreateComponent = () => {
                         'list', 'bullet', 'indent',
                         'link', 'image'
                     ]}
-                    className="admin-quill-editor" // Add a class for styling if needed
+                    className="admin-quill-editor"
                 />
             </div>
             <div className="admin-form-group">
@@ -97,10 +100,10 @@ const FAQCreateComponent = () => {
                     required
                 />
             </div>
-            <button type="submit" className="admin-primary-btn">FAQ 등록</button>
+            <button type="submit" className="admin-primary-btn">FAQ 수정</button>
         </form>
     </div>
   );
 };
 
-export default FAQCreateComponent;
+export default FAQEditComponent;

@@ -3,6 +3,7 @@ package com.fullstack.service;
 import com.fullstack.model.InquiryDTO;
 import com.fullstack.model.Inquiry;
 import com.fullstack.model.DailyAnswerCountDTO;
+import com.fullstack.model.InquiryStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -12,14 +13,17 @@ import java.util.UUID;
 public interface InquiryService {
     InquiryDTO createInquiry(InquiryDTO inquiryDTO);
     InquiryDTO getInquiryById(UUID id);
-    Page<InquiryDTO> getAllInquiries(Pageable pageable);
+    Page<InquiryDTO> getAllInquiries(Pageable pageable, InquiryStatus status, String searchQuery);
     InquiryDTO updateInquiry(UUID id, InquiryDTO inquiryDTO);
     void deleteInquiry(UUID id);
     Page<InquiryDTO> getInquiriesByCustomerId(Long customerId, Pageable pageable);
-    Page<InquiryDTO> getInquiriesByAdminId(Long adminId, Pageable pageable);
+    Page<InquiryDTO> getInquiriesByAdminId(String adminId, Pageable pageable);
+
+    List<InquiryDTO> getRecentInquiriesByCustomerId(Long customerId);
 
     List<DailyAnswerCountDTO> getDailyAnswerCounts(int year, int month);
-    List<InquiryDTO> getInquiryDetailsByFilter(String filter);
+    List<DailyAnswerCountDTO> getDailyInquiryCounts(int year, int month);
+    List<InquiryDTO> getInquiryDetailsByFilter(String filter, String adminId);
 
     default Inquiry dtoToEntity(InquiryDTO dto) {
         return Inquiry.builder()
@@ -30,7 +34,7 @@ public interface InquiryService {
                 .inquiryAnswer(dto.getInquiryAnswer())
                 .createdAt(dto.getCreatedAt())
                 .answeredAt(dto.getAnsweredAt())
-                .adminIdIndex(dto.getAdminIdIndex())
+                
                 .adminId(dto.getAdminId())
                 .status(dto.getStatus())
                 .reInquiryId(dto.getReInquiryId())
@@ -46,7 +50,7 @@ public interface InquiryService {
                 .inquiryAnswer(entity.getInquiryAnswer())
                 .createdAt(entity.getCreatedAt())
                 .answeredAt(entity.getAnsweredAt())
-                .adminIdIndex(entity.getAdminIdIndex())
+                
                 .adminId(entity.getAdminId())
                 .status(entity.getStatus())
                 .reInquiryId(entity.getReInquiryId())

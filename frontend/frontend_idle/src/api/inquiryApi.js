@@ -28,10 +28,25 @@ export const getInquiriesByCustomerId = async (customerId) => {
 };
 
 /**
+ * 📋 고객 ID로 최근 문의 목록 조회 (인증)
+ */
+export const getRecentInquiriesByCustomerId = async (customerId) => {
+    const { data } = await authClient.get(`/inquiries/customer/${customerId}/recent`);
+    return data;
+};
+
+/**
  * 📋 모든 문의 목록 조회 (인증)
  */
-export const getAllInquiries = async (pageable) => {
-    const { data } = await authClient.get("/inquiries", { params: pageable });
+export const getAllInquiries = async (page = 0, size = 10, status = '', searchQuery = '') => {
+    const params = { page, size };
+    if (status) {
+        params.status = status;
+    }
+    if (searchQuery) {
+        params.searchQuery = searchQuery;
+    }
+    const { data } = await authClient.get("/inquiries", { params });
     return data;
 };
 

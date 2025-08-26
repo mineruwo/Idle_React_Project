@@ -32,6 +32,7 @@ const MyInquiriesComponent = () => {
     const [dailyAnswerData, setDailyAnswerData] = useState({
         labels: [],
         datasets: [],
+        yAxisMax: 10, // Initial max value
     });
     const [inquiryTableData, setInquiryTableData] = useState([]);
     const [selectedYear, setSelectedYear] = useState(currentYear);
@@ -42,13 +43,25 @@ const MyInquiriesComponent = () => {
     const fetchDailyAnswerData = async (year, month) => {
         try {
             const response = await axios.get(`/api/admin/inquiries/daily-answers?year=${year}&month=${month}`);
-            const data = response.data;
+            const backendData = response.data; // Renamed to avoid conflict
 
-            const labels = data.map(item => item.date);
-            const counts = data.map(item => item.count);
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const allDates = Array.from({ length: daysInMonth }, (_, i) => {
+                const day = i + 1;
+                return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            });
+
+            const dataMap = new Map();
+            backendData.forEach(item => {
+                dataMap.set(item.date, item.count);
+            });
+
+            const counts = allDates.map(date => dataMap.get(date) || 0);
+
+            const maxCount = Math.max(...counts, 10); // Calculate max, ensure at least 10
 
             setDailyAnswerData({
-                labels: labels,
+                labels: allDates,
                 datasets: [
                     {
                         label: '일일 답변 수',
@@ -58,10 +71,29 @@ const MyInquiriesComponent = () => {
                         tension: 0.1,
                     },
                 ],
+                yAxisMax: maxCount // Store max for dynamic options
             });
         } catch (error) {
             console.error('Error fetching daily answer data:', error);
-            setDailyAnswerData({ labels: [], datasets: [] }); // Clear data on error
+            // Even on error, try to render a zero-filled graph for the selected month
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const allDates = Array.from({ length: daysInMonth }, (_, i) => {
+                const day = i + 1;
+                return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            });
+            setDailyAnswerData({
+                labels: allDates,
+                datasets: [
+                    {
+                        label: '일일 답변 수',
+                        data: allDates.map(() => 0), // All zeros on error
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        tension: 0.1,
+                    },
+                ],
+                yAxisMax: 10 // Default max on error
+            });
         }
     };
 
@@ -87,11 +119,11 @@ const MyInquiriesComponent = () => {
     }, [selectedFilter]);
 
     const myInquiriesColumns = [
-        { header: '상담 번호', key: 'id', sortable: true, render: (item) => item.id },
-        { header: '제목', key: 'title', sortable: true, render: (item) => item.title },
+        { header: '상담 번호', key: 'inquiryId', sortable: true, render: (item) => item.inquiryId },
+        { header: '제목', key: 'inquiryTitle', sortable: true, render: (item) => item.inquiryTitle },
         { header: '상태', key: 'status', sortable: true, render: (item) => item.status },
-        { header: '배정일', key: 'assignedDate', sortable: true, render: (item) => item.assignedDate },
-        { header: '답변 내용', key: 'answerContent', sortable: false, render: (item) => item.answerContent || 'N/A' },
+        { header: '생성일', key: 'createdAt', sortable: true, render: (item) => item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'N/A' },
+        { header: '답변 내용', key: 'inquiryAnswer', sortable: false, render: (item) => item.inquiryAnswer || 'N/A' },
     ];
 
     const chartOptions = {
@@ -105,6 +137,20 @@ const MyInquiriesComponent = () => {
                 text: '월별 일일 답변 추이',
             },
         },
+        scales: { // Add this scales configuration
+            y: {
+                beginAtZero: true, // Ensure the Y-axis starts at 0
+                ticks: {
+                    precision: 0, // Ensure only integer ticks
+                    callback: function(value) {
+                        if (value % 1 === 0) { // Only show integer labels
+                            return value;
+                        }
+                        return null; // Hide non-integer labels
+                    }
+                }
+            }
+        }
     };
 
     const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i); // Current year +/- 2
@@ -143,7 +189,16 @@ const MyInquiriesComponent = () => {
                 </div>
                 <div className="chart-container">
                     {dailyAnswerData.labels.length > 0 ? (
-                        <Line data={dailyAnswerData} options={chartOptions} />
+                        <Line data={dailyAnswerData} options={{
+                            ...chartOptions, // Spread existing options
+                            scales: {
+                                ...chartOptions.scales, // Spread existing scales
+                                y: {
+                                    ...chartOptions.scales.y, // Spread existing y-axis options
+                                    max: dailyAnswerData.yAxisMax, // Set dynamic max
+                                },
+                            },
+                        }} />
                     ) : (
                         <p>데이터를 불러오는 중이거나 표시할 데이터가 없습니다.</p>
                     )}

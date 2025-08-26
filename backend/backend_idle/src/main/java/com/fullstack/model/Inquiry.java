@@ -49,8 +49,7 @@ public class Inquiry {
     @Column(name = "answered_at")
     private LocalDateTime answeredAt;
 
-    @Column(name = "admin_id_index")
-    private Long adminIdIndex;
+    
 
     @Column(name = "admin_id", length = 255)
     private String adminId;

@@ -1,154 +1,156 @@
-/* Modal Container */
-.modal-chat-session {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 350px;
-    height: 500px;
-    background-color: white;
-    z-index: 1000;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
-    transition: all 0.3s ease-in-out; /* Add transition for smooth resizing */
+/* ModalChatSession.css */
+
+:root {
+  --modal-bg: #fff;
+  --modal-border-radius: 8px;
+  --modal-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  --header-bg: #f0f2f5;
+  --header-text-color: #333;
+  --header-padding: 15px;
+  --header-border-bottom: 1px solid #eee;
+
+  --message-container-bg: #f9f9f9;
+  --message-container-border: 1px solid #eee;
+  --message-container-padding: 10px;
+  --message-container-height: 400px;
+
+  --sent-bubble-bg: #e6f7ff; /* Light blue */
+  --received-bubble-bg: #f0f0f0; /* Light grey */
+  --bubble-text-color: #333;
+  --bubble-border-radius: 15px;
+  --bubble-padding: 8px 12px;
+  --bubble-max-width: 70%;
+
+  --input-area-border-top: 1px solid #eee;
+  --input-area-padding: 10px;
+  --input-bg: #fff;
+  --input-border: 1px solid #d9d9d9;
+  --input-border-radius: 4px;
+  --input-padding: 8px 12px;
+
+  --button-bg: #1890ff; /* Ant Design primary blue */
+  --button-text-color: #fff;
+  --button-border-radius: 4px;
+  --button-padding: 8px 15px;
 }
 
-/* Header */
+.modal-chat-session {
+  position: fixed;
+  bottom: 20px; /* Distance from bottom */
+  right: 20px;  /* Distance from right */
+  width: 600px; /* Adjust as needed */
+  background-color: var(--modal-bg);
+  border-radius: var(--modal-border-radius);
+  box-shadow: var(--modal-box-shadow);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000; /* Ensure it's on top */
+}
+
 .modal-chat-header {
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--header-padding);
+  background-color: var(--header-bg);
+  border-bottom: var(--header-border-bottom);
+  border-top-left-radius: var(--modal-border-radius);
+  border-top-right-radius: var(--modal-border-radius);
 }
 
 .modal-chat-header h5 {
-    margin: 0;
+  margin: 0;
+  color: var(--header-text-color);
 }
 
-.modal-chat-header .close-button {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+  color: var(--header-text-color);
 }
 
-/* Message Area */
 .message-container {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: var(--message-container-padding);
+  background-color: var(--message-container-bg);
+  height: var(--message-container-height); /* Fixed height for scroll */
 }
 
 .message-row {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    margin-bottom: 10px;
+  display: flex;
+  margin-bottom: 10px;
 }
 
 .message-row.sent {
-    align-items: flex-end;
+  justify-content: flex-end;
 }
 
 .message-row.received {
-    align-items: flex-start;
+  justify-content: flex-start;
 }
 
 .message-sender {
-    font-size: 0.8rem;
-    color: #888;
-    margin-bottom: 2px;
+  font-size: 0.8em;
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.message-row.sent .message-sender {
+  text-align: right;
+}
+
+.message-row.received .message-sender {
+  text-align: left;
 }
 
 .message-bubble {
-    border-radius: 20px;
-    padding: 8px 15px;
-    max-width: 70%;
-    word-break: break-word;
-    overflow-wrap: break-word;
+  padding: var(--bubble-padding);
+  border-radius: var(--bubble-border-radius);
+  max-width: var(--bubble-max-width);
+  word-wrap: break-word;
+  color: var(--bubble-text-color);
 }
 
-.message-bubble.sent {
-    background-color: #007bff;
-    color: white;
+.message-row.sent .message-bubble {
+  background-color: var(--sent-bubble-bg);
 }
 
-.message-bubble.received {
-    background-color: #e9e9eb;
-    color: black;
+.message-row.received .message-bubble {
+  background-color: var(--received-bubble-bg);
 }
 
-/* Input Area */
 .input-area {
-    display: flex;
-    padding: 10px;
-    border-top: 1px solid #ccc;
+  display: flex;
+  padding: var(--input-area-padding);
+  border-top: var(--input-area-border-top);
+  background-color: var(--input-bg);
+  border-bottom-left-radius: var(--modal-border-radius);
+  border-bottom-right-radius: var(--modal-border-radius);
 }
 
-.input-area input {
-    flex-grow: 1;
-    border: 1px solid #ccc;
-    border-radius: 20px;
-    padding: 8px 15px;
-    margin-right: 10px;
+.input-area input[type="text"] {
+  flex-grow: 1;
+  padding: var(--input-padding);
+  border: var(--input-border);
+  border-radius: var(--input-border-radius);
+  margin-right: 10px;
+  font-size: 1em;
 }
 
 .input-area button {
-    padding: 8px 15px;
-    border-radius: 20px;
-    border: none;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
+  background-color: var(--button-bg);
+  color: var(--button-text-color);
+  border: none;
+  border-radius: var(--button-border-radius);
+  padding: var(--button-padding);
+  cursor: pointer;
+  font-size: 1em;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .modal-chat-session {
-        width: 90vw; /* Use viewport width */
-        height: 80vh; /* Use viewport height */
-        bottom: 5vh; /* Adjust position */
-        right: 5vw;
-        left: 5vw; /* Center horizontally */
-        margin: auto;
-        max-width: 400px; /* Limit max width even on smaller screens */
-        max-height: 600px; /* Limit max height */
-    }
-    .message-bubble {
-        max-width: 85%; /* Allow messages to take more width */
-    }
-    .input-area input, .input-area button {
-        padding: 6px 12px;
-        font-size: 0.9em;
-    }
-}
-
-@media (max-width: 480px) {
-    .modal-chat-session {
-        width: 95vw;
-        height: 90vh;
-        bottom: 2.5vh;
-        right: 2.5vw;
-        left: 2.5vw;
-        border-radius: 5px;
-    }
-    .modal-chat-header, .input-area {
-        padding: 8px;
-    }
-    .message-container {
-        padding: 8px;
-    }
-    .message-bubble {
-        padding: 6px 10px;
-        font-size: 0.85em;
-    }
-    .message-sender {
-        font-size: 0.75rem;
-    }
+.input-area button:hover {
+  opacity: 0.9;
 }

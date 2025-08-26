@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.LocalDate;
-import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,8 +43,8 @@ public class InquiryServiceImpl implements InquiryService {
     }
 
     @Override
-    public Page<InquiryDTO> getAllInquiries(Pageable pageable) {
-        return inquiryRepository.findAll(pageable)
+    public Page<InquiryDTO> getAllInquiries(Pageable pageable, InquiryStatus status, String searchQuery) {
+        return inquiryRepository.findAllInquiriesByStatusAndSearchQuery(status, searchQuery, pageable)
                 .map(this::entityToDto);
     }
 
@@ -57,7 +56,7 @@ public class InquiryServiceImpl implements InquiryService {
                     existingInquiry.setInquiryContent(inquiryDTO.getInquiryContent());
                     existingInquiry.setInquiryAnswer(inquiryDTO.getInquiryAnswer());
                     existingInquiry.setAnsweredAt(inquiryDTO.getAnsweredAt());
-                    existingInquiry.setAdminIdIndex(inquiryDTO.getAdminIdIndex());
+                    
                     existingInquiry.setAdminId(inquiryDTO.getAdminId());
                     existingInquiry.setStatus(inquiryDTO.getStatus());
                     existingInquiry.setReInquiryId(inquiryDTO.getReInquiryId());
@@ -78,92 +77,64 @@ public class InquiryServiceImpl implements InquiryService {
     }
 
     @Override
-    public Page<InquiryDTO> getInquiriesByAdminId(Long adminId, Pageable pageable) {
-        // Assuming InquiryRepository has a method findByAdminIdIndex
-        return inquiryRepository.findByAdminIdIndex(adminId, pageable)
+    public Page<InquiryDTO> getInquiriesByAdminId(String adminId, Pageable pageable) {
+        // Assuming InquiryRepository has a method findByAdminId
+        return inquiryRepository.findByAdminId(adminId, pageable)
                 .map(this::entityToDto);
     }
 
     @Override
     public List<DailyAnswerCountDTO> getDailyAnswerCounts(int year, int month) {
-        // In a real scenario, this would query the database
-        // For now, return mock data
-        List<DailyAnswerCountDTO> mockData = new ArrayList<>();
-        YearMonth yearMonth = YearMonth.of(year, month);
-        int daysInMonth = yearMonth.lengthOfMonth();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-        for (int i = 1; i <= daysInMonth; i++) {
-            LocalDate date = yearMonth.atDay(i);
-            // Simulate some counts
-            int count = (int) (Math.random() * 10); // Random count between 0 and 9
-            mockData.add(new DailyAnswerCountDTO(date.format(formatter), count));
+        List<Object[]> results = inquiryRepository.countDailyAnsweredInquiriesByMonth(year, month);
+        List<DailyAnswerCountDTO> dailyCounts = new ArrayList<>();
+        for (Object[] result : results) {
+            String date = (String) result[0];
+            Long count = (Long) result[1];
+            dailyCounts.add(new DailyAnswerCountDTO(date, count.intValue()));
         }
-        return mockData;
+        return dailyCounts;
     }
 
     @Override
-    public List<InquiryDTO> getInquiryDetailsByFilter(String filter) {
-        // In a real scenario, this would query the database
-        // For now, return mock data
-        List<InquiryDTO> mockInquiries = new ArrayList<>();
-        // Add some mock inquiries based on filter
-        // Using the actual InquiryDTO fields
-        mockInquiries.add(InquiryDTO.builder()
-                .inquiryId(UUID.randomUUID())
-                .inquiryTitle("상품 문의")
-                .status(InquiryStatus.INQUIRY_PENDING)
-                .createdAt(LocalDateTime.now().minusDays(5))
-                .inquiryAnswer("")
-                .build());
-        mockInquiries.add(InquiryDTO.builder()
-                .inquiryId(UUID.randomUUID())
-                .inquiryTitle("배송 문의")
-                .status(InquiryStatus.ANSWERED)
-                .createdAt(LocalDateTime.now().minusDays(2))
-                .inquiryAnswer("배송은 3일 이내 완료됩니다.")
-                .build());
-        mockInquiries.add(InquiryDTO.builder()
-                .inquiryId(UUID.randomUUID())
-                .inquiryTitle("환불 문의")
-                .status(InquiryStatus.IN_PROGRESS)
-                .createdAt(LocalDateTime.now().minusDays(1))
-                .inquiryAnswer("")
-                .build());
-        mockInquiries.add(InquiryDTO.builder()
-                .inquiryId(UUID.randomUUID())
-                .inquiryTitle("기술 지원")
-                .status(InquiryStatus.ANSWERED)
-                .createdAt(LocalDateTime.now())
-                .inquiryAnswer("기술 지원 답변입니다.")
-                .build());
-
-        // Filter logic (very basic, needs proper date handling)
-        if ("day".equals(filter)) {
-            return mockInquiries.stream()
-                    .filter(inq -> inq.getCreatedAt().toLocalDate().isEqual(LocalDate.now()))
-                    .collect(Collectors.toList());
-        } else if ("week".equals(filter)) {
-            // Example: last 7 days
-            LocalDate sevenDaysAgo = LocalDate.now().minusDays(7);
-            return mockInquiries.stream()
-                    .filter(inq -> inq.getCreatedAt().toLocalDate().isAfter(sevenDaysAgo) || inq.getCreatedAt().toLocalDate().isEqual(sevenDaysAgo))
-                    .collect(Collectors.toList());
-        } else if ("month".equals(filter)) {
-            // Example: current month
-            YearMonth currentMonth = YearMonth.now();
-            return mockInquiries.stream()
-                    .filter(inq -> YearMonth.from(inq.getCreatedAt()).equals(currentMonth))
-                    .collect(Collectors.toList());
-        } else if ("year".equals(filter)) {
-            // Example: current year
-            int currentYear = LocalDate.now().getYear();
-            return mockInquiries.stream()
-                    .filter(inq -> inq.getCreatedAt().getYear() == currentYear)
-                    .collect(Collectors.toList());
-        } else if ("all".equals(filter)) {
-            return mockInquiries;
+    public List<DailyAnswerCountDTO> getDailyInquiryCounts(int year, int month) {
+        List<Object[]> results = inquiryRepository.countDailyCreatedInquiriesByMonth(year, month);
+        List<DailyAnswerCountDTO> dailyCounts = new ArrayList<>();
+        for (Object[] result : results) {
+            String date = (String) result[0];
+            Long count = (Long) result[1];
+            dailyCounts.add(new DailyAnswerCountDTO(date, count.intValue()));
         }
-        return new ArrayList<>();
+        return dailyCounts;
+    }
+
+    @Override
+    public List<InquiryDTO> getInquiryDetailsByFilter(String filter, String adminId) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate today = LocalDate.now();
+        LocalDateTime sevenDaysAgo = today.minusDays(7).atStartOfDay();
+        int currentYear = today.getYear();
+        int currentMonth = today.getMonthValue();
+        String currentDate = today.format(DateTimeFormatter.ofPattern("YYYY-MM-dd"));
+
+        List<Inquiry> inquiries = inquiryRepository.findInquiriesByFilter(
+                filter,
+                currentDate,
+                sevenDaysAgo,
+                now,
+                currentYear,
+                currentMonth,
+                adminId // Pass adminId to repository
+        );
+
+        return inquiries.stream()
+                .map(this::entityToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<InquiryDTO> getRecentInquiriesByCustomerId(Long customerId) {
+        return inquiryRepository.findTop5ByCustomerIdNumOrderByCreatedAtDesc(customerId).stream()
+                .map(this::entityToDto)
+                .collect(Collectors.toList());
     }
 }

@@ -6,6 +6,7 @@ import CustomerAccountDashboard from './CustomerAccountDashboard';
 import RecentAdminAccountsDashboard from './RecentAdminAccountsDashboard'; // New import
 import RecentCustomerAccountsDashboard from './RecentCustomerAccountsDashboard'; // New import
 import NoticeAndFaqDashboard from './NoticeAndFaqDashboard';
+import InquiryDashboard from './InquiryDashboard'; // New import
 import '../../../theme/admin.css';
 
 const DashboardComponent = () => {
@@ -55,7 +56,7 @@ const DashboardComponent = () => {
 
         {accessibleMenus.includes('상담 문의 관리') && (
             <DashboardSection title="상담 문의 관리">
-                <p>상담 문의 관련 내용이 여기에 표시됩니다.</p>
+                <InquiryDashboard />
             </DashboardSection>
         )}
 

@@ -111,8 +111,7 @@ const NoticeListComponent = () => {
                                 {expandedNoticeId === notice.id && (
                                     <tr className="admin-content-row">
                                         <td colSpan={columns.length}>
-                                            <div className="admin-content-box">
-                                                {notice.content}
+                                            <div className="admin-content-box" dangerouslySetInnerHTML={{ __html: notice.content }}>
                                             </div>
                                             <div className="admin-actions">
                                                 <Link to={`/admin/notices/edit/${notice.id}`} className="admin-action-btn admin-modify-btn">수정</Link>

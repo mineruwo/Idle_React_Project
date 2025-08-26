@@ -32,6 +32,10 @@ public class FaqService {
         }
     }
 
+    public Faq getFaqForEdit(Long faqId) {
+        return faqRepository.findById(faqId).orElse(null);
+    }
+
     public Faq createFAQ(FaqDTO faqDTO) {
         Faq faq = new Faq();
         faq.setQuestion(faqDTO.getQuestion());
