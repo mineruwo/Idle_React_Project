@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080/api";
+const API_BASE = "http://localhost:8080";
 
 const useCustomMove = () => {
     const navigate = useNavigate();
@@ -96,17 +96,11 @@ const useCustomMove = () => {
         else window.location.href = url;
     };
 
-    // 공통 OAuth 시작 (flow: "login" | "signup")
-    const oauthStart = (provider, { flow = "login", replace = true, next } = {}) => {
-        const url = new URL(`${API_BASE}/oauth2/authorization/${provider}`);
-        url.searchParams.set("flow", flow);
-        if (next) url.searchParams.set("next", next); // 로그인/가입 후 돌아올 경로
-        moveToExternal(url.toString(), { replace });
+    // OAuth 로그인 시작
+    const oauthLogin = (provider, { replace = true } = {}) => {
+        const url = `${API_BASE}/oauth2/authorization/${provider}`;
+        moveToExternal(url, { replace }); 
     };
-
-    // 분리된 퍼블릭 API
-    const oauthLogin = (provider, opts) => oauthStart(provider, { flow: "login", ...(opts || {}) });
-    const oauthSignup = (provider, opts) => oauthStart(provider, { flow: "signup", ...(opts || {}) });
 
     return {
         shipperMoveToDashBoard,
@@ -132,8 +126,7 @@ const useCustomMove = () => {
         moveToMainPage,
         moveToMyPageByRole,
         moveToNewPassword,
-        oauthLogin,
-        oauthSignup
+        oauthLogin
     };
 };
 

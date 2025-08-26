@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
@@ -17,10 +19,13 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import com.fullstack.entity.CustomerEntity;
+import com.fullstack.model.TokenDTO;
 import com.fullstack.repository.CustomerRepository;
 import com.fullstack.security.jwt.JWTUtil;
+import com.fullstack.security.util.NicknameUtil;
+import com.fullstack.security.util.TokenCookieUtils;
+import com.fullstack.service.TokenService;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -29,12 +34,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 	
-	private final JWTUtil jwtUtil;
 	private final CustomerRepository customerRepository;
-	private final OauthTempCookie oauthTempCookie;
-	
-	private final HttpSessionOAuth2AuthorizationRequestRepository authReqRepo =
-            new HttpSessionOAuth2AuthorizationRequestRepository();
+	private final TokenService tokenService;
 	
 	@Value("${frontend.base-url}")
     private String frontendBaseUrl;
@@ -52,72 +53,64 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 	        
 	        String providerId = extractProviderId(provider, attrs);
             String email = extractEmail(provider, attrs); 
-            boolean emailVerified = extractEmailVerified(provider, attrs);
-	        
-            OAuth2AuthorizationRequest authReq = authReqRepo.removeAuthorizationRequest(req, res);
-            String flow = "login";
-            if (authReq != null && authReq.getAdditionalParameters().get("flow") != null) {
-                flow = String.valueOf(authReq.getAdditionalParameters().get("flow"));
-            }
+            String nickname   = extractNickname(provider, attrs);
             
 	        CustomerEntity customer = customerRepository
 	                .findBySnsLoginProviderAndSnsProviderId(provider, providerId)
 	                .orElse(null);
 	        
-	        // 계정 존재 -> 로그인
-	        if (customer != null) {
-	        	// JWT 발급
-		        String accessToken = jwtUtil.generateAccessToken(customer.getId(), customer.getRole());
-		        String refreshToken = jwtUtil.generateRefreshToken(customer.getId());
-
-		        // HttpOnly 쿠키로 세팅 (크로스 도메인이면 SameSite=None; Secure 필요)
-		        res.addHeader("Set-Cookie", cookie("accessToken", accessToken, true));
-		        res.addHeader("Set-Cookie", cookie("refreshToken", refreshToken, true));
-		        
-		        res.sendRedirect(frontendBaseUrl + "/oauth2/success");
-                return;
+	        if (customer == null) {
+                // 연동 없으면 이메일로 기존 계정 찾기 → 있으면 연동, 없으면 신규 생성
+	        	 if (!isBlank(email)) {
+                	customer = customerRepository.findById(email).orElse(null);
+                }
+                if (customer != null) {
+                    // 기존 로컬 계정에 연동
+                	customer.setSnsLoginProvider(provider);
+                	customer.setSnsProviderId(providerId);
+                    customerRepository.save(customer);
+                } else {
+                    // 신규 생성
+                	String loginId = chooseLoginId(email, provider, providerId);
+                	customer = new CustomerEntity();
+                	customer.setId(loginId);
+                	customer.setPasswordEnc(null);
+                	customer.setCustomName(!isBlank(nickname) ? nickname : "새 사용자");
+                	String picked = NicknameUtil.pickAvailable(
+                            nickname, provider, customerRepository::existsByNickname);
+                	customer.setNickname(picked);
+                    customer.setSnsLoginProvider(provider);
+                    customer.setSnsProviderId(providerId);
+                    customer.setCreatedAt(LocalDateTime.now());
+                    customer.setIsLefted(false);
+                    customer.setUserPoint(0);
+                    customerRepository.save(customer);
+                }
             }
-	        
-	        // 계정 X
-	        String payload = oauthTempCookie.sign(provider, providerId, email, emailVerified, flow);
-	        String tmpCookie = ResponseCookie.from("oauth_tmp", payload)
-                    .httpOnly(true)
-                    .secure(false)                 // 운영: true (HTTPS)
-                    .path("/")
-                    .sameSite("Lax")              // 크로스 도메인이면 "None"
-                    .maxAge(Duration.ofMinutes(5))
-                    .build()
-                    .toString();
-            res.addHeader("Set-Cookie", tmpCookie);
 
-	        boolean emailExists = (email != null) && customerRepository.findById(email).isPresent();
+            // === 여기서부터 컨트롤러와 동일한 쿠키 발급 방식 ===
+            TokenDTO tokenDTO = tokenService.issue(customer.getId(), customer.getRole());
 
-	        if (emailExists) {
-	            // 로컬 계정 존재 → 연동 동의 화면
-	        	String url = frontendBaseUrl + "/oauth/consent?type=link&email="
-                        + URLEncoder.encode(email, StandardCharsets.UTF_8);
-                res.sendRedirect(url);
-	        } else {
-	            // 로컬 계정 없음 → SNS 정보로 회원가입 동의 화면
-	        	res.sendRedirect(frontendBaseUrl + "/oauth/consent?type=signup");
-	        }  
-		} catch (Exception e) {
+            TokenCookieUtils.setAccessTokenCookie(res, tokenDTO.getAccessToken(), tokenDTO.getAtExpiresIn());
+            TokenCookieUtils.setRefreshTokenCookie(res, tokenDTO.getRefreshToken(), tokenDTO.getRtExpiresIn());
+            TokenCookieUtils.setAuthHintCookie(res, true, tokenDTO.getRtExpiresIn());
+
+            res.sendRedirect(frontendBaseUrl + "/oauth2/success");
+
+        } catch (Exception e) {
             e.printStackTrace();
             res.sendRedirect(frontendBaseUrl + "/login?error=oauth2");
         }
     }
-
-    private String cookie(String name, String value, boolean httpOnly) {
-        // 필요에 맞게 도메인/Max-Age/SameSite 조정
-        return ResponseCookie.from(name, value)
-                .httpOnly(httpOnly)
-                .secure(false)              // 배포에서는 true + HTTPS
-                .path("/")
-                .sameSite("Lax")           // 프론트/백이 다른 도메인이면 "None"
-                .maxAge(Duration.ofHours(1))
-                .build()
-                .toString();
-    }
+	
+	 private String chooseLoginId(String email, String provider, String providerId) {
+	        if (!isBlank(email) && !customerRepository.existsById(email)) {
+	            return email;
+	        }
+	        String base = "sns-" + provider + "-" + providerId + "@" + provider + ".oauth";
+	        if (!customerRepository.existsById(base)) return base;
+	        return base + "-" + UUID.randomUUID().toString().substring(0, 8);
+	    }
     
     private String extractProviderId(String provider, Map<String, Object> attrs) {
         switch (provider) {
@@ -152,23 +145,24 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         }
     }
     
-    private boolean extractEmailVerified(String provider, Map<String, Object> attrs) {
+    private String extractNickname(String provider, Map<String, Object> attrs) {
         switch (provider) {
-            case "google":
-                // OIDC 표준: email_verified
-                return Boolean.TRUE.equals(attrs.get("email_verified"));
+            case "google": return String.valueOf(attrs.getOrDefault("name", ""));
             case "kakao": {
-                Map<?, ?> account = (Map<?, ?>) attrs.get("kakao_account");
-                // 카카오 스펙: is_email_verified (있는 경우)
-                Object v = (account != null) ? account.get("is_email_verified") : null;
-                return Boolean.TRUE.equals(v);
+                Map<?, ?> acc = (Map<?, ?>) attrs.get("kakao_account");
+                Map<?, ?> profile = acc == null ? null : (Map<?, ?>) acc.get("profile");
+                Object nick = profile == null ? null : profile.get("nickname");
+                return nick == null ? "" : String.valueOf(nick);
             }
-            case "naver":
-                // 네이버는 명시 필드가 없어서 보수적으로 false 처리(정책에 따라 조정)
-                return false;
-            default:
-                return false;
+            case "naver": {
+                Map<?, ?> resp = (Map<?, ?>) attrs.get("response");
+                Object nick = resp == null ? null : resp.get("nickname");
+                return nick == null ? "" : String.valueOf(nick);
+            }
+            default: return "";
         }
     }
+    
+    private boolean isBlank(String s) { return s == null || s.isBlank(); }
 
 }
