@@ -20,9 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-@Log4j2
-@Component
-@RequiredArgsConstructor
+ @Log4j2 @RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
@@ -98,17 +96,17 @@ public class JWTFilter extends OncePerRequestFilter {
                         );
 
 
-                    log.info("JWTFilter: Setting Authentication. User: {}, Role: {}, Authorities: {}", id, role, authToken.getAuthorities());
+                    log.info("JWTFilter: Setting Authentication. User: {}, Role: {}, Authorities: {}", id, role, auth.getAuthorities());
 
-                    log.info("JWTFilter: Attempting to set Authentication. User: {}, Role: {}, Authorities: {}", id, role, authToken.getAuthorities()); // ADD THIS LINE
+                    log.info("JWTFilter: Attempting to set Authentication. User: {}, Role: {}, Authorities: {}", id, role, auth.getAuthorities()); // ADD THIS LINE
 
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                    SecurityContextHolder.getContext().setAuthentication(auth);
                     log.debug("JWT 인증 세팅 완료: id={}, role={}", id, role);
-                    
-                } else {
-                    log.debug("JWT 검증 실패(만료/서명오류 등) → 비인증으로 진행");
                 }
-            } catch (Exception e) {
+            } else {
+                log.debug("JWT 검증 실패(만료/서명오류 등) → 비인증으로 진행");
+            }
+        } catch (Exception e) {
                 log.debug("JWT 파싱 예외 → 비인증으로 진행. msg={}", e.getMessage());
             }
         } else {

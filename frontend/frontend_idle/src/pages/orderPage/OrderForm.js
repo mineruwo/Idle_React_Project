@@ -635,12 +635,6 @@ const WarnText = styled.p`
   color: #d1002e;
 `;
 
-const WarnText = styled.p`
-  margin: 6px 0 0;
-  font-size: 13px;
-  color: #d1002e;
-`;
-
 const ButtonRow = styled.div`
     display: flex;
     justify-content: center;

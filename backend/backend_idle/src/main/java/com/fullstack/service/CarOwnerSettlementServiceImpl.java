@@ -71,9 +71,9 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
 
     /** 월 배치 가져오거나 생성 */
     private CarOwnerSettlementBatch getOrCreateBatch(String ownerId, LocalDate monthKey) {
-    	CarOwnerSettlementBatchRepository b = batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey);
+    	CarOwnerSettlementBatch b = batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey);
         if (b == null) {
-            b = CarOwnerSettlementBatchRepository.builder()
+            b = CarOwnerSettlementBatch.builder()
                     .ownerId(ownerId)
                     .monthKey(monthKey)
                     .status(CarOwnerSettlementBatch.Status.REQUESTED)

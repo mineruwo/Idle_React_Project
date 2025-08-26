@@ -1,5 +1,6 @@
 package com.fullstack.repository;
 
+import com.fullstack.entity.CarOwnerSettlementBatch;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -7,11 +8,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface CarOwnerSettlementBatchRepository extends JpaRepository<CarOwnerSettlementBatchRepository, Long> {
+public interface CarOwnerSettlementBatchRepository extends JpaRepository<CarOwnerSettlementBatch, Long> {
 
     boolean existsByOwnerIdAndMonthKey(String ownerId, LocalDate monthKey);
 
-    CarOwnerSettlementBatchRepository findByOwnerIdAndMonthKey(String ownerId, LocalDate monthKey);
+    CarOwnerSettlementBatch findByOwnerIdAndMonthKey(String ownerId, LocalDate monthKey);
 
     @Query("""
       select coalesce(sum(b.totalAmount),0)

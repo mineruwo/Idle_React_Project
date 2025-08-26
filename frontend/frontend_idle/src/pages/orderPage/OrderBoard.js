@@ -713,11 +713,10 @@ const OrderBoard = () => {
                     <Val>{confirmedPrice != null ? `${Number(confirmedPrice).toLocaleString()} 원` : "-"}</Val>
                   </Row>
                 </div>
-              </>
             ) : (
               <div>아직 배정되지 않았습니다. 아래 입찰에서 확정하세요.</div>
             )}
-          </div>
+          </Section>
 
           <div style={{ marginTop: 16 }}>
             <h3 style={{ margin: "8px 0" }}>입찰 목록</h3>
