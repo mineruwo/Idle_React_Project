@@ -84,6 +84,12 @@ export const updateOrder = async (orderId, updatedData) => {
   return data;
 };
 
+/** 📋 내 오더 목록 (인증 GET) */
+export const fetchMyOrders = async () => {
+  const { data } = await authClient.get("/orders/my");
+  return data;
+};
+
 /* ------------------------------------------------------------------ */
 /*                             입찰(오퍼)                               */
 /* ------------------------------------------------------------------ */

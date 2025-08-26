@@ -2,17 +2,22 @@ package com.fullstack.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import com.fullstack.entity.Order;
+import com.fullstack.model.enums.OrderStatus; // Added import
 
 @Getter
 @Setter
 public class OrderDto {
 
     private Long id;
+    private String orderNo; // Add this field
+    private String shipperNickname; // Add this field
     private Integer proposedPrice;      // 화주 제안가
     private Long driverPrice;           // 기사 제안가
     private Long avgPrice;
-    private String packingOptions; // JSON 문자열로 체크된 포장 옵션들
+    private String packingOptions;      // JSON 문자열로 체크된 포장 옵션들
 
     private String departure;           // 출발지
     private String arrival;             // 도착지
@@ -29,11 +34,13 @@ public class OrderDto {
 
     private String packingOption;       // 포장 옵션 (ex: "특수포장, 고가화물")
 
-    private String status;              // 상태 (optional: 미배차, 배차완료 등)
+    private OrderStatus status;              // 상태 (optional: 미배차, 배차완료 등) // Changed type
 
-    public static OrderDto fromEntity(Order entity) {
+    public static OrderDto fromEntity(Order entity, String shipperNickname) {
         OrderDto dto = new OrderDto();
-        dto.setId(entity.getId()); // Add this line
+        dto.setId(entity.getId());
+        dto.setOrderNo(entity.getOrderNo()); // Add this line
+        dto.setShipperNickname(shipperNickname); // Set nickname
         dto.setProposedPrice(entity.getProposedPrice());
         dto.setDriverPrice(entity.getDriverPrice());
         dto.setAvgPrice(entity.getAvgPrice());
@@ -42,12 +49,28 @@ public class OrderDto {
         dto.setArrival(entity.getArrival());
         dto.setDistance(entity.getDistance());
         dto.setReservedDate(entity.getReservedDate());
-        dto.setImmediate(entity.getIsImmediate());
+        dto.setImmediate(entity.getIsImmediate());   // ✅ 수정된 부분
         dto.setWeight(entity.getWeight());
         dto.setVehicle(entity.getVehicle());
         dto.setCargoType(entity.getCargoType());
         dto.setCargoSize(entity.getCargoSize());
-        dto.setStatus(entity.getStatus());
+                OrderStatus statusEnum = entity.getStatus(); // Changed type to OrderStatus
+        String statusString = null; // Initialize to null
+        if (statusEnum != null) {
+            statusString = statusEnum.name(); // Get the enum name as string
+        }
+
+        try {
+            if (statusString != null && !statusString.isEmpty()) {
+                dto.setStatus(OrderStatus.valueOf(statusString.toUpperCase()));
+            } else {
+                System.err.println("Entity status is null or empty. Setting to NONE.");
+                dto.setStatus(OrderStatus.NONE);
+            }
+        } catch (IllegalArgumentException e) {
+            System.err.println("Unknown OrderStatus: " + statusString + ". Setting to NONE.");
+            dto.setStatus(OrderStatus.NONE);
+        }
         return dto;
     }
 }

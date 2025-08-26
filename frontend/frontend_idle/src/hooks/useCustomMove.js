@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 
+const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080/api";
+
 const useCustomMove = () => {
     const navigate = useNavigate();
 
@@ -15,11 +17,10 @@ const useCustomMove = () => {
         navigate({ pathname: `/shipper/orderBoard` });
     };
 
-    const shipperMoveToPayment = (orderId) => {
+    const shipperMoveToPayment = (orderData) => {
         navigate({
             pathname: `/shipper/payment`,
-            search: `?orderId=${orderId}`,
-        });
+        }, { state: { orderData } });
     };
 
     const shipperMoveToPaymentSuccess = (state) => {
@@ -84,9 +85,21 @@ const useCustomMove = () => {
         }
     };
 
-    const moveToNewPassword = (token, {replace = false} = {}) => {
+    const moveToNewPassword = (token, { replace = false } = {}) => {
         if (!token) return;
-        navigate("/newPassword", {state: { token }, replace });
+        navigate("/newPassword", { state: { token }, replace });
+    };
+
+    // 외부 이동
+    const moveToExternal = (url, { replace = false } = {}) => {
+        if (replace) window.location.replace(url);
+        else window.location.href = url;
+    };
+
+    // OAuth 로그인 시작
+    const oauthLogin = (provider, { replace = true } = {}) => {
+        const url = `${API_BASE}/oauth2/authorization/${provider}`;
+        moveToExternal(url, { replace }); 
     };
 
     return {
@@ -113,6 +126,7 @@ const useCustomMove = () => {
         moveToMainPage,
         moveToMyPageByRole,
         moveToNewPassword,
+        oauthLogin
     };
 };
 

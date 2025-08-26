@@ -20,5 +20,6 @@ public class PaymentResponseDTO {
     private String impUid;
     private Long amount;
     private String paymentStatus;
+    private String paidAt;
 	
 }

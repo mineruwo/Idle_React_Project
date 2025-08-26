@@ -5,6 +5,7 @@ import com.fullstack.model.CarOwnerDashboardDTO.DashboardSummaryDTO;
 import com.fullstack.model.CarOwnerDashboardDTO.DeliveryItemDTO;
 import com.fullstack.model.CarOwnerDashboardDTO.SalesChartDTO;
 import com.fullstack.model.CarOwnerDashboardDTO.WarmthDTO;
+import com.fullstack.model.enums.OrderStatus; // Added import
 import com.fullstack.repository.CarOwnerDashboardPaymentRepository;
 import com.fullstack.repository.CustomerRepository;
 import com.fullstack.repository.OrderRepository;   // ✅ 새로 주입
@@ -111,8 +112,8 @@ public class CarOwnerDashboardServiceImpl implements CarOwnerDashboardService {
     public WarmthDTO getWarmth(String ownerId) {
         Long driverKey = resolveDriverKey(ownerId);
         int completed = (int) (driverKey == null ? 0 :
-                orderRepository.countByAssignedDriverIdAndStatus(driverKey, "COMPLETED"));
-        int late = 0; // TODO: 예정/도착 시각 생기면 교체
+                orderRepository.countByAssignedDriverIdAndStatus(driverKey, OrderStatus.COMPLETED));
+        int late = 0; // 실제 예정/도착 시간이 생기면 로직 교체
         return new WarmthDTO(completed, late);
     }
 
@@ -125,12 +126,12 @@ public class CarOwnerDashboardServiceImpl implements CarOwnerDashboardService {
         List<String> statuses = List.of("READY", "ONGOING");
 
         return orderRepository
-                .findTop5ByAssignedDriverIdAndStatusInOrderByUpdatedAtDesc(driverKey, statuses)
+                .findTop5ByAssignedDriverIdAndStatusOrderByUpdatedAtDesc(driverKey, OrderStatus.ONGOING) // Changed status literal
                 .stream()
                 .map(o -> DeliveryItemDTO.builder()
                         .id(o.getId())
                         .deliveryNum(String.valueOf(o.getId()))
-                        .status(o.getStatus())
+                        .status(o.getStatus().name()) // Converted to enum name
                         .transport_type(o.getCargoType())
                         .from(o.getDeparture())
                         .s_date(o.getUpdatedAt() == null ? null : o.getUpdatedAt().toLocalDate().toString())

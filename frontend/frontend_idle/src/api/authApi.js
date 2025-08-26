@@ -5,7 +5,7 @@ const api = axios.create({
   withCredentials: true,
 });
 
-const skipAuthUrl = ["/auth/login", "/auth/refresh", "/auth/logout"];
+const skipAuthUrl = ["/auth/login", "/auth/refresh", "/auth/logout", "/auth/reset-password"];
 
 // 401 (재발급) 처리
 let isRefreshing = false;
@@ -18,6 +18,7 @@ api.interceptors.response.use((res) => res, async (error) => {
   const urlPath = original.url?.startsWith("http")
     ? new URL(original.url).pathname.replace(/^\/api/, "")
     : original.url;
+
 
   const isAuthApi = skipAuthUrl.includes(urlPath);
   const status = error.response.status;

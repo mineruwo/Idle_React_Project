@@ -1,71 +1,48 @@
 import { useState, useEffect } from "react";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { checkAuthStatus } from "../../slices/adminLoginSlice";
+import { Outlet, useLocation } from "react-router-dom";
+import useWindowSize from "../../hooks/useWindowSize";
+import useAuth from "../../hooks/useAuth";
 import {
     AdminHeaderComponent,
     SideBarComponent,
     MainContentComponent,
+    Overlay,
 } from "../../layouts/components/admin";
 
 const AdminPage = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 767);
-    const navigate = useNavigate();
+    const { width } = useWindowSize();
+    const { status } = useAuth();
     const location = useLocation();
-    const { isAuthenticated, status } = useSelector((state) => state.adminLogin);
-    const dispatch = useDispatch();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(width > 767);
 
     useEffect(() => {
-        // Only check auth status if it hasn't been checked yet
-        if (status === 'idle') {
-            dispatch(checkAuthStatus());
-        }
-    }, [status, dispatch]);
-
-    useEffect(() => {
-        // Redirect logic based on authentication status
-        if (status === 'succeeded' && isAuthenticated && location.pathname === '/admin/login') {
-            navigate("/admin/dashboard", { replace: true });
-        } else if (status === 'failed' && !isAuthenticated && location.pathname !== '/admin/login') {
-            navigate("/admin/login");
-        }
-    }, [isAuthenticated, status, navigate, location.pathname]);
-
-    useEffect(() => {
-        const handleResize = () => {
-            if (window.innerWidth > 767) {
-                setIsSidebarOpen(true);
-            } else {
-                setIsSidebarOpen(false);
-            }
-        };
-        window.addEventListener("resize", handleResize);
-        return () => {
-            window.removeEventListener("resize", handleResize);
-        };
-    }, []);
+        setIsSidebarOpen(width > 767);
+    }, [width]);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
-    // Render a loading indicator while checking auth status
     if (status === 'loading' || status === 'idle') {
-        return <div>Loading...</div>; // Or a more sophisticated spinner component
+        return <div>Loading...</div>;
     }
 
     const isLoginPage = location.pathname === '/admin/login';
+    const shouldShrinkHeader = isSidebarOpen && width > 767 && !isLoginPage;
+    const showOverlay = isSidebarOpen && width <= 767;
+    const mainContentSidebarOpen = !isLoginPage && isSidebarOpen;
 
     return (
         <div>
-            <AdminHeaderComponent toggleSidebar={toggleSidebar} />
+            <AdminHeaderComponent toggleSidebar={toggleSidebar} shrinkHeader={shouldShrinkHeader} />
             {!isLoginPage && (
                 <SideBarComponent
                     isOpen={isSidebarOpen}
                     toggleSidebar={toggleSidebar}
                 />
             )}
-            <MainContentComponent isSidebarOpen={!isLoginPage ? isSidebarOpen : false}>
+            {showOverlay && <Overlay onClick={toggleSidebar} />}
+            <MainContentComponent isSidebarOpen={mainContentSidebarOpen}>
                 <Outlet />
             </MainContentComponent>
         </div>
