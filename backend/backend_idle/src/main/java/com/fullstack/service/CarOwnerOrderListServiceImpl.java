@@ -3,6 +3,7 @@ package com.fullstack.service;
 import com.fullstack.entity.CustomerEntity;
 import com.fullstack.entity.Order;
 import com.fullstack.model.CarOwnerOrderListDTO;
+import com.fullstack.model.enums.OrderStatus;
 import com.fullstack.repository.CustomerRepository;
 import com.fullstack.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,18 +31,37 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
 
 	    @Transactional(readOnly = true)
 	    @Override
-	    public Page<CarOwnerOrderListDTO.OrderSummaryResponse> list(String loginId, int page, int size,
-	                                                    String status, LocalDate from, LocalDate to, String q) {
+	    public Page<CarOwnerOrderListDTO.OrderSummaryResponse> list(
+	            String loginId, int page, int size, String status, LocalDate from, LocalDate to, String q) {
 
 	        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
 	        Long driverId = getDriverId(loginId);
 
-	        LocalDateTime start = (from == null ? LocalDate.now().minusMonths(3).atStartOfDay() : from.atStartOfDay());
-	        LocalDateTime end   = (to == null ? LocalDateTime.now() : to.atTime(LocalTime.MAX));
+	        LocalDateTime start;
+	        LocalDateTime end;
+
+	        if (from == null && to == null) {
+	            // ✅ 기본값: 이번 달 1일 ~ 말일
+	            LocalDate today = LocalDate.now(KST);
+	            LocalDate firstDay = today.withDayOfMonth(1);
+	            LocalDate lastDay = today.withDayOfMonth(today.lengthOfMonth());
+	            start = firstDay.atStartOfDay();
+	            end = lastDay.atTime(LocalTime.MAX);
+	        } else {
+	            // 요청 값 있으면 그대로 사용
+	            start = (from == null ? LocalDate.now().minusMonths(3).atStartOfDay() : from.atStartOfDay());
+	            end   = (to == null ? LocalDateTime.now() : to.atTime(LocalTime.MAX));
+	        }
+
+	        // status → enum 변환
+	        OrderStatus statusEnum = null;
+	        if (status != null && !status.isBlank()) {
+	            statusEnum = OrderStatus.valueOf(status.toUpperCase());
+	        }
 
 	        Page<Order> pageData = orderRepository.searchForDriver(
 	                driverId,
-	                (status == null || status.isBlank()) ? null : status.toUpperCase(),
+	                statusEnum,
 	                start,
 	                end,
 	                (q == null ? "" : q.trim()),
@@ -66,7 +86,7 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
 	        Long driverId = getDriverId(loginId);
 	        Order o = Order.builder()
 	                .assignedDriverId(driverId)
-	                .status("READY")
+	                .status(OrderStatus.READY)
 	                .departure(req.getDeparture())
 	                .arrival(req.getArrival())
 	                .distance(req.getDistance())
@@ -107,27 +127,26 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
 
 	    @Transactional
 	    @Override
-	    public CarOwnerOrderListDTO.OrderDetailResponse changeStatus(String loginId, Long orderId, String nextStatus) {
+	    public CarOwnerOrderListDTO.OrderDetailResponse changeStatus(String loginId, Long orderId, OrderStatus nextStatus) {
 	        Long driverId = getDriverId(loginId);
 	        Order o = orderRepository.findByIdAndAssignedDriverId(orderId, driverId)
 	                .orElseThrow(() -> new AccessDeniedException("FORBIDDEN_ORDER_OWNER"));
 
-	        String cur  = o.getStatus();
-	        String next = nextStatus.toUpperCase();
+	        OrderStatus cur  = o.getStatus();
+	        OrderStatus next = nextStatus;
 
 	        boolean normal =
-	                ("READY".equals(cur)   && "ONGOING".equals(next)) ||
-	                ("ONGOING".equals(cur) && "COMPLETED".equals(next));
+	                (cur == OrderStatus.READY   && next == OrderStatus.ONGOING) ||
+	                (cur == OrderStatus.ONGOING && next == OrderStatus.COMPLETED);
 
 	        boolean cancel =
-	                "CANCELED".equals(next) &&
-	                ("READY".equals(cur) || "ONGOING".equals(cur));
+	                (next == OrderStatus.CANCELED) &&
+	                (cur == OrderStatus.READY || cur == OrderStatus.ONGOING);
 
 	        if (!(normal || cancel)) {
 	            throw new IllegalArgumentException("INVALID_STATUS_TRANSITION");
 	        }
 
-	        // (선택) 당일 취소 금지
 	        if (cancel && isSameDayKST(o.getReservedDate())) {
 	            throw new IllegalArgumentException("SAME_DAY_CANCEL_NOT_ALLOWED");
 	        }
@@ -159,7 +178,7 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
 	                                                  : (o.getProposedPrice() == null ? null : o.getProposedPrice().longValue());
 	        return CarOwnerOrderListDTO.OrderSummaryResponse.builder()
 	                .id(o.getId())
-	                .status(o.getStatus())
+	                .status(o.getStatus().name())
 	                .route(safeJoin(o.getDeparture(), "→", o.getArrival()))
 	                .cargoType(o.getCargoType())
 	                .price(price)
@@ -183,7 +202,7 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
 	        return CarOwnerOrderListDTO.OrderDetailResponse.builder()
 	                .id(o.getId())
 	                .assignedDriverId(o.getAssignedDriverId())
-	                .status(o.getStatus())
+	                .status(o.getStatus().name())
 	                .departure(o.getDeparture())
 	                .arrival(o.getArrival())
 	                .distance(o.getDistance())
