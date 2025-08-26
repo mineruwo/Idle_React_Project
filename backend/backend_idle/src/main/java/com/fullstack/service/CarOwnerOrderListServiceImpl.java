@@ -1,15 +1,13 @@
 package com.fullstack.service;
 
-import com.fullstack.entity.CarOwnerOrderList;
-import com.fullstack.entity.CarOwnerOrderList.Status;
+import com.fullstack.entity.CustomerEntity;
+import com.fullstack.entity.Order;
 import com.fullstack.model.CarOwnerOrderListDTO;
-import com.fullstack.model.CarOwnerOrderListDTO.OrderCreateRequest;
-import com.fullstack.model.CarOwnerOrderListDTO.OrderDetailResponse;
-import com.fullstack.model.CarOwnerOrderListDTO.OrderSummaryResponse;
-import com.fullstack.model.CarOwnerOrderListDTO.OrderUpdateRequest;
-import com.fullstack.repository.CarOwnerOrderListRepository;
+import com.fullstack.repository.CustomerRepository;
+import com.fullstack.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,161 +17,187 @@ import java.time.*;
 @RequiredArgsConstructor
 public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
 
-    private final CarOwnerOrderListRepository repo;
-    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
+	 private final OrderRepository orderRepository;
+	    private final CustomerRepository customerRepository;
 
-    @Transactional(readOnly = true)
-    @Override
-    public Page<CarOwnerOrderListDTO.OrderSummaryResponse> list(String ownerId, int page, int size, String status, LocalDate from, LocalDate to, String q) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
+	    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
-        Status st = null;
-        if (status != null && !status.isBlank()) {
-            st = Status.valueOf(status.toUpperCase());
-        }
+	    private Long getDriverId(String loginId) {
+	        CustomerEntity me = customerRepository.findByLoginId(loginId)
+	                .orElseThrow(() -> new AccessDeniedException("AUTH_USER_NOT_FOUND"));
+	        return me.getIdNum().longValue();
+	    }
 
-        LocalDateTime start = (from == null ? LocalDate.now().minusMonths(3).atStartOfDay()
-                                            : from.atStartOfDay());
-        LocalDateTime end   = (to == null ? LocalDateTime.now()
-                                          : to.atTime(LocalTime.MAX));
+	    @Transactional(readOnly = true)
+	    @Override
+	    public Page<CarOwnerOrderListDTO.OrderSummaryResponse> list(String loginId, int page, int size,
+	                                                    String status, LocalDate from, LocalDate to, String q) {
 
-        return repo.search(ownerId, st, start, end, (q == null ? "" : q.trim()), pageable)
-                   .map(this::toSummary);
-    }
+	        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
+	        Long driverId = getDriverId(loginId);
 
-    @Transactional(readOnly = true)
-    @Override
-    public CarOwnerOrderListDTO.OrderDetailResponse detail(String ownerId, Long orderId) {
-        CarOwnerOrderList o = repo.findByIdAndOwnerId(orderId, ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("ORDER_NOT_FOUND"));
-        return toDetail(o);
-    }
+	        LocalDateTime start = (from == null ? LocalDate.now().minusMonths(3).atStartOfDay() : from.atStartOfDay());
+	        LocalDateTime end   = (to == null ? LocalDateTime.now() : to.atTime(LocalTime.MAX));
 
-    @Transactional
-    @Override
-    public OrderDetailResponse create(String ownerId, OrderCreateRequest req) {
-        CarOwnerOrderList o = CarOwnerOrderList.builder()
-                .ownerId(ownerId)
-                .status(Status.CREATED)
-                .departure(req.getDeparture())
-                .arrival(req.getArrival())
-                .cargoType(req.getCargoType())
-                .cargoSize(req.getCargoSize())
-                .weight(req.getWeight())
-                .vehicle(req.getVehicle())
-                .immediate(req.isImmediate())
-                .reservedDate(req.getReservedDate()) // String 그대로 저장
-                .distance(req.getDistance())
-                .proposedPrice(req.getProposedPrice())
-                .build();
-        o = repo.save(o);
-        return toDetail(o);
-    }
+	        Page<Order> pageData = orderRepository.searchForDriver(
+	                driverId,
+	                (status == null || status.isBlank()) ? null : status.toUpperCase(),
+	                start,
+	                end,
+	                (q == null ? "" : q.trim()),
+	                pageable
+	        );
 
-    @Transactional
-    @Override
-    public OrderDetailResponse update(String ownerId, Long orderId, OrderUpdateRequest req) {
-        CarOwnerOrderList o = repo.findByIdAndOwnerId(orderId, ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("ORDER_NOT_FOUND"));
-        o.applyUpdate(
-                req.getDeparture(), req.getArrival(), req.getCargoType(), req.getCargoSize(),
-                req.getWeight(), req.getVehicle(), req.getImmediate(), req.getReservedDate(),
-                req.getDistance(), req.getProposedPrice()
-        );
-        return toDetail(o);
-    }
+	        return pageData.map(this::toSummary);
+	    }
 
-    @Transactional
-    @Override
-    public OrderDetailResponse changeStatus(String ownerId, Long orderId, String status) {
-        CarOwnerOrderList o = repo.findByIdAndOwnerId(orderId, ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("ORDER_NOT_FOUND"));
+	    @Transactional(readOnly = true)
+	    @Override
+	    public CarOwnerOrderListDTO.OrderDetailResponse detail(String loginId, Long orderId) {
+	        Long driverId = getDriverId(loginId);
+	        Order o = orderRepository.findByIdAndAssignedDriverId(orderId, driverId)
+	                .orElseThrow(() -> new AccessDeniedException("FORBIDDEN_ORDER_OWNER"));
+	        return toDetail(o);
+	    }
 
-        Status next = Status.valueOf(status.toUpperCase());
-        Status cur  = o.getStatus();
+	    @Transactional
+	    @Override
+	    public CarOwnerOrderListDTO.OrderDetailResponse create(String loginId, CarOwnerOrderListDTO.OrderCreateRequest req) {
+	        Long driverId = getDriverId(loginId);
+	        Order o = Order.builder()
+	                .assignedDriverId(driverId)
+	                .status("READY")
+	                .departure(req.getDeparture())
+	                .arrival(req.getArrival())
+	                .distance(req.getDistance())
+	                .reservedDate(req.getReservedDate())
+	                .isImmediate(req.isImmediate())
+	                .weight(req.getWeight())
+	                .vehicle(req.getVehicle())
+	                .cargoType(req.getCargoType())
+	                .cargoSize(req.getCargoSize())
+	                .packingOption(req.getPackingOption())
+	                .proposedPrice(req.getProposedPrice())
+	                .build();
+	        o = orderRepository.save(o);
+	        return toDetail(o);
+	    }
 
-        // === 전이 규칙 ===
-        // 1) 정상 전이만 허용: CREATED->ONGOING, ONGOING->COMPLETED
-        boolean normalTransit = (cur == Status.CREATED  && next == Status.ONGOING) ||
-                                (cur == Status.ONGOING && next == Status.COMPLETED);
+	    @Transactional
+	    @Override
+	    public CarOwnerOrderListDTO.OrderDetailResponse update(String loginId, Long orderId, CarOwnerOrderListDTO.OrderUpdateRequest req) {
+	        Long driverId = getDriverId(loginId);
+	        Order o = orderRepository.findByIdAndAssignedDriverId(orderId, driverId)
+	                .orElseThrow(() -> new AccessDeniedException("FORBIDDEN_ORDER_OWNER"));
 
-        // 2) 취소 전이 허용: CREATED/ONGOING -> CANCELED (완료 후 취소 불가)
-        boolean cancelTransit = (next == Status.CANCELED) &&
-                                (cur == Status.CREATED || cur == Status.ONGOING);
+	        if (req.getDeparture() != null) o.setDeparture(req.getDeparture());
+	        if (req.getArrival() != null)   o.setArrival(req.getArrival());
+	        if (req.getDistance() != null)  o.setDistance(req.getDistance());
+	        if (req.getReservedDate() != null) o.setReservedDate(req.getReservedDate());
+	        if (req.getWeight() != null)    o.setWeight(req.getWeight());
+	        if (req.getVehicle() != null)   o.setVehicle(req.getVehicle());
+	        if (req.getCargoType() != null) o.setCargoType(req.getCargoType());
+	        if (req.getCargoSize() != null) o.setCargoSize(req.getCargoSize());
+	        if (req.getPackingOption() != null) o.setPackingOption(req.getPackingOption());
+	        if (req.getProposedPrice() != null) o.setProposedPrice(req.getProposedPrice());
+	        if (req.getDriverPrice() != null)   o.setDriverPrice(req.getDriverPrice());
 
-        if (!(normalTransit || cancelTransit)) {
-            throw new IllegalArgumentException("INVALID_STATUS_TRANSITION");
-        }
+	        return toDetail(o);
+	    }
 
-        // === 당일 취소 금지 ===
-        if (cancelTransit) {
-            if (isSameDayKST(o.getReservedDate())) { // reservedDate(String) 앞 10자리 비교
-                throw new IllegalArgumentException("SAME_DAY_CANCEL_NOT_ALLOWED");
-            }
-        }
+	    @Transactional
+	    @Override
+	    public CarOwnerOrderListDTO.OrderDetailResponse changeStatus(String loginId, Long orderId, String nextStatus) {
+	        Long driverId = getDriverId(loginId);
+	        Order o = orderRepository.findByIdAndAssignedDriverId(orderId, driverId)
+	                .orElseThrow(() -> new AccessDeniedException("FORBIDDEN_ORDER_OWNER"));
 
-        // 엔티티 도메인 메서드 사용 (낙관적 락은 @Version으로 보호)
-        o.changeStatus(next);
+	        String cur  = o.getStatus();
+	        String next = nextStatus.toUpperCase();
 
-        return toDetail(o);
-    }
+	        boolean normal =
+	                ("READY".equals(cur)   && "ONGOING".equals(next)) ||
+	                ("ONGOING".equals(cur) && "COMPLETED".equals(next));
 
-    @Transactional
-    @Override
-    public OrderDetailResponse assignVehicle(String ownerId, Long orderId, Long vehicleId) {
-        CarOwnerOrderList o = repo.findByIdAndOwnerId(orderId, ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("ORDER_NOT_FOUND"));
-        o.assignVehicle(vehicleId);
-        return toDetail(o);
-    }
+	        boolean cancel =
+	                "CANCELED".equals(next) &&
+	                ("READY".equals(cur) || "ONGOING".equals(cur));
 
-    @Transactional
-    @Override
-    public void delete(String ownerId, Long orderId) {
-        CarOwnerOrderList o = repo.findByIdAndOwnerId(orderId, ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("ORDER_NOT_FOUND"));
-        repo.delete(o);
-    }
+	        if (!(normal || cancel)) {
+	            throw new IllegalArgumentException("INVALID_STATUS_TRANSITION");
+	        }
 
-    // ===== helpers =====
-    private boolean isSameDayKST(String reservedDateStr) {
-        if (reservedDateStr == null || reservedDateStr.length() < 10) return false;
-        String dateOnly = reservedDateStr.substring(0, 10); // yyyy-MM-dd
-        String todayKst = LocalDate.now(KST).toString();    // yyyy-MM-dd
-        return todayKst.equals(dateOnly);
-    }
+	        // (선택) 당일 취소 금지
+	        if (cancel && isSameDayKST(o.getReservedDate())) {
+	            throw new IllegalArgumentException("SAME_DAY_CANCEL_NOT_ALLOWED");
+	        }
 
-    // ===== mappers =====
-    private OrderSummaryResponse toSummary(CarOwnerOrderList o) {
-        return OrderSummaryResponse.builder()
-                .id(o.getId())
-                .status(o.getStatus().name())
-                .route(o.getDeparture() + "→" + o.getArrival())
-                .cargoType(o.getCargoType())
-                .price(o.getFinalPrice() != null ? o.getFinalPrice() : o.getProposedPrice())
-                .updatedAt(o.getUpdatedAt())
-                .build();
-    }
+	        o.setStatus(next);
+	        return toDetail(o);
+	    }
 
-    private OrderDetailResponse toDetail(CarOwnerOrderList o) {
-        return OrderDetailResponse.builder()
-                .id(o.getId())
-                .ownerId(o.getOwnerId())
-                .status(o.getStatus().name())
-                .departure(o.getDeparture())
-                .arrival(o.getArrival())
-                .cargoType(o.getCargoType())
-                .cargoSize(o.getCargoSize())
-                .weight(o.getWeight())
-                .vehicle(o.getVehicle())
-                .immediate(o.isImmediate())
-                .reservedDate(o.getReservedDate())
-                .distance(o.getDistance())
-                .vehicleId(o.getVehicleId())
-                .proposedPrice(o.getProposedPrice())
-                .finalPrice(o.getFinalPrice())
-                .createdAt(o.getCreatedAt())
-                .updatedAt(o.getUpdatedAt())
-                .build();
-    }
-}
+	    @Transactional
+	    @Override
+	    public void delete(String loginId, Long orderId) {
+	        Long driverId = getDriverId(loginId);
+	        Order o = orderRepository.findByIdAndAssignedDriverId(orderId, driverId)
+	                .orElseThrow(() -> new AccessDeniedException("FORBIDDEN_ORDER_OWNER"));
+	        orderRepository.delete(o);
+	    }
+
+	    // ===== helpers =====
+	    private boolean isSameDayKST(String reservedDateStr) {
+	        if (reservedDateStr == null || reservedDateStr.length() < 10) return false;
+	        String dateOnly = reservedDateStr.substring(0, 10);
+	        String todayKst = LocalDate.now(KST).toString();
+	        return todayKst.equals(dateOnly);
+	    }
+
+	    // ===== mappers =====
+	    private CarOwnerOrderListDTO.OrderSummaryResponse toSummary(Order o) {
+	        Long price = (o.getDriverPrice() != null) ? o.getDriverPrice()
+	                                                  : (o.getProposedPrice() == null ? null : o.getProposedPrice().longValue());
+	        return CarOwnerOrderListDTO.OrderSummaryResponse.builder()
+	                .id(o.getId())
+	                .status(o.getStatus())
+	                .route(safeJoin(o.getDeparture(), "→", o.getArrival()))
+	                .cargoType(o.getCargoType())
+	                .price(price)
+	                .updatedAt(o.getUpdatedAt())
+	                .departure(o.getDeparture())
+	                .arrival(o.getArrival())
+	                .s_date(o.getReservedDate())
+	                .build();
+	    }
+	    private static String safeJoin(String a, String sep, String b) {
+	        String left = (a == null ? "" : a);   // a가 null이면 ""로 처리
+	        String right = (b == null ? "" : b);  // b가 null이면 ""로 처리
+
+	        if (left.isEmpty() && right.isEmpty()) return "";   // 둘 다 없으면 ""
+	        if (left.isEmpty()) return right;                   // 출발지만 없으면 도착지만 리턴
+	        if (right.isEmpty()) return left;                   // 도착지만 없으면 출발지만 리턴
+	        return left + sep + right;                          // 둘 다 있으면 "출발→도착"
+	    }
+
+	    private CarOwnerOrderListDTO.OrderDetailResponse toDetail(Order o) {
+	        return CarOwnerOrderListDTO.OrderDetailResponse.builder()
+	                .id(o.getId())
+	                .assignedDriverId(o.getAssignedDriverId())
+	                .status(o.getStatus())
+	                .departure(o.getDeparture())
+	                .arrival(o.getArrival())
+	                .distance(o.getDistance())
+	                .reservedDate(o.getReservedDate())
+	                .weight(o.getWeight())
+	                .vehicle(o.getVehicle())
+	                .cargoType(o.getCargoType())
+	                .cargoSize(o.getCargoSize())
+	                .packingOption(o.getPackingOption())
+	                .proposedPrice(o.getProposedPrice())
+	                .driverPrice(o.getDriverPrice())
+	                .avgPrice(o.getAvgPrice())
+	                .createdAt(o.getCreatedAt())
+	                .updatedAt(o.getUpdatedAt())
+	                .build();
+	    }
+	}

@@ -8,14 +8,13 @@ import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import AppTheme from '../../../theme/muitheme/AppTheme';
-import { GoogleIcon, KakaoIcon, PinkTruckIcon } from './IconComponent';
+import { GoogleIcon, KakaoIcon, NaverIcon, PinkTruckIcon } from '../common/IconComponent';
 import useCustomMove from '../../../hooks/useCustomMove';
 import { login } from '../../../api/loginApi';
 import { UserCard as Card, UserContainer as SignInContainer } from '../../../theme/User/UserCard';
 import { useState } from 'react';
 import ForgotPasswordModal from '../modal/ForgotPasswordModal';
 import { useAuth } from '../../../auth/AuthProvider';
-import { replace } from 'react-router-dom';
 
 
 export default function LoginComponent(props) {
@@ -32,7 +31,8 @@ export default function LoginComponent(props) {
     const {
         moveToSignUpPage,
         moveToNewPassword,
-        moveToMyPageByRole
+        moveToMyPageByRole,
+        oauthLogin
     } = useCustomMove();
 
     // 유효성 검사
@@ -155,27 +155,30 @@ export default function LoginComponent(props) {
                             handleClose={() => setForgotOpen(false)}
                             onVerified={({ token }) => moveToNewPassword(token, { replace: true })}
                         />
-                        <br></br>
                         <Button
                             type="submit"
                             fullWidth
                             variant="contained"
+                            sx={{ mt: 4 }}
                         >
                             로그인
                         </Button>
-                        <Link component="button" type="button" onClick={() => setForgotOpen(true)} variant="body2" sx={{ alignSelf: 'center' }}>
+                        <Link
+                            component="button"
+                            type="button"
+                            onClick={() => setForgotOpen(true)}
+                            variant="body2" sx={{ alignSelf: 'center' }}>
                             비밀번호 찾기
                         </Link>
-                        <br></br>
                     </Box>
-                    <Divider>
+                    <Divider sx={{ mt: 2 }}>
                         <Typography sx={{ color: 'text.secondary' }}>SNS 로그인</Typography>
                     </Divider>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                         <Button
                             fullWidth
                             variant="outlined"
-                            onClick={() => alert('Sign in with Google')}
+                            onClick={() => oauthLogin("google")}
                             startIcon={<GoogleIcon />}
                         >
                             구글 로그인
@@ -183,7 +186,15 @@ export default function LoginComponent(props) {
                         <Button
                             fullWidth
                             variant="outlined"
-                            onClick={() => alert('Sign in with Kakao')}
+                            onClick={() => oauthLogin("naver")}
+                            startIcon={<NaverIcon />}
+                        >
+                            네이버 로그인
+                        </Button>
+                        <Button
+                            fullWidth
+                            variant="outlined"
+                            onClick={() => oauthLogin("kakao")}
                             startIcon={<KakaoIcon />}
                         >
                             카카오 로그인

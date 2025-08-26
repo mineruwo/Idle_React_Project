@@ -8,8 +8,8 @@ import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import com.fullstack.controller.OrderController;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -19,34 +19,60 @@ import io.jsonwebtoken.security.Keys;
 public class JWTUtil {
 
 	private final Key key;
-	
-	public JWTUtil(@Value("${jwt.secret}") String secret) {
+	private final Duration accessTtl;
+    private final Duration refreshTtl;
+    private final String issuer;
+    
+	public JWTUtil(@Value("${jwt.secret}") String secret,
+			@Value("${jwt.access-ttl:PT30M}") Duration accessTtl,
+            @Value("${jwt.refresh-ttl:P14D}") Duration refreshTtl,
+            @Value("${jwt.issuer:idle-api}") String issuer) 
+	{
 		this.key = Keys.hmacShaKeyFor(secret.getBytes());
+		this.accessTtl = accessTtl;
+        this.refreshTtl = refreshTtl;
+        this.issuer = issuer;
 	}
 	
+	public String generateAccessToken(String id, String role) {
+        return buildToken(id, role, accessTtl);
+    }
+
+    public String generateRefreshToken(String id) {
+        return buildToken(id, null, refreshTtl);
+    }
+	
 	public String generateAccessToken(String id, String role, Duration expire) {
-		return Jwts.builder()
-				.setSubject(id)
-				.claim("role", role)
-				.setIssuedAt(new Date())
-				.setExpiration(new Date(System.currentTimeMillis() + expire.toMillis()))
-				.signWith(key, SignatureAlgorithm.HS256)
-				.compact();
+		return buildToken(id, role, expire);
 	}
 	
 	public String generateRefreshToken(String id, Duration expire) {
-		return Jwts.builder()
-				.setSubject(id)
-				.setIssuedAt(new Date())
-				.setExpiration(new Date(System.currentTimeMillis() + expire.toMillis()))
-				.signWith(key, SignatureAlgorithm.HS256)
-				.compact();
+		return buildToken(id, null, expire);
 	}
+	
+	// 공통 빌더
+    private String buildToken(String id, String role, Duration expire) {
+    	Date now = new Date();
+    	Date exp = new Date(now.getTime() + expire.toMillis());
+
+    	JwtBuilder builder = Jwts.builder()
+                .setSubject(id)
+                .setIssuer(issuer)
+                .setIssuedAt(now)
+                .setExpiration(exp)
+                .signWith(key, SignatureAlgorithm.HS256);
+
+        if (role != null) {
+            builder.claim("role", role);
+        }
+
+        return builder.compact();
+    }
 	
 	// 토큰에서 ID 추출
 	public String getId(String token) {
 		
-		String ids  = parseClaims(token).getSubject();
+		String ids = parseClaims(token).getSubject();
 		
 		return parseClaims(token).getSubject();
 	}

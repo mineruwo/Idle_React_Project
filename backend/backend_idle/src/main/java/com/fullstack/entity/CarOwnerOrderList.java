@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class CarOwnerOrderList {
 
-    public enum Status { CREATED, ONGOING, COMPLETED, CANCELED }
+    public enum Status { READY, ONGOING, COMPLETED, CANCELED }
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -55,7 +55,7 @@ public class CarOwnerOrderList {
         LocalDateTime now = LocalDateTime.now();
         createdAt = now;
         updatedAt = now;
-        if (status == null) status = Status.CREATED;
+        if (status == null) status = Status.READY;
     }
 
     @PreUpdate

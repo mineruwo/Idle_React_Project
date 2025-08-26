@@ -5,10 +5,10 @@ import SalesChart from "../../../../layouts/components/carownerComponent/DashCom
 import WarmPieChart from "../../../../layouts/components/carownerComponent/DashComponent/WarmPieChart";
 import DeliveryList from "../../../../layouts/components/carownerComponent/DashComponent/DeliveryList";
 import {
-  fetchDeliveries,
-  fetchSalesChart,
-  fetchTransportSummary,
-  fetchWarmth
+    fetchDeliveries,
+    fetchSalesChart,
+    fetchTransportSummary,
+    fetchWarmth
 } from "../../../../api/CarOwnerApi/CarOwnerDashboard_deliveryApi";
 
 const CarOwnerDashboard = () => {
@@ -19,11 +19,11 @@ const CarOwnerDashboard = () => {
     const [warmth, setWarmth] = useState({ onTime: 0, late: 0 });
     const [loading, setLoading] = useState(true);
     const [err, setErr] = useState(null);
-console.log("[DASH] module loaded");
+    
     useEffect(() => {
         console.log("[DASH] useEffect run");
         (async () => {
-            console.log("[DASH] before Promise.all");
+            
             try {
                 const [s, sc, d, w] = await Promise.all([
                     fetchTransportSummary(),
@@ -31,13 +31,13 @@ console.log("[DASH] module loaded");
                     fetchDeliveries(),
                     fetchWarmth(),
                 ]);
-                 console.log("[DASH] after Promise.all", { s, scLen: sc?.length, dLen: d?.length, w });
+                console.log("[DASH] after Promise.all", { s, scLen: sc?.length, dLen: d?.length, w });
                 setSummary(s);
                 setSalesData(sc || []);
                 setDeliveries(d || []);
                 setWarmth(w || { onTime: 0, late: 0 });
             } catch (e) {
-                 console.log("[DASH] catch", e);
+                console.log("[DASH] catch", e);
                 console.error(e);
                 setErr(e.message || "데이터 로딩 실패");
             } finally {
@@ -45,15 +45,15 @@ console.log("[DASH] module loaded");
                 setLoading(false);
             }
         })();
-    },[]);
-     const refreshDeliveries = async () => {
-    try {
-      const d = await fetchDeliveries();
-      setDeliveries(d || []);
-    } catch (e) {
-      console.error(e);
-    }
-  };
+    }, []);
+    const refreshDeliveries = async () => {
+        try {
+            const d = await fetchDeliveries();
+            setDeliveries(d || []);
+        } catch (e) {
+            console.error(e);
+        }
+    };
 
     if (loading) return <div className="dashboard-loading">로딩 중...</div>;
     if (err) return <div className="dashboard-error">에러: {String(err)}</div>;

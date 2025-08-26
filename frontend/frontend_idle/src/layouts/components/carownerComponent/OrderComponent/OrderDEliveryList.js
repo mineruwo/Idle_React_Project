@@ -1,33 +1,51 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../../../../theme/CarOwner/Order.css";
 import { fetchCarOwnerOrders } from "../../../../api/CarOwnerApi/CarOwnerOrdersApi";
-import { useNavigate } from "react-router-dom";
-import { useMemo } from "react";
+
+const STATUS = {
+  READY: "READY",
+  ONGOING: "ONGOING",
+  COMPLETED: "COMPLETED",
+  CANCELED: "CANCELED",
+};
+
+const STATUS_LABEL = {
+  READY: "READY",
+  ONGOING: "ONGOING",
+  COMPLETED: "COMPLETED",
+  CANCELED: "CANCELED",
+};
+
 const BOARD_POST_URL = (orderId) => `/board/orders/${orderId}`;
 
-const moveToOrderPost = (orderId) => {
-  if (!orderId) return;
-  window.location.href = BOARD_POST_URL(orderId); // 내부 라우팅이면 navigate로 교체 가능
+const formatDate10 = (v) => {
+  if (!v) return "-";
+  const s = String(v);
+  return s.length >= 10 ? s.slice(0, 10) : s;
 };
 
-const formatDate = (isoOrYmd) => {
-  if (!isoOrYmd) return "-";
-  // '2025-08-13' 그대로면 리턴, ISO면 앞 10자리
-  return isoOrYmd.length >= 10 ? isoOrYmd.slice(0, 10) : isoOrYmd;
+/** 서버 응답의 키가 제각각일 수 있으므로 안전하게 꺼내기 */
+const pick = (obj, keys, def = "-") => {
+  for (const k of keys) {
+    const v = obj?.[k];
+    if (v !== undefined && v !== null && String(v).trim() !== "") return v;
+  }
+  return def;
 };
 
-const OrderDEliveryList = () => {
-    const navigate = useNavigate();
+export default function OrderDEliveryList() {
+  const navigate = useNavigate();
 
-  // 필터 & 페이지 상태
+  // 필터 & 페이지
   const [page, setPage] = useState(0);
   const [size] = useState(10);
-  const [status, setStatus] = useState(""); // "", "READY", "SHIPPED", "DELIVERED", "CANCELLED"
-  const [from, setFrom] = useState("");     // yyyy-MM-dd
-  const [to, setTo] = useState("");         // yyyy-MM-dd
-  const [q, setQ] = useState("");           // 검색어(출발/도착지 등)
+  const [status, setStatus] = useState("");   // "", READY, ONGOING, COMPLETED, CANCELED
+  const [from, setFrom] = useState("");       // yyyy-MM-dd
+  const [to, setTo] = useState("");           // yyyy-MM-dd
+  const [q, setQ] = useState("");             // 검색어
 
-  // 데이터 상태
+  // 데이터
   const [pageData, setPageData] = useState({ content: [], number: 0, totalPages: 1, totalElements: 0 });
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState(null);
@@ -37,43 +55,40 @@ const OrderDEliveryList = () => {
     setErr(null);
     try {
       const data = await fetchCarOwnerOrders({ page: nextPage, size, status, from, to, q });
-      setPageData(data);
+      setPageData(data || { content: [], number: 0, totalPages: 1, totalElements: 0 });
       setPage(nextPage);
     } catch (e) {
-      setErr(e.message || String(e));
+      setErr(e?.message || String(e));
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    // 첫 로드
-    load(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { load(0); /* 초기 1회 */ // eslint-disable-next-line
   }, []);
 
   const applyFilter = () => load(0);
 
-  // 요약 집계
+  // 요약 집계(READY/ONGOING/COMPLETED/CANCELED 기준)
   const summary = useMemo(() => {
-    const counts = { READY: 0, SHIPPED: 0, DELIVERED: 0, CANCELLED: 0 };
+    const c = { READY: 0, ONGOING: 0, COMPLETED: 0, CANCELED: 0 };
     for (const it of pageData.content || []) {
-      const s = it.status;
-      if (s && counts.hasOwnProperty(s)) counts[s]++;
+      const s = String(it.status || "").toUpperCase();
+      if (c[s] !== undefined) c[s]++;
     }
     return {
-      done: counts.DELIVERED,
-      shipping: counts.SHIPPED,
-      scheduled: counts.READY,
-      totalDone: counts.DELIVERED, // 필요에 따라 누적 완료를 백엔드에서 내려주면 그 값 사용
+      done: c.COMPLETED,
+      shipping: c.ONGOING,
+      scheduled: c.READY,
+      totalDone: c.COMPLETED, // 누적이 필요하면 백엔드 합계 내려받아 교체
     };
   }, [pageData.content]);
 
   const moveToOrderPost = (orderId) => {
     if (!orderId) return;
-    // 내부 라우팅
-    navigate(`/board/orders/${orderId}`);
+    navigate(BOARD_POST_URL(orderId));
   };
+
   return (
     <div className="settlement-page">
       <h2 className="summary-title">배송 요약</h2>
@@ -82,10 +97,10 @@ const OrderDEliveryList = () => {
       <div className="filter-row" style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12 }}>
         <select value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="">전체 상태</option>
-          <option value="READY">READY</option>
-          <option value="SHIPPED">SHIPPED</option>
-          <option value="DELIVERED">DELIVERED</option>
-          <option value="CANCELLED">CANCELLED</option>
+          <option value={STATUS.READY}>{STATUS_LABEL.READY}</option>
+          <option value={STATUS.ONGOING}>{STATUS_LABEL.ONGOING}</option>
+          <option value={STATUS.COMPLETED}>{STATUS_LABEL.COMPLETED}</option>
+          <option value={STATUS.CANCELED}>{STATUS_LABEL.CANCELED}</option>
         </select>
         <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
         <span>~</span>
@@ -113,6 +128,7 @@ const OrderDEliveryList = () => {
       <h2>운송건</h2>
 
       {err && <div className="error">에러: {err}</div>}
+
       {loading ? (
         <div>불러오는 중...</div>
       ) : (
@@ -120,31 +136,52 @@ const OrderDEliveryList = () => {
           <table className="delivery-table">
             <thead>
               <tr>
+                <th>운송번호</th>
                 <th>배송 상태</th>
+                <th>화물 종류</th>
                 <th>출발지</th>
                 <th>출발 예정일</th>
                 <th>도착지</th>
-                <th>예정일</th>
+                <th>최종수정일</th>
               </tr>
             </thead>
             <tbody>
               {(pageData.content || []).length === 0 ? (
-                <tr><td colSpan={5} style={{ textAlign: "center" }}>표시할 오더리스트가 없습니다.</td></tr>
+                <tr><td colSpan={7} style={{ textAlign: "center" }}>표시할 오더리스트가 없습니다.</td></tr>
               ) : (
-                pageData.content.map((item) => (
-                  <tr
-                    key={item.id}
-                    onClick={() => moveToOrderPost(item.id)}
-                    style={{ cursor: "pointer" }}
-                    title={`게시판 상세로 이동 (#${item.id})`}
-                  >
-                    <td>{item.status ?? "-"}</td>
-                    <td>{item.departure ?? "-"}</td>
-                    <td>{formatDate(item.departurePlannedAt || item.scheduledDeparture || item.s_date)}</td>
-                    <td>{item.arrival ?? "-"}</td>
-                    <td>{formatDate(item.arrivalPlannedAt || item.scheduledArrival || item.d_date)}</td>
-                  </tr>
-                ))
+                pageData.content.map((item) => {
+                  // 가능한 모든 키에서 안전하게 값 추출
+                  const id = pick(item, ["id", "orderId", "deliveryNum"]);
+                  const status = String(pick(item, ["status"], "")).toUpperCase() || "-";
+                  const cargoType = pick(item, ["cargoType", "transport_type"]);
+                  const fromAddr = pick(item, ["departure", "from"]);
+                  const toAddr = pick(item, ["arrival", "to"]);
+
+                  // 출발 예정일: reservedDate(문자열 yyyy-MM-dd…), scheduledDeparture, s_date …
+                  const depPlanned = formatDate10(
+                    pick(item, ["reservedDate", "scheduledDeparture", "s_date", "departurePlannedAt"])
+                  );
+
+                  // 최종 수정일: updatedAt 존재 시 날짜만
+                  const updated = formatDate10(pick(item, ["updatedAt"], ""));
+
+                  return (
+                    <tr
+                      key={id}
+                      onClick={() => moveToOrderPost(id)}
+                      style={{ cursor: "pointer" }}
+                      title={`게시판 상세로 이동 (#${id})`}
+                    >
+                      <td>{id}</td>
+                      <td>{STATUS_LABEL[status] || status}</td>
+                      <td>{cargoType}</td>
+                      <td>{fromAddr}</td>
+                      <td>{depPlanned}</td>
+                      <td>{toAddr}</td>
+                      <td>{updated}</td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -152,14 +189,18 @@ const OrderDEliveryList = () => {
           {/* 페이지네이션 */}
           <div className="pager" style={{ marginTop: 12 }}>
             <button disabled={page <= 0} onClick={() => load(page - 1)}>이전</button>
-            <span style={{ margin: "0 8px" }}>{(pageData.number ?? page) + 1} / {pageData.totalPages || 1}</span>
-            <button disabled={(pageData.number ?? page) + 1 >= (pageData.totalPages || 1)} onClick={() => load(page + 1)}>다음</button>
+            <span style={{ margin: "0 8px" }}>
+              {(pageData.number ?? page) + 1} / {pageData.totalPages || 1}
+            </span>
+            <button
+              disabled={(pageData.number ?? page) + 1 >= (pageData.totalPages || 1)}
+              onClick={() => load(page + 1)}
+            >
+              다음
+            </button>
           </div>
         </>
       )}
     </div>
   );
-};
-
-
-export default OrderDEliveryList;
+}
