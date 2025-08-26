@@ -1,7 +1,7 @@
-package com.fullstack.idle.controller;
+package com.fullstack.controller;
 
-import com.fullstack.idle.dto.inquiry.InquiryDTO;
-import com.fullstack.idle.service.inquiry.InquiryService;
+import com.fullstack.model.InquiryDTO;
+import com.fullstack.service.InquiryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

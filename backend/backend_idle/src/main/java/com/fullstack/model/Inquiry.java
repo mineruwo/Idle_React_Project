@@ -1,4 +1,4 @@
-package com.fullstack.idle.model.inquiry;
+package com.fullstack.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

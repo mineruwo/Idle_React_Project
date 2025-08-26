@@ -3,6 +3,7 @@ package com.fullstack.service;
 import com.fullstack.entity.CustomerEntity;
 import com.fullstack.entity.Order;
 import com.fullstack.model.CarOwnerOrderListDTO;
+import com.fullstack.model.enums.OrderStatus;
 import com.fullstack.repository.CustomerRepository;
 import com.fullstack.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -66,7 +67,7 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
 	        Long driverId = getDriverId(loginId);
 	        Order o = Order.builder()
 	                .assignedDriverId(driverId)
-	                .status("READY")
+	                .status(OrderStatus.READY)
 	                .departure(req.getDeparture())
 	                .arrival(req.getArrival())
 	                .distance(req.getDistance())
@@ -112,7 +113,7 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
 	        Order o = orderRepository.findByIdAndAssignedDriverId(orderId, driverId)
 	                .orElseThrow(() -> new AccessDeniedException("FORBIDDEN_ORDER_OWNER"));
 
-	        String cur  = o.getStatus();
+	        String cur  = o.getStatus().name();
 	        String next = nextStatus.toUpperCase();
 
 	        boolean normal =
@@ -132,7 +133,7 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
 	            throw new IllegalArgumentException("SAME_DAY_CANCEL_NOT_ALLOWED");
 	        }
 
-	        o.setStatus(next);
+	        o.setStatus(OrderStatus.valueOf(next));
 	        return toDetail(o);
 	    }
 
@@ -159,7 +160,7 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
 	                                                  : (o.getProposedPrice() == null ? null : o.getProposedPrice().longValue());
 	        return CarOwnerOrderListDTO.OrderSummaryResponse.builder()
 	                .id(o.getId())
-	                .status(o.getStatus())
+	                .status(o.getStatus().name())
 	                .route(safeJoin(o.getDeparture(), "→", o.getArrival()))
 	                .cargoType(o.getCargoType())
 	                .price(price)
@@ -183,7 +184,7 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
 	        return CarOwnerOrderListDTO.OrderDetailResponse.builder()
 	                .id(o.getId())
 	                .assignedDriverId(o.getAssignedDriverId())
-	                .status(o.getStatus())
+	                .status(o.getStatus().name())
 	                .departure(o.getDeparture())
 	                .arrival(o.getArrival())
 	                .distance(o.getDistance())

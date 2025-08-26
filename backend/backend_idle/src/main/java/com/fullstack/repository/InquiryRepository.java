@@ -1,6 +1,6 @@
-package com.fullstack.idle.repository;
+package com.fullstack.repository;
 
-import com.fullstack.idle.model.inquiry.Inquiry;
+import com.fullstack.model.Inquiry;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

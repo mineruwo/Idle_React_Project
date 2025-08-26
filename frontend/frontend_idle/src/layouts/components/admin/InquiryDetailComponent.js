@@ -15,7 +15,7 @@ const InquiryDetailComponent = ({ inquiry, onBackToList, refreshInquiries }) => 
         const inquiryData = {
             ...inquiry,
             inquiryAnswer: answer,
-            status: 'ANSWER_COMPLETED', // Or whatever the completed status is
+            status: 'ANSWERED', // Or whatever the completed status is
         };
 
         try {

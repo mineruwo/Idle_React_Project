@@ -46,9 +46,9 @@ public class CarOwnerDashboardServiceImpl implements CarOwnerDashboardService {
         LocalDateTime start = dr.startDate.atStartOfDay();
         LocalDateTime end   = dr.endDate.atTime(LocalTime.MAX);
 
-        long completed  = driverKey == null ? 0 : orderRepository.countByAssignedDriverIdAndStatus(driverKey, "COMPLETED");
-        long inProgress = driverKey == null ? 0 : orderRepository.countByAssignedDriverIdAndStatus(driverKey, "ONGOING");
-        long scheduled  = driverKey == null ? 0 : orderRepository.countByAssignedDriverIdAndStatus(driverKey, "READY");
+        long completed  = driverKey == null ? 0 : orderRepository.countByAssignedDriverIdAndStatus(driverKey, OrderStatus.COMPLETED);
+        long inProgress = driverKey == null ? 0 : orderRepository.countByAssignedDriverIdAndStatus(driverKey, OrderStatus.ONGOING);
+        long scheduled  = driverKey == null ? 0 : orderRepository.countByAssignedDriverIdAndStatus(driverKey, OrderStatus.READY);
         long total      = completed + inProgress + scheduled;
 
         // ✅ 이번달 매출: Order 기준(완료건의 driverPrice/proposedPrice 합)
@@ -126,7 +126,7 @@ public class CarOwnerDashboardServiceImpl implements CarOwnerDashboardService {
         List<String> statuses = List.of("READY", "ONGOING");
 
         return orderRepository
-                .findTop5ByAssignedDriverIdAndStatusOrderByUpdatedAtDesc(driverKey, OrderStatus.ONGOING) // Changed status literal
+                .findTop5ByAssignedDriverIdAndStatusInOrderByUpdatedAtDesc(driverKey, List.of(OrderStatus.ONGOING.name())) // Changed status literal
                 .stream()
                 .map(o -> DeliveryItemDTO.builder()
                         .id(o.getId())
@@ -165,4 +165,5 @@ public class CarOwnerDashboardServiceImpl implements CarOwnerDashboardService {
                 LocalDate last  = today.withDayOfMonth(today.lengthOfMonth());
                 return new DateRange(first, last);
         }
+    }
 }

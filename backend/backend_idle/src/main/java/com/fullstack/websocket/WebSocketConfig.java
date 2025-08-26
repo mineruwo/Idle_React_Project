@@ -1,4 +1,4 @@
-package com.idle.backend.websocket;
+package com.fullstack.websocket;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;

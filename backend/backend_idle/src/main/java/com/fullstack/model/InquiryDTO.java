@@ -1,6 +1,6 @@
-package com.fullstack.idle.dto.inquiry;
+package com.fullstack.model;
 
-import com.fullstack.idle.model.inquiry.InquiryStatus;
+import com.fullstack.model.InquiryStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

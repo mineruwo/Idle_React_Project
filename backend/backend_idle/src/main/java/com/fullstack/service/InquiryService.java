@@ -1,10 +1,12 @@
-package com.fullstack.idle.service.inquiry;
+package com.fullstack.service;
 
-import com.fullstack.idle.dto.inquiry.InquiryDTO;
-import com.fullstack.idle.model.inquiry.Inquiry;
+import com.fullstack.model.InquiryDTO;
+import com.fullstack.model.Inquiry;
+import com.fullstack.model.DailyAnswerCountDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface InquiryService {
@@ -15,6 +17,9 @@ public interface InquiryService {
     void deleteInquiry(UUID id);
     Page<InquiryDTO> getInquiriesByCustomerId(Long customerId, Pageable pageable);
     Page<InquiryDTO> getInquiriesByAdminId(Long adminId, Pageable pageable);
+
+    List<DailyAnswerCountDTO> getDailyAnswerCounts(int year, int month);
+    List<InquiryDTO> getInquiryDetailsByFilter(String filter);
 
     default Inquiry dtoToEntity(InquiryDTO dto) {
         return Inquiry.builder()

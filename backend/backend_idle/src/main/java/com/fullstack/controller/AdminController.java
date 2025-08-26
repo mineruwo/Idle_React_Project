@@ -35,6 +35,9 @@ import java.util.HashMap;
 import java.util.Map;
 import com.fullstack.service.ChatSessionService;
 import com.fullstack.model.ChatSessionDTO;
+import com.fullstack.model.DailyAnswerCountDTO;
+import com.fullstack.model.InquiryDTO;
+import com.fullstack.service.InquiryService;
 import java.util.Optional;
 
 @RestController
@@ -62,6 +65,9 @@ public class AdminController {
 
     @Autowired
     private ChatSessionService chatSessionService;
+
+    @Autowired
+    private InquiryService inquiryService;
 
     @PostMapping("/login")
     public ResponseEntity<AdminLoginResponseDTO> login(@RequestBody AdminLoginRequestDTO loginRequestDTO, HttpServletResponse response) {
@@ -390,5 +396,20 @@ public class AdminController {
     public ResponseEntity<Void> deleteChatSession(@PathVariable String chatRoomId) {
         chatSessionService.deleteChatSessionByChatRoomId(chatRoomId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/inquiries/daily-answers")
+    public ResponseEntity<List<DailyAnswerCountDTO>> getDailyAnswerCounts(
+            @RequestParam int year,
+            @RequestParam int month) {
+        List<DailyAnswerCountDTO> counts = inquiryService.getDailyAnswerCounts(year, month);
+        return ResponseEntity.ok(counts);
+    }
+
+    @GetMapping("/inquiries/my-history")
+    public ResponseEntity<List<InquiryDTO>> getInquiryDetailsByFilter(
+            @RequestParam String filter) {
+        List<InquiryDTO> inquiries = inquiryService.getInquiryDetailsByFilter(filter);
+        return ResponseEntity.ok(inquiries);
     }
 }

@@ -27,7 +27,7 @@ public class CarOwnerDashboardController {
 	public DashboardSummaryDTO getSummary(@AuthenticationPrincipal String ownerId,
 			@RequestParam(defaultValue = "month") String period) {
 
-		return dashboardService.getSummary(ownerId);
+		return dashboardService.getSummary(ownerId, period);
 	}
 
 	@GetMapping("/deliveries")
