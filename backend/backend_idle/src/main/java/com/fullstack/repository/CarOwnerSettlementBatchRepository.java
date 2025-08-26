@@ -16,7 +16,7 @@ public interface CarOwnerSettlementBatchRepository extends JpaRepository<CarOwne
 
     @Query("""
       select coalesce(sum(b.totalAmount),0)
-      from SettlementBatch b
+      from CarOwnerSettlementBatch b
       where b.ownerId = :ownerId
         and b.status in ('REQUESTED','APPROVED')
     """)
@@ -24,7 +24,7 @@ public interface CarOwnerSettlementBatchRepository extends JpaRepository<CarOwne
 
     @Query("""
       select coalesce(sum(b.totalAmount),0)
-      from SettlementBatch b
+      from CarOwnerSettlementBatch b
       where b.ownerId = :ownerId
         and b.paidAt >= :start and b.paidAt < :end
         and b.status = 'PAID'
@@ -35,7 +35,7 @@ public interface CarOwnerSettlementBatchRepository extends JpaRepository<CarOwne
 
     @Query("""
       select coalesce(sum(b.totalAmount),0)
-      from SettlementBatch b
+      from CarOwnerSettlementBatch b
       where b.ownerId = :ownerId
         and b.monthKey >= :monthStart and b.monthKey < :monthEnd
         and b.status in ('REQUESTED','APPROVED','PAID')

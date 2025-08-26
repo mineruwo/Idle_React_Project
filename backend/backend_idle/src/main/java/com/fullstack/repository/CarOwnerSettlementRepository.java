@@ -17,7 +17,7 @@ public interface CarOwnerSettlementRepository extends JpaRepository<CarOwnerSett
 
     @Query("""
       select s
-      from Settlement s
+      from CarOwnerSettlement s
       join s.batch b
       where b.ownerId = :ownerId
         and (:status is null or b.status = :status)
@@ -35,7 +35,7 @@ public interface CarOwnerSettlementRepository extends JpaRepository<CarOwnerSett
 
     @Query("""
       select s
-      from Settlement s
+      from CarOwnerSettlement s
       join s.batch b
       where s.id = :id and b.ownerId = :ownerId
     """)
