@@ -1,47 +1,37 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import CreateInquiryComponent from '../../layouts/components/common/inquiry/CreateInquiryComponent';
-import MyInquiriesComponent from '../../layouts/components/common/inquiry/MyInquiriesComponent';
+import React, { useState, useEffect } from 'react';
 import { getMe } from '../../api/loginApi';
-import { getInquiriesByCustomerId } from '../../api/inquiryApi';
+import FAQListComponent from '../../layouts/components/common/inquiry/FAQListComponent';
+import MyInquiriesListComponent from '../../layouts/components/common/inquiry/MyInquiriesListComponent';
+import CreateInquiryComponent from '../../layouts/components/common/inquiry/CreateInquiryComponent';
+import '../../CustomCSS/InquiryNav.css';
 
 const ShipperInquiriesPage = () => {
-    const [inquiries, setInquiries] = useState([]);
+    const [showWriteForm, setShowWriteForm] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    const fetchInquiries = useCallback(async () => {
-        if (!currentUser) return;
-        try {
-            const inquiriesData = await getInquiriesByCustomerId(currentUser.idNum);
-            setInquiries(inquiriesData.content); // Assuming the data is paginated
-        } catch (error) {
-            setError('문의 내역을 불러오는 중 오류가 발생했습니다.');
-            console.error(error);
-        }
-    }, [currentUser]);
+    const [inquiryListKey, setInquiryListKey] = useState(Date.now());
 
     useEffect(() => {
-        const fetchUserAndInquiries = async () => {
+        const fetchUser = async () => {
             setLoading(true);
             try {
                 const userData = await getMe();
                 setCurrentUser(userData);
-            } catch (error) {
-                setError('사용자 정보를 불러오는 중 오류가 발생했습니다.');
-                console.error(error);
+            } catch (err) {
+                setError('사용자 정보를 불러오는데 실패했습니다.');
+                console.error(err);
             } finally {
                 setLoading(false);
             }
         };
-        fetchUserAndInquiries();
+        fetchUser();
     }, []);
 
-    useEffect(() => {
-        if (currentUser) {
-            fetchInquiries();
-        }
-    }, [currentUser, fetchInquiries]);
+    const handleInquiryCreated = () => {
+        setInquiryListKey(Date.now());
+        setShowWriteForm(false);
+    };
 
     if (loading) {
         return <div>로딩 중...</div>;
@@ -52,12 +42,28 @@ const ShipperInquiriesPage = () => {
     }
 
     return (
-        <div>
-            <CreateInquiryComponent
-                currentUser={currentUser}
-                refreshInquiries={fetchInquiries}
-            />
-            <MyInquiriesComponent inquiries={inquiries} />
+        <div className="inquiry-page-container">
+            {showWriteForm ? (
+                <>
+                    <CreateInquiryComponent 
+                        currentUser={currentUser} 
+                        refreshInquiries={handleInquiryCreated}
+                        onCancelWrite={() => setShowWriteForm(false)}
+                    />
+                </>
+            ) : (
+                <>
+                    <div className="inquiry-header">
+                        <h2>고객 문의</h2>
+                        <button onClick={() => setShowWriteForm(true)} className="write-inquiry-button">
+                            문의 작성
+                        </button>
+                    </div>
+                    <FAQListComponent />
+                    <hr className="inquiry-divider" />
+                    <MyInquiriesListComponent key={inquiryListKey} currentUser={currentUser} />
+                </>
+            )}
         </div>
     );
 };
