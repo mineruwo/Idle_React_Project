@@ -18,8 +18,13 @@ const Main = lazy(() => import("../pages/mainpage/MainPage"));
 const OrderForm = lazy(() => import("../pages/orderPage/OrderForm"));
 const Login = lazy(() => import("../pages/loginpage/LoginPage"));
 const Signup = lazy(() => import("../pages/signuppage/SignupPage"));
-const NewPassword = lazy(() => import ("../pages/loginpage/NewPasswordPage"))
+const NewPassword = lazy(() => import("../pages/loginpage/NewPasswordPage"))
+const OauthLanding = lazy(() => import("../pages/signuppage/OauthLandingPage"));
+const LinkExisting = lazy(() => import("../pages/signuppage/LinkExistingPage"));
+const SnsSignup = lazy(() => import("../pages/signuppage/SnsSignupPage"));
+
 const AdminPage = lazy(() => import("../pages/adminPage/AdminPage"));
+
 const Shipper = lazy(() => import("../pages/shipperPage/ShipperDashBoard"));
 
 const CarPage = lazy(() => import("../pages/carOwnerPage/CarPage"));
@@ -29,7 +34,7 @@ const Profile = lazy(() => import("../pages/carOwnerPage/Profile"));
 const EditProfile = lazy(() => import("../pages/carOwnerPage/EditProfile"));
 const SubmitDOC = lazy(() => import("../pages/carOwnerPage/SubmitDOC"));
 const Settlement = lazy(() => import("../pages/carOwnerPage/Settlement"));
-const Vehicles = lazy(()=> import("../pages/carOwnerPage/Vehicles"));
+const Vehicles = lazy(() => import("../pages/carOwnerPage/Vehicles"));
 
 
 // 최상위 레이아웃 컴포넌트
@@ -66,9 +71,21 @@ const root = createBrowserRouter([
             },
             {
                 path: "newPassword",
-                element: <RedirectIfAuthed><NewPassword /></RedirectIfAuthed>
-            // 차주
+                element: <RedirectIfAuthed><NewPassword /></RedirectIfAuthed>,
             },
+            {
+                path: "oauth2/land",
+                element: <RedirectIfAuthed><OauthLanding /></RedirectIfAuthed>,
+            },
+            {
+                path: "oauth2/link",
+                element: <RedirectIfAuthed><LinkExisting /></RedirectIfAuthed>,
+            },
+            {
+                path: "oauth2/signup",
+                element: <RedirectIfAuthed><SnsSignup /></RedirectIfAuthed>,
+            },
+            // 차주
             {
                 path: "carPage",
                 element: (
@@ -125,7 +142,7 @@ const root = createBrowserRouter([
                         path: "vehicles",
                         element: (
                             <Suspense fallback={Loading}>
-                                <Vehicles/>
+                                <Vehicles />
                             </Suspense>
                         ),
                     },

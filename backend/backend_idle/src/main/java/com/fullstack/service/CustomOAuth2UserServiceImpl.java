@@ -34,19 +34,48 @@ public class CustomOAuth2UserServiceImpl implements CustomOAuth2UserService {
 		
         String provider = req.getClientRegistration().getRegistrationId();
 		Map<String, Object> attrs = new LinkedHashMap<>(user.getAttributes());
-        
-		String providerId = extractProviderId(provider, attrs);
-	    String email = extractEmail(provider, attrs);
 
+	    // 공급자별 attribute 평탄화 + nameAttributeKey 정리
+        String nameAttributeKey = req.getClientRegistration()
+                .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
+
+        if ("naver".equals(provider)) {
+            Map<String, Object> response = asMap(attrs.get("response"));
+            if (response != null) {
+                attrs = new LinkedHashMap<>(response); 
+            }
+            nameAttributeKey = "id"; 
+        } else if ("kakao".equals(provider)) {
+            Map<String, Object> account = asMap(attrs.get("kakao_account"));
+            if (account != null) {
+                Object email = account.get("email");
+                if (email != null) attrs.put("email", email);
+                Map<String, Object> profile = asMap(account.get("profile"));
+                if (profile != null) {
+                    if (profile.get("nickname") != null) attrs.put("nickname", profile.get("nickname"));
+                    if (profile.get("profile_image_url") != null) attrs.put("profile_image_url", profile.get("profile_image_url"));
+                }
+            }
+            nameAttributeKey = "id"; 
+        } else if ("google".equals(provider)) {
+            nameAttributeKey = "sub";
+        }
+        
+        String providerId = "google".equals(provider)
+                ? asString(attrs.get("sub"))
+                : asString(attrs.get("id")); 
+
+        String resolvedEmail = asString(attrs.get("email")); 
+        
         CustomerEntity linked = (providerId == null) ? null
                 : customerRepository.findBySnsLoginProviderAndSnsProviderId(provider, providerId).orElse(null);
 
-        CustomerEntity localByEmail = (email == null) ? null
-                : customerRepository.findById(email).orElse(null);
+        CustomerEntity localByEmail = (resolvedEmail == null) ? null
+                : customerRepository.findById(resolvedEmail).orElse(null);
         
         attrs.put("provider", provider);
         attrs.put("providerId", providerId);
-        attrs.put("resolvedEmail", email);       
+        attrs.put("resolvedEmail", resolvedEmail);       
         attrs.put("existingLinkedUser", linked != null);
         attrs.put("emailUserExists", localByEmail != null);
 
@@ -55,44 +84,21 @@ public class CustomOAuth2UserServiceImpl implements CustomOAuth2UserService {
                 	? Collections.<GrantedAuthority>emptyList()
                 	: Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + linked.getRole().toUpperCase()));
         
-        String nameAttributeKey = req.getClientRegistration()
-                .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
-        
+        if (!attrs.containsKey(nameAttributeKey)) {
+            if (providerId != null) {
+                attrs.put(nameAttributeKey, providerId);
+            }
+        }
+
         return new DefaultOAuth2User(authorities, attrs, nameAttributeKey); 
     }
 	
-	private String extractProviderId(String provider, Map<String, Object> attrs) {
-        switch (provider) {
-            case "google":
-                return (String) attrs.get("sub");
-            case "kakao": {
-                Object id = attrs.get("id");
-                return (id != null) ? String.valueOf(id) : null;
-            }
-            case "naver": {
-                Map<?, ?> resp = (Map<?, ?>) attrs.get("response");
-                return (resp != null) ? (String) resp.get("id") : null;
-            }
-            default:
-                return null;
-        }
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> asMap(Object o) {
+        return (o instanceof Map) ? (Map<String, Object>) o : null;
     }
-
-    private String extractEmail(String provider, Map<String, Object> attrs) {
-        switch (provider) {
-            case "google":
-                return (String) attrs.get("email");
-            case "kakao": {
-                Map<?, ?> account = (Map<?, ?>) attrs.get("kakao_account");
-                return (account != null) ? (String) account.get("email") : null;
-            }
-            case "naver": {
-                Map<?, ?> resp = (Map<?, ?>) attrs.get("response");
-                return (resp != null) ? (String) resp.get("email") : null;
-            }
-            default:
-                return null;
-        }
+    private static String asString(Object o) {
+        return (o == null) ? null : String.valueOf(o);
     }
 
 }

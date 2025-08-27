@@ -1,15 +1,16 @@
 import Footer from "../../layouts/components/common/Footer";
 import GNB from "../../layouts/components/common/GNB"
-import SignupComponent from "../../layouts/components/signup/SignupComponent"
+import SnsSignupComponent from "../../layouts/components/signup/SnsSignupComponent";
 
-const SignupPage = () => {
+
+const SnsSignupPage = () => {
     return (
         <>
             <GNB />
-            <SignupComponent />
+            <SnsSignupComponent />
             <Footer />
         </>
     );
 }
 
-export default SignupPage;
+export default SnsSignupPage;

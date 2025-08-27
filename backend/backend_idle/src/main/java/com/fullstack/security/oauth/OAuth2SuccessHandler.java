@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository;
-import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -21,9 +19,8 @@ import org.springframework.stereotype.Component;
 import com.fullstack.entity.CustomerEntity;
 import com.fullstack.model.TokenDTO;
 import com.fullstack.repository.CustomerRepository;
-import com.fullstack.security.jwt.JWTUtil;
-import com.fullstack.security.util.NicknameUtil;
 import com.fullstack.security.util.TokenCookieUtils;
+import com.fullstack.service.SnsSignupService;
 import com.fullstack.service.TokenService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,9 +33,12 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 	
 	private final CustomerRepository customerRepository;
 	private final TokenService tokenService;
+	private final SnsSignupService snsSignupService;
 	
 	@Value("${frontend.base-url}")
     private String frontendBaseUrl;
+	
+	private static final Duration OAUTH_SIGNUP_TTL = Duration.ofMinutes(10);
 	
 	@Override
     public void onAuthenticationSuccess(HttpServletRequest req, HttpServletResponse res,
@@ -51,118 +51,69 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 			OAuth2User principal = oauth.getPrincipal();
 	        Map<String, Object> attrs = principal.getAttributes();
 	        
-	        String providerId = extractProviderId(provider, attrs);
-            String email = extractEmail(provider, attrs); 
-            String nickname   = extractNickname(provider, attrs);
+	        String providerId = extractProviderId(provider, attrs);        
             
 	        CustomerEntity customer = customerRepository
 	                .findBySnsLoginProviderAndSnsProviderId(provider, providerId)
 	                .orElse(null);
 	        
-	        if (customer == null) {
-                // 연동 없으면 이메일로 기존 계정 찾기 → 있으면 연동, 없으면 신규 생성
-	        	 if (!isBlank(email)) {
-                	customer = customerRepository.findById(email).orElse(null);
-                }
-                if (customer != null) {
-                    // 기존 로컬 계정에 연동
-                	customer.setSnsLoginProvider(provider);
-                	customer.setSnsProviderId(providerId);
-                    customerRepository.save(customer);
-                } else {
-                    // 신규 생성
-                	String loginId = chooseLoginId(email, provider, providerId);
-                	customer = new CustomerEntity();
-                	customer.setId(loginId);
-                	customer.setPasswordEnc(null);
-                	customer.setCustomName(!isBlank(nickname) ? nickname : "새 사용자");
-                	String picked = NicknameUtil.pickAvailable(
-                            nickname, provider, customerRepository::existsByNickname);
-                	customer.setNickname(picked);
-                    customer.setSnsLoginProvider(provider);
-                    customer.setSnsProviderId(providerId);
-                    customer.setCreatedAt(LocalDateTime.now());
-                    customer.setIsLefted(false);
-                    customer.setUserPoint(0);
-                    customerRepository.save(customer);
-                }
+	        // 로그인
+	        if (customer != null) {
+                TokenDTO tokenDTO = tokenService.issue(customer.getId(), customer.getRole());
+                TokenCookieUtils.setAccessTokenCookie(res, tokenDTO.getAccessToken(), tokenDTO.getAtExpiresIn());
+                TokenCookieUtils.setRefreshTokenCookie(res, tokenDTO.getRefreshToken(), tokenDTO.getRtExpiresIn());
+                TokenCookieUtils.setAuthHintCookie(res, true, tokenDTO.getRtExpiresIn());
+                res.sendRedirect(frontendBaseUrl + "/");
+                return;
             }
-
-            // === 여기서부터 컨트롤러와 동일한 쿠키 발급 방식 ===
-            TokenDTO tokenDTO = tokenService.issue(customer.getId(), customer.getRole());
-
-            TokenCookieUtils.setAccessTokenCookie(res, tokenDTO.getAccessToken(), tokenDTO.getAtExpiresIn());
-            TokenCookieUtils.setRefreshTokenCookie(res, tokenDTO.getRefreshToken(), tokenDTO.getRtExpiresIn());
-            TokenCookieUtils.setAuthHintCookie(res, true, tokenDTO.getRtExpiresIn());
-
-            res.sendRedirect(frontendBaseUrl + "/");
-
+	        
+	        String mode = "choose";
+	      	        
+	        String signupToken = snsSignupService.issue(provider, providerId, mode, OAUTH_SIGNUP_TTL);
+	        
+	        ResponseCookie signupCookie = ResponseCookie.from("oauth_signup_token",
+                    URLEncoder.encode(signupToken, StandardCharsets.UTF_8))
+	        	.httpOnly(true)
+	            .secure(false)          // TODO: 운영 배포 시 true
+	            .sameSite("Lax")
+	            .path("/")
+	            .maxAge(OAUTH_SIGNUP_TTL)
+	            .build();
+	        
+	        res.addHeader("Set-Cookie", signupCookie.toString());
+	        
+	        res.sendRedirect(frontendBaseUrl + "/oauth2/land?mode=choose");
         } catch (Exception e) {
             e.printStackTrace();
             res.sendRedirect(frontendBaseUrl + "/login?error=oauth2");
         }
     }
-	
-	 private String chooseLoginId(String email, String provider, String providerId) {
-	        if (!isBlank(email) && !customerRepository.existsById(email)) {
-	            return email;
+    
+	private String extractProviderId(String provider, Map<String, Object> attrs) {
+	    switch (provider) {
+	        case "google":
+	            // google은 sub가 id. 혹시 라이브러리/환경에 따라 id만 있는 경우도 대비
+	            return asString(attrs.getOrDefault("sub", attrs.get("id")));
+	        case "kakao":
+	            // kakao는 기본 id가 최상위. (평탄화 전이면 그대로, 후면 어차피 최상위)
+	            return asString(attrs.get("id"));
+	        case "naver": {
+	            // ✅ 평탄화된 경우: attrs.get("id")
+	            // ✅ 평탄화 전(기존): attrs.get("response.id")
+	            Object id = attrs.get("id");
+	            if (id == null) {
+	                Map<String,Object> resp = asMap(attrs.get("response"));
+	                if (resp != null) id = resp.get("id");
+	            }
+	            return asString(id);
 	        }
-	        String base = "sns-" + provider + "-" + providerId + "@" + provider + ".oauth";
-	        if (!customerRepository.existsById(base)) return base;
-	        return base + "-" + UUID.randomUUID().toString().substring(0, 8);
+	        default:
+	            return null;
 	    }
-    
-    private String extractProviderId(String provider, Map<String, Object> attrs) {
-        switch (provider) {
-            case "google":
-                return (String) attrs.get("sub");
-            case "naver": {
-                Map<?, ?> resp = (Map<?, ?>) attrs.get("response");
-                return resp != null ? (String) resp.get("id") : null;
-            }
-            case "kakao":
-                Object id = attrs.get("id");
-                return id != null ? String.valueOf(id) : null;
-            default:
-                throw new IllegalArgumentException("Unsupported provider: " + provider);
-        }
-    }
-    
-    private String extractEmail(String provider, Map<String, Object> attrs) {
-        switch (provider) {
-            case "google":
-                return (String) attrs.get("email");
-            case "kakao": {
-                Map<?, ?> account = (Map<?, ?>) attrs.get("kakao_account");
-                return (account != null) ? (String) account.get("email") : null;
-            }
-            case "naver": {
-                Map<?, ?> resp = (Map<?, ?>) attrs.get("response");
-                return (resp != null) ? (String) resp.get("email") : null;
-            }
-            default:
-                return null;
-        }
-    }
-    
-    private String extractNickname(String provider, Map<String, Object> attrs) {
-        switch (provider) {
-            case "google": return String.valueOf(attrs.getOrDefault("name", ""));
-            case "kakao": {
-                Map<?, ?> acc = (Map<?, ?>) attrs.get("kakao_account");
-                Map<?, ?> profile = acc == null ? null : (Map<?, ?>) acc.get("profile");
-                Object nick = profile == null ? null : profile.get("nickname");
-                return nick == null ? "" : String.valueOf(nick);
-            }
-            case "naver": {
-                Map<?, ?> resp = (Map<?, ?>) attrs.get("response");
-                Object nick = resp == null ? null : resp.get("nickname");
-                return nick == null ? "" : String.valueOf(nick);
-            }
-            default: return "";
-        }
-    }
-    
-    private boolean isBlank(String s) { return s == null || s.isBlank(); }
+	}
+	
+	private static String asString(Object o) { return o == null ? null : String.valueOf(o); }
+	@SuppressWarnings("unchecked")
+	private static Map<String, Object> asMap(Object o) { return (o instanceof Map) ? (Map<String, Object>) o : null; }
 
 }

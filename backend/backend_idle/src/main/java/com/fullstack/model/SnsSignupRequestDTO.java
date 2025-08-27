@@ -1,0 +1,17 @@
+package com.fullstack.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class SnsSignupRequestDTO {
+
+	private String customName;
+	private String nickname;
+	private String role;
+}
