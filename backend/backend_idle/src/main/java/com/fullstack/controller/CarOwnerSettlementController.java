@@ -1,91 +1,99 @@
 package com.fullstack.controller;
 
-
-import com.fullstack.model.CarOwnerSettlementDTO.SettlementCreate;
+import com.fullstack.entity.CarOwnerSettlement;
 import com.fullstack.model.CarOwnerSettlementDTO.SettlementDetailResponse;
-import com.fullstack.model.CarOwnerSettlementDTO.SettlementMemoRequest;
-import com.fullstack.model.CarOwnerSettlementDTO.SettlementPayRequest;
 import com.fullstack.model.CarOwnerSettlementDTO.SettlementSummaryCardResponse;
 import com.fullstack.model.CarOwnerSettlementDTO.SettlementSummaryResponse;
 import com.fullstack.service.CarOwnerSettlementService;
-import lombok.RequiredArgsConstructor;
+import jakarta.validation.constraints.Min;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/car-owner/settlements")
-@RequiredArgsConstructor
 public class CarOwnerSettlementController {
 
-    private final CarOwnerSettlementService service;
+    private final CarOwnerSettlementService settlementService;
 
-    // 목록 (기간/상태/페이징)  ← fetchSettlements 와 1:1
+    public CarOwnerSettlementController(CarOwnerSettlementService settlementService) {
+        this.settlementService = settlementService;
+    }
+
+    /** 목록 */
     @GetMapping
     public Page<SettlementSummaryResponse> list(
             @AuthenticationPrincipal String ownerId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) String from,   // yyyy-MM-dd
-            @RequestParam(required = false) String to      // yyyy-MM-dd
+            @RequestParam(name = "from", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(name = "to", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(name = "status", required = false) String status,
+            @RequestParam(name = "page", defaultValue = "0") @Min(0) int page,
+            @RequestParam(name = "size", defaultValue = "20") @Min(1) int size
     ) {
-        return service.list(ownerId, status, from, to, page, size);
+        CarOwnerSettlement.Status st = parseStatusOrNull(status);
+        return settlementService.list(ownerId, from, to, st, page, size);
     }
 
-    // 단건 조회  ← fetchSettlementDetail
+    /** 상세 */
     @GetMapping("/{id}")
     public SettlementDetailResponse detail(
             @AuthenticationPrincipal String ownerId,
-            @PathVariable Long id
+            @PathVariable("id") Long id
     ) {
-        return service.get(ownerId, id);
+        return settlementService.getDetail(ownerId, id);
     }
 
-    // 생성  ← createSettlement
-    @PostMapping
-    public SettlementDetailResponse create(
+    /** 주문 1건 정산 생성 */
+    @PostMapping("/order/{orderId}")
+    public Long createForOrder(
             @AuthenticationPrincipal String ownerId,
-            @RequestBody SettlementCreate req
+            @PathVariable("orderId") Long orderId
     ) {
-        return service.create(ownerId, req);
+        return settlementService.createForOrder(ownerId, orderId);
     }
 
-    // 승인  ← approveSettlement
-    @PatchMapping("/{id}/approve")
-    public SettlementDetailResponse approve(
+    /** 월 동기화 */
+    @PostMapping("/sync")
+    public int syncMonthly(
             @AuthenticationPrincipal String ownerId,
-            @PathVariable Long id,
-            @RequestBody(required = false) SettlementMemoRequest body
+            @RequestParam(name = "ym") String ym
     ) {
-        return service.approve(ownerId, id, body);
+        YearMonth yearMonth = YearMonth.parse(ym); // "YYYY-MM"
+        return settlementService.syncMonthly(ownerId, yearMonth);
     }
 
-    // 지급  ← paySettlement
-    @PatchMapping("/{id}/pay")
-    public SettlementDetailResponse pay(
+    /** 정산 요청 (READY -> REQUESTED) */
+    @PostMapping("/{id}/request")
+    public void requestPayout(
             @AuthenticationPrincipal String ownerId,
-            @PathVariable Long id,
-            @RequestBody(required = false) SettlementPayRequest body
+            @PathVariable("id") Long id
     ) {
-        return service.pay(ownerId, id, body);
+        settlementService.requestPayout(ownerId, id);
     }
 
-    // 취소  ← cancelSettlement
-    @PatchMapping("/{id}/cancel")
-    public SettlementDetailResponse cancel(
-            @AuthenticationPrincipal String ownerId,
-            @PathVariable Long id,
-            @RequestBody(required = false) SettlementMemoRequest body
-    ) {
-        return service.cancel(ownerId, id, body);
-    }
-
-    // 요약 카드  ← fetchSettlementSummaryCard (엔드포인트명은 summary)
+    /** 요약 카드 */
     @GetMapping("/summary")
     public SettlementSummaryCardResponse summary(
-            @AuthenticationPrincipal String ownerId
+            @AuthenticationPrincipal String ownerId,
+            @RequestParam(name = "from", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(name = "to", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
     ) {
-        return service.summary(ownerId);
+        return settlementService.summaryCard(ownerId, from, to);
+    }
+
+    private CarOwnerSettlement.Status parseStatusOrNull(String status) {
+        if (status == null || status.isBlank()) return null;
+        try {
+            return CarOwnerSettlement.Status.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 }

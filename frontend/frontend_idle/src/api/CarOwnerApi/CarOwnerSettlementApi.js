@@ -1,76 +1,117 @@
-// 목록 (기간/상태/페이징)
-export async function fetchSettlements({ page=0, size=10, status="", from="", to="" } = {}) {
-  const p = new URLSearchParams();
-  p.set("page", page);
-  p.set("size", size);
-  if (status) p.set("status", status);
-  if (from) p.set("from", from); // yyyy-MM-dd
-  if (to) p.set("to", to);
+const BASE = "/api/car-owner";
+const SETTLEMENTS = `${BASE}/settlements`;
 
-  const res = await fetch(`/api/car-owner/settlements?` + p.toString(), {
+async function handle(res) {
+  if (!res.ok) {
+    let msg = `요청 실패 (${res.status})`;
+    try {
+      const body = await res.json();
+      msg = body.code ? `${body.code}:${body.message}` : (body.message || msg);
+    } catch {
+      const txt = await res.text().catch(() => "");
+      msg = txt || msg;
+    }
+    throw new Error(msg);
+  }
+  if (res.status === 204) return null;
+  const ct = res.headers.get("content-type") || "";
+  return ct.includes("application/json") ? res.json() : res.text();
+}
+
+const qp = (v) => (v !== undefined && v !== null && v !== "" ? String(v) : undefined);
+
+/** 정산 목록: GET /api/car-owner/settlements */
+export async function fetchSettlements({ page = 0, size = 20, status = "", from = "", to = "" } = {}, token) {
+  const url = new URL(SETTLEMENTS, window.location.origin);
+  const params = { page, size, status: qp(status), from: qp(from), to: qp(to) };
+  Object.entries(params).forEach(([k, v]) => v !== undefined && url.searchParams.set(k, v));
+
+  const res = await fetch(url.toString(), {
+    method: "GET",
     credentials: "include",
-    // JWT 미완 시: headers: { "X-Dev-User": "driver_123" }
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json(); // Page<SettlementSummaryResponse>
+  return handle(res);
 }
 
-// 단건 조회
-export async function fetchSettlementDetail(id) {
-  const res = await fetch(`/api/car-owner/settlements/${id}`, { credentials: "include" });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json(); // SettlementDetailResponse
+/** 정산 상세: GET /api/car-owner/settlements/{id} */
+export async function fetchSettlementDetail(id, token) {
+  const res = await fetch(`${SETTLEMENTS}/${encodeURIComponent(id)}`, {
+    method: "GET",
+    credentials: "include",
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  return handle(res);
 }
 
-// 생성
-export async function createSettlement(payload) {
-  const res = await fetch(`/api/car-owner/settlements`, {
+/** 요약 카드: GET /api/car-owner/settlements/summary */
+export async function fetchSettlementSummaryCard({ from = "", to = "" } = {}, token) {
+  const url = new URL(`${SETTLEMENTS}/summary`, window.location.origin);
+  if (qp(from)) url.searchParams.set("from", from);
+  if (qp(to)) url.searchParams.set("to", to);
+
+  const res = await fetch(url.toString(), {
+    method: "GET",
+    credentials: "include",
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  return handle(res);
+}
+
+/** (주문 1건 기준) 정산 생성: POST /api/car-owner/settlements/order/{orderId} */
+export async function createSettlementForOrder(orderId, token) {
+  const res = await fetch(`${SETTLEMENTS}/order/${encodeURIComponent(orderId)}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify(payload), // { orderId, amount, memo? }
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+  return handle(res); // returns settlementId
 }
 
-// 승인/지급/취소
-export async function approveSettlement(id, memo) {
-  const res = await fetch(`/api/car-owner/settlements/${id}/approve`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+/** 월 동기화: POST /api/car-owner/settlements/sync?ym=YYYY-MM */
+export async function syncMonthly(ym, token) {
+  const url = new URL(`${SETTLEMENTS}/sync`, window.location.origin);
+  url.searchParams.set("ym", ym); // "2025-08"
+
+  const res = await fetch(url.toString(), {
+    method: "POST",
     credentials: "include",
-    body: JSON.stringify({ memo: memo || "" }),
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+  return handle(res); // returns created count
 }
 
-export async function paySettlement(id, txRef) {
-  const res = await fetch(`/api/car-owner/settlements/${id}/pay`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+/** 정산 요청(READY→REQUESTED): POST /api/car-owner/settlements/{id}/request */
+export async function requestPayout(id, token) {
+  const res = await fetch(`${SETTLEMENTS}/${encodeURIComponent(id)}/request`, {
+    method: "POST",
     credentials: "include",
-    body: JSON.stringify({ txRef: txRef || "" }),
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+  return handle(res);
 }
 
-export async function cancelSettlement(id, memo) {
-  const res = await fetch(`/api/car-owner/settlements/${id}/cancel`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+/** 지급 완료(REQUESTED/APPROVED→PAID): POST /api/car-owner/settlements/{id}/paid */
+export async function markSettlementPaid(id, token) {
+  const res = await fetch(`${SETTLEMENTS}/${encodeURIComponent(id)}/paid`, {
+    method: "POST",
     credentials: "include",
-    body: JSON.stringify({ memo: memo || "" }),
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+  return handle(res);
 }
 
-// 요약 카드
-export async function fetchSettlementSummaryCard() {
-  const res = await fetch(`/api/car-owner/settlements/summary`, { credentials: "include" });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json(); // SettlementSummaryCardResponse
+/** 🔸 월 정산 신청: POST /api/car-owner/settlements/batch/request?ym=YYYY-MM
+ *  백엔드 엔드포인트가 다르면 아래 경로만 맞춰주세요.
+ */
+export async function requestPayoutBatch(ym, token) {
+  const url = new URL(`${SETTLEMENTS}/batch/request`, window.location.origin);
+  url.searchParams.set("ym", ym);
+
+  const res = await fetch(url.toString(), {
+    method: "POST",
+    credentials: "include",
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  return handle(res);
 }

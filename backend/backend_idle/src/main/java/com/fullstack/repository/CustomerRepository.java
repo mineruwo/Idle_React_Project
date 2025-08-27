@@ -60,6 +60,9 @@ public interface CustomerRepository extends JpaRepository<CustomerEntity, Intege
     boolean existsByNickname(String nickname);
     
     boolean existsByNicknameAndIdNot(String nickname, String id);
+    
+    @Query("select c.idNum from CustomerEntity c where c.id = :ownerId")
+    Optional<String> findIdNumByOwnerId(@Param("ownerId") String ownerId);
 
     @Query("SELECT DATE(c.createdAt), COUNT(c) FROM CustomerEntity c WHERE DATE(c.createdAt) BETWEEN :startDate AND :endDate GROUP BY DATE(c.createdAt) ORDER BY DATE(c.createdAt)")
     List<Object[]> countCustomersByCreationDate(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);

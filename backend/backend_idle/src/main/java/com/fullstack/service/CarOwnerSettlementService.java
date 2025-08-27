@@ -1,26 +1,51 @@
 package com.fullstack.service;
 
-import com.fullstack.model.CarOwnerSettlementDTO.SettlementCreate;
+import com.fullstack.entity.CarOwnerSettlement;
 import com.fullstack.model.CarOwnerSettlementDTO.SettlementDetailResponse;
-import com.fullstack.model.CarOwnerSettlementDTO.SettlementMemoRequest;
-import com.fullstack.model.CarOwnerSettlementDTO.SettlementPayRequest;
 import com.fullstack.model.CarOwnerSettlementDTO.SettlementSummaryCardResponse;
 import com.fullstack.model.CarOwnerSettlementDTO.SettlementSummaryResponse;
 import org.springframework.data.domain.Page;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
+
 public interface CarOwnerSettlementService {
 
-    Page<SettlementSummaryResponse> list(String ownerId, String status, String from, String to, int page, int size);
+    /**
+     * 정산 목록 (기간/상태/페이징)
+     */
+    Page<SettlementSummaryResponse> list(
+            String ownerId,
+            LocalDate from,   // nullable
+            LocalDate to,     // nullable
+            CarOwnerSettlement.Status status, // nullable
+            int page,
+            int size
+    );
 
-    SettlementDetailResponse get(String ownerId, Long id);
+    /**
+     * 정산 상세
+     */
+    SettlementDetailResponse getDetail(String ownerId, Long settlementId);
 
-    SettlementDetailResponse create(String ownerId, SettlementCreate req); // (월 자동 동기화 + 수동 추가 병행 가능)
+    /**
+     * (주문 1건 기준) 정산 생성. 이미 존재하면 기존 ID 반환.
+     */
+    Long createForOrder(String ownerId, Long orderId);
 
-    SettlementDetailResponse approve(String ownerId, Long id, SettlementMemoRequest memo);
+    /**
+     * 월 동기화 (완료 주문 → 미존재 정산 자동 생성)
+     * @return 생성 건수
+     */
+    int syncMonthly(String ownerId, YearMonth ym);
 
-    SettlementDetailResponse pay(String ownerId, Long id, SettlementPayRequest req);
+    /**
+     * 차주 정산 요청 (READY → REQUESTED)
+     */
+    void requestPayout(String ownerId, Long settlementId);
 
-    SettlementDetailResponse cancel(String ownerId, Long id, SettlementMemoRequest memo);
-
-    SettlementSummaryCardResponse summary(String ownerId);
+    /**
+     * 요약 카드 (합계·건수)
+     */
+    SettlementSummaryCardResponse summaryCard(String ownerId, LocalDate from, LocalDate to);
 }
