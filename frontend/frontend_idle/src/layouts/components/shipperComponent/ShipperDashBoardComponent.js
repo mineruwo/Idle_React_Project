@@ -5,15 +5,22 @@ import ShippingStatusComponent from "./ShippingStatusComponent";
 import { fetchUserPoints } from "../../../api/paymentApi";
 import ShipperReviewDashboard from "./ShipperReviewDashboard";
 import { fetchMyOrders } from "../../../api/orderApi";
+import { getInquiriesByCustomerId } from "../../../api/inquiryApi";
+import { useAuth } from "../../../auth/AuthProvider";
 
-const ShipperDashBoardComponent = (userId) => {
-    const { shipperMoveToPoint, shipperMoveToOrderHistory } = useCustomMove();
+const ShipperDashBoardComponent = () => {
+    const { shipperMoveToPoint, shipperMoveToOrderHistory, shipperMoveToInquiries } =
+        useCustomMove();
+    const { profile } = useAuth();
 
     const [currentPoints, setCurrentPoints] = useState(0);
     const [totalOrders, setTotalOrders] = useState(0);
     const [inProgressOrders, setInProgressOrders] = useState(0);
     const [completedOrders, setCompletedOrders] = useState(0);
     const [cancelledOrders, setCancelledOrders] = useState(0);
+    const [totalInquiries, setTotalInquiries] = useState(0);
+    const [answeredInquiries, setAnsweredInquiries] = useState(0);
+    const [pendingInquiries, setPendingInquiries] = useState(0);
 
     useEffect(() => {
         const loadOrderCounts = async () => {
@@ -26,24 +33,24 @@ const ShipperDashBoardComponent = (userId) => {
                 let completed = 0;
                 let cancelled = 0;
 
-                allOrders.forEach(order => {
+                allOrders.forEach((order) => {
                     switch (order.status) {
-                        case 'CREATED':
+                        case "CREATED":
                             created++;
                             break;
-                        case 'PAYMENT_PENDING':
+                        case "PAYMENT_PENDING":
                             paymentPending++;
                             break;
-                        case 'READY':
+                        case "READY":
                             ready++;
                             break;
-                        case 'ONGOING':
+                        case "ONGOING":
                             ongoing++;
                             break;
-                        case 'COMPLETED':
+                        case "COMPLETED":
                             completed++;
                             break;
-                        case 'CANCELLED': // Assuming 'CANCELLED' is a possible status
+                        case "CANCELLED": // Assuming 'CANCELLED' is a possible status
                             cancelled++;
                             break;
                         default:
@@ -55,28 +62,57 @@ const ShipperDashBoardComponent = (userId) => {
                 setInProgressOrders(created + paymentPending + ready + ongoing);
                 setCompletedOrders(completed);
                 setCancelledOrders(cancelled);
-
             } catch (error) {
                 console.error("Failed to fetch order counts:", error);
-                // Optionally set error state for display
             }
         };
 
         loadOrderCounts();
-    }, []); // Empty dependency array to run once on mount
+    }, []);
 
     useEffect(() => {
-        const getUserPoints = async () => {
-            try {
-                const response = await fetchUserPoints();
-                setCurrentPoints(response.points);
-            } catch (error) {
-                console.error("Failed to fetch user points:", error);
-            }
-        };
+        if (profile?.idNum) {
+            const getUserPoints = async () => {
+                try {
+                    const response = await fetchUserPoints();
+                    setCurrentPoints(response.points);
+                } catch (error) {
+                    console.error("Failed to fetch user points:", error);
+                }
+            };
 
-        getUserPoints();
-    }, [userId]);
+            const loadInquiryCounts = async () => {
+                try {
+                    const response = await getInquiriesByCustomerId(profile.idNum);
+                    const inquiries = response.content; // Extract array from 'content' property
+
+                    if (Array.isArray(inquiries)) {
+                        let answered = 0;
+                        let pending = 0;
+                        inquiries.forEach((inquiry) => {
+                            if (inquiry.status === "ANSWERED") {
+                                answered++;
+                            } else {
+                                pending++;
+                            }
+                        });
+                        setTotalInquiries(inquiries.length);
+                        setAnsweredInquiries(answered);
+                        setPendingInquiries(pending);
+                    } else {
+                        setTotalInquiries(0);
+                        setAnsweredInquiries(0);
+                        setPendingInquiries(0);
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch inquiries:", error);
+                }
+            };
+
+            getUserPoints();
+            loadInquiryCounts();
+        }
+    }, [profile]);
 
     return (
         <div className="dashboard">
@@ -85,9 +121,13 @@ const ShipperDashBoardComponent = (userId) => {
                     <div className="card-title">오더상세</div>
                     <div className="card-content">{totalOrders}건</div>
                     <div className="card-desc">
-                        최근 오더: 진행중 {inProgressOrders}, 완료 {completedOrders}, 취소 {cancelledOrders}
+                        최근 오더: 진행중 {inProgressOrders}, 완료 {completedOrders}, 취소{" "}
+                        {cancelledOrders}
                     </div>
-                    <div className="card-action" onClick={shipperMoveToOrderHistory}>
+                    <div
+                        className="card-action"
+                        onClick={shipperMoveToOrderHistory}
+                    >
                         상세보기
                     </div>
                 </div>
@@ -102,24 +142,24 @@ const ShipperDashBoardComponent = (userId) => {
                 </div>
                 <div className="card">
                     <div className="card-title">내 문의 내역</div>
-                    <div className="card-content">3건</div>
+                    <div className="card-content">{totalInquiries}건</div>
                     <div className="card-desc">
-                        최근 문의: 답변 완료 2, 답변 대기 1
+                        최근 문의: 답변 완료 {answeredInquiries}, 답변 대기 {pendingInquiries}
                     </div>
-                    <div className="card-action">
+                    <div className="card-action" onClick={shipperMoveToInquiries}>
                         상세보기
                     </div>
                 </div>
-            </div>
-            <div className="dashboard-row-1">
-                {/* 새로운 후기 관리 컴포넌트를 여기에 추가 */}
-                <ShipperReviewDashboard />
             </div>
             <div className="dashboard-row-1">
                 <div className="card card-full-width">
                     <div className="card-title">운송현황</div>
                     <ShippingStatusComponent />
                 </div>
+            </div>
+            <div className="dashboard-row-1">
+                {/* 새로운 후기 관리 컴포넌트를 여기에 추가 */}
+                <ShipperReviewDashboard />
             </div>
         </div>
     );
