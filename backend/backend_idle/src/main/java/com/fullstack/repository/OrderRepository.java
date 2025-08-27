@@ -157,4 +157,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     long countByAssignedDriverIdAndStatusIn(Long assignedDriverId, Collection<OrderStatus> statuses); // or varargs
     long countByStatus(OrderStatus status);
     long countByStatusIn(Collection<OrderStatus> statuses);
+
+    List<Order> findByCreatedAtBetween(LocalDateTime startDateTime, LocalDateTime endDateTime);
 }

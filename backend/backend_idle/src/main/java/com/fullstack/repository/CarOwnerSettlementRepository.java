@@ -22,7 +22,7 @@ public interface CarOwnerSettlementRepository extends JpaRepository<CarOwnerSett
       where b.ownerId = :ownerId
         and (:status is null or b.status = :status)
         and (:fromMonth is null or b.monthKey >= :fromMonth)
-        and (:toMonth   is null or b.monthKey <  :toNextMonth)
+        and (:toNextMonth   is null or b.monthKey <  :toNextMonth)
       order by b.monthKey desc, s.id desc
     """)
     Page<CarOwnerSettlement> search(

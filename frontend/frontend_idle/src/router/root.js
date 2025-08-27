@@ -18,19 +18,19 @@ const Main = lazy(() => import("../pages/mainpage/MainPage"));
 const OrderForm = lazy(() => import("../pages/orderPage/OrderForm"));
 const Login = lazy(() => import("../pages/loginpage/LoginPage"));
 const Signup = lazy(() => import("../pages/signuppage/SignupPage"));
-const NewPassword = lazy(() => import ("../pages/loginpage/NewPasswordPage"))
+const NewPassword = lazy(() => import("../pages/loginpage/NewPasswordPage"));
 const AdminPage = lazy(() => import("../pages/adminPage/AdminPage"));
 const Shipper = lazy(() => import("../pages/shipperPage/ShipperDashBoard"));
 
 const CarPage = lazy(() => import("../pages/carOwnerPage/CarPage"));
 const CarDashPage = lazy(() => import("../pages/carOwnerPage/DashBoard"));
 const Order = lazy(() => import("../pages/carOwnerPage/Orders"));
+const CarOrderBoard = lazy(() => import("../pages/carOwnerPage/CarOrderBoard"));
 const Profile = lazy(() => import("../pages/carOwnerPage/Profile"));
 const EditProfile = lazy(() => import("../pages/carOwnerPage/EditProfile"));
 const SubmitDOC = lazy(() => import("../pages/carOwnerPage/SubmitDOC"));
 const Settlement = lazy(() => import("../pages/carOwnerPage/Settlement"));
-const Vehicles = lazy(()=> import("../pages/carOwnerPage/Vehicles"));
-
+const Vehicles = lazy(() => import("../pages/carOwnerPage/Vehicles"));
 
 // 최상위 레이아웃 컴포넌트
 const RootLayout = () => {
@@ -58,16 +58,28 @@ const root = createBrowserRouter([
             // 게스트
             {
                 path: "login",
-                element: <RedirectIfAuthed><Login /></RedirectIfAuthed>,
+                element: (
+                    <RedirectIfAuthed>
+                        <Login />
+                    </RedirectIfAuthed>
+                ),
             },
             {
                 path: "signup",
-                element: <RedirectIfAuthed><Signup /></RedirectIfAuthed>,
+                element: (
+                    <RedirectIfAuthed>
+                        <Signup />
+                    </RedirectIfAuthed>
+                ),
             },
             {
                 path: "newPassword",
-                element: <RedirectIfAuthed><NewPassword /></RedirectIfAuthed>
-            // 차주
+                element: (
+                    <RedirectIfAuthed>
+                        <NewPassword />
+                    </RedirectIfAuthed>
+                ),
+                // 차주
             },
             {
                 path: "carPage",
@@ -106,6 +118,14 @@ const root = createBrowserRouter([
                         ),
                     },
                     {
+                        path: "CarOrderBoard",
+                        element: (
+                            <Suspense fallback={Loading}>
+                                <CarOrderBoard />
+                            </Suspense>
+                        ),
+                    },
+                    {
                         path: "orders",
                         element: (
                             <Suspense fallback={Loading}>
@@ -125,7 +145,7 @@ const root = createBrowserRouter([
                         path: "vehicles",
                         element: (
                             <Suspense fallback={Loading}>
-                                <Vehicles/>
+                                <Vehicles />
                             </Suspense>
                         ),
                     },
@@ -164,7 +184,9 @@ const root = createBrowserRouter([
         path: "shipper",
         element: (
             <RequireAuth roles={["shipper"]}>
-                <Suspense fallback={Loading}><Shipper /></Suspense>
+                <Suspense fallback={Loading}>
+                    <Shipper />
+                </Suspense>
             </RequireAuth>
         ),
         children: shipperRouter(),

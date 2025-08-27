@@ -1,30 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { AdminTable } from './AdminTable';
-import { Line } from 'react-chartjs-2';
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend,
-} from 'chart.js';
 import { getAllInquiries, getDailyInquiryCounts } from '../../../api/adminApi';
+import AdminSelect from '../common/AdminSelect'; // Import AdminSelect
+import AdminChartCard from '../common/AdminChartCard'; // Import AdminChartCard
 import '../../../theme/admin.css';
-
-// Register Chart.js components
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend
-);
 
 const InquiryDashboard = () => {
     const currentYear = new Date().getFullYear();
@@ -105,29 +85,24 @@ const InquiryDashboard = () => {
         },
     };
 
-    const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
-    const months = Array.from({ length: 12 }, (_, i) => i + 1);
+    const years = Array.from({ length: 6 }, (_, i) => currentYear - i).reverse(); // Current year and 5 years prior
+    const months = Array.from({ length: (selectedYear === currentYear ? currentMonth : 12) }, (_, i) => i + 1);
 
     return (
         <div>
-            <div className="graph-section admin-card" style={{ marginBottom: '24px' }}>
-                <h3>일일 문의 추이</h3>
-                <div className="date-selector">
-                    <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
-                        {years.map(year => <option key={year} value={year}>{year}년</option>)}
-                    </select>
-                    <select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))}>
-                        {months.map(month => <option key={month} value={month}>{month}월</option>)}
-                    </select>
-                </div>
-                <div className="chart-container">
-                    {dailyInquiryData.labels.length > 0 ? (
-                        <Line data={dailyInquiryData} options={chartOptions} />
-                    ) : (
-                        <p>데이터를 불러오는 중...</p>
-                    )}
-                </div>
-            </div>
+            <AdminChartCard
+                title="일일 문의 추이"
+                chartData={dailyInquiryData}
+                chartOptions={chartOptions}
+                loading={false} // Adjust based on actual loading state if available
+                error={null} // Adjust based on actual error state if available
+                selectedYear={selectedYear}
+                selectedMonth={selectedMonth}
+                setSelectedYear={setSelectedYear}
+                setSelectedMonth={setSelectedMonth}
+                years={years}
+                months={months}
+            />
 
             <div className="table-section admin-card">
                 <h3>최근 문의 5건</h3>
