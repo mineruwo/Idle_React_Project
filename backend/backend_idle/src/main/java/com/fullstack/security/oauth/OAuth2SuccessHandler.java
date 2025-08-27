@@ -95,7 +95,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
             TokenCookieUtils.setRefreshTokenCookie(res, tokenDTO.getRefreshToken(), tokenDTO.getRtExpiresIn());
             TokenCookieUtils.setAuthHintCookie(res, true, tokenDTO.getRtExpiresIn());
 
-            res.sendRedirect(frontendBaseUrl + "/oauth2/success");
+            res.sendRedirect(frontendBaseUrl + "/");
 
         } catch (Exception e) {
             e.printStackTrace();
