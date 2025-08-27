@@ -1,0 +1,64 @@
+/* InquiryNav.css - Refined for a better UI */
+
+.inquiry-page-container {
+    padding: 24px;
+    background-color: #f7f9fc; /* Lighter, cleaner background */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.inquiry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.inquiry-header h2 {
+    margin: 0;
+    color: #2d3748; /* Darker, more professional text color */
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.write-inquiry-button {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    background-color: #4299e1; /* A modern blue */
+    color: white;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.write-inquiry-button:hover {
+    background-color: #3182ce;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.back-to-list-button {
+    margin-bottom: 20px;
+    padding: 8px 15px;
+    cursor: pointer;
+    border: 1px solid #cbd5e0;
+    background-color: white;
+    color: #4a5568;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.3s;
+}
+
+.back-to-list-button:hover {
+    background-color: #f7fafc;
+}
+
+.inquiry-divider {
+    margin: 32px 0;
+    border: 0;
+    border-top: 1px solid #e2e8f0;
+}
