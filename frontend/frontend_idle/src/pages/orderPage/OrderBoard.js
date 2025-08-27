@@ -183,7 +183,9 @@ const offerStatusLabelK = (s) => {
 const canBid = (order, assign) => {
     const orderStatus = String(order?.status || "").toUpperCase();
     const assignStatus = String(assign?.status || "").toUpperCase();
-    const orderLocked = ["PAYMENT_PENDING", "COMPLETED"].includes(orderStatus);
+    const orderLocked = ["PAYMENT_PENDING", "READY", "ONGOING", "COMPLETED"].includes(
+        orderStatus
+    );
     const assignLocked = ["ASSIGNED", "CONFIRMED"].includes(assignStatus);
     return !(orderLocked || assignLocked);
 };
@@ -228,14 +230,19 @@ const OrderBoard = () => {
 
     /* 목록 로드 */
     useEffect(() => {
-        if (!authenticated) {
+        if (!authenticated || !profile?.role) {
             setOrders([]);
             return;
         }
 
         const fetchOrderData = async () => {
             try {
-                const data = await fetchMyOrders();
+                let data;
+                if (profile.role.toUpperCase() === "CARRIER") {
+                    data = await fetchOrders();
+                } else {
+                    data = await fetchMyOrders();
+                }
                 setOrders(Array.isArray(data) ? data : []);
             } catch (error) {
                 console.error("Failed to fetch shipping data:", error);
@@ -244,7 +251,7 @@ const OrderBoard = () => {
         };
 
         fetchOrderData();
-    }, [authenticated]);
+    }, [authenticated, profile]);
 
     /* 카드 선택 시 우측패널로 스크롤 보정 + 입찰/배정 로드 */
     const loadOfferAndAssignment = async (orderId) => {
@@ -254,13 +261,14 @@ const OrderBoard = () => {
                 fetchOffersByOrder(orderId),
                 fetchAssignment(orderId),
             ]);
-            const newOffers = Array.isArray(offersRes.data) ? offersRes.data : [];
-            const newAssignment =
-                assignRes.data || {
-                    assignedDriverId: null,
-                    driverPrice: null,
-                    status: null,
-                };
+            const newOffers = Array.isArray(offersRes.data)
+                ? offersRes.data
+                : [];
+            const newAssignment = assignRes.data || {
+                assignedDriverId: null,
+                driverPrice: null,
+                status: null,
+            };
             setOffers(newOffers);
             setAssignment(newAssignment);
             return { newOffers, newAssignment };
@@ -842,7 +850,7 @@ const OrderBoard = () => {
                                                 </small>
                                             </div>
                                             <div>
-                                                {userRole === "SHIPPER" && (
+                                                {userRole?.toUpperCase() === "SHIPPER" && (
                                                     <AcceptBtn
                                                         disabled={
                                                             !canBid(
@@ -865,7 +873,7 @@ const OrderBoard = () => {
                                 </OfferList>
                             )}
 
-                            {userRole === "DRIVER" &&
+                            {userRole?.toUpperCase() === "CARRIER" &&
                                 canBid(selected, assignment) && (
                                     <div
                                         style={{
@@ -879,7 +887,7 @@ const OrderBoard = () => {
                                         }}
                                     >
                                         <span>입찰 등록:</span>
-                                        <input
+                                        <SearchInput
                                             type="number"
                                             placeholder={`제안가 (최소 ${minDriverBid(
                                                 selected
@@ -890,7 +898,7 @@ const OrderBoard = () => {
                                             }
                                             style={{ width: 140 }}
                                         />
-                                        <input
+                                        <SearchInput
                                             type="text"
                                             placeholder="메모(선택)"
                                             value={bidMemo}
@@ -899,9 +907,9 @@ const OrderBoard = () => {
                                             }
                                             style={{ flex: 1 }}
                                         />
-                                        <button onClick={handleBid}>
+                                        <AcceptBtn onClick={handleBid}>
                                             등록
-                                        </button>
+                                        </AcceptBtn>
                                         <MinBidHint>
                                             최소 제안가:{" "}
                                             {minDriverBid(
@@ -961,7 +969,8 @@ const OrderBoard = () => {
                             </Row>
                         </Section>
 
-                        {selected?.status === "PAYMENT_PENDING" &&
+                        {userRole?.toUpperCase() === "SHIPPER" &&
+                            selected?.status === "PAYMENT_PENDING" &&
                             selected?.driverPrice != null && (
                                 <Section style={{ marginTop: 16 }}>
                                     <AcceptBtn

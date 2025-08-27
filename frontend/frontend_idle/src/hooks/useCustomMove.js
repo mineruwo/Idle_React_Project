@@ -49,6 +49,7 @@ const useCustomMove = () => {
     const carOwnerMoveToDashboard = () => navigate("/carPage");
     const carOwnerMoveToProfile = () => navigate("/carPage/profile");
     const carOwnerMoveToEditProfile = () => navigate("/carPage/editProfile");
+    const carOwnerMoveToOrderBoard = () => navigate("/carPage/CarOrderBoard");
     const carOwnerMoveToOrders = () => navigate("/carPage/orders");
     const carOwnerMoveToSettlement = () => navigate("/carPage/settlement");
     const carOwnerMoveToVehicles = () => navigate("/carPage/vehicles");
@@ -91,7 +92,6 @@ const useCustomMove = () => {
     const moveToNewPassword = (token, { replace = false } = {}) => {
         if (!token) return;
         navigate("/newPassword", { state: { token }, replace });
-
     };
 
     // 외부 이동
@@ -103,7 +103,7 @@ const useCustomMove = () => {
     // OAuth 로그인 시작
     const oauthLogin = (provider, { replace = true } = {}) => {
         const url = `${API_BASE}/oauth2/authorization/${provider}`;
-        moveToExternal(url, { replace }); 
+        moveToExternal(url, { replace });
     };
 
     return {
@@ -119,6 +119,7 @@ const useCustomMove = () => {
         carOwnerMoveToDashboard,
         carOwnerMoveToProfile,
         carOwnerMoveToEditProfile,
+        carOwnerMoveToOrderBoard,
         carOwnerMoveToOrders,
         carOwnerMoveToSettlement,
         carOwnerMoveToVehicles,
@@ -130,7 +131,7 @@ const useCustomMove = () => {
         moveToMainPage,
         moveToMyPageByRole,
         moveToNewPassword,
-        oauthLogin
+        oauthLogin,
     };
 };
 
