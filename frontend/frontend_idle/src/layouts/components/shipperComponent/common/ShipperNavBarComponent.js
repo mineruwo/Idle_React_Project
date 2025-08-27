@@ -60,15 +60,15 @@ const ShipperNavBarComponent = () => {
                             </li>
                             <li
                                 className="nav-item py-2 border-bottom border-light border-opacity-25"
-                                onClick={shipperMoveToOrderHistory}
-                            >
-                                <div className="nav-link">오더내역</div>
-                            </li>
-                            <li
-                                className="nav-item py-2 border-bottom border-light border-opacity-25"
                                 onClick={shipperMoveToOrderBoard}
                             >
                                 <div className="nav-link">오더게시판</div>
+                            </li>
+                            <li
+                                className="nav-item py-2 border-bottom border-light border-opacity-25"
+                                onClick={shipperMoveToOrderHistory}
+                            >
+                                <div className="nav-link">오더내역</div>
                             </li>
                             <li
                                 className="nav-item py-2 border-bottom border-light border-opacity-25"
