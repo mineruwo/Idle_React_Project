@@ -9,9 +9,12 @@ import com.fullstack.model.AdminLoginResponseDTO;
 import com.fullstack.service.AdminService;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.Duration;
+import java.time.LocalDate;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +23,12 @@ import org.springframework.security.core.Authentication;
 import com.fullstack.model.CustomerDTO;
 import com.fullstack.model.FaqDTO;
 import com.fullstack.model.NoticeDTO;
+import com.fullstack.model.SalesSummaryDTO;
 import com.fullstack.service.CustomerService;
 import com.fullstack.service.FaqService;
 import com.fullstack.service.NoticeService;
+import com.fullstack.service.SalesService;
+
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,6 +43,7 @@ import java.util.Map;
 import com.fullstack.service.ChatSessionService;
 import com.fullstack.model.ChatSessionDTO;
 import com.fullstack.model.DailyAnswerCountDTO;
+import com.fullstack.model.DailySalesDataDTO;
 import com.fullstack.model.InquiryDTO;
 import com.fullstack.service.InquiryService;
 import java.util.Optional;
@@ -69,6 +76,9 @@ public class AdminController {
 
     @Autowired
     private InquiryService inquiryService;
+
+    @Autowired
+    private SalesService salesService;
 
     @PostMapping("/login")
     public ResponseEntity<AdminLoginResponseDTO> login(@RequestBody AdminLoginRequestDTO loginRequestDTO, HttpServletResponse response) {
@@ -477,5 +487,19 @@ public class AdminController {
         String adminId = authentication.getName(); // Get adminId from authenticated user
         List<InquiryDTO> inquiries = inquiryService.getInquiryDetailsByFilter(filter, adminId); // Pass adminId
         return ResponseEntity.ok(inquiries);
+    }
+
+    @GetMapping("/sales/daily")
+    public ResponseEntity<List<DailySalesDataDTO>> getDailySalesData(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        List<DailySalesDataDTO> dailySalesData = salesService.getDailySalesData(startDate, endDate);
+        return ResponseEntity.ok(dailySalesData);
+    }
+
+    @GetMapping("/sales/summary")
+    public ResponseEntity<SalesSummaryDTO> getSalesSummary() {
+        SalesSummaryDTO salesSummary = salesService.getSalesSummary();
+        return ResponseEntity.ok(salesSummary);
     }
 }

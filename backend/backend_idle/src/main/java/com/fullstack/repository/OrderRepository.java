@@ -161,4 +161,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     /** 여러 상태 합산 전체 건수 (원하면 사용) */
     long countByStatusIn(Collection<String> statuses);
+
+    List<Order> findByCreatedAtBetween(LocalDateTime startDateTime, LocalDateTime endDateTime);
 }
