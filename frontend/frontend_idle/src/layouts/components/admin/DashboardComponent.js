@@ -7,10 +7,15 @@ import RecentAdminAccountsDashboard from './RecentAdminAccountsDashboard'; // Ne
 import RecentCustomerAccountsDashboard from './RecentCustomerAccountsDashboard'; // New import
 import NoticeAndFaqDashboard from './NoticeAndFaqDashboard';
 import InquiryDashboard from './InquiryDashboard'; // New import
+import useSalesData from '../../../hooks/useSalesData'; // Import useSalesData
+import SalesSummaryCards from './SalesSummaryCards'; // Import SalesSummaryCards
 import '../../../theme/admin.css';
 
 const DashboardComponent = () => {
   const { adminName, role } = useSelector((state) => state.adminLogin);
+
+  // Fetch sales summary data
+  const { salesSummary, loading, error } = useSalesData(null, null); // Pass null for startDate and endDate as we only need summary
 
   const menuConfig = {
     ALL_PERMISSION: ['대시보드', '관리자 계정 관리', '고객 계정 관리', '매출 관리', '상담 문의 관리', '공지 사항 관리'],
@@ -50,7 +55,7 @@ const DashboardComponent = () => {
 
         {accessibleMenus.includes('매출 관리') && (
             <DashboardSection title="매출 관리">
-                <p>매출 관리 관련 내용이 여기에 표시됩니다.</p>
+                <SalesSummaryCards salesSummary={salesSummary} loading={loading} error={error} />
             </DashboardSection>
         )}
 
