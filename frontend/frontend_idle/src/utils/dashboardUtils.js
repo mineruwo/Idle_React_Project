@@ -1,15 +1,17 @@
 import React from 'react';
-import PaginationComponent from '../layouts/components/common/PaginationComponent'; // Import PaginationComponent
+import PaginationComponent from '../layouts/components/common/PaginationComponent';
+import AdminCard from '../layouts/components/common/AdminCard';
+import AdminButton from '../layouts/components/common/AdminButton';
 
 export const renderAccountPanel = (title, dateColumnName, data, type, dateRange, onDateRangeChange, currentPage, totalPages, onPageChange) => {
     return (
-        <div style={{ flex: 1, border: '1px dashed #aaa', padding: '15px', borderRadius: '8px' }}>
+        <AdminCard title={title}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                <h4>{title}</h4>
+                {/* <h4>{title}</h4> -- Title is now handled by AdminCard */}
                 <div>
-                    <button className={`btn btn-outline-secondary btn-sm ${dateRange === '1day' ? 'active' : ''}`} style={{margin: '0 2px'}} onClick={() => onDateRangeChange('1day')}>1일</button>
-                    <button className={`btn btn-outline-secondary btn-sm ${dateRange === '1week' ? 'active' : ''}`} style={{margin: '0 2px'}} onClick={() => onDateRangeChange('1week')}>1주일</button>
-                    <button className={`btn btn-outline-secondary btn-sm ${dateRange === '1month' ? 'active' : ''}`} style={{margin: '0 2px'}} onClick={() => onDateRangeChange('1month')}>1달</button>
+                    <AdminButton className={dateRange === '1day' ? 'active' : ''} style={{margin: '0 2px'}} onClick={() => onDateRangeChange('1day')}>1일</AdminButton>
+                    <AdminButton className={dateRange === '1week' ? 'active' : ''} style={{margin: '0 2px'}} onClick={() => onDateRangeChange('1week')}>1주일</AdminButton>
+                    <AdminButton className={dateRange === '1month' ? 'active' : ''} style={{margin: '0 2px'}} onClick={() => onDateRangeChange('1month')}>1달</AdminButton>
                 </div>
             </div>
             <table className="admin-table" style={{ fontSize: '0.9rem' }}>
@@ -36,6 +38,6 @@ export const renderAccountPanel = (title, dateColumnName, data, type, dateRange,
                 totalPages={totalPages}
                 onPageChange={onPageChange}
             />
-        </div>
+        </AdminCard>
     );
 };

@@ -2,19 +2,10 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { AdminTable } from './AdminTable';
 import '../../../theme/admin.css';
 import useSalesData from '../../../hooks/useSalesData';
-import { Chart as ChartJS, CategoryScale, LinearScale, LineElement, Title, Tooltip, Legend } from 'chart.js';
-import { Line } from 'react-chartjs-2';
 import SalesSummaryCards from './SalesSummaryCards';
+import AdminSelect from '../common/AdminSelect';
+import AdminChartCard from '../common/AdminChartCard'; // Import AdminChartCard
 import { format, getDaysInMonth, parseISO, startOfMonth, endOfMonth } from 'date-fns';
-
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend
-);
 
 const SalesDetailComponent = () => {
     const currentYear = new Date().getFullYear();
@@ -137,35 +128,19 @@ const SalesDetailComponent = () => {
                 <SalesSummaryCards salesSummary={salesSummary} loading={loading} error={error} />
             )}
 
-            <div className="date-selection" style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <label htmlFor="year-select" style={{ fontWeight: 'bold', color: 'var(--admin-pink-strong)' }}>년도:</label>
-                <select
-                    id="year-select"
-                    value={selectedYear}
-                    onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                    style={{ padding: '8px 12px', border: '1px solid var(--admin-pink-panel-border)', borderRadius: '8px', fontSize: '14px', color: 'var(--admin-pink-text)', backgroundColor: 'var(--admin-pink-bg)' }}
-                >
-                    {years.map(year => (
-                        <option key={year} value={year}>{year}년</option>
-                    ))}
-                </select>
-
-                <label htmlFor="month-select" style={{ fontWeight: 'bold', color: 'var(--admin-pink-strong)' }}>월:</label>
-                <select
-                    id="month-select"
-                    value={selectedMonth}
-                    onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-                    style={{ padding: '8px 12px', border: '1px solid var(--admin-pink-panel-border)', borderRadius: '8px', fontSize: '14px', color: 'var(--admin-pink-text)', backgroundColor: 'var(--admin-pink-bg)' }}
-                >
-                    {months.map(month => (
-                        <option key={month} value={month}>{month}월</option>
-                    ))}
-                </select>
-            </div>
-
-            <div className="chart-container">
-                <Line options={chartOptions} data={chartData} />
-            </div>
+            <AdminChartCard
+                title="일별 매출 데이터"
+                chartData={chartData}
+                chartOptions={chartOptions}
+                loading={loading}
+                error={error}
+                selectedYear={selectedYear}
+                selectedMonth={selectedMonth}
+                setSelectedYear={setSelectedYear}
+                setSelectedMonth={setSelectedMonth}
+                years={years}
+                months={months}
+            />
 
             <div className="admin-table-section">
                 <h3>일별 매출 상세</h3>
