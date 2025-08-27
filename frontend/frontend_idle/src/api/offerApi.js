@@ -11,7 +11,7 @@ const client = axios.create({
 export const fetchOffersByOrder = (orderId) =>
   client.get(`/offers/order/${orderId}`);
 
-// 입찰 확정
+// 입찰 확정 (화주)
 export const acceptOffer = (offerId) =>
   client.post(`/offers/${offerId}/accept`);
 
@@ -26,3 +26,7 @@ export const createOffer = ({ orderId, price, memo }) =>
 // (화주) 기사 선택 → 등록+배정 한 번에
 export const assignOfferDirect = ({ orderId, driverId, price, memo }) =>
   client.post(`/offers/assign`, { orderId, driverId, price, memo });
+
+// ✅ (기사) 입찰 수정
+export const updateOffer = ({ offerId, price, memo }) =>
+  client.put(`/offers/${offerId}`, { price, memo });

@@ -22,8 +22,10 @@ export const createInquiry = async (inquiryData) => {
 /**
  * 📋 고객 ID로 문의 목록 조회 (인증)
  */
-export const getInquiriesByCustomerId = async (customerId) => {
-    const { data } = await authClient.get(`/inquiries/customer/${customerId}`);
+export const getInquiriesByCustomerId = async (customerId, page = 0, size = 10) => {
+    const { data } = await authClient.get(`/inquiries/customer/${customerId}`, {
+        params: { page, size }
+    });
     return data;
 };
 

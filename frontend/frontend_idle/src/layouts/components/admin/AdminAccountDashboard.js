@@ -1,7 +1,5 @@
 import React from 'react';
 import { renderAccountPanel } from '../../../utils/dashboardUtils';
-import { Paper } from '@mui/material';
-import './AdminAccountDashboard.css';
 import { getRecentlyCreatedAdmins, getRecentlyDeletedAdmins } from '../../../api/adminApi';
 import useAdminAccountsData from '../../../hooks/useAdminAccountsData';
 
@@ -32,26 +30,26 @@ const AdminAccountDashboard = () => {
 
     if (createdLoading || deletedLoading) {
         return (
-            <Paper className="admin-dashboard-paper">
+            <div className="admin-dashboard-paper">
                 <div className="admin-dashboard-content">
                     <div>로딩 중...</div>
                 </div>
-            </Paper>
+            </div>
         );
     }
 
     if (createdError || deletedError) {
         return (
-            <Paper className="admin-dashboard-paper">
+            <div className="admin-dashboard-paper">
                 <div className="admin-dashboard-content">
                     <div className="error-message">{createdError || deletedError}</div>
                 </div>
-            </Paper>
+            </div>
         );
     }
 
     return (
-        <Paper className="admin-dashboard-paper">
+        <div className="admin-dashboard-paper">
             <div className="admin-dashboard-content">
                 <div className="recent-accounts-panels-container">
                     {renderAccountPanel(
@@ -78,7 +76,7 @@ const AdminAccountDashboard = () => {
                     )}
                 </div>
             </div>
-        </Paper>
+        </div>
     );
 };
 

@@ -61,7 +61,7 @@ dependencies {
     // SNS
     implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-    
+
 }
 
 tasks.named('test') {

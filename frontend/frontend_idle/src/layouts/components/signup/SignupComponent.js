@@ -41,7 +41,8 @@ export default function SignUp(props) {
   const [openModal, setOpenModal] = useState(false);
 
   const {
-    moveToLoginPage
+    moveToLoginPage,
+    oauthLogin
   } = useCustomMove();
 
   // 유효성 검사
@@ -297,7 +298,7 @@ export default function SignUp(props) {
             <Button
               fullWidth
               variant="outlined"
-              onClick={() => alert('Sign up with Google')}
+              onClick={() => oauthLogin("google")}
               startIcon={<GoogleIcon />}
             >
               구글 가입
@@ -305,7 +306,7 @@ export default function SignUp(props) {
             <Button
               fullWidth
               variant="outlined"
-              onClick={() => alert('Sign up with Naver')}
+              onClick={() => oauthLogin("naver")}
               startIcon={<NaverIcon />}
             >
               네이버 가입
@@ -313,7 +314,7 @@ export default function SignUp(props) {
             <Button
               fullWidth
               variant="outlined"
-              onClick={() => alert('Sign up with Kakao')}
+              onClick={() => oauthLogin("kakao")}
               startIcon={<KakaoIcon />}
             >
               카카오 가입

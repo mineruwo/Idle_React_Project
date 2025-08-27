@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -59,9 +61,7 @@ public class InquiryController {
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<Page<InquiryDTO>> getInquiriesByCustomerId(
             @PathVariable Long customerId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<InquiryDTO> inquiries = inquiryService.getInquiriesByCustomerId(customerId, pageable);
         return ResponseEntity.ok(inquiries);
     }

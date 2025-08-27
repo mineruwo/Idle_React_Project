@@ -4,72 +4,114 @@ import useCustomMove from "../../../../hooks/useCustomMove";
 import "../../../../theme/CarOwner/navbar.css";
 
 const ShipperNavBarComponent = () => {
-  const location = useLocation(); // 현재 경로 감지
-  const [activeMenu, setActiveMenu] = useState("dashboard");
+    const location = useLocation(); // 현재 경로 감지
+    const [activeMenu, setActiveMenu] = useState("dashboard");
 
-  const {
-    carOwnerMoveToDashboard,
-    carOwnerMoveToOrders,
-    carOwnerMoveToProfile,
-    carOwnerMoveToSettlement,
-    carOwnerMoveToVehicles,
-  } = useCustomMove();
+    const {
+        carOwnerMoveToDashboard,
+        carOwnerMoveToOrders,
+        carOwnerMoveToProfile,
+        carOwnerMoveToSettlement,
+        carOwnerMoveToVehicles,
+        carOwnerMoveToOrderBoard,
+    } = useCustomMove();
 
-  useEffect(() => {
-    // URL path 기준으로 active 상태 설정
-    if (location.pathname.includes("dashboard")) setActiveMenu("dashboard");
-    else if (location.pathname.includes("profile")) setActiveMenu("profile");
-    else if (location.pathname.includes("orders")) setActiveMenu("orders");
-    else if (location.pathname.includes("settlement")) setActiveMenu("settlement");
-    else if (location.pathname.includes("vehucles")) setActiveMenu("vehucles");
-  }, [location.pathname]);
+    useEffect(() => {
+        // URL path 기준으로 active 상태 설정
+        if (location.pathname.includes("dashboard")) setActiveMenu("dashboard");
+        else if (location.pathname.includes("profile"))
+            setActiveMenu("profile");
+        else if (location.pathname.includes("orders")) setActiveMenu("orders");
+        else if (location.pathname.includes("settlement"))
+            setActiveMenu("settlement");
+        else if (location.pathname.includes("vehucles"))
+            setActiveMenu("vehucles");
+    }, [location.pathname]);
 
-  return (
-    <div className="bs-component">
-      <nav className="navbar navbar-expand-lg bg-primary bg-opacity-75" data-bs-theme="dark">
-        <div className="container-fluid">
-          <div className="navbar-brand">차주 페이지</div>
-          <button
-            className="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#shipperNavbar"
-            aria-controls="shipperNavbar"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span className="navbar-toggler-icon" />
-          </button>
+    return (
+        <div className="bs-component">
+            <nav
+                className="navbar navbar-expand-lg bg-primary bg-opacity-75"
+                data-bs-theme="dark"
+            >
+                <div className="container-fluid">
+                    <div className="navbar-brand">차주 페이지</div>
+                    <button
+                        className="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#shipperNavbar"
+                        aria-controls="shipperNavbar"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation"
+                    >
+                        <span className="navbar-toggler-icon" />
+                    </button>
 
-          <div className="collapse navbar-collapse" id="shipperNavbar">
-            <ul className="navbar-nav mx-auto">
+                    <div
+                        className="collapse navbar-collapse"
+                        id="shipperNavbar"
+                    >
+                        <ul className="navbar-nav mx-auto">
+                            <li
+                                className={`nav-item py-2 border-bottom border-light border-opacity-25 ${
+                                    activeMenu === "dashboard" ? "active" : ""
+                                }`}
+                                onClick={carOwnerMoveToDashboard}
+                            >
+                                <div className="nav-link">대시보드</div>
+                            </li>
 
-              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "dashboard" ? "active" : ""}`} onClick={carOwnerMoveToDashboard}>
-                <div className="nav-link">대시보드</div>
-              </li>
+                            <li
+                                className={`nav-item py-2 border-bottom border-light border-opacity-25 ${
+                                    activeMenu === "profile" ? "active" : ""
+                                }`}
+                                onClick={carOwnerMoveToProfile}
+                            >
+                                <div className="nav-link">프로필</div>
+                            </li>
 
-              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "profile" ? "active" : ""}`} onClick={carOwnerMoveToProfile}>
-                <div className="nav-link">프로필</div>
-              </li>
+                            <li
+                                className={`nav-item py-2 border-bottom border-light border-opacity-25 ${
+                                    activeMenu === "profile" ? "active" : ""
+                                }`}
+                                onClick={carOwnerMoveToOrderBoard}
+                            >
+                                <div className="nav-link">오더게시판</div>
+                            </li>
 
-              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "orders" ? "active" : ""}`} onClick={carOwnerMoveToOrders}>
-                <div className="nav-link">내 운송</div>
-              </li>
+                            <li
+                                className={`nav-item py-2 border-bottom border-light border-opacity-25 ${
+                                    activeMenu === "orders" ? "active" : ""
+                                }`}
+                                onClick={carOwnerMoveToOrders}
+                            >
+                                <div className="nav-link">내 운송</div>
+                            </li>
 
-              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "settlement" ? "active" : ""}`} onClick={carOwnerMoveToSettlement}>
-                <div className="nav-link">정산</div>
-              </li>
+                            <li
+                                className={`nav-item py-2 border-bottom border-light border-opacity-25 ${
+                                    activeMenu === "settlement" ? "active" : ""
+                                }`}
+                                onClick={carOwnerMoveToSettlement}
+                            >
+                                <div className="nav-link">정산</div>
+                            </li>
 
-              <li className={`nav-item py-2 border-bottom border-light border-opacity-25 ${activeMenu === "vehucles" ? "active" : ""}`} onClick={carOwnerMoveToVehicles}>
-                <div className="nav-link">내 차량</div>
-              </li>
-
-            </ul>
-          </div>
+                            <li
+                                className={`nav-item py-2 border-bottom border-light border-opacity-25 ${
+                                    activeMenu === "vehucles" ? "active" : ""
+                                }`}
+                                onClick={carOwnerMoveToVehicles}
+                            >
+                                <div className="nav-link">내 차량</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
         </div>
-      </nav>
-    </div>
-  );
+    );
 };
 
 export default ShipperNavBarComponent;

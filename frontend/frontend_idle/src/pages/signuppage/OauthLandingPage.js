@@ -1,15 +1,16 @@
 import Footer from "../../layouts/components/common/Footer";
 import GNB from "../../layouts/components/common/GNB"
-import SignupComponent from "../../layouts/components/signup/SignupComponent"
+import OauthLandingComponent from "../../layouts/components/signup/OauthLandingComponent.js"
 
-const SignupPage = () => {
+
+const OauthLandingPage = () => {
     return (
         <>
             <GNB />
-            <SignupComponent />
+            <OauthLandingComponent />
             <Footer />
         </>
     );
 }
 
-export default SignupPage;
+export default OauthLandingPage;

@@ -1,15 +1,15 @@
 import Footer from "../../layouts/components/common/Footer";
 import GNB from "../../layouts/components/common/GNB"
-import SignupComponent from "../../layouts/components/signup/SignupComponent"
+import LinkExistingComponent from "../../layouts/components/signup/LinkExistingComponent";
 
-const SignupPage = () => {
+const LinkExistingPage = () => {
     return (
         <>
             <GNB />
-            <SignupComponent />
+            <LinkExistingComponent />
             <Footer />
         </>
     );
 }
 
-export default SignupPage;
+export default LinkExistingPage;

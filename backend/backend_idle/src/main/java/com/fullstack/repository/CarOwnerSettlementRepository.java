@@ -25,6 +25,23 @@ public interface CarOwnerSettlementRepository extends JpaRepository<CarOwnerSett
 
     @Query("select s.id from CarOwnerSettlement s where s.order.id = :orderId")
     Optional<Long> findIdByOrderId(@Param("orderId") Long orderId);
+    @Query("""
+      select s
+      from CarOwnerSettlement s
+      join s.batch b
+      where b.ownerId = :ownerId
+        and (:status is null or b.status = :status)
+        and (:fromMonth is null or b.monthKey >= :fromMonth)
+        and (:toNextMonth   is null or b.monthKey <  :toNextMonth)
+      order by b.monthKey desc, s.id desc
+    """)
+    Page<CarOwnerSettlement> search(
+            @Param("ownerId") String ownerId,
+            @Param("status") String status,      // REQUESTED/APPROVED/PAID/CANCELED or null
+            @Param("fromMonth") LocalDate fromMonthFirst, // yyyy-MM-01
+            @Param("toNextMonth") LocalDate toMonthNextFirst, // (to 월의 다음달 1일)
+            Pageable pageable
+    );
 
     // ==== 기간 합계(기존 summaryCard용) ====
     @Query("select coalesce(sum(s.amount), 0) from CarOwnerSettlement s " +

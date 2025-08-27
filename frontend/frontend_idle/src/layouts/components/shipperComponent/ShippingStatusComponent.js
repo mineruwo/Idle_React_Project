@@ -5,11 +5,27 @@ import { useAuth } from "../../../auth/AuthProvider";
 
 const ShippingStatusComponent = () => {
     const [shippingData, setShippingData] = useState([]);
+    const [selectedOrderId, setSelectedOrderId] = useState("");
     const { authenticated } = useAuth();
+
+    const fmtDateTime = (v) => {
+        try {
+            const d = new Date(v);
+            if (Number.isNaN(d.getTime())) return "-";
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, "0");
+            const day = String(d.getDate()).padStart(2, "0");
+            const hh = String(d.getHours()).padStart(2, "0");
+            const mm = String(d.getMinutes()).padStart(2, "0");
+            return `${y}.${m}.${day} ${hh}:${mm}`;
+        } catch {
+            return "-";
+        }
+    };
 
     const STATUS_MAP = {
         CREATED: "오더신청",
-        PAYMENT_PENDING: "결제대기",
+        PAYMENT_PENDING: "차주 연결",
         READY: "운송준비중",
         ONGOING: "운송중",
         COMPLETED: "운송완료",
@@ -22,7 +38,7 @@ const ShippingStatusComponent = () => {
             case "CREATED":
                 return "화물 운송 오더가 접수되었습니다.";
             case "PAYMENT_PENDING":
-                return "결제가 대기 중입니다.";
+                return "차주와 연결중입니다.";
             case "READY":
                 return "운송 준비 중입니다.";
             case "ONGOING":
@@ -46,8 +62,12 @@ const ShippingStatusComponent = () => {
 
         const fetchShippingData = async () => {
             try {
-                const data = await fetchMyOrders(); // 내 오더만 가져오기
-                setShippingData(Array.isArray(data) ? data : []);
+                const data = await fetchMyOrders();
+                const orders = Array.isArray(data) ? data : [];
+                setShippingData(orders);
+                if (orders.length > 0) {
+                    setSelectedOrderId(orders[0].id);
+                }
             } catch (error) {
                 console.error("Failed to fetch shipping data:", error);
                 setShippingData([]);
@@ -291,82 +311,183 @@ const ShippingStatusComponent = () => {
 
     return (
         <div className="shipping-status-container">
-            {shippingData.map((order) => {
-                const currentStep =
-                    steps.find((step) => step.name === STATUS_MAP[order.status])
-                        ?.id || 1;
-                return (
-                    <div key={order.id} className="shipping-status-card">
-                        <h3>주문 번호: {order.orderNo}</h3>
-                        <ul className="steps">
-                            {steps.map((step) => (
-                                <li
-                                    key={step.id}
-                                    className={`steps-segment ${
-                                        step.id < currentStep
-                                            ? "is-completed"
-                                            : ""
-                                    } ${
-                                        step.id === currentStep
-                                            ? "is-active"
-                                            : ""
-                                    }`}
-                                >
-                                    <span
-                                        className={`steps-marker ${
-                                            currentStep < step.id
-                                                ? "is-hollow"
+            <div
+                style={{
+                    marginBottom: "20px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                }}
+            >
+                <label htmlFor="order-select" style={{ fontWeight: "bold" }}>
+                    주문 선택:
+                </label>
+                <select
+                    id="order-select"
+                    value={selectedOrderId}
+                    onChange={(e) => setSelectedOrderId(e.target.value)}
+                    style={{
+                        padding: "8px",
+                        borderRadius: "4px",
+                        border: "1px solid #ccc",
+                    }}
+                >
+                    {shippingData.map((order) => (
+                        <option key={order.id} value={order.id}>
+                            주문번호: {order.orderNo} (출발:
+                            {order.departure})
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+            {shippingData
+                .filter((order) => String(order.id) === String(selectedOrderId))
+                .map((order) => {
+                    const currentStep =
+                        steps.find(
+                            (step) => step.name === STATUS_MAP[order.status]
+                        )?.id || 1;
+                    return (
+                        <div key={order.id} className="shipping-status-card">
+                            <h3>주문 번호: {order.orderNo}</h3>
+                            <ul className="steps">
+                                {steps.map((step) => (
+                                    <li
+                                        key={step.id}
+                                        className={`steps-segment ${
+                                            step.id < currentStep
+                                                ? "is-completed"
+                                                : ""
+                                        } ${
+                                            step.id === currentStep
+                                                ? "is-active"
                                                 : ""
                                         }`}
                                     >
-                                        <span className="icon">
-                                            {step.icon}
+                                        <span
+                                            className={`steps-marker ${
+                                                currentStep < step.id
+                                                    ? "is-hollow"
+                                                    : ""
+                                            }`}
+                                        >
+                                            <span className="icon">
+                                                {step.icon}
+                                            </span>
                                         </span>
-                                    </span>
-                                    <div className="steps-content">
-                                        <p className="heading">{step.name}</p>
+                                        <div className="steps-content">
+                                            <p className="heading">
+                                                {step.name}
+                                            </p>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                            <div className="shipping-details">
+                                <div className="status-section">
+                                    <div className="status-logs">
+                                        <div className="log-headers">
+                                            <span className="log-header-item">
+                                                시간
+                                            </span>
+                                            <span className="log-header-item">
+                                                진행상태
+                                            </span>
+                                            <span className="log-header-item">
+                                                내용
+                                            </span>
+                                        </div>
+                                        <ul>
+                                            {(() => {
+                                                const logEntries = [];
+                                                for (
+                                                    let i = 1;
+                                                    i <= currentStep;
+                                                    i++
+                                                ) {
+                                                    const step = steps.find(
+                                                        (s) => s.id === i
+                                                    );
+                                                    if (step) {
+                                                        const backendStatus =
+                                                            Object.keys(
+                                                                STATUS_MAP
+                                                            ).find(
+                                                                (key) =>
+                                                                    STATUS_MAP[
+                                                                        key
+                                                                    ] ===
+                                                                    step.name
+                                                            );
+
+                                                        let timestamp =
+                                                            "기록 없음";
+                                                        if (
+                                                            step.name ===
+                                                            "오더신청"
+                                                        ) {
+                                                            timestamp =
+                                                                order.createdAt
+                                                                    ? fmtDateTime(
+                                                                          order.createdAt
+                                                                      )
+                                                                    : "기록 없음";
+                                                        } else if (
+                                                            step.name ===
+                                                            "운송준비중"
+                                                        ) {
+                                                            timestamp =
+                                                                order.paidAt
+                                                                    ? fmtDateTime(
+                                                                          order.paidAt
+                                                                      )
+                                                                    : "기록 없음";
+                                                        }
+
+                                                        logEntries.push({
+                                                            id: step.id,
+                                                            timestamp:
+                                                                timestamp,
+                                                            statusName:
+                                                                step.name,
+                                                            description:
+                                                                getStatusDescription(
+                                                                    backendStatus ||
+                                                                        "NONE"
+                                                                ),
+                                                        });
+                                                    }
+                                                }
+                                                return logEntries.map(
+                                                    (log) => (
+                                                        <li key={log.id}>
+                                                            <span className="log-timestamp">
+                                                                {
+                                                                    log.timestamp
+                                                                }
+                                                            </span>
+                                                            <span className="log-status">
+                                                                {
+                                                                    log.statusName
+                                                                }
+                                                            </span>
+                                                            <span className="log-description">
+                                                                {
+                                                                    log.description
+                                                                }
+                                                            </span>
+                                                        </li>
+                                                    )
+                                                );
+                                            })()}
+                                        </ul>
                                     </div>
-                                </li>
-                            ))}
-                        </ul>
-                        <div className="shipping-details">
-                            <div className="status-section">
-                                <div className="status-logs">
-                                    <div className="log-headers">
-                                        <span className="log-header-item">
-                                            시간
-                                        </span>
-                                        <span className="log-header-item">
-                                            진행상태
-                                        </span>
-                                        <span className="log-header-item">
-                                            내용
-                                        </span>
-                                    </div>
-                                    <ul>
-                                        {/* Generate a single log entry for the current status */}
-                                        <li key={order.id}>
-                                            <span className="log-timestamp">
-                                                {new Date().toLocaleString()}{" "}
-                                                {/* Current time */}
-                                            </span>
-                                            <span className="log-status">
-                                                {STATUS_MAP[order.status] ||
-                                                    order.status}
-                                            </span>
-                                            <span className="log-description">
-                                                {getStatusDescription(
-                                                    order.status
-                                                )}
-                                            </span>
-                                        </li>
-                                    </ul>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                );
-            })}
+                    );
+                })}
         </div>
     );
 };

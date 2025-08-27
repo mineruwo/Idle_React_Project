@@ -164,4 +164,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findByStatusAndCreatedAtBetween(
             OrderStatus status, LocalDateTime start, LocalDateTime end);
+
+    List<Order> findByCreatedAtBetween(LocalDateTime startDateTime, LocalDateTime endDateTime);
 }

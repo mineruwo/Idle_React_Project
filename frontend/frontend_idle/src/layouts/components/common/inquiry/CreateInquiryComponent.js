@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css'; // Quill CSS
 import "../../../../CustomCSS/Inquiry.css";
 import { createInquiry } from '../../../../api/inquiryApi';
 
-const CreateInquiryComponent = ({ currentUser, refreshInquiries }) => {
+const CreateInquiryComponent = ({ currentUser, refreshInquiries, onCancelWrite }) => {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
 
@@ -47,14 +49,20 @@ const CreateInquiryComponent = ({ currentUser, refreshInquiries }) => {
                 </div>
                 <div className="form-group">
                     <label htmlFor="content">내용</label>
-                    <textarea
-                        id="content"
+                    <ReactQuill
+                        theme="snow"
                         value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        required
+                        onChange={setContent}
+                        className="quill-editor"
+                        modules={{
+                            toolbar: false,
+                        }}
                     />
                 </div>
-                <button type="submit" className="inquiry-form-button">문의 접수</button>
+                <div className="form-buttons">
+                    <button type="submit" className="inquiry-form-button">문의 접수</button>
+                    <button type="button" onClick={onCancelWrite} className="inquiry-form-button secondary-button">목록으로 돌아가기</button>
+                </div>
             </form>
         </div>
     );
