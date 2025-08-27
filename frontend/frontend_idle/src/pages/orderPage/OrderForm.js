@@ -90,10 +90,7 @@ const OrderForm = () => {
     setProposedPrice(formatted);
   };
 
-  const parseProposedPriceNumber = () => {
-        const onlyNums = (proposedPrice || "").replace(/[^0-9]/g, "");
-        return onlyNums ? Number(onlyNums) : null;
-    };
+  
 
     // 포장 토글
     const togglePacking = (key) =>
