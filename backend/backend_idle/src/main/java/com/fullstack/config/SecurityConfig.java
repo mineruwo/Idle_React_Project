@@ -108,6 +108,10 @@ public class SecurityConfig {
                     .redirectionEndpoint(r -> r.baseUri("/login/oauth2/code/*"))
                     .userInfoEndpoint(u -> u.userService(customOAuth2UserService))
                     .successHandler(oAuth2SuccessHandler)
+                    .failureHandler((req, res, ex) -> {  // 오류 내용을 확인하려면 임시로 추가
+                        ex.printStackTrace();
+                        res.sendRedirect("/login?error=" + java.net.URLEncoder.encode(ex.getMessage(), java.nio.charset.StandardCharsets.UTF_8));
+                    })
                 )
             
             
