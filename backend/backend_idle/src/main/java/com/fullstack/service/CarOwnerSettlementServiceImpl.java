@@ -312,18 +312,22 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
 
         var b = batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey)
                 .orElseThrow(() -> new IllegalArgumentException("BATCH_NOT_FOUND"));
-
         if (b.getStatus() != CarOwnerSettlementBatch.Status.REQUESTED) {
             throw new IllegalStateException("BATCH_NOT_OPEN");
         }
 
-        // READY -> REQUESTED + 은행/계좌값 일괄 반영
-        settlementRepo.bulkRequestWithBank(ownerId, monthKey, bankCode, accountNo);
+        // 1) READY → REQUESTED (항목)
+        settlementRepo.bulkMarkRequested(ownerId, monthKey);
 
-        // 총액/건수 갱신(순지급으로 집계해두었으면 해당 로직 호출)
+        // 2) 배치에 은행/계좌 저장
+        b.setBankCode(bankCode);
+        b.setBankAccountNo(accountNo);
+        b.setRequestedAt(LocalDateTime.now());
+        // b.setStatus(...)는 이미 REQUESTED 상태 유지
+
+        // 3) 합계/건수 재계산
         refreshBatchTotals(ownerId, monthKey);
 
-        b.setRequestedAt(java.time.LocalDateTime.now());
         batchRepo.save(b);
     }
 

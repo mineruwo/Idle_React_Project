@@ -48,4 +48,10 @@ private BigDecimal totalAmount = BigDecimal.ZERO;
 // 🔧 NOT NULL + 기본값 0
 @Column(name = "item_count", nullable = false)
 private Integer itemCount = 0;
+
+@Column(name = "bank_code", length = 10)
+private String bankCode;
+
+@Column(name = "bank_account_no", length = 64)
+private String bankAccountNo;
 }
