@@ -6,6 +6,7 @@ import usePaginatedData from "../../../hooks/usePaginatedData";
 import { ROLE_OPTIONS } from "../../../constants/roles";
 import { AdminTable } from "./AdminTable";
 import { AdminControls } from "./AdminControls";
+import AdminAccountDetail from "./AdminAccountDetail"; // Import the new component
 import '../../../theme/admin.css';
 
 const AdminAccountListComponent = () => {
@@ -22,13 +23,27 @@ const AdminAccountListComponent = () => {
         sortConfig,
         filters,
         search,
+        fetchData, // Add fetchData from usePaginatedData
     } = usePaginatedData(getAdminList, {
         filters: { role: '' },
         sortConfig: { key: 'idIndex', direction: 'asc' },
         search: { query: '', type: 'adminId' },
     });
 
+    const [expandedRowId, setExpandedRowId] = useState(null);
     const [modalState, setModalState] = useState({ show: false, message: "" });
+
+    const handleRowClick = (item) => {
+        const rowId = item.idIndex;
+        setExpandedRowId(prevId => (prevId === rowId ? null : rowId));
+    };
+
+    const handleAdminDeleted = (deletedAdminId) => {
+        // After an admin is deleted, refresh the list
+        fetchData(); // Re-fetch data to update the list
+        setExpandedRowId(null); // Collapse the expanded row
+        showModal(`관리자 계정 (ID: ${deletedAdminId})이(가) 성공적으로 삭제되었습니다.`);
+    };
 
     const showModal = (message) => {
         setModalState({ show: true, message });
@@ -57,6 +72,12 @@ const AdminAccountListComponent = () => {
             render: (item) => (item.del ? "Yes" : "No")
         },
     ];
+
+    const renderExpandedContent = (item) => (
+        <td colSpan={adminTableColumns.length}>
+            <AdminAccountDetail adminId={item.idIndex} onAdminDeleted={handleAdminDeleted} />
+        </td>
+    );
 
     const searchOptions = [
         { value: "adminId", label: "아이디" },
@@ -97,6 +118,9 @@ const AdminAccountListComponent = () => {
                 sortConfig={sortConfig}
                 onSort={handleSort}
                 emptyMessage="관리자 계정이 없습니다."
+                onRowClick={handleRowClick}
+                selectedRowId={expandedRowId}
+                renderExpandedContent={renderExpandedContent}
             />
 
             <PaginationComponent

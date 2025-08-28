@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { AdminTable } from './AdminTable';
-import { Line } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -12,6 +11,7 @@ import {
     Legend,
 } from 'chart.js';
 import axios from 'axios';
+import AdminChartCard from '../common/AdminChartCard'; // Import AdminChartCard
 import '../../../theme/admin.css';
 
 // Register Chart.js components
@@ -38,12 +38,16 @@ const MyInquiriesComponent = () => {
     const [selectedYear, setSelectedYear] = useState(currentYear);
     const [selectedMonth, setSelectedMonth] = useState(currentMonth);
     const [selectedFilter, setSelectedFilter] = useState('all'); // 'day', 'week', 'month', 'year', 'all'
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     // Function to fetch daily answer data for the graph
     const fetchDailyAnswerData = async (year, month) => {
+        setLoading(true);
+        setError(null);
         try {
             const response = await axios.get(`/api/admin/inquiries/daily-answers?year=${year}&month=${month}`);
-            const backendData = response.data; // Renamed to avoid conflict
+            const backendData = response.data;
 
             const daysInMonth = new Date(year, month, 0).getDate();
             const allDates = Array.from({ length: daysInMonth }, (_, i) => {
@@ -58,7 +62,7 @@ const MyInquiriesComponent = () => {
 
             const counts = allDates.map(date => dataMap.get(date) || 0);
 
-            const maxCount = Math.max(...counts, 10); // Calculate max, ensure at least 10
+            const maxCount = Math.max(...counts, 10);
 
             setDailyAnswerData({
                 labels: allDates,
@@ -71,11 +75,11 @@ const MyInquiriesComponent = () => {
                         tension: 0.1,
                     },
                 ],
-                yAxisMax: maxCount // Store max for dynamic options
+                yAxisMax: maxCount
             });
-        } catch (error) {
-            console.error('Error fetching daily answer data:', error);
-            // Even on error, try to render a zero-filled graph for the selected month
+        } catch (err) {
+            setError(err);
+            console.error('Error fetching daily answer data:', err);
             const daysInMonth = new Date(year, month, 0).getDate();
             const allDates = Array.from({ length: daysInMonth }, (_, i) => {
                 const day = i + 1;
@@ -86,14 +90,16 @@ const MyInquiriesComponent = () => {
                 datasets: [
                     {
                         label: '일일 답변 수',
-                        data: allDates.map(() => 0), // All zeros on error
+                        data: allDates.map(() => 0),
                         borderColor: 'rgb(75, 192, 192)',
                         backgroundColor: 'rgba(75, 192, 192, 0.5)',
                         tension: 0.1,
                     },
                 ],
-                yAxisMax: 10 // Default max on error
+                yAxisMax: 10
             });
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -104,7 +110,7 @@ const MyInquiriesComponent = () => {
             setInquiryTableData(response.data);
         } catch (error) {
             console.error('Error fetching inquiry table data:', error);
-            setInquiryTableData([]); // Clear data on error
+            setInquiryTableData([]);
         }
     };
 
@@ -137,24 +143,19 @@ const MyInquiriesComponent = () => {
                 text: '월별 일일 답변 추이',
             },
         },
-        scales: { // Add this scales configuration
+        scales: {
             y: {
-                beginAtZero: true, // Ensure the Y-axis starts at 0
+                beginAtZero: true,
                 ticks: {
-                    precision: 0, // Ensure only integer ticks
-                    callback: function(value) {
-                        if (value % 1 === 0) { // Only show integer labels
-                            return value;
-                        }
-                        return null; // Hide non-integer labels
-                    }
-                }
-            }
-        }
+                    precision: 0,
+                },
+                max: dailyAnswerData.yAxisMax,
+            },
+        },
     };
 
-    const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i); // Current year +/- 2
-    const months = Array.from({ length: 12 }, (_, i) => i + 1);
+    const years = Array.from({ length: 6 }, (_, i) => currentYear - i).reverse();
+    const months = Array.from({ length: (selectedYear === currentYear ? currentMonth : 12) }, (_, i) => i + 1);
 
     return (
         <div className="admin-container">
@@ -162,48 +163,19 @@ const MyInquiriesComponent = () => {
                 <h2>내 상담 내역 확인</h2>
             </div>
 
-            {/* Graph Section */}
-            <div className="graph-section admin-card">
-                <h3>일일 답변 추이</h3>
-                <div className="date-selector">
-                    <label htmlFor="year-select">년도:</label>
-                    <select
-                        id="year-select"
-                        value={selectedYear}
-                        onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                    >
-                        {years.map((year) => (
-                            <option key={year} value={year}>{year}년</option>
-                        ))}
-                    </select>
-                    <label htmlFor="month-select">월:</label>
-                    <select
-                        id="month-select"
-                        value={selectedMonth}
-                        onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-                    >
-                        {months.map((month) => (
-                            <option key={month} value={month}>{month}월</option>
-                        ))}
-                    </select>
-                </div>
-                <div className="chart-container">
-                    {dailyAnswerData.labels.length > 0 ? (
-                        <Line data={dailyAnswerData} options={{
-                            ...chartOptions, // Spread existing options
-                            scales: {
-                                ...chartOptions.scales, // Spread existing scales
-                                y: {
-                                    ...chartOptions.scales.y, // Spread existing y-axis options
-                                    max: dailyAnswerData.yAxisMax, // Set dynamic max
-                                },
-                            },
-                        }} />
-                    ) : (
-                        <p>데이터를 불러오는 중이거나 표시할 데이터가 없습니다.</p>
-                    )}
-                </div>
-            </div>
+            <AdminChartCard
+                title="일일 답변 추이"
+                chartData={dailyAnswerData}
+                chartOptions={chartOptions}
+                loading={loading}
+                error={error}
+                selectedYear={selectedYear}
+                selectedMonth={selectedMonth}
+                setSelectedYear={setSelectedYear}
+                setSelectedMonth={setSelectedMonth}
+                years={years}
+                months={months}
+            />
 
             {/* Table Section */}
             <div className="table-section admin-card">

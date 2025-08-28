@@ -1,9 +1,9 @@
-
 import React, { useState, Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllNotices, deleteNotice, toggleNoticeActive } from '../../../api/adminApi';
 import useDashboardData from '../../../hooks/useDashboardData';
 import Modal from '../common/Modal';
+import AdminButton from '../common/AdminButton'; // Import AdminButton
 import '../../../theme/admin.css';
 
 const NoticeListComponent = () => {
@@ -89,8 +89,10 @@ const NoticeListComponent = () => {
             />
             <div className="admin-header">
                 <h2>공지 사항 관리</h2>
-                <Link to="/admin/notices/create" className="admin-primary-btn">
-                    공지사항 생성
+                <Link to="/admin/notices/create">
+                    <AdminButton variant="primary"> 
+                        공지사항 생성
+                    </AdminButton>
                 </Link>
             </div>
             <table className="admin-table">
@@ -111,14 +113,16 @@ const NoticeListComponent = () => {
                                 {expandedNoticeId === notice.id && (
                                     <tr className="admin-content-row">
                                         <td colSpan={columns.length}>
-                                            <div className="admin-content-box" dangerouslySetInnerHTML={{ __html: notice.content }}>
+                                            <div className="admin-content-box">
                                             </div>
                                             <div className="admin-actions">
-                                                <Link to={`/admin/notices/edit/${notice.id}`} className="admin-action-btn admin-modify-btn">수정</Link>
-                                                <button onClick={() => handleDelete(notice.id)} className="admin-action-btn admin-delete-btn">삭제</button>
-                                                <button onClick={() => handleToggle(notice.id)} className="admin-action-btn admin-toggle-btn">
+                                                <Link to={`/admin/notices/edit/${notice.id}`}> {/* Removed className from Link */}
+                                                    <AdminButton variant="modify">수정</AdminButton> {/* Changed to AdminButton */}
+                                                </Link>
+                                                <AdminButton onClick={() => handleDelete(notice.id)} variant="delete">삭제</AdminButton> 
+                                                <AdminButton onClick={() => handleToggle(notice.id)} variant="toggle"> 
                                                     {notice.is_del ? '활성화' : '비활성화'}
-                                                </button>
+                                                </AdminButton>
                                             </div>
                                         </td>
                                     </tr>

@@ -91,25 +91,28 @@ const InquiryListComponent = () => {
                 <>
                     <div className="admin-header">
                         <h2>상담 문의 관리</h2>
-                        <div className="inquiry-filters">
-                            <select 
-                                value={statusFilter} 
-                                onChange={(e) => setStatusFilter(e.target.value)}
-                                className="filter-select"
-                            >
+                        <div className="admin-controls">
+                            <div className="admin-filter">
+                                <label htmlFor="status-filter">상태:</label>
+                                <select 
+                                    id="status-filter" 
+                                    value={statusFilter} 
+                                    onChange={(e) => setStatusFilter(e.target.value)}
+                                >
                                 {inquiryStatuses.map(s => (
                                     <option key={s.value} value={s.value}>{s.label}</option>
                                 ))}
-                            </select>
-                            <input 
-                                type="text" 
-                                placeholder="문의 번호, 제목, 사용자 ID 검색" 
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                onKeyPress={(e) => { if (e.key === 'Enter') fetchInquiries(0); }} // Trigger search on Enter
-                                className="search-input"
-                            />
-                            <button onClick={() => fetchInquiries(0)} className="search-button">검색</button>
+                                </select>
+                            </div>
+                            <form onSubmit={(e) => { e.preventDefault(); fetchInquiries(0); }} className="admin-search">
+                                <input 
+                                    type="text" 
+                                    placeholder="문의 번호, 제목, 사용자 ID 검색" 
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                                <button type="submit" className="admin-primary-btn">검색</button>
+                            </form>
                         </div>
                     </div>
                     <AdminTable

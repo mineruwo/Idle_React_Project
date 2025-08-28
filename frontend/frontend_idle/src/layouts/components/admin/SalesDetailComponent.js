@@ -5,6 +5,7 @@ import useSalesData from '../../../hooks/useSalesData';
 import SalesSummaryCards from './SalesSummaryCards';
 import AdminSelect from '../common/AdminSelect';
 import AdminChartCard from '../common/AdminChartCard'; // Import AdminChartCard
+import AdminCard from '../common/AdminCard'; // Import AdminCard
 import { format, getDaysInMonth, parseISO, startOfMonth, endOfMonth } from 'date-fns';
 
 const SalesDetailComponent = () => {
@@ -142,8 +143,7 @@ const SalesDetailComponent = () => {
                 months={months}
             />
 
-            <div className="admin-table-section">
-                <h3>일별 매출 상세</h3>
+            <AdminCard title="일별 매출 상세">
                 <AdminTable
                     data={dailySales.filter(item => item.orderCount > 0)}
                     columns={salesColumns}
@@ -151,7 +151,7 @@ const SalesDetailComponent = () => {
                     onSort={() => {}} // Sorting will be handled by backend if implemented
                     emptyMessage="등록된 매출 데이터가 없습니다."
                 />
-            </div>
+            </AdminCard>
         </div>
     );
 };

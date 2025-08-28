@@ -229,6 +229,41 @@ public class CustomerServiceImpl implements CustomerService {
 		return entityToDto(savedEntity);
 	}
 
+    @Override
+    public CustomerDTO getCustomerById(String id) {
+        Optional<CustomerEntity> result = customerRepository.findById(id);
+        return result.map(this::entityToDto).orElse(null);
+    }
+
+    @Override
+    public CustomerDTO updateCustomer(String id, CustomerDTO customerDTO) {
+        Optional<CustomerEntity> result = customerRepository.findById(id);
+        if (result.isPresent()) {
+            CustomerEntity customer = result.get();
+            customer.setCustomName(customerDTO.getCustomName());
+            customer.setPhone(customerDTO.getPhone());
+            customer.setNickname(customerDTO.getNickname());
+            customer.setRole(customerDTO.getRole());
+            customer.setUpdatedAt(LocalDateTime.now());
+
+            CustomerEntity updatedCustomer = customerRepository.save(customer);
+            return entityToDto(updatedCustomer);
+        }
+        return null; // Or throw an exception
+    }
+
+    @Override
+    public void deleteCustomer(String id) {
+        Optional<CustomerEntity> result = customerRepository.findById(id);
+        if (result.isPresent()) {
+            CustomerEntity customer = result.get();
+            customer.setIsLefted(true);
+            customer.setLeftedAt(LocalDateTime.now());
+            customerRepository.save(customer);
+        }
+        // Or throw an exception if not found
+    }
+
 	private CustomerDTO entityToDto(CustomerEntity entity) {
 		CustomerDTO dto = new CustomerDTO();
 		dto.setId(entity.getId());
@@ -252,11 +287,5 @@ public class CustomerServiceImpl implements CustomerService {
 		CustomerEntity customerEntity = customerRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 		return customerEntity.getUserPoint();
 	}
-
-    @Override
-    public CustomerEntity getCustomerById(Long id) {
-        return customerRepository.findById(id.intValue())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found"));
-    }
 
 }

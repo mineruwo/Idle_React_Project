@@ -20,8 +20,8 @@ export const AdminControls = ({
         <form onSubmit={handleSearch} className="admin-search">
             <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
                 {searchOptions.map(option => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
+                    <option key={option.value} value={option.value}>{option.label}</option>)
+                )}
             </select>
             <input
                 type="text"

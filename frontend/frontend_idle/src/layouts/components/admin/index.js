@@ -4,7 +4,7 @@ import MainContentComponent from "./MainContentComponent";
 import LoginComponent from "./LoginComponent";
 import DashboardComponent from "./DashboardComponent";
 import AdminAccountListComponent from "./AdminAccountListComponent";
-import CustomerAccountListComponent from "./CustomerAccountListComponent";
+import CustomerAccountListComponent from "././CustomerAccountListComponent";
 import InquiryListComponent from "./InquiryListComponent";
 import NoticeListComponent from "./NoticeListComponent";
 import AdminAccountCreateComponent from "./AdminAccountCreateComponent";

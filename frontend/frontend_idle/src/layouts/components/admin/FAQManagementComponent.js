@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getAllFAQs, deleteFAQ, toggleFAQActive } from '../../../api/adminApi';
 import useDashboardData from '../../../hooks/useDashboardData';
 import Modal from '../common/Modal';
+import AdminButton from '../common/AdminButton'; // Import AdminButton
 import '../../../theme/admin.css';
 
 const FAQManagementComponent = () => {
@@ -87,8 +88,10 @@ const FAQManagementComponent = () => {
             />
             <div className="admin-header">
                 <h2>자주 묻는 질문 관리</h2>
-                <Link to="/admin/faqs/create" className="admin-primary-btn">
-                    새 FAQ 등록
+                <Link to="/admin/faqs/create">
+                    <AdminButton variant="primary"> {/* Changed to AdminButton */}
+                        새 FAQ 등록
+                    </AdminButton>
                 </Link>
             </div>
             <table className="admin-table">
@@ -114,10 +117,10 @@ const FAQManagementComponent = () => {
                                                 <div style={{ marginTop: '5px' }} dangerouslySetInnerHTML={{ __html: faq.answer }}></div>
                                             </div>
                                             <div className="admin-actions">
-                                                <button onClick={() => handleDelete(faq.id)} className="admin-action-btn admin-delete-btn">삭제</button>
-                                                <button onClick={() => handleToggle(faq.id)} className="admin-action-btn admin-toggle-btn">
+                                                <AdminButton onClick={() => handleDelete(faq.id)} variant="delete">삭제</AdminButton> {/* Changed to AdminButton */}
+                                                <AdminButton onClick={() => handleToggle(faq.id)} variant="toggle"> {/* Changed to AdminButton */}
                                                     {faq.is_del ? '활성화' : '비활성화'}
-                                                </button>
+                                                </AdminButton>
                                             </div>
                                         </td>
                                     </tr>
