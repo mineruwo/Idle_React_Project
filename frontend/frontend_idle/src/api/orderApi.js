@@ -40,6 +40,26 @@ export const authClient = axios.create({
   timeout: 15000,
 });
 
+authClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      // For API calls, we shouldn't be redirected to a login page.
+      // Instead, we reject the promise with a clear error message.
+      // This prevents the browser from following a faulty redirect and causing SSL errors.
+      return Promise.reject(new Error('인증에 실패했습니다. 다시 로그인해주세요.'));
+    }
+    // Handle cases where the error is a network error from a bad redirect
+    if (!error.response && error.message === 'Network Error') {
+      console.error(
+        'Network Error: This might be due to a redirect to an incorrect protocol (e.g., http to https) or a CORS issue. Check backend security configuration.'
+      );
+      return Promise.reject(new Error('서버에 연결할 수 없습니다. 백엔드 인증 리디렉션 문제일 수 있습니다.'));
+    }
+    return Promise.reject(error);
+  }
+);
+
 /* ------------------------------------------------------------------ */
 /*                                오더                                 */
 /* ------------------------------------------------------------------ */
