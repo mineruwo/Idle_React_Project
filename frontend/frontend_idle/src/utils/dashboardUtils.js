@@ -8,29 +8,28 @@ export const renderAccountPanel = (title, dateColumnName, data, type, dateRange,
         <AdminCard title={title}>
             <div className="dashboard-date-filters"> {/* New class for date filters container */}
                 {/* <h4>{title}</h4> -- Title is now handled by AdminCard */}
-                <div>
-                    <AdminButton
-                        variant="filter" // Use filter variant for these buttons
-                        isActive={dateRange === '1day'}
-                        onClick={() => onDateRangeChange('1day')}
-                    >
-                        1일
-                    </AdminButton>
-                    <AdminButton
-                        variant="filter" // Use filter variant for these buttons
-                        isActive={dateRange === '1week'}
-                        onClick={() => onDateRangeChange('1week')}
-                    >
-                        1주일
-                    </AdminButton>
-                    <AdminButton
-                        variant="filter" // Use filter variant for these buttons
-                        isActive={dateRange === '1month'}
-                        onClick={() => onDateRangeChange('1month')}
-                    >
-                        1달
-                    </AdminButton>
-                </div>
+                {/* Removed extra div around AdminButtons */}
+                <AdminButton
+                    variant="filter" // Use filter variant for these buttons
+                    isActive={dateRange === '1day'}
+                    onClick={() => onDateRangeChange('1day')}
+                >
+                    1일
+                </AdminButton>
+                <AdminButton
+                    variant="filter" // Use filter variant for these buttons
+                    isActive={dateRange === '1week'}
+                    onClick={() => onDateRangeChange('1week')}
+                >
+                    1주일
+                </AdminButton>
+                <AdminButton
+                    variant="filter" // Use filter variant for these buttons
+                    isActive={dateRange === '1month'}
+                    onClick={() => onDateRangeChange('1month')}
+                >
+                    1달
+                </AdminButton>
             </div>
             <table className="admin-table" style={{ fontSize: '0.9rem' }}>
                 <thead>

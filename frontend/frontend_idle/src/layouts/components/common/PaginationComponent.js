@@ -5,16 +5,24 @@ const PaginationComponent = ({ currentPage, totalPages, onPageChange, maxVisible
     const pageNumbers = [];
     const halfVisible = Math.floor(maxVisibleButtons / 2);
 
-    let startPage = Math.max(0, currentPage - halfVisible);
-    let endPage = Math.min(totalPages - 1, currentPage + halfVisible);
+    let startPage = currentPage - halfVisible;
+    let endPage = currentPage + halfVisible;
 
-    // Adjust startPage and endPage to ensure maxVisibleButtons are always shown if possible
-    if (endPage - startPage + 1 < maxVisibleButtons) {
-        if (startPage === 0) {
-            endPage = Math.min(totalPages - 1, maxVisibleButtons - 1);
-        } else if (endPage === totalPages - 1) {
-            startPage = Math.max(0, totalPages - maxVisibleButtons);
-        }
+    // Ensure startPage is not less than 0
+    if (startPage < 0) {
+        endPage += -startPage; // Shift endPage by the amount startPage is below 0
+        startPage = 0;
+    }
+
+    // Ensure endPage is not greater than totalPages - 1
+    if (endPage >= totalPages) {
+        startPage -= (endPage - (totalPages - 1)); // Shift startPage by the amount endPage is above totalPages - 1
+        endPage = totalPages - 1;
+    }
+
+    // Re-check startPage after adjusting for endPage (in case totalPages is very small)
+    if (startPage < 0) {
+        startPage = 0;
     }
 
     for (let i = startPage; i <= endPage; i++) {
@@ -27,6 +35,7 @@ const PaginationComponent = ({ currentPage, totalPages, onPageChange, maxVisible
                 onClick={() => onPageChange(currentPage - 1)}
                 disabled={currentPage === 0}
                 variant="default"
+                className="pagination-button"
             >
                 이전
             </AdminButton>
@@ -34,7 +43,7 @@ const PaginationComponent = ({ currentPage, totalPages, onPageChange, maxVisible
             {/* Render first page button and ellipsis if needed */}
             {startPage > 0 && (
                 <>
-                    <AdminButton onClick={() => onPageChange(0)} variant="default">1</AdminButton>
+                    <AdminButton onClick={() => onPageChange(0)} variant="default" className="pagination-button">1</AdminButton>
                     {startPage > 1 && <span>...</span>}
                 </>
             )}
@@ -45,7 +54,7 @@ const PaginationComponent = ({ currentPage, totalPages, onPageChange, maxVisible
                     onClick={() => onPageChange(number)}
                     variant="default"
                     isActive={number === currentPage} 
-                    className={number === currentPage ? 'pagination-button-active' : ''} 
+                    className={`pagination-button ${number === currentPage ? 'pagination-button-active' : ''}`} 
                 >
                     {number + 1}
                 </AdminButton>
@@ -63,6 +72,7 @@ const PaginationComponent = ({ currentPage, totalPages, onPageChange, maxVisible
                 onClick={() => onPageChange(currentPage + 1)}
                 disabled={currentPage === totalPages - 1}
                 variant="default"
+                className="pagination-button"
             >
                 다음
             </AdminButton>

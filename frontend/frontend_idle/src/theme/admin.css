@@ -531,8 +531,8 @@ body {
 
 .dashboard-date-filters {
     display: flex;
-    justify-content: flex-end; /* Align buttons to the right */
-    gap: 5px; /* Space between buttons */
+    justify-content: flex-start; /* Align buttons to the left */
+    gap: 5px;
     margin-bottom: 10px; /* Space below the filter buttons */
 }
 
@@ -696,4 +696,8 @@ body {
     color: var(--admin-pink-header);
 }
 
-
+.pagination-button {
+    width: 50px; /* Adjust as needed, this is half of a typical button width */
+    min-width: unset; /* Override any min-width from AdminButton */
+    padding: 5px 0; /* Adjust padding to keep content centered */
+}

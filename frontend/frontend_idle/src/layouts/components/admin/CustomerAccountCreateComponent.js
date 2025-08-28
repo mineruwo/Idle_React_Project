@@ -58,27 +58,27 @@ const CustomerAccountCreateComponent = () => {
             <Modal show={modalState.show} message={modalState.message} onClose={closeModal} />
             <form onSubmit={handleSubmit}>
                 <div className="admin-form-group">
-                    <label htmlFor="id" className="admin-label">ID:</label>
+                    <label htmlFor="id" className="admin-label">아이디</label>
                     <input type="text" id="id" name="id" value={newCustomer.id} onChange={handleChange} required className="admin-input" />
                 </div>
                 <div className="admin-form-group">
-                    <label htmlFor="passwordEnc" className="admin-label">비밀번호:</label>
+                    <label htmlFor="passwordEnc" className="admin-label">비밀번호</label>
                     <input type="password" id="passwordEnc" name="passwordEnc" value={newCustomer.passwordEnc} onChange={handleChange} required className="admin-input" />
                 </div>
                 <div className="admin-form-group">
-                    <label htmlFor="customName" className="admin-label">이름:</label>
+                    <label htmlFor="customName" className="admin-label">이름</label>
                     <input type="text" id="customName" name="customName" value={newCustomer.customName} onChange={handleChange} required className="admin-input" />
                 </div>
                 <div className="admin-form-group">
-                    <label htmlFor="phone" className="admin-label">전화번호:</label>
+                    <label htmlFor="phone" className="admin-label">전화번호</label>
                     <input type="tel" id="phone" name="phone" value={newCustomer.phone} onChange={handleChange} required className="admin-input" />
                 </div>
                 <div className="admin-form-group">
-                    <label htmlFor="nickname" className="admin-label">닉네임:</label>
+                    <label htmlFor="nickname" className="admin-label">닉네임</label>
                     <input type="text" id="nickname" name="nickname" value={newCustomer.nickname} onChange={handleChange} required className="admin-input" />
                 </div>
                 <div className="admin-form-group">
-                    <label htmlFor="role" className="admin-label">역할:</label>
+                    <label htmlFor="role" className="admin-label">역할</label>
                     <select id="role" name="role" value={newCustomer.role} onChange={handleChange} className="admin-select">
                         {CUSTOMER_ROLE_OPTIONS.map(option => (
                             <option key={option.value} value={option.value}>{option.label}</option>
