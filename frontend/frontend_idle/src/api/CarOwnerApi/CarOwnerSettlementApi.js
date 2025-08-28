@@ -104,14 +104,21 @@ export async function markSettlementPaid(id, token) {
 /** 🔸 월 정산 신청: POST /api/car-owner/settlements/batch/request?ym=YYYY-MM
  *  백엔드 엔드포인트가 다르면 아래 경로만 맞춰주세요.
  */
-export async function requestPayoutBatch(ym, token) {
-  const url = new URL(`${SETTLEMENTS}/batch/request`, window.location.origin);
+export async function requestPayoutBatch(ym, token, { bankCode, accountNo } = {}) {
+  const url = new URL(`/api/car-owner/settlements/batch/request`, window.location.origin);
   url.searchParams.set("ym", ym);
+
+  const headers = { "Content-Type": "application/json" };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  // 모달에서 값이 들어오면 JSON 바디로 전송 (없으면 빈 바디)
+  const body = (bankCode || accountNo) ? JSON.stringify({ bankCode, accountNo }) : null;
 
   const res = await fetch(url.toString(), {
     method: "POST",
     credentials: "include",
-    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    headers,
+    body,
   });
   return handle(res);
 }

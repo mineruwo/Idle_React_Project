@@ -66,6 +66,12 @@ public class CarOwnerSettlement {
     private LocalDateTime approvedAt;
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
+    
+    @Column(name = "bank_code", length = 10)
+    private String bankCode;
+
+    @Column(name = "bank_account_no", length = 64)
+    private String bankAccountNo;
 
     // 월 집계키: 주문 완료일 기준 그 달의 1일 (yyyy-MM-01)
     @Column(name = "month_key", nullable = false)

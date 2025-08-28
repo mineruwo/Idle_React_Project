@@ -145,4 +145,23 @@ public interface CarOwnerSettlementRepository extends JpaRepository<CarOwnerSett
 
     // ✅ 월/차주 + REQUESTED 상태 기준 건수
     long countByOwnerIdAndMonthKeyAndStatus(String ownerId, LocalDate monthKey, Status status);
-}
+    
+    //계좌번호 입력 
+    
+    @Modifying
+    @Query("""
+        update CarOwnerSettlement s
+           set s.bankCode = :bankCode,
+               s.bankAccountNo = :accountNo,
+               s.status = com.fullstack.entity.CarOwnerSettlement.Status.REQUESTED,
+               s.requestedAt = CURRENT_TIMESTAMP,
+               s.updatedAt  = CURRENT_TIMESTAMP
+         where s.ownerId  = :ownerId
+           and s.monthKey = :monthKey
+           and s.status   = com.fullstack.entity.CarOwnerSettlement.Status.READY
+    """)
+    int bulkRequestWithBank(@Param("ownerId") String ownerId,
+                            @Param("monthKey") java.time.LocalDate monthKey,
+                            @Param("bankCode") String bankCode,
+                            @Param("accountNo") String accountNo);
+  }

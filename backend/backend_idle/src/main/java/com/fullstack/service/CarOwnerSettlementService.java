@@ -39,7 +39,7 @@ public interface CarOwnerSettlementService {
      */
     int syncMonthly(String ownerId, YearMonth ym);
     /* payoutBatch 생성*/
-    void requestPayoutBatch(String ownerId, YearMonth ym);
+    void requestPayoutBatch(String ownerId, YearMonth ym, String bankCode, String accountNo);
     /**
      * 요약 카드 (합계·건수)
      */

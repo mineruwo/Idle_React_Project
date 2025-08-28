@@ -5,6 +5,7 @@ import {
   fetchSettlementSummaryCard,
   requestPayoutBatch,
 } from "../../../../api/CarOwnerApi/CarOwnerSettlementApi";
+import BankAccountModalPortal from "./BankAccountmodalPortal"; // ← 네가 만든 포탈 컴포넌트 경로
 
 // YYYY-MM 생성
 function toYearMonth(d) {
@@ -19,44 +20,45 @@ function defaultMonthRange(from, to) {
   const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
   const pad = (n) => String(n).padStart(2, "0");
   const toISO = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-  return {
-    f: from || toISO(start),
-    t: to || toISO(end),
-    ym: toYearMonth(start),
-  };
+  return { f: from || toISO(start), t: to || toISO(end), ym: toYearMonth(start) };
 }
 
 const SettlementComponent = () => {
   // 필터
-  const [from, setFrom] = useState(""); // yyyy-MM-dd
+  const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const [status, setStatus] = useState(""); // READY/REQUESTED/APPROVED/PAID/CANCELED/""
+  const [status, setStatus] = useState("");
   const [pageData, setPageData] = useState({ content: [], number: 0, size: 10, totalPages: 0, totalElements: 0 });
   const [card, setCard] = useState(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState(null);
 
-  // 월 정산 버튼 로딩 상태
+  // 월 정산 버튼/모달 상태
   const [batchSubmitting, setBatchSubmitting] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
-  const handleRequestPayoutBatch = async () => {
-    const { ym } = defaultMonthRange(from, to);
-    if (!card) return;
-
-    const readyCount = card.readyCount ?? 0;
-    if (readyCount === 0) {
+  // 버튼 클릭 → 모달만 열기
+  const handleRequestPayoutBatch = () => {
+    if (!card || (card.readyCount ?? 0) === 0) {
       alert("요청할 READY 건이 없습니다.");
       return;
     }
-    if (!window.confirm(`${ym} 월 정산을 요청할까요?\nREADY 건수: ${readyCount}`)) return;
+    setModalOpen(true);
+  };
 
+  // 모달 제출 → API 호출 → 닫기 + 리프레시
+  const submitBankInfo = async ({ bankCode, accountNo }) => {
+    const { ym } = defaultMonthRange(from, to);
+    setBatchSubmitting(true);
     try {
-      setBatchSubmitting(true);
-      await requestPayoutBatch(ym);
+      await requestPayoutBatch(ym, undefined, { bankCode, accountNo });
       await load(pageData.number || 0);
+      setModalOpen(false);
       alert("정산 요청이 접수되었습니다.");
     } catch (e) {
+      // 에러는 모달에서 표시하고 싶으면 throw로 넘겨도 됨
       alert(e.message || "정산 요청 중 오류가 발생했습니다.");
+      throw e;
     } finally {
       setBatchSubmitting(false);
     }
@@ -66,13 +68,10 @@ const SettlementComponent = () => {
     setLoading(true);
     setErr(null);
     try {
-      // 1) 기간/월 확정
-      const { f, t, ym } = defaultMonthRange(from, to);
-
-      // 3) 목록 + 요약카드 병렬 조회
+      const { f, t } = defaultMonthRange(from, to);
       const [listRes, cardRes] = await Promise.all([
         fetchSettlements({ page, size: pageData.size || 10, status, from: f, to: t }),
-        fetchSettlementSummaryCard({ from: f, to: t })
+        fetchSettlementSummaryCard({ from: f, to: t }),
       ]);
       setPageData(listRes);
       setCard(cardRes);
@@ -113,7 +112,7 @@ const SettlementComponent = () => {
           </div>
         </div>
 
-        {/* 정산 인쇄 영역에 월 정산 버튼 + 인쇄 버튼 */}
+        {/* 정산 버튼 → 모달 오픈 */}
         <div className="settlementprintbtn" style={{ display: "flex", gap: 8 }}>
           <button
             onClick={handleRequestPayoutBatch}
@@ -206,6 +205,14 @@ const SettlementComponent = () => {
           </div>
         </>
       )}
+
+      {/* 🔹 모달 포탈: 버튼 누를 때만 뜨고, 제출/취소 시 사라짐 */}
+      <BankAccountModalPortal
+        open={modalOpen}
+        busy={batchSubmitting}                 // 선택 prop: 제출 중 비활성화
+        onClose={() => setModalOpen(false)}    // 취소 또는 성공 시 닫기
+        onSubmit={submitBankInfo}              // { bankCode, accountNo } 받음
+      />
     </div>
   );
 };
