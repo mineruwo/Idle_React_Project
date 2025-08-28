@@ -435,6 +435,16 @@ const ShippingStatusComponent = () => {
                                                                     : "기록 없음";
                                                         } else if (
                                                             step.name ===
+                                                            "차주 연결"
+                                                        ) {
+                                                            timestamp =
+                                                                order.assignedAt
+                                                                    ? fmtDateTime(
+                                                                          order.assignedAt
+                                                                      )
+                                                                    : "기록 없음";
+                                                        } else if (
+                                                            step.name ===
                                                             "운송준비중"
                                                         ) {
                                                             timestamp =
@@ -443,6 +453,14 @@ const ShippingStatusComponent = () => {
                                                                           order.paidAt
                                                                       )
                                                                     : "기록 없음";
+                                                        } else if (step.name === "운송중") {
+                                                            timestamp = order.departedAt
+                                                                ? fmtDateTime(order.departedAt)
+                                                                : "기록 없음";
+                                                        } else if (step.name === "운송완료") {
+                                                            timestamp = order.completedAt
+                                                                ? fmtDateTime(order.completedAt)
+                                                                : "기록 없음";
                                                         }
 
                                                         logEntries.push({

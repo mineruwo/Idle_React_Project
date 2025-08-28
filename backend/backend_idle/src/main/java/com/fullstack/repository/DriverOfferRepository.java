@@ -1,7 +1,8 @@
-// com.fullstack.repository.DriverOfferRepository
 package com.fullstack.repository;
 
 import com.fullstack.entity.DriverOffer;
+import com.fullstack.entity.Order;
+import com.fullstack.entity.DriverOffer.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -17,6 +18,9 @@ public interface DriverOfferRepository extends JpaRepository<DriverOffer, Long> 
 
     /** 특정 오더의 입찰 목록 (최신순) */
     List<DriverOffer> findByOrder_IdOrderByCreatedAtDesc(@Param("orderId") Long orderId);
+
+    // Order와 Status로 DriverOffer를 찾는 메소드 추가
+    Optional<DriverOffer> findByOrderAndStatus(Order order, DriverOffer.Status status);
 
     /**
      * 선택된 offer(acceptedId)를 제외한 같은 주문의 나머지 PENDING들을 REJECTED로 일괄 변경

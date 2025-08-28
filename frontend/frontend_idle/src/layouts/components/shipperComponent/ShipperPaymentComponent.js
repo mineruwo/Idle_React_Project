@@ -155,7 +155,7 @@ const ShipperPaymentComponent = ({
                         merchantUid: response.merchantUid,
                         itemName:
                             orderList.length > 1
-                                ? `${orderList[0].itemName} 외 ${ 
+                                ? `${orderList[0].itemName} 외 ${
                                       orderList.length - 1
                                   }건`
                                 : orderList[0].itemName,
@@ -169,10 +169,7 @@ const ShipperPaymentComponent = ({
                             "Updating order status for order ID:",
                             orderList[0].orderId
                         );
-                        await updateOrderStatus(
-                            orderList[0].orderId,
-                            "READY"
-                        );
+                        await updateOrderStatus(orderList[0].orderId, "READY");
                         console.log("주문 상태 업데이트 성공!");
                     } catch (statusUpdateError) {
                         console.error(
@@ -235,6 +232,7 @@ const ShipperPaymentComponent = ({
                     userId: userId,
                     pgProvider: pgProviderForBackend,
                     pointsToUse: pointsToUse,
+                    orderId: orderList[0].orderId,
                 });
 
                 if (!prepareResponse.success) {

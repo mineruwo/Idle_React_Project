@@ -5,44 +5,52 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import com.fullstack.entity.Order;
-import com.fullstack.model.enums.OrderStatus; // Added import
+import com.fullstack.model.enums.OrderStatus;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 public class OrderDto {
 
     private Long id;
-    private String orderNo; // Add this field
-    private String shipperNickname; // Add this field
-    private Integer proposedPrice;      // 화주 제안가
-    private Long driverPrice;           // 기사 제안가
+    private String orderNo;
+    private String shipperNickname;
+    private Integer proposedPrice;
+    private Long driverPrice;
     private Long avgPrice;
-    private String packingOptions;      // JSON 문자열로 체크된 포장 옵션들
+    private String packingOptions;
 
-    private Long assignedDriverId; // Added: 배정된 기사 ID
+    private Long assignedDriverId;
 
-    private String departure;           // 출발지
-    private String arrival;             // 도착지
-    private double distance;            // 거리
+    private String departure;
+    private String arrival;
+    private double distance;
 
-    private String date;                // 등록일 (필요 시)
-    private String reservedDate;        // 예약 시간
+    private String date;
+    private String reservedDate;
 
-    private boolean isImmediate;        // 즉시배송 여부
-    private String weight;              // 무게
-    private String vehicle;             // 차량 종류
-    private String cargoType;           // 화물 종류
-    private String cargoSize;           // 화물 크기
+    private boolean isImmediate;
+    private String weight;
+    private String vehicle;
+    private String cargoType;
+    private String cargoSize;
 
-    private String packingOption;       // 포장 옵션 (ex: "특수포장, 고가화물")
+    private String packingOption;
 
-    private OrderStatus status;              // 상태 (optional: 미배차, 배차완료 등) // Changed type
+    private OrderStatus status;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime paidAt;
+    private LocalDateTime departedAt;
+    private LocalDateTime completedAt;
+
+    private LocalDateTime assignedAt; // assignedAt 필드 추가
 
     public static OrderDto fromEntity(Order entity, String shipperNickname) {
         OrderDto dto = new OrderDto();
         dto.setId(entity.getId());
-        dto.setOrderNo(entity.getOrderNo()); // Add this line
-        dto.setShipperNickname(shipperNickname); // Set nickname
+        dto.setOrderNo(entity.getOrderNo());
+        dto.setShipperNickname(shipperNickname);
         dto.setProposedPrice(entity.getProposedPrice());
         dto.setDriverPrice(entity.getDriverPrice());
         dto.setAvgPrice(entity.getAvgPrice());
@@ -51,16 +59,23 @@ public class OrderDto {
         dto.setArrival(entity.getArrival());
         dto.setDistance(entity.getDistance());
         dto.setReservedDate(entity.getReservedDate());
-        dto.setImmediate(entity.getIsImmediate());   // ✅ 수정된 부분
+        dto.setImmediate(entity.getIsImmediate());
         dto.setWeight(entity.getWeight());
         dto.setVehicle(entity.getVehicle());
         dto.setCargoType(entity.getCargoType());
         dto.setCargoSize(entity.getCargoSize());
-        dto.setAssignedDriverId(entity.getAssignedDriverId()); // Added: Map assignedDriverId
-                OrderStatus statusEnum = entity.getStatus(); // Changed type to OrderStatus
-        String statusString = null; // Initialize to null
+        dto.setAssignedDriverId(entity.getAssignedDriverId());
+        
+        dto.setCreatedAt(entity.getCreatedAt());
+        dto.setDepartedAt(entity.getDepartedAt());
+        dto.setCompletedAt(entity.getCompletedAt());
+        // assignedAt 필드는 OrderService에서 DriverOffer 정보를 조회하여 설정됩니다.
+        // 여기서는 entity.getAssignedAt()을 호출하지 않습니다.
+
+        OrderStatus statusEnum = entity.getStatus();
+        String statusString = null;
         if (statusEnum != null) {
-            statusString = statusEnum.name(); // Get the enum name as string
+            statusString = statusEnum.name();
         }
 
         try {
