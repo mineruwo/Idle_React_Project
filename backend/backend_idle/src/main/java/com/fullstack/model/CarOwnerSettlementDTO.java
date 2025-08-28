@@ -1,8 +1,9 @@
 package com.fullstack.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,59 +11,108 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 public final class CarOwnerSettlementDTO {
-    private CarOwnerSettlementDTO(){}
+    private CarOwnerSettlementDTO() {}
 
-    // 생성(수동 추가가 필요할 때만 사용; 월 자동 동기화와 병행 가능)
-    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    /* =========================
+     * 요청 DTO
+     * ========================= */
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class SettlementCreate {
         private Long orderId;
-        private Long amount;
+        private BigDecimal amount;
         private String memo;
     }
 
-    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class SettlementMemoRequest {
         private String memo;
     }
 
-    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class SettlementPayRequest {
         private String txRef;
     }
 
-    // 목록 행 (프론트 fetchSettlements 반환값: Page<SettlementSummaryResponse>)
-    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    /* =========================
+     * 응답 DTO - 목록 행
+     * ========================= */
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class SettlementSummaryResponse {
-        private Long id;           // item id
+        private Long id;
         private Long orderId;
-        private Long amount;
-        private String status;     // 배치 상태를 내려줌(REQUESTED/APPROVED/PAID/CANCELED)
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-        private LocalDateTime requestedAt; // 배치 요청 시각
+        private String orderNo;
+        private String departure;
+        private String arrival;
+        private BigDecimal amount;
+        private BigDecimal commission;
+        private BigDecimal netAmount;
+        private String status;
+        private LocalDateTime createdAt;
+        private LocalDateTime paidAt;
+        private LocalDate monthKey;
     }
 
-    // 단건 상세
-    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    /* =========================
+     * 응답 DTO - 상세
+     * ========================= */
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class SettlementDetailResponse {
         private Long id;
         private String ownerId;
         private Long orderId;
-        private Long amount;
-        private String status;     // 배치 상태
-        private String memo;
-        private String txRef;
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+        private String orderNo;
+        private String departure;
+        private String arrival;
+        private BigDecimal amount;
+        private BigDecimal commission;
+        private BigDecimal netAmount;
+        private String status;
         private LocalDateTime requestedAt;
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+        private LocalDateTime approvedAt;
         private LocalDateTime paidAt;
+        private LocalDate monthKey;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
+        private String txRef;
+        private Long batchId;
     }
 
-    // 요약 카드 (/summary)
-    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    /* =========================
+     * 응답 DTO - 요약 카드
+     * ========================= */
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class SettlementSummaryCardResponse {
-        private long todayEarnings;
-        private long monthEarnings;
-        private long unsettledAmount;
-        private LocalDate month;   // 2025-08-01 (월 첫날)
+        private String period;
+        private BigDecimal totalAmount;
+        private BigDecimal totalCommission;
+        private BigDecimal netAmount;
+        private long readyCount;
+        private long requestedCount;
+        private long paidCount;
     }
 }

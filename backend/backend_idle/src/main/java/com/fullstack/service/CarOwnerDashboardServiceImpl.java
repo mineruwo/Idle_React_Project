@@ -1,5 +1,6 @@
 package com.fullstack.service;
 
+import com.fullstack.entity.CustomerEntity;
 import com.fullstack.entity.Order;
 import com.fullstack.model.CarOwnerDashboardDTO.DashboardSummaryDTO;
 import com.fullstack.model.CarOwnerDashboardDTO.DeliveryItemDTO;
@@ -9,9 +10,12 @@ import com.fullstack.model.enums.OrderStatus; // Added import
 import com.fullstack.repository.CarOwnerDashboardPaymentRepository;
 import com.fullstack.repository.CustomerRepository;
 import com.fullstack.repository.OrderRepository; // ✅ 새로 주입
+import com.fullstack.repository.ReviewRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +30,7 @@ public class CarOwnerDashboardServiceImpl implements CarOwnerDashboardService {
 
 	private final OrderRepository orderRepository;
 	private final CustomerRepository customerRepository;
+	private final ReviewRepository reviewRepository;
 
 	private static final DateTimeFormatter DF = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	private static final int DEFAULT_COMMISSION_RATE = 10; // %
@@ -114,15 +119,30 @@ public class CarOwnerDashboardServiceImpl implements CarOwnerDashboardService {
 	    }
 	    return out;
 	}
-
 	@Transactional(readOnly = true)
 	@Override
 	public WarmthDTO getWarmth(String ownerId) {
-		Long driverKey = resolveDriverKey(ownerId);
-		int completed = (int) (driverKey == null ? 0
-				: orderRepository.countByAssignedDriverIdAndStatus(driverKey, OrderStatus.COMPLETED));
-		int late = 0; // 실제 예정/도착 시간이 생기면 로직 교체
-		return new WarmthDTO(completed, late);
+	    // ownerId(loginId) -> 드라이버 idNum
+	    CustomerEntity me = customerRepository.findByLoginId(ownerId)
+	            .orElseThrow(() -> new AccessDeniedException("AUTH_USER_NOT_FOUND"));
+	    Integer driverIdNum = me.getIdNum();
+
+	    long cnt = reviewRepository.countByTargetIdNum(driverIdNum);
+
+	    if (cnt == 0) {
+	        // 리뷰 없음 → 점수 미표기
+	        return new WarmthDTO(null, 0, null);
+	    }
+
+	    Double avg = reviewRepository.avgRatingByTargetIdNum(driverIdNum); // 1~5
+	    if (avg == null) {
+	        return new WarmthDTO(null, 0, null);
+	    }
+
+	    // 5점 만점 → 100점 환산
+	    int score = (int)Math.round((avg / 5.0) * 100.0);
+
+	    return new WarmthDTO(score, (int)cnt, avg);
 	}
 
 	@Transactional(readOnly = true)

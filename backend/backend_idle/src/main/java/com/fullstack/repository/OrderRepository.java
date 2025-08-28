@@ -4,7 +4,7 @@ package com.fullstack.repository;
 import com.fullstack.entity.Order;
 import com.fullstack.model.enums.OrderStatus; // Added import
 
-
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -136,7 +136,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     	                                              @Param("end") LocalDateTime end);
     
 
-	// (선택) 일자별 운송건수 필요 시 JPQL/네이티브로 추가 가능
+	
     	@Query("""
     		    select function('to_char', o.updatedAt, 'YYYY-MM-DD') as day,
     		           count(o.id)
@@ -157,6 +157,13 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     long countByAssignedDriverIdAndStatusIn(Long assignedDriverId, Collection<OrderStatus> statuses); // or varargs
     long countByStatus(OrderStatus status);
     long countByStatusIn(Collection<OrderStatus> statuses);
+    
+   //차주 정산 
+    List<Order> findByAssignedDriverIdAndStatusAndCreatedAtBetween(
+            Long assignedDriverId, OrderStatus status, LocalDateTime start, LocalDateTime end);
+
+    List<Order> findByStatusAndCreatedAtBetween(
+            OrderStatus status, LocalDateTime start, LocalDateTime end);
 
     List<Order> findByCreatedAtBetween(LocalDateTime startDateTime, LocalDateTime endDateTime);
 }
