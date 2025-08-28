@@ -75,13 +75,8 @@ public class SalesService {
 
         if (order.getAssignedDriverId() != null) {
             CarOwnerSettlement settlement = carOwnerSettlementRepository.findById(order.getAssignedDriverId()).orElse(null);
-            if (settlement != null && settlement.getTxRef() != null) {
-                try {
-                    commissionRate = new BigDecimal(settlement.getTxRef());
-                } catch (NumberFormatException e) {
-                    // Log error or handle invalid tx_ref format
-                    System.err.println("Invalid tx_ref format for settlement ID " + settlement.getId() + ": " + settlement.getTxRef());
-                }
+            if (settlement != null) {
+                commissionRate = settlement.getCommission();
             }
         }
         return driverPrice.multiply(commissionRate);
