@@ -27,6 +27,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -288,14 +289,23 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
     
     @Transactional
     protected void refreshBatchTotals(String ownerId, LocalDate monthKey) {
-        BigDecimal total = settlementRepo.sumAmountByOwnerAndMonthKey(ownerId, monthKey);
-        long cnt = settlementRepo.countByOwnerIdAndMonthKey(ownerId, monthKey);
-        batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey).ifPresent(b -> {
-            b.setTotalAmount(total);
-            b.setItemCount((int) cnt);
+        BigDecimal net = Optional.ofNullable(
+                settlementRepo.sumNetByOwnerAndMonthKeyForRequested(ownerId, monthKey))
+            .orElse(BigDecimal.ZERO)
+            .setScale(0, RoundingMode.HALF_UP);
+
+        int cnt = (int) settlementRepo.countByOwnerIdAndMonthKeyAndStatus(
+                ownerId, monthKey, CarOwnerSettlement.Status.REQUESTED);
+
+        var opt = batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey);
+        if (opt.isPresent()) {
+            var b = opt.get();
+            b.setTotalAmount(net);
+            b.setItemCount(cnt);
             batchRepo.save(b);
-        });
+        }
     }
+    
     @Transactional
     public void requestPayoutBatch(String ownerId, YearMonth ym) {
         LocalDate monthKey = ym.atDay(1);
