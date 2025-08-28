@@ -77,10 +77,18 @@ public class PaymentServiceImpl implements PaymentService {
         paymentEntity.setCustomer(customer);
 
         // 주문(Order) 정보를 찾아서 관계 설정
-        Order order = Optional.ofNullable(requestDto.getOrderId())
-        		.flatMap(orderRepository::findById)
-        		.orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다: " + requestDto.getOrderId()));
-        paymentEntity.setOrder(order);
+        // 주문(Order) 정보를 찾아서 관계 설정
+        // 포인트 충전의 경우 orderId가 없을 수 있으므로 조건부 처리
+        if ("포인트 충전".equals(paymentEntity.getItemName())) {
+            // 포인트 충전은 특정 주문과 연관되지 않으므로 orderId가 null일 수 있음
+            paymentEntity.setOrder(null); // 명시적으로 null 설정
+        } else {
+            // 그 외의 결제는 orderId가 필수
+            Order order = Optional.ofNullable(requestDto.getOrderId())
+                    .flatMap(orderRepository::findById)
+                    .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다: " + requestDto.getOrderId()));
+            paymentEntity.setOrder(order);
+        }
         paymentEntity.setPointsUsed(requestDto.getPointsToUse());
         paymentEntity.setPgProvider(requestDto.getPgProvider());
         log.info("preparePayment: PaymentEntity customer ID set to: {}", paymentEntity.getCustomer().getIdNum());
