@@ -29,7 +29,7 @@ import com.fullstack.security.util.TokenCookieUtils;
 import com.fullstack.service.AuthService;
 import com.fullstack.service.ResetPasswordService;
 import com.fullstack.service.SnsOnboardingService;
-import com.fullstack.service.SnsSignupService;
+import com.fullstack.service.SnsTokenService;
 import com.fullstack.service.TokenService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,7 +49,7 @@ public class AuthController {
 	private final TokenService tokenService;
 	private final CustomerRepository customerRepository;
 	private final ResetPasswordService resetPasswordService;
-	private final SnsSignupService snsSignupService;
+	private final SnsTokenService snsSignupService;
     private final SnsOnboardingService snsOnboardingService;
 	
 	@PostMapping("/login")
@@ -67,7 +67,7 @@ public class AuthController {
 	}
 
 	@PostMapping("/refresh")
-	public ResponseEntity<Map<String, Object>> refresh(HttpServletRequest request, HttpServletResponse response) {
+	public ResponseEntity<Void> refresh(HttpServletRequest request, HttpServletResponse response) {
 		String refreshToken = TokenCookieUtils.getRefreshTokenFromCookie(request);
 
 		if (refreshToken == null) {
@@ -80,15 +80,12 @@ public class AuthController {
 	    }
 
 		TokenCookieUtils.setAccessTokenCookie(response, tokenDTO.getAccessToken(), tokenDTO.getAtExpiresIn());
-
 		if (tokenDTO.getRefreshToken() != null) {
 			TokenCookieUtils.setRefreshTokenCookie(response, tokenDTO.getRefreshToken(), tokenDTO.getRtExpiresIn());
 		}
-
 		TokenCookieUtils.setAuthHintCookie(response, true, tokenDTO.getRtExpiresIn());
 		
-		return ResponseEntity
-				.ok(Map.of("atExpiresIn", tokenDTO.getAtExpiresIn(), "rtRotated", tokenDTO.getRefreshToken() != null));
+		 return ResponseEntity.ok().build();
 	}
 
 	@PostMapping("/logout")
@@ -126,16 +123,12 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 	
-	
 	// sns
 	@PostMapping("/oauth/complete-signup")
     public ResponseEntity<Map<String, Object>> completeSnsSignup(
             @CookieValue(name = OAUTH_SIGNUP_TOKEN, required = false) String ticket,
             @Validated @RequestBody SnsSignupRequestDTO body,
             HttpServletResponse response) {
-
-		  log.info("📩 complete-signup request body: userName={}, nickname={}, role={}",
-		            body.getCustomName(), body.getNickname(), body.getRole());
 		  
         var opt = snsSignupService.consume(ticket);
         if (opt.isEmpty()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

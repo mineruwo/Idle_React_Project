@@ -2,8 +2,6 @@ package com.fullstack.service;
 
 import com.fullstack.entity.CustomerEntity;
 import com.fullstack.model.CustomerDTO;
-import com.fullstack.model.LoginRequestDTO;
-import com.fullstack.model.LoginResponseDTO;
 
 import java.util.Map;
 
@@ -11,12 +9,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface CustomerService {
-	
-	public void register(CustomerDTO dto);
-
-	public boolean isIdDuplicate(String id);
-    
-	public boolean isNicknameDuplicate(String id);
 
 	public Page<CustomerEntity> getCustomers(Pageable pageable, String role, String searchType, String searchQuery);
 

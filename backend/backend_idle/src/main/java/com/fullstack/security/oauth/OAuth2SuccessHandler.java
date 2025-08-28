@@ -20,7 +20,7 @@ import com.fullstack.entity.CustomerEntity;
 import com.fullstack.model.TokenDTO;
 import com.fullstack.repository.CustomerRepository;
 import com.fullstack.security.util.TokenCookieUtils;
-import com.fullstack.service.SnsSignupService;
+import com.fullstack.service.SnsTokenService;
 import com.fullstack.service.TokenService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,7 +33,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 	
 	private final CustomerRepository customerRepository;
 	private final TokenService tokenService;
-	private final SnsSignupService snsSignupService;
+	private final SnsTokenService snsSignupService;
 	
 	@Value("${frontend.base-url}")
     private String frontendBaseUrl;

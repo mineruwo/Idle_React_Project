@@ -31,28 +31,6 @@ public class CustomerServiceImpl implements CustomerService {
 	private final CustomerRepository customerRepository;
 	private final PasswordEncoder passwordEncoder;
 
-	// 회원가입
-	@Override
-	public void register(CustomerDTO dto) {
-		// 비밀번호 암호화
-		String rawPassword = dto.getPasswordEnc();
-		String encodedPassword = passwordEncoder.encode(rawPassword);
-		dto.setPasswordEnc(encodedPassword);
-
-		CustomerEntity entity = dtoToEntity(dto);
-		customerRepository.save(entity);
-	}
-
-	// 회원가입 검증
-	@Override
-	public boolean isIdDuplicate(String id) {
-		return customerRepository.existsById(id);
-	}
-	@Override
-	public boolean isNicknameDuplicate(String nickname) {
-		return customerRepository.existsByNickname(nickname);
-	}
-
 	private CustomerEntity dtoToEntity(CustomerDTO dto) {
 		return CustomerEntity.builder().id(dto.getId()).passwordEnc(dto.getPasswordEnc())
 				.customName(dto.getCustomName()).phone(dto.getPhone()).nickname(dto.getNickname()).role(dto.getRole())

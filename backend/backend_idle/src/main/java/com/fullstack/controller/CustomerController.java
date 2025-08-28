@@ -1,6 +1,8 @@
 package com.fullstack.controller;
 
 import com.fullstack.model.CustomerDTO;
+import com.fullstack.model.SignupRequestDTO;
+import com.fullstack.service.AuthService;
 import com.fullstack.service.CustomerService;
 
 import lombok.RequiredArgsConstructor;
@@ -20,18 +22,19 @@ public class CustomerController {
 
     @Autowired
     private final CustomerService customerService;
+    private final AuthService authService;
     
     // 회원가입
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody CustomerDTO customerDTO) {
-    	customerService.register(customerDTO);
-    	return ResponseEntity.ok("회원가입 성공");
+    public ResponseEntity<Void> signup(@RequestBody SignupRequestDTO signupRequestDTO) {
+    	authService.register(signupRequestDTO);
+    	return ResponseEntity.ok().build();
     }
     
     // 아이디 중복 확인
     @GetMapping("/check-id")
     public ResponseEntity<Boolean> checkId(@RequestParam("id") String id) {
-    	boolean result = customerService.isIdDuplicate(id);
+    	boolean result = authService.isIdDuplicate(id);
     	
     	return ResponseEntity.ok(result);
     }
@@ -39,7 +42,7 @@ public class CustomerController {
     // 닉네임 중복 확인
     @GetMapping("/check-nickname")
     public ResponseEntity<Boolean> checkNickname(@RequestParam("nickname") String nickname) {
-    	boolean result = customerService.isNicknameDuplicate(nickname);
+    	boolean result = authService.isNicknameDuplicate(nickname);
     	
     	return ResponseEntity.ok(result);
     }
