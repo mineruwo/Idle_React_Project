@@ -47,6 +47,7 @@ public final class CarOwnerDashboardDTO {
         private String from;
         private String s_date;       // 출발 예정일(문자열)
         private String to;
+        
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder

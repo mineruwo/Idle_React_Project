@@ -13,6 +13,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -59,6 +60,52 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 	 /** ✅ 로그인한 기사(driverId)에게 배정된 주문만 상태 변경 허용 */
     Optional<Order> findByIdAndAssignedDriverId(Long id, Long assignedDriverId);
     
+    //오더 상태값 변경에 따른 시간 업데이트
+    @Modifying
+    @Query("""
+        update Order o
+           set o.status = com.fullstack.model.enums.OrderStatus.ONGOING,
+               o.departedAt = :now,
+               o.updatedAt  = :now
+         where o.id = :orderId
+           and o.assignedDriverId = :driverId
+           and o.status = com.fullstack.model.enums.OrderStatus.READY
+    """)
+    int markDeparted(@Param("orderId") Long orderId,
+                     @Param("driverId") Long driverId,
+                     @Param("now") LocalDateTime now);
+
+    @Modifying
+    @Query("""
+        update Order o
+           set o.status = com.fullstack.model.enums.OrderStatus.COMPLETED,
+               o.completedAt = :now,
+               o.updatedAt   = :now
+         where o.id = :orderId
+           and o.assignedDriverId = :driverId
+           and o.status = com.fullstack.model.enums.OrderStatus.ONGOING
+    """)
+    int markCompleted(@Param("orderId") Long orderId,
+                      @Param("driverId") Long driverId,
+                      @Param("now") LocalDateTime now);
+    
+    @Modifying
+    @Query("""
+        update Order o
+           set o.status = com.fullstack.model.enums.OrderStatus.CANCELED,
+               o.updatedAt = :now
+         where o.id = :orderId
+           and o.assignedDriverId = :driverId
+           and o.status in (
+                com.fullstack.model.enums.OrderStatus.READY,
+                com.fullstack.model.enums.OrderStatus.ONGOING
+           )
+    """)
+    int markCanceled(@Param("orderId") Long orderId,
+                     @Param("driverId") Long driverId,
+                     @Param("now") LocalDateTime now);
+   //---------------------------------------------------------------
+    
     @Query("""
     	    select o from Order o
     	    where o.assignedDriverId = :driverId
@@ -92,7 +139,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     	        @Param("start") LocalDateTime start,
     	        @Param("end") LocalDateTime end);
 
-    	// ✅ 동일 패턴으로 두 메서드 모두 수정
+    	
     	@Query("""
     	    select function('to_char', o.updatedAt, 'YYYY-MM-DD') as day,
     	           coalesce(sum(coalesce(o.driverPrice, cast(o.proposedPrice as long))), 0) as sum
