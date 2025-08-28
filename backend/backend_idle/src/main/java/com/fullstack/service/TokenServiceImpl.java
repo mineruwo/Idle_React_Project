@@ -2,7 +2,6 @@ package com.fullstack.service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Objects;
 
 import org.springframework.stereotype.Service;
@@ -13,7 +12,6 @@ import com.fullstack.repository.CustomerRepository;
 import com.fullstack.security.jwt.JWTUtil;
 import com.fullstack.security.util.HashUtils;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service

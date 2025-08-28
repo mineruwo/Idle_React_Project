@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.fullstack.entity.CustomerEntity;
-import com.fullstack.model.CustomerDTO;
+import com.fullstack.model.LoginRequestDTO;
 import com.fullstack.model.LoginResponseDTO;
 import com.fullstack.model.ResetPasswordDTO;
 import com.fullstack.model.SnsLinkExistingRequestDTO;
@@ -26,10 +26,10 @@ import com.fullstack.model.SnsSignupRequestDTO;
 import com.fullstack.model.TokenDTO;
 import com.fullstack.repository.CustomerRepository;
 import com.fullstack.security.util.TokenCookieUtils;
-import com.fullstack.service.CustomerService;
+import com.fullstack.service.AuthService;
 import com.fullstack.service.ResetPasswordService;
 import com.fullstack.service.SnsOnboardingService;
-import com.fullstack.service.SnsSignupService;
+import com.fullstack.service.SnsTokenService;
 import com.fullstack.service.TokenService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,30 +45,29 @@ public class AuthController {
 	
 	private static final String OAUTH_SIGNUP_TOKEN = "oauth_signup_token";
 
-	private final CustomerService customerService;
+	private final AuthService authService;
 	private final TokenService tokenService;
 	private final CustomerRepository customerRepository;
 	private final ResetPasswordService resetPasswordService;
-	private final SnsSignupService snsSignupService;
+	private final SnsTokenService snsSignupService;
     private final SnsOnboardingService snsOnboardingService;
 	
 	@PostMapping("/login")
-	public ResponseEntity<Map<String, Object>> login(@RequestBody CustomerDTO customerDTO,
+	public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO loginRequestDTO,
 			HttpServletResponse response) {
-		LoginResponseDTO responseDTO = customerService.login(customerDTO);
+		LoginResponseDTO loginResponseDTO = authService.authenticate(loginRequestDTO);
 
-		TokenDTO tokenDTO = tokenService.issue(responseDTO.getId(), responseDTO.getRole());
+		TokenDTO tokenDTO = tokenService.issue(loginResponseDTO.getId(), loginResponseDTO.getRole());
 
 		TokenCookieUtils.setAccessTokenCookie(response, tokenDTO.getAccessToken(), tokenDTO.getAtExpiresIn());
 		TokenCookieUtils.setRefreshTokenCookie(response, tokenDTO.getRefreshToken(), tokenDTO.getRtExpiresIn());
 		TokenCookieUtils.setAuthHintCookie(response, true, tokenDTO.getRtExpiresIn());
 
-		return ResponseEntity.ok(Map.of("id", responseDTO.getId(), "role", responseDTO.getRole(), "atExpiresIn",
-				tokenDTO.getAtExpiresIn(), "rtExpiresIn", tokenDTO.getRtExpiresIn()));
+		return ResponseEntity.ok(loginResponseDTO);
 	}
 
 	@PostMapping("/refresh")
-	public ResponseEntity<Map<String, Object>> refresh(HttpServletRequest request, HttpServletResponse response) {
+	public ResponseEntity<Void> refresh(HttpServletRequest request, HttpServletResponse response) {
 		String refreshToken = TokenCookieUtils.getRefreshTokenFromCookie(request);
 
 		if (refreshToken == null) {
@@ -81,15 +80,12 @@ public class AuthController {
 	    }
 
 		TokenCookieUtils.setAccessTokenCookie(response, tokenDTO.getAccessToken(), tokenDTO.getAtExpiresIn());
-
 		if (tokenDTO.getRefreshToken() != null) {
 			TokenCookieUtils.setRefreshTokenCookie(response, tokenDTO.getRefreshToken(), tokenDTO.getRtExpiresIn());
 		}
-
 		TokenCookieUtils.setAuthHintCookie(response, true, tokenDTO.getRtExpiresIn());
 		
-		return ResponseEntity
-				.ok(Map.of("atExpiresIn", tokenDTO.getAtExpiresIn(), "rtRotated", tokenDTO.getRefreshToken() != null));
+		 return ResponseEntity.ok().build();
 	}
 
 	@PostMapping("/logout")
@@ -127,16 +123,12 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 	
-	
 	// sns
 	@PostMapping("/oauth/complete-signup")
     public ResponseEntity<Map<String, Object>> completeSnsSignup(
             @CookieValue(name = OAUTH_SIGNUP_TOKEN, required = false) String ticket,
             @Validated @RequestBody SnsSignupRequestDTO body,
             HttpServletResponse response) {
-
-		  log.info("📩 complete-signup request body: userName={}, nickname={}, role={}",
-		            body.getCustomName(), body.getNickname(), body.getRole());
 		  
         var opt = snsSignupService.consume(ticket);
         if (opt.isEmpty()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

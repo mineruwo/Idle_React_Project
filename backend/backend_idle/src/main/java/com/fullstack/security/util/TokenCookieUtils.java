@@ -37,10 +37,6 @@ public class TokenCookieUtils {
 		response.addHeader("Set-Cookie", cookie.toString());
 	}
 
-	public static String getAccessTokenFromCookie(HttpServletRequest request) {
-		return getCookieValue(request, "accessToken");
-	}
-
 	public static String getRefreshTokenFromCookie(HttpServletRequest request) {
 		return getCookieValue(request, "refreshToken");
 	}

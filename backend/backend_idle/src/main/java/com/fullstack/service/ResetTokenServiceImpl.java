@@ -2,40 +2,39 @@ package com.fullstack.service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.fullstack.entity.CustomerEntity;
-import com.fullstack.repository.CustomerRepository;
-import com.fullstack.security.util.HashUtils;
-import com.fullstack.security.util.ResetTokenUtils;
-
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+
 
 @Service
 @RequiredArgsConstructor
 public class ResetTokenServiceImpl implements ResetTokenService {
-	
-	private final CustomerRepository customerRepository;
 
-    private static final Duration RESET_TTL = Duration.ofMinutes(20);
+	private static final String PURPOSE = "RESET_PASSWORD";
 
-    public record Token(String token, LocalDateTime expiresAt) {}
+    private final OneTimeTokenService oneTimeTokenService;
 
-    @Transactional
+    @Value("${reset.token.ttl-minutes:30}")
+    private long defaultTtlMinutes;
+
+    @Override
     public Token issueResetToken(String email) {
-        CustomerEntity customerEntity = customerRepository.findActiveByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("user_not_found"));
+        return issueResetToken(email, Duration.ofMinutes(defaultTtlMinutes));
+    }
 
-        String token = ResetTokenUtils.generateToken();      
-        String hash = HashUtils.sha256(token);
-    
-        customerEntity.setResetTokenHash(hash);
-        customerEntity.setResetExpiresAt(LocalDateTime.now().plus(RESET_TTL));
-        customerEntity.setResetUsed(false);
-        customerRepository.save(customerEntity);
+    @Override
+    public Token issueResetToken(String email, Duration ttl) {
+        LocalDateTime exp = LocalDateTime.now().plus(ttl);
+        String token = oneTimeTokenService.issue(PURPOSE, ttl, email);
+        return new Token(token, exp);
+    }
 
-        return new Token(token, customerEntity.getResetExpiresAt());
+    @Override
+    public Optional<String> consume(String token) {
+        return oneTimeTokenService.consume(token, PURPOSE, String.class);
     }
 }

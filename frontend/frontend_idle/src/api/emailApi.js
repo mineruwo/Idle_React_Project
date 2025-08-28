@@ -17,7 +17,8 @@ const verifyEmailCode = (email, code, purpose) =>
         withCredentials: true,
     });
 
-    
+
+// 회원가입용
 export const sendSignupEmailCode = (email) => sendEmailCode(email, PURPOSE.SIGNUP_VERIFY_EMAIL);
 export const verifySignupEmailCode = (email, code) => verifyEmailCode(email, code, PURPOSE.SIGNUP_VERIFY_EMAIL);
 
