@@ -1,8 +1,9 @@
-// src/pages/orderPage/OrderBoard.js
+
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import useCustomMove from "../../hooks/useCustomMove";
 import styled from "styled-components";
-import { fetchMyOrders, fetchOrders } from "../../api/orderApi";
+
+import { fetchMyOrders, fetchOrders } from "../../api/orderApi"; 
 import {
   fetchOffersByOrder,
   acceptOffer,
@@ -10,11 +11,11 @@ import {
   createOffer,
 } from "../../api/offerApi";
 import { useAuth } from "../../auth/AuthProvider";
-import BidDialog from "./BidDialog"; // ✅ 모달 컴포넌트
+import BidDialog from "./BidDialog"; 
 
 // ===== 입찰 하한가 설정 =====
 const AVERAGE_PRICE_PER_KM = 3000; // OrderForm과 동일
-const MIN_BID_RATE = 0.9; // 평균가의 90% 하한
+const MIN_BID_RATE = 0.6; 
 
 const _num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
 const basePriceFor = (o) =>
@@ -126,7 +127,7 @@ const isAssigned = (order, assign) =>
       (order && order.assignedDriverId != null)
   );
 
-/** 카드 상태 라벨 */
+/** 카드 상태 라벨 (from orderB.js) */
 const statusLabelK = (s) => {
   const t = String(s || "").toUpperCase();
   switch (t) {
@@ -149,7 +150,7 @@ const statusLabelK = (s) => {
   }
 };
 
-/** 상세 패널 상태 라벨 */
+/** 상세 패널 상태 라벨 (from orderB.js, logic same as orderA.js) */
 const statusK = (order, assign) => {
   if (isAssigned(order, assign)) return "완료";
   const s = String(order?.status || "").toUpperCase();
@@ -157,7 +158,7 @@ const statusK = (order, assign) => {
   return "입찰중";
 };
 
-/** 입찰 상태 라벨 */
+/** 입찰 상태 라벨 (from orderB.js) */
 const offerStatusLabelK = (s) => {
   const t = String(s || "").toUpperCase();
   switch (t) {
@@ -176,7 +177,7 @@ const offerStatusLabelK = (s) => {
   }
 };
 
-/** 입찰 가능 여부 */
+/** 입찰 가능 여부 (from orderB.js) */
 const canBid = (order, assign) => {
   const orderStatus = String(order?.status || "").toUpperCase();
   const assignStatus = String(assign?.status || "").toUpperCase();
@@ -193,8 +194,8 @@ const OrderBoard = () => {
   const [orders, setOrders] = useState([]);
   const [selected, setSelected] = useState(null);
   const [panelOpen, setPanelOpen] = useState(false);
-  const { authenticated, profile } = useAuth();
-  const userRole = profile?.role;
+  const { authenticated, profile } = useAuth(); 
+  const userRole = profile?.role; 
 
   // 입찰/배정 상태
   const [offers, setOffers] = useState([]);
@@ -205,7 +206,7 @@ const OrderBoard = () => {
   });
   const [loadingOffers, setLoadingOffers] = useState(false);
 
-  // 모달 열기
+  // 모달 열기 (from orderB.js)
   const [bidOpen, setBidOpen] = useState(false);
 
   // 검색/필터
@@ -226,18 +227,18 @@ const OrderBoard = () => {
 
   /* 목록 로드 */
   useEffect(() => {
-    if (!authenticated || !profile?.role) {
+    if (!authenticated || !profile?.role) { 
       setOrders([]);
       return;
     }
 
-    const fetchOrderData = async () => {
+    const fetchOrderData = async () => { 
       try {
         let data;
         if (profile.role.toUpperCase() === "CARRIER") {
-          data = await fetchOrders();
+          data = await fetchOrders(); 
         } else {
-          data = await fetchMyOrders();
+          data = await fetchMyOrders(); 
         }
         setOrders(Array.isArray(data) ? data : []);
       } catch (error) {
@@ -247,7 +248,7 @@ const OrderBoard = () => {
     };
 
     fetchOrderData();
-  }, [authenticated, profile]);
+  }, [authenticated, profile]); 
 
   /* 카드 선택 시 우측패널로 스크롤 보정 + 입찰/배정 로드 */
   const loadOfferAndAssignment = async (orderId) => {
@@ -308,9 +309,10 @@ const OrderBoard = () => {
       driverPrice: null,
       status: null,
     });
+    
   };
 
-  const handleAccept = async (offerId) => {
+  const handleAccept = async (offerId) => { 
     if (!selected) return;
     try {
       await acceptOffer(offerId);
@@ -338,7 +340,7 @@ const OrderBoard = () => {
     }
   };
 
-  // ✅ 모달에서 넘어온 입찰 제출 처리
+  
   const handleBidSubmit = async ({ price, memo, vehicleName, ton, cargoType }) => {
     if (!selected) return;
     try {
@@ -386,7 +388,7 @@ const OrderBoard = () => {
       const packingText = prettyPacking(o.packingOptions ?? o.packingOption);
 
       return (
-        matchText(o.orderNo) || // ✅ 주문번호로도 검색
+        matchText(o.orderNo) || 
         matchText(o.departure) ||
         matchText(o.arrival) ||
         matchText(o.status) ||
@@ -430,7 +432,7 @@ const OrderBoard = () => {
   const total = sorted.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
-  // ✅ 보드 진입 시 무조건 최상단으로
+  
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     requestAnimationFrame(() => window.scrollTo(0, 0));
@@ -454,7 +456,7 @@ const OrderBoard = () => {
 
   /* 파생값 (우측 패널에서 재사용) */
   const currentStatus = String(assignment?.status ?? selected?.status ?? "").toUpperCase();
-  const confirmedPrice = assignment?.driverPrice ?? selected?.driverPrice;
+  const confirmedPrice = assignment?.driverPrice ?? selected?.driverPrice; // Use assignedDriverId from orderB.js
   const assignedDriver = assignment?.assignedDriverId ?? selected?.assignedDriverId;
 
   return (
@@ -555,7 +557,7 @@ const OrderBoard = () => {
                   <RightMeta>{o.status || "READY"}</RightMeta>
                 </RowBetween>
 
-                {/* 2행: 주문번호 배지 */}
+                {/* 2행: 주문번호 배지 */} 
                 <OrderNoBadge title={o.orderNo || ""}>{o.orderNo || "-"}</OrderNoBadge>
 
                 <InfoGrid>
@@ -624,7 +626,7 @@ const OrderBoard = () => {
         </DetailHeader>
 
         {selected ? (
-          <>
+          <> 
             {/* ===== 배정 뱃지 헤더 ===== */}
             <BadgeRow>
               {assignment?.assignedDriverId ? (
@@ -703,7 +705,7 @@ const OrderBoard = () => {
                   </Row>
                 </div>
               ) : (
-                <div>아직 배정되지 않았습니다. 아래 입찰에서 확정하세요.</div>
+                <Muted>아직 배정되지 않았습니다. 아래 입찰에서 확정하세요.</Muted>
               )}
             </Section>
 
@@ -741,7 +743,7 @@ const OrderBoard = () => {
 
               {/* 캐리어: 모달로 입찰 등록 */}
               {userRole?.toUpperCase() === "CARRIER" && canBid(selected, assignment) && (
-                <>
+                <> 
                   <div
                     style={{
                       marginTop: 10,
@@ -806,410 +808,20 @@ const OrderBoard = () => {
               </Row>
             </Section>
 
-                        return (
-                            <Card
-                                key={o.id}
-                                ref={(el) => (cardRefs.current[o.id] = el)}
-                                onClick={() => handleSelect(o)}
-                                data-selected={selected?.id === o.id}
-                            >
-                                {/* 1행: 출발 → 도착 + 우측 상태 */}
-                                <RowBetween>
-                                    <FromTo>
-                                        <Strong>출발</Strong> {o.departure}{" "}
-                                        &nbsp;→&nbsp;
-                                        <Strong>도착</Strong> {o.arrival}
-                                    </FromTo>
-                                    <RightMeta>{o.status || "READY"}</RightMeta>
-                                </RowBetween>
-
-                                {/* 2행: 주문번호 배지 (출발/도착 아래에 항상 노출) */}
-                                <OrderNoBadge title={o.orderNo || ""}>
-                                    {o.orderNo || "-"}
-                                </OrderNoBadge>
-
-                                <InfoGrid>
-                                    <Col>
-                                        <SubLabel>화물 종류</SubLabel>
-                                        <SubValue>{cargoTypeLabel}</SubValue>
-                                    </Col>
-                                    <Col>
-                                        <SubLabel>크기</SubLabel>
-                                        <SubValue>{sizeLabel}</SubValue>
-                                    </Col>
-                                    <Col>
-                                        <SubLabel>무게</SubLabel>
-                                        <SubValue>{weightLabel}</SubValue>
-                                    </Col>
-                                    <Col>
-                                        <SubLabel>차량</SubLabel>
-                                        <SubValue>{vehicleLabel}</SubValue>
-                                    </Col>
-                                    <Col>
-                                        <SubLabel>포장</SubLabel>
-                                        <SubValue>
-                                            {prettyPacking(
-                                                o.packingOptions ??
-                                                    o.packingOption
-                                            )}
-                                        </SubValue>
-                                    </Col>
-                                    <Col>
-                                        <SubLabel>예약 시간</SubLabel>
-                                        <SubValue>
-                                            {immediate
-                                                ? "즉시"
-                                                : o.reservedDate
-                                                ? fmtDateTime(o.reservedDate)
-                                                : "-"}
-                                        </SubValue>
-                                    </Col>
-                                </InfoGrid>
-
-                                {/* 등록일 표시는 제거. 필요 시 아래 주석 해제 */}
-                                {/* <DateWrap>{o.createdAt ? fmtDate(o.createdAt) : "-"}</DateWrap> */}
-                            </Card>
-                        );
-                    })}
-                </CardList>
-
-                {/* ===== 페이지네이션 ===== */}
-                <Pagination>
-                    <PageBtn
-                        disabled={page === 1}
-                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    >
-                        ← 이전
-                    </PageBtn>
-
-                    <PageNumbers>
-                        {Array.from({ length: totalPages }, (_, i) => i + 1)
-                            .slice(
-                                Math.max(0, page - 3),
-                                Math.max(0, page - 3) + 5
-                            )
-                            .map((p) => (
-                                <PageNumber
-                                    key={p}
-                                    data-active={p === page}
-                                    onClick={() => setPage(p)}
-                                >
-                                    {p}
-                                </PageNumber>
-                            ))}
-                    </PageNumbers>
-
-                    <PageBtn
-                        disabled={page === totalPages}
-                        onClick={() =>
-                            setPage((p) => Math.min(totalPages, p + 1))
-                        }
-                    >
-                        다음 →
-                    </PageBtn>
-                </Pagination>
-            </ListArea>
-
-            <DetailArea ref={panelRef} data-open={panelOpen}>
-                <DetailHeader>
-                    <BackBtn onClick={handleBack}>← 뒤로가기</BackBtn>
-                    <DetailTitle>오더 게시판</DetailTitle>
-                    <Today>{todayStr}</Today>
-                </DetailHeader>
-
-                {selected ? (
-                    <>
-                        {/* ===== 배정 뱃지 헤더 ===== */}
-                        <BadgeRow>
-                            {assignment?.assignedDriverId ? (
-                                <Badge>
-                                    배정: Driver #{assignment.assignedDriverId}{" "}
-                                    /{" "}
-                                    {Number(
-                                        assignment.driverPrice ?? 0
-                                    ).toLocaleString()}
-                                    원
-                                </Badge>
-                            ) : (
-                                <BadgeGray>미배정</BadgeGray>
-                            )}
-                        </BadgeRow>
-
-                        <Section>
-                            <SectionTitle>
-                                화물 상세 정보{" "}
-                                <StatusTag>
-                                    {statusK(selected, assignment)}
-                                </StatusTag>
-                            </SectionTitle>
-                            <Row>
-                                <Key>주문번호</Key>
-                                <Val>{selected.orderNo || "-"}</Val>
-                            </Row>
-                            <Row>
-                                <Key>출발지</Key>
-                                <Val>{selected.departure}</Val>
-                            </Row>
-                            <Row>
-                                <Key>도착지</Key>
-                                <Val>{selected.arrival}</Val>
-                            </Row>
-                            <Row>
-                                <Key>화물 종류</Key>
-                                <Val>
-                                    {LABEL.cargoType[selected.cargoType] ||
-                                        selected.cargoType ||
-                                        "-"}
-                                </Val>
-                            </Row>
-                            <Row>
-                                <Key>크기</Key>
-                                <Val>
-                                    {LABEL.cargoSize[selected.cargoSize] ||
-                                        selected.cargoSize ||
-                                        "-"}
-                                </Val>
-                            </Row>
-                            <Row>
-                                <Key>무게</Key>
-                                <Val>
-                                    {LABEL.weight[selected.weight] ||
-                                        selected.weight ||
-                                        "-"}
-                                </Val>
-                            </Row>
-                            <Row>
-                                <Key>차량 종류</Key>
-                                <Val>
-                                    {LABEL.vehicle[selected.vehicle] ||
-                                        selected.vehicle ||
-                                        "-"}
-                                </Val>
-                            </Row>
-                            <Row>
-                                <Key>포장 여부</Key>
-                                <Val>
-                                    {prettyPacking(
-                                        selected.packingOptions ??
-                                            selected.packingOption
-                                    )}
-                                </Val>
-                            </Row>
-                            <Row>
-                                <Key>예약시간</Key>
-                                <Val>
-                                    {isImmediateOf(selected)
-                                        ? "즉시"
-                                        : selected.reservedDate
-                                        ? fmtDateTime(selected.reservedDate)
-                                        : "-"}
-                                </Val>
-                            </Row>
-                        </Section>
-
-                        <Section>
-                            <SectionTitle>배정된 기사</SectionTitle>
-                            {isAssigned(selected, assignment) ? (
-                                <div>
-                                    <Row>
-                                        <Key>Driver ID</Key>
-                                        <Val>{assignedDriver}</Val>
-                                    </Row>
-                                    <Row>
-                                        <Key>확정가</Key>
-                                        <Val>
-                                            {confirmedPrice != null
-                                                ? `${Number(
-                                                      confirmedPrice
-                                                  ).toLocaleString()} 원`
-                                                : "-"}
-                                        </Val>
-                                    </Row>
-                                </div>
-                            ) : (
-                                <div>
-                                    아직 배정되지 않았습니다. 아래 입찰에서
-                                    확정하세요.
-                                </div>
-                            )}
-                        </Section>
-
-                        <Section>
-                            <SectionTitle>입찰 목록</SectionTitle>
-                            {loadingOffers ? (
-                                <div>불러오는 중...</div>
-                            ) : offers.length === 0 ? (
-                                <Muted>입찰이 아직 없습니다.</Muted>
-                            ) : (
-                                <OfferList>
-                                    {offers.map((o) => (
-                                        <OfferItem key={o.id}>
-                                            <div>
-                                                <b>
-                                                    {o.driverNick
-                                                        ? o.driverNick
-                                                        : `기사 #${o.driverId}`}
-                                                </b>{" "}
-                                                ·{" "}
-                                                {Number(
-                                                    o.price ?? 0
-                                                ).toLocaleString()}
-                                                원
-                                                <small
-                                                    style={{
-                                                        marginLeft: 8,
-                                                        opacity: 0.7,
-                                                    }}
-                                                >
-                                                    (
-                                                    {offerStatusLabelK(
-                                                        o.status
-                                                    )}
-                                                    )
-                                                </small>
-                                            </div>
-                                            <div>
-                                                {userRole?.toUpperCase() ===
-                                                    "SHIPPER" && (
-                                                    <AcceptBtn
-                                                        disabled={
-                                                            !canBid(
-                                                                selected,
-                                                                assignment
-                                                            ) ||
-                                                            o.status !==
-                                                                "PENDING"
-                                                        }
-                                                        onClick={() =>
-                                                            handleAccept(o.id)
-                                                        }
-                                                    >
-                                                        입찰 확정
-                                                    </AcceptBtn>
-                                                )}
-                                            </div>
-                                        </OfferItem>
-                                    ))}
-                                </OfferList>
-                            )}
-
-                            {userRole?.toUpperCase() === "CARRIER" &&
-                                canBid(selected, assignment) && (
-                                    <div
-                                        style={{
-                                            marginTop: 10,
-                                            display: "flex",
-                                            gap: 6,
-                                            alignItems: "center",
-                                            flexWrap: "wrap",
-                                            paddingTop: 10,
-                                            borderTop: `1px solid ${PINK.panelBorder}`,
-                                        }}
-                                    >
-                                        <span>입찰 등록:</span>
-                                        <SearchInput
-                                            type="number"
-                                            placeholder={`제안가 (최소 ${minDriverBid(
-                                                selected
-                                            ).toLocaleString()}원)`}
-                                            value={bidPrice}
-                                            onChange={(e) =>
-                                                setBidPrice(e.target.value)
-                                            }
-                                            style={{ width: 140 }}
-                                        />
-                                        <SearchInput
-                                            type="text"
-                                            placeholder="메모(선택)"
-                                            value={bidMemo}
-                                            onChange={(e) =>
-                                                setBidMemo(e.target.value)
-                                            }
-                                            style={{ flex: 1 }}
-                                        />
-                                        <AcceptBtn onClick={handleBid}>
-                                            등록
-                                        </AcceptBtn>
-                                        <MinBidHint>
-                                            최소 제안가:{" "}
-                                            {minDriverBid(
-                                                selected
-                                            ).toLocaleString()}
-                                            원
-                                        </MinBidHint>
-                                    </div>
-                                )}
-                        </Section>
-
-                        <Section>
-                            <SectionTitle>운임 정보</SectionTitle>
-                            <Row>
-                                <Key>기사 제안가</Key>
-                                <Val>
-                                    {assignment?.driverPrice != null
-                                        ? `${Number(
-                                              assignment.driverPrice
-                                          ).toLocaleString()} 원`
-                                        : selected.driverPrice
-                                        ? `${Number(
-                                              selected.driverPrice
-                                          ).toLocaleString()} 원`
-                                        : "-"}
-                                </Val>
-                            </Row>
-                            <Row>
-                                <Key>화주 제안가</Key>
-                                <Val>
-                                    {selected.proposedPrice
-                                        ? `${Number(
-                                              selected.proposedPrice
-                                          ).toLocaleString()} 원`
-                                        : "-"}
-                                </Val>
-                            </Row>
-                            <Row>
-                                <Key>평균가</Key>
-                                <Val>
-                                    {selected.avgPrice
-                                        ? `${Number(
-                                              selected.avgPrice
-                                          ).toLocaleString()} 원`
-                                        : "-"}
-                                </Val>
-                            </Row>
-                            <Row>
-                                <Key>예상 거리</Key>
-                                <Val>
-                                    {selected.distance != null
-                                        ? `${Number(selected.distance).toFixed(
-                                              2
-                                          )}km`
-                                        : "-"}
-                                </Val>
-                            </Row>
-                        </Section>
-
-                        {userRole?.toUpperCase() === "SHIPPER" &&
-                            selected?.status === "PAYMENT_PENDING" &&
-                            selected?.driverPrice != null && (
-                                <Section style={{ marginTop: 16 }}>
-                                    <AcceptBtn
-                                        onClick={() =>
-                                            shipperMoveToPayment(selected)
-                                        }
-                                    >
-                                        {Number(
-                                            selected.driverPrice
-                                        ).toLocaleString()}
-                                        원 결제하기
-                                    </AcceptBtn>
-                                </Section>
-                            )}
-                    </>
-                ) : null}
-            </DetailArea>
-        </PageWrap>
-    );
+            {userRole?.toUpperCase() === "SHIPPER" &&
+              selected?.status === "PAYMENT_PENDING" &&
+              selected?.driverPrice != null && (
+                <Section style={{ marginTop: 16 }}>
+                  <AcceptBtn onClick={() => shipperMoveToPayment(selected)}>
+                    {Number(selected.driverPrice).toLocaleString()}원 결제하기
+                  </AcceptBtn>
+                </Section>
+              )}
+          </>
+        ) : null}
+      </DetailArea>
+    </PageWrap>
+  );
 };
 
 export default OrderBoard;
@@ -1368,7 +980,7 @@ const Card = styled.div`
   padding: 18px 20px 14px;
   box-shadow: 0 4px 14px ${PINK.cardShadow};
   cursor: pointer;
-  transition: box-shadow 180ms ease, border-color 180ms ease, transform 120ms ease;
+  transition: box-shadow 180ms ease, border-color 180ms ease, transform 120ms ease;;
 
   &:hover {
     border-color: ${PINK.cardBorderHover};
