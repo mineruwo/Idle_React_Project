@@ -66,14 +66,12 @@ const InquiryDetailComponent = ({ inquiry, onBackToList, refreshInquiries }) => 
                     <p className="detail-label">상태:</p>
                     <p className="detail-value">{inquiry.status}</p>
                 </div>
-                {inquiry.inquiryAnswer && (
-                    <div className="detail-item">
-                        <p className="detail-label">답변:</p>
-                        <div className="detail-content admin-text-area-display" dangerouslySetInnerHTML={{ __html: inquiry.inquiryAnswer }}>
-                        </div>
+            <div className="detail-item">
+                    <p className="detail-label">답변 내용:</p>
+                    <div className="detail-content admin-text-area-display" dangerouslySetInnerHTML={{ __html: inquiry.inquiryAnswer }}>
                     </div>
-                )}
-            </div>
+                </div>
+            </div> {/* Closes admin-card inquiry-detail-card */}
 
             <div className="admin-card mt-3"> {/* Margin top for separation */}
                 <h3 className="admin-heading-sub">답변 작성</h3>

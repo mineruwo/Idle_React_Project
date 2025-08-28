@@ -247,6 +247,10 @@ body {
     font-weight: 800;
 }
 
+.admin-form-title {
+    color: var(--admin-pink-header);
+}
+
 /* Card styles (mimicking OrderBoard's Card) - from CustomCSS/admin.css */
 .admin-card {
     background: #fff;
@@ -365,6 +369,8 @@ body {
 }
 
 /* Styles for filter, search, and sortable headers */
+
+/* Styles for filter, search, and sortable headers */
 .admin-filter select,
 .admin-search select,
 .admin-search input[type="text"] {
@@ -420,6 +426,114 @@ body {
 .btn.active:hover {
     background-color: var(--admin-pink-header);
     border-color: var(--admin-pink-header);
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.filter-button {
+    padding: 8px 16px;
+    background-color: var(--admin-pink-back-bg); /* Light pink background */
+    color: var(--admin-pink-header); /* Darker pink text */
+    border: 1px solid var(--admin-pink-back-bg-hover); /* Slightly darker border */
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.filter-button:hover {
+    background-color: var(--admin-pink-back-bg-hover);
+    border-color: var(--admin-pink-panel-border);
+}
+
+.filter-button.active {
+    background-color: var(--admin-pink-strong); /* Strong pink for active */
+    color: white;
+    border-color: var(--admin-pink-strong);
+}
+
+.filter-button.active:hover {
+    background-color: var(--admin-pink-header); /* Darker pink on hover for active */
+    border-color: var(--admin-pink-header);
+}
+
+.admin-chart-title {
+    color: var(--admin-pink-header);
+    border-bottom: 1px solid var(--admin-pink-panel-border);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.chart-date-selection {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px; /* Space between controls and chart */
+    align-items: center;
+}
+
+
+/* Pagination styles */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 5px; /* Space between pagination buttons */
+    align-items: center;
+}
+
+.pagination-container .admin-button {
+    /* Base styles for pagination buttons using admin-button default variant */
+    padding: 8px 8px; /* Reduced horizontal padding */
+    border: 1px solid var(--admin-pink-panel-border);
+    border-radius: 8px;
+    background-color: var(--admin-pink-panel-bg);
+    color: var(--admin-pink-text);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pagination-container .admin-button:hover:not(:disabled) {
+    background-color: var(--admin-pink-back-bg);
+    border-color: var(--admin-pink-strong);
+}
+
+.pagination-container .admin-button:disabled {
+    background-color: #e9ecef; /* Lighter background for disabled */
+    color: var(--admin-pink-sub-text); /* Subtler text for disabled */
+    cursor: not-allowed;
+    border-color: #dee2e6;
+}
+
+.pagination-container .pagination-button-active {
+    background-color: var(--admin-pink-strong); /* Strong pink for active page */
+    color: white;
+    border-color: var(--admin-pink-strong);
+    font-weight: bold;
+}
+
+.pagination-container .pagination-button-active:hover {
+    background-color: var(--admin-pink-header); /* Darker pink on hover for active */
+    border-color: var(--admin-pink-header);
+}
+
+.pagination-container span {
+    margin: 0 5px;
+    color: var(--admin-pink-text);
+    font-weight: 600;
+}
+
+
+.dashboard-date-filters {
+    display: flex;
+    justify-content: flex-end; /* Align buttons to the right */
+    gap: 5px; /* Space between buttons */
+    margin-bottom: 10px; /* Space below the filter buttons */
 }
 
 .recent-accounts-panels-container {

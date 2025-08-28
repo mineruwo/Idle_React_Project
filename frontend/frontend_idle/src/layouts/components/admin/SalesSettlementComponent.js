@@ -1,5 +1,6 @@
 import React from 'react';
 import { AdminTable } from './AdminTable'; // Reusing AdminTable
+import AdminButton from '../common/AdminButton'; // Import AdminButton
 import '../../../theme/admin.css';
 
 const SalesSettlementComponent = () => {
@@ -20,7 +21,7 @@ const SalesSettlementComponent = () => {
         <div className="admin-container">
             <div className="admin-header">
                 <h2>매출 정산 관리</h2>
-                <button className="admin-primary-btn">새 정산 생성</button>
+                <AdminButton variant="primary">새 정산 생성</AdminButton> 
             </div>
             <AdminTable
                 data={settlementData}

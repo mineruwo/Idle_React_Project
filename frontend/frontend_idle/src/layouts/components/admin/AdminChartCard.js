@@ -1,7 +1,7 @@
 import React from 'react';
 import { Line } from 'react-chartjs-2';
 import '../../../theme/admin.css';
-import AdminSelect from './AdminSelect'; // Assuming AdminSelect is in common
+import AdminSelect from '../common/AdminSelect'; // Assuming AdminSelect is in common
 
 const AdminChartCard = ({
     title,
@@ -19,8 +19,8 @@ const AdminChartCard = ({
     return (
         <div className="admin-form-container" style={{ marginBottom: '24px' }}>
             <h3 className="admin-chart-title">{title}</h3>
-            <div className="chart-date-selection"> {/* Added chart-date-selection class */}
-                <label htmlFor="year-select" className="admin-label">년도:</label> {/* Added admin-label class */}
+            <div className="chart-date-selection">
+                <label htmlFor="year-select" className="admin-label">년도:</label>
                 <AdminSelect
                     id="year-select"
                     value={selectedYear}
@@ -28,7 +28,7 @@ const AdminChartCard = ({
                     options={years.map(year => ({ value: year, label: `${year}년` }))}
                 />
 
-                <label htmlFor="month-select" className="admin-label">월:</label> {/* Added admin-label class */}
+                <label htmlFor="month-select" className="admin-label">월:</label>
                 <AdminSelect
                     id="month-select"
                     value={selectedMonth}

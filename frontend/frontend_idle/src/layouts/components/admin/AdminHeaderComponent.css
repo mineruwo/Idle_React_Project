@@ -1,6 +1,6 @@
 .admin-header-nav {
-    width: calc(100% - 250px);
-    margin-left: 250px;
+    width: calc(100% - 280px);
+    margin-left: 280px;
     display: flex;
     align-items: center;
 }
