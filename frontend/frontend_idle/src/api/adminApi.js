@@ -62,6 +62,36 @@ export const getAdminList = async (params = {}) => {
     }
 };
 
+export const getAdminById = async (id) => {
+    try {
+        const response = await adminApi.get(`/admin/accounts/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Failed to fetch admin with id ${id}:`, error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const updateAdmin = async (id, adminData) => {
+    try {
+        const response = await adminApi.put(`/admin/accounts/${id}`, adminData);
+        return response.data;
+    } catch (error) {
+        console.error(`Failed to update admin with id ${id}:`, error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const deleteAdmin = async (id) => {
+    try {
+        const response = await adminApi.delete(`/admin/accounts/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Failed to delete admin with id ${id}:`, error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
 export const getCustomerList = async (params = {}) => {
     try {
         const response = await adminApi.get(`/admin/customers`, {
@@ -80,6 +110,26 @@ export const getCustomerById = async (id) => {
         return response.data;
     } catch (error) {
         console.error(`Failed to fetch customer with id ${id}:`, error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const updateCustomer = async (id, customerData) => {
+    try {
+        const response = await adminApi.put(`/admin/customers/${id}`, customerData);
+        return response.data;
+    } catch (error) {
+        console.error(`Failed to update customer with id ${id}:`, error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const deleteCustomer = async (id) => {
+    try {
+        const response = await adminApi.delete(`/admin/customers/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Failed to delete customer with id ${id}:`, error.response ? error.response.data : error.message);
         throw error;
     }
 };

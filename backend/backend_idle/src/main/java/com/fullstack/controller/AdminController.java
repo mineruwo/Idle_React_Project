@@ -131,7 +131,6 @@ public class AdminController {
 
 
     @GetMapping("/accounts")
-    @PreAuthorize("hasRole('DEV_ADMIN') or hasRole('ADMIN') or hasRole('ALL_PERMISSION')")
     public ResponseEntity<Page<AdminDTO>> getAdminList(
             Pageable pageable,
             @RequestParam(required = false) String role,
@@ -139,6 +138,17 @@ public class AdminController {
             @RequestParam(required = false) String searchQuery) {
         Page<AdminDTO> adminPage = adminService.getAdminList(pageable, role, searchType, searchQuery);
         return ResponseEntity.ok(adminPage);
+    }
+
+        @GetMapping("/accounts/{id}")
+    @PreAuthorize("hasAnyRole('DEV_ADMIN', 'ADMIN', 'ALL_PERMISSION')")
+    public ResponseEntity<AdminDTO> getAdminById(@PathVariable Integer id) {
+        AdminDTO adminDTO = adminService.getAdminById(id);
+        if (adminDTO != null) {
+            return ResponseEntity.ok(adminDTO);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
         @GetMapping("/customers")
@@ -157,17 +167,39 @@ public class AdminController {
 
     @GetMapping("/customers/{id}")
     @PreAuthorize("hasAnyRole('DEV_ADMIN', 'ADMIN', 'ALL_PERMISSION', 'MANAGER_COUNSELING')")
-    public ResponseEntity<CustomerDTO> getCustomerById(@PathVariable Long id) {
-        CustomerEntity customerEntity = customerService.getCustomerById(id);
-        CustomerDTO customerDTO = new CustomerDTO();
-        customerDTO.setId(customerEntity.getId());
-        customerDTO.setCustomName(customerEntity.getCustomName());
-        customerDTO.setRole(customerEntity.getRole());
-        customerDTO.setPhone(customerEntity.getPhone());
-        customerDTO.setNickname(customerEntity.getNickname());
-        customerDTO.setCreatedAt(customerEntity.getCreatedAt());
-        customerDTO.setUserPoint(customerEntity.getUserPoint());
-        return ResponseEntity.ok(customerDTO);
+    public ResponseEntity<CustomerDTO> getCustomerById(@PathVariable String id) {
+        CustomerDTO customerDTO = customerService.getCustomerById(id);
+        if (customerDTO != null) {
+            return ResponseEntity.ok(customerDTO);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/customers/{id}")
+    @PreAuthorize("hasAuthority('ROLE_DEV_ADMIN') or hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_ALL_PERMISSION')")
+    public ResponseEntity<?> updateCustomer(@PathVariable String id, @RequestBody CustomerDTO customerDTO) {
+        try {
+            CustomerDTO updatedCustomer = customerService.updateCustomer(id, customerDTO);
+            if (updatedCustomer != null) {
+                return ResponseEntity.ok(updatedCustomer);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating customer: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/customers/{id}")
+    @PreAuthorize("hasAuthority('ROLE_DEV_ADMIN') or hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_ALL_PERMISSION')")
+    public ResponseEntity<?> deleteCustomer(@PathVariable String id) {
+        try {
+            customerService.deleteCustomer(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting customer: " + e.getMessage());
+        }
     }
 
     @PostMapping("/accounts")
@@ -178,6 +210,32 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.CREATED).body(createdAdmin);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating admin: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/accounts/{id}")
+    @PreAuthorize("hasAuthority('ROLE_DEV_ADMIN') or hasAuthority('ROLE_ALL_PERMISSION')")
+    public ResponseEntity<?> updateAdmin(@PathVariable Integer id, @RequestBody AdminDTO adminDTO) {
+        try {
+            AdminDTO updatedAdmin = adminService.updateAdmin(id, adminDTO);
+            if (updatedAdmin != null) {
+                return ResponseEntity.ok(updatedAdmin);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating admin: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/accounts/{id}")
+    @PreAuthorize("hasAuthority('ROLE_DEV_ADMIN') or hasAuthority('ROLE_ALL_PERMISSION')")
+    public ResponseEntity<?> deleteAdmin(@PathVariable Integer id) {
+        try {
+            adminService.deleteAdmin(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting admin: " + e.getMessage());
         }
     }
 

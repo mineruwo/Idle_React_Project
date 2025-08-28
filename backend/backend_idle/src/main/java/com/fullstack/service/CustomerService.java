@@ -28,12 +28,13 @@ public interface CustomerService {
 	
 	public Integer getPoints(String id);
 
-    public CustomerEntity getCustomerById(Long id);
+    public CustomerDTO getCustomerById(String id);
+    public CustomerDTO updateCustomer(String id, CustomerDTO customerDTO);
+    public void deleteCustomer(String id);
 
-
-    Page<CustomerDTO> getRecentlyCreatedCustomers(Pageable pageable, String dateRange); // Modified
-    Page<CustomerDTO> getRecentlyDeletedCustomers(Pageable pageable, String dateRange); // Modified
+    Page<CustomerDTO> getRecentlyCreatedCustomers(Pageable pageable, String dateRange);
+    Page<CustomerDTO> getRecentlyDeletedCustomers(Pageable pageable, String dateRange);
 
     Map<String, Long> getDailyCustomerCreationCounts(int year, int month);
-    Map<String, Long> getDailyCustomerDeletionCounts(int year, int month); // New method // New method
+    Map<String, Long> getDailyCustomerDeletionCounts(int year, int month);
 }

@@ -350,10 +350,6 @@ body {
 }
 
 /* Specific styles for AdminAccountCreateComponent */
-.create-admin-form-card {
-    /* This class is already in AdminAccountCreateComponent.js */
-    /* We will apply admin-form-container to it */
-}
 
 .admin-controls {
   display: flex;
@@ -405,16 +401,6 @@ body {
     top: 50%;
     transform: translateY(-50%);
     border: 4px solid transparent;
-}
-
-.admin-table th.sort-asc::after {
-    border-bottom-color: var(--admin-pink-strong);
-    top: 40%;
-}
-
-.admin-table th.sort-desc::after {
-    border-top-color: var(--admin-pink-strong);
-    top: 60%;
 }
 
 .btn.active {
@@ -587,25 +573,6 @@ body {
     color: var(--admin-pink-text);
 }
 
-.admin-textarea {
-    min-height: 150px;
-    padding: 12px;
-    border: 1px solid var(--admin-pink-panel-border);
-    border-radius: 8px;
-    font-size: 15px;
-    color: var(--admin-pink-text);
-    background-color: var(--admin-pink-bg);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    box-sizing: border-box;
-    resize: vertical;
-}
-
-.admin-textarea:focus {
-    outline: none;
-    border-color: var(--admin-pink-strong);
-    box-shadow: 0 0 0 3px var(--admin-pink-back-bg);
-}
-
 .admin-button-secondary {
     padding: 8px 16px;
     background-color: transparent;
@@ -700,4 +667,31 @@ body {
     width: 50px; /* Adjust as needed, this is half of a typical button width */
     min-width: unset; /* Override any min-width from AdminButton */
     padding: 5px 0; /* Adjust padding to keep content centered */
+}
+
+/* Detail Table for expanded rows */
+.detail-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.detail-table td {
+    padding: 8px 4px;
+    border-bottom: 1px solid var(--admin-pink-bg);
+    font-size: 14px;
+}
+
+.detail-table tr:last-child td {
+    border-bottom: none;
+}
+
+.detail-table .detail-label {
+    font-weight: 600;
+    color: var(--admin-pink-strong);
+    width: 150px; /* Fixed width for alignment */
+    padding-right: 10px;
+}
+
+.detail-table .detail-value {
+    color: var(--admin-pink-text);
 }

@@ -28,9 +28,14 @@ public class AdminServiceImpl implements AdminService {
     private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Override
     public AdminDTO getAdmin(String adminId) {
         Optional<Admin> result = adminRepository.findByAdminIdAndIsDelFalse(adminId);
+        return result.map(this::entityToDto).orElse(null);
+    }
+
+        @Override
+    public AdminDTO getAdminById(Integer id) {
+        Optional<Admin> result = adminRepository.findById(id);
         return result.map(this::entityToDto).orElse(null);
     }
 
@@ -43,20 +48,31 @@ public class AdminServiceImpl implements AdminService {
         return entityToDto(savedAdmin);
     }
 
-	/*
-	 * @Override public void updateAdmin(AdminDTO adminDTO) { Optional<Admin> result
-	 * = adminRepository.findByAdminIdAndIsDelFalse(adminDTO.getAdminId()); if
-	 * (result.isPresent()) { Admin admin = result.get();
-	 * admin.setName(adminDTO.getName()); admin.setRole(adminDTO.getRole()); if
-	 * (adminDTO.getPassword() != null && !adminDTO.getPassword().isEmpty()) {
-	 * admin.setPassword(passwordEncoder.encode(adminDTO.getPassword())); // 비밀번호
-	 * 업데이트 로직 추가 } adminRepository.save(admin); } }
-	 * 
-	 * @Override public void deleteAdmin(String adminId) { Optional<Admin> result =
-	 * adminRepository.findByAdminIdAndIsDelFalse(adminId); if (result.isPresent())
-	 * { Admin admin = result.get(); admin.setDel(true);
-	 * admin.setDelDate(LocalDateTime.now()); adminRepository.save(admin); } }
-	 */
+    @Override
+    public AdminDTO updateAdmin(Integer id, AdminDTO adminDTO) {
+        Optional<Admin> result = adminRepository.findById(id);
+        if (result.isPresent()) {
+            Admin admin = result.get();
+            admin.setName(adminDTO.getName());
+            admin.setRole(adminDTO.getRole());
+            // Password should be updated via a separate, dedicated process
+            Admin updatedAdmin = adminRepository.save(admin);
+            return entityToDto(updatedAdmin);
+        }
+        return null; // Or throw a ResourceNotFoundException
+    }
+
+    @Override
+    public void deleteAdmin(Integer id) {
+        Optional<Admin> result = adminRepository.findById(id);
+        if (result.isPresent()) {
+            Admin admin = result.get();
+            admin.setDel(true);
+            admin.setDelDate(LocalDateTime.now());
+            adminRepository.save(admin);
+        }
+        // Or throw an exception if not found
+    }
 
     @Override
     public Page<AdminDTO> getAdminList(Pageable pageable, String role, String searchType, String searchQuery) {
@@ -83,8 +99,7 @@ public class AdminServiceImpl implements AdminService {
                 }
             }
 
-            // Exclude deleted admins
-            predicates.add(cb.isFalse(root.get("isDel")));
+            // No longer excluding deleted admins by default
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };
