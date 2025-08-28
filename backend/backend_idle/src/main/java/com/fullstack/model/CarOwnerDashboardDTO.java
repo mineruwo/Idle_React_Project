@@ -56,9 +56,12 @@ public final class CarOwnerDashboardDTO {
         private Long deliveries;    // 해당일 운송건수
     }
 
-    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class WarmthDTO {
-        private int onTime;
-        private int late;
+        private Integer score;       // 0~100, null = 없음
+        private Integer reviewCount; // 리뷰 개수
+        private Double  avgRating;   // 1~5, null = 없음
     }
 }

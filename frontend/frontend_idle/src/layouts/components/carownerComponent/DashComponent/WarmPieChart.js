@@ -1,18 +1,20 @@
-// src/components/WarmthPieChart.jsx
 import React from "react";
 import { PieChart, Pie, Cell } from "recharts";
 import "../../../../theme/CarOwner/warmpiechart.css";
 
-const COLORS = ["#ffccdd", "#ff9999"]; // 정시 도착 / 지각
+// 점수(%)와 남은 비율로 단순 도넛
+const COLORS = ["#ffccdd", "#f0f0f0"]; // 점수 / 남은 영역
 
-const WarmthPieChart = ({ onTime, late }) => {
-  const total = onTime + late;
+const WarmPieChart = ({ score }) => {
+  // score가 null이면 차트는 빈 원형, 중앙엔 '—'만 표시
+  const valid = typeof score === "number" && !Number.isNaN(score);
+  const clamp = (v) => Math.max(0, Math.min(100, v));
+  const s = valid ? clamp(Math.round(score)) : 0;
+
   const data = [
-    { name: "정시 도착", value: onTime },
-    { name: "지각", value: late },
+    { name: "score", value: s },
+    { name: "rest", value: 100 - s },
   ];
-
-  const warmth = total === 0 ? 0 : Math.round((onTime / total) * 100);
 
   return (
     <div className="chart-wrapper">
@@ -31,14 +33,14 @@ const WarmthPieChart = ({ onTime, late }) => {
             <Cell key={`cell-${index}`} fill={COLORS[index]} />
           ))}
         </Pie>
-        {/* 중앙 텍스트는 PieChart 외부에서 절대 위치로 배치 */}
       </PieChart>
+
       <div className="center-text">
-        <div className="score">{warmth}</div>
+        <div className="score">{valid ? s : "—"}</div>
         <div className="label">점</div>
       </div>
     </div>
   );
 };
 
-export default WarmthPieChart;
+export default WarmPieChart;

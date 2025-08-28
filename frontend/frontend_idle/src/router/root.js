@@ -32,6 +32,9 @@ const EditProfile = lazy(() => import("../pages/carOwnerPage/EditProfile"));
 const SubmitDOC = lazy(() => import("../pages/carOwnerPage/SubmitDOC"));
 const Settlement = lazy(() => import("../pages/carOwnerPage/Settlement"));
 const Vehicles = lazy(() => import("../pages/carOwnerPage/Vehicles"));
+const OauthLanding = lazy(() => import("../pages/signuppage/OauthLandingPage"));
+const LinkExisting = lazy(() => import("../pages/signuppage/LinkExistingPage"));
+const SnsSignup = lazy(() => import("../pages/signuppage/SnsSignupPage"));
 
 
 // 최상위 레이아웃 컴포넌트

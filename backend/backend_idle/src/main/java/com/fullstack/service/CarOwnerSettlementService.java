@@ -38,12 +38,8 @@ public interface CarOwnerSettlementService {
      * @return 생성 건수
      */
     int syncMonthly(String ownerId, YearMonth ym);
-
-    /**
-     * 차주 정산 요청 (READY → REQUESTED)
-     */
-    void requestPayout(String ownerId, Long settlementId);
-
+    /* payoutBatch 생성*/
+    void requestPayoutBatch(String ownerId, YearMonth ym);
     /**
      * 요약 카드 (합계·건수)
      */

@@ -14,7 +14,7 @@ const DashboardHeader = ({ name, completed, inProgress, scheduled, total, revenu
       <hr />
       <h3>💰 이번달 매출 요약</h3>
       <p>총 매출액: {Number(revenue || 0).toLocaleString()}원</p>
-      <p>수수료율: {commission}%</p>
+      <p>수수료: {commission}원</p>
       <p>정산예정금액: {Number(settlement || 0).toLocaleString()}원</p>
     </div>
   );

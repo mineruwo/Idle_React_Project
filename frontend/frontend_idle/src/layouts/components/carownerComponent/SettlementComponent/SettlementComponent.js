@@ -3,7 +3,6 @@ import "../../../../theme/CarOwner/Settlement.css";
 import {
   fetchSettlements,
   fetchSettlementSummaryCard,
-  syncMonthly,
   requestPayoutBatch,
 } from "../../../../api/CarOwnerApi/CarOwnerSettlementApi";
 
@@ -69,9 +68,6 @@ const SettlementComponent = () => {
     try {
       // 1) 기간/월 확정
       const { f, t, ym } = defaultMonthRange(from, to);
-
-      // 2) 월 동기화 (완료 주문 → 미정산 자동 생성)
-      await syncMonthly(ym).catch(() => { /* 엔드포인트 없는 환경이면 무시 */ });
 
       // 3) 목록 + 요약카드 병렬 조회
       const [listRes, cardRes] = await Promise.all([

@@ -61,6 +61,8 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
         return p.map(this::toSummaryDTO);
     }
 
+
+
     @Override
     public SettlementDetailResponse getDetail(String ownerId, Long settlementId) {
         CarOwnerSettlement s = settlementRepo.findById(settlementId)
@@ -113,74 +115,27 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
 
     @Override
     @Transactional
-    public int syncMonthly(String ownerId, YearMonth ym) {
-        // ownerId가 숫자(드라이버 ID)로 안 들어오면 아무것도 만들지 않음 (전체주문 오염 방지)
-        Long driverId = parseLongOrNull(ownerId);
-        if (driverId == null) {
-            return 0;
-        }
-
+    public int syncMonthly(String ignored, YearMonth ym) {
         LocalDateTime start = ym.atDay(1).atStartOfDay();
-        LocalDateTime end = ym.atEndOfMonth().plusDays(1).atStartOfDay();
+        LocalDateTime end   = ym.atEndOfMonth().plusDays(1).atStartOfDay();
 
-        // 오직 내(로그인 사용자)의 완료 주문만
-        List<Order> candidates = orderRepo.findByAssignedDriverIdAndStatusAndCreatedAtBetween(
-                driverId, OrderStatus.COMPLETED, start, end);
+        var orders = orderRepo.findByStatusAndCreatedAtBetween(OrderStatus.COMPLETED, start, end);
 
         int created = 0;
-        for (Order o : candidates) {
+        for (Order o : orders) {
+            if (o.getAssignedDriverId() == null) continue;
+
+            // 이미 정산 있으면 스킵
             if (settlementRepo.existsByOrderId(o.getId())) continue;
 
-            // 방어적으로 한 번 더 확인 (혹시라도 불일치 주문이 있으면 스킵)
-            if (o.getAssignedDriverId() == null || !Objects.equals(o.getAssignedDriverId(), driverId)) continue;
-
-            BigDecimal amount = computeBaseAmount(o);
-            BigDecimal commission = computeCommission(amount);
-            LocalDate monthKey = resolveMonthKey(o);
-            CarOwnerSettlementBatch batch = ensureBatch(ownerId, monthKey);
-
-            CarOwnerSettlement s = new CarOwnerSettlement();
-            s.setOrder(o);
-            s.setOwnerId(ownerId);
-            s.setAmount(amount);
-            s.setCommission(commission);
-            s.setStatus(Status.READY);
-            s.setMonthKey(monthKey);
-            s.setBatch(batch);
-            s.setCreatedAt(LocalDateTime.now());
-            s.setUpdatedAt(LocalDateTime.now());
-
-            settlementRepo.save(s);
+            // 누락된 것만 생성
+            createForOrder(String.valueOf(o.getAssignedDriverId()), o.getId());
             created++;
         }
-
-        // 해당 월 배치 합계 갱신
-        refreshBatchTotals(ownerId, ym.atDay(1));
         return created;
     }
 
-    /* ===================== 상태 전이 ===================== */
-
-    @Override
-    @Transactional
-    public void requestPayout(String ownerId, Long settlementId) {
-        CarOwnerSettlement s = settlementRepo.findById(settlementId)
-                .orElseThrow(() -> new IllegalArgumentException("SETTLEMENT_NOT_FOUND"));
-        requireOwner(s, ownerId);
-
-        if (s.getStatus() != Status.READY) {
-            throw new IllegalStateException("INVALID_STATUS_TRANSITION: " + s.getStatus() + " → REQUESTED");
-        }
-        s.setStatus(Status.REQUESTED);
-        s.setRequestedAt(LocalDateTime.now());
-        s.setUpdatedAt(LocalDateTime.now());
-        settlementRepo.save(s);
-
-        refreshBatchTotals(ownerId, s.getMonthKey());
-    }
-
     /* ===================== 요약 카드 ===================== */
-
     @Override
     public SettlementSummaryCardResponse summaryCard(String ownerId, LocalDate from, LocalDate to) {
         LocalDateTime start = (from != null) ? from.atStartOfDay()
@@ -310,32 +265,27 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
 
     /* ===== 배치 보장/집계 ===== */
 
-    @Transactional
-    protected CarOwnerSettlementBatch ensureBatch(String ownerId, LocalDate monthKey) {
+    @Transactional // ← 가능하면 public 메서드에서
+    public CarOwnerSettlementBatch ensureBatch(String ownerId, LocalDate monthKey) {
         return batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey)
-                .orElseGet(() -> {
+            .orElseGet(() -> {
+                try {
                     CarOwnerSettlementBatch b = new CarOwnerSettlementBatch();
                     b.setOwnerId(ownerId);
                     b.setMonthKey(monthKey);
-                    b.setStatus(CarOwnerSettlementBatch.Status.REQUESTED);
-                    b.setRequestedAt(LocalDateTime.now());
-                    b.setItemCount(0);
-                    b.setTotalAmount(BigDecimal.ZERO);
-
-                    try {
-                        // flush까지 해서 DB 유니크 제약 즉시 확인
-                        return batchRepo.saveAndFlush(b);
-                    } catch (DataIntegrityViolationException ex) {
-                        // ⚠️ 중요: 실패한 엔티티를 세션에서 떼어내야 오토플러시 시 null id 문제 방지
-                        em.detach(b); // 또는 em.clear();
-
-                        // 경쟁으로 이미 누가 만들었으니 재조회해서 반환
-                        return batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey)
-                                .orElseThrow(() -> ex);
-                    }
-                });
+                    b.setStatus(CarOwnerSettlementBatch.Status.REQUESTED); // 권장: READY
+                    return batchRepo.saveAndFlush(b);
+                } catch (DataIntegrityViolationException /*| ConstraintViolationException*/ ex) {
+                    // flush 실패 → 1차 캐시 정리
+                    em.clear();
+                    // 이미 다른 트랜잭션이 만든 케이스
+                    return batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey)
+                        .orElseThrow(() -> new IllegalStateException(
+                            "Batch was inserted concurrently but not found"));
+                }
+            });
     }
-
+    
     @Transactional
     protected void refreshBatchTotals(String ownerId, LocalDate monthKey) {
         BigDecimal total = settlementRepo.sumAmountByOwnerAndMonthKey(ownerId, monthKey);
@@ -361,4 +311,9 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
         b.setRequestedAt(LocalDateTime.now());
         batchRepo.save(b);
     }
+
+
+	
+		
+	
 }

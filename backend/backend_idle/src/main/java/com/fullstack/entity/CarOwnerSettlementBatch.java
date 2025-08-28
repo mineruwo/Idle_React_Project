@@ -42,9 +42,10 @@ private Status status = Status.REQUESTED;
 @Column(name = "approved_at") private LocalDateTime approvedAt;
 @Column(name = "paid_at")     private LocalDateTime paidAt;
 
-@Column(name = "total_amount", precision = 18, scale = 2)
-private BigDecimal totalAmount;
+@Column(name = "total_amount", precision = 18, scale = 2, nullable = false)
+private BigDecimal totalAmount = BigDecimal.ZERO;
 
-@Column(name = "item_count")
-private Integer itemCount;
+// 🔧 NOT NULL + 기본값 0
+@Column(name = "item_count", nullable = false)
+private Integer itemCount = 0;
 }
