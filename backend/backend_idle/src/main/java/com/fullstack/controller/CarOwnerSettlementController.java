@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -24,6 +25,11 @@ public class CarOwnerSettlementController {
 
     private final CarOwnerSettlementService settlementService;
     private final CustomerRepository customerRepository;
+    
+    public static class BankReq {
+        public String bankCode;
+        public String accountNo; // bank_code만 쓰려면 생략 가능
+      }
 
     /** 로그인 사용자의 idNum을 문자열 키(ownerId)로 반환 */
     private String ownerKey(Principal principal) {
@@ -80,12 +86,15 @@ public class CarOwnerSettlementController {
     }
     
     @PostMapping("/batch/request")
-    public void requestPayoutBatch(
+    public void requestBatch(
             Principal principal,
-            @RequestParam(name = "ym")
-            @DateTimeFormat(pattern = "yyyy-MM") YearMonth ym
+            @RequestParam("ym") @DateTimeFormat(pattern = "yyyy-MM") YearMonth ym,
+            @RequestBody(required = false) BankReq req
     ) {
-        settlementService.requestPayoutBatch(ownerKey(principal), ym);
+        String ownerId = ownerKey(principal); // idNum 문자열로 통일
+        String bankCode = (req == null ? null : req.bankCode);
+        String accountNo = (req == null ? null : req.accountNo);
+        settlementService.requestPayoutBatch(ownerId, ym, bankCode, accountNo);
     }
 
 }

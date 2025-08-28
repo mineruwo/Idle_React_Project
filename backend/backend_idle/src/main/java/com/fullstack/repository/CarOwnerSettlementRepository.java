@@ -130,4 +130,21 @@ public interface CarOwnerSettlementRepository extends JpaRepository<CarOwnerSett
           and s.status = com.fullstack.entity.CarOwnerSettlement.Status.READY
     """)
     int bulkMarkRequested(@Param("ownerId") String ownerId, @Param("monthKey") LocalDate monthKey);
-}
+    
+    
+ // ✅ 월/차주 + REQUESTED 상태 기준 "순지급액" 합
+    @Query("""
+        select coalesce(sum(s.amount - s.commission), 0)
+        from CarOwnerSettlement s
+        where s.ownerId = :ownerId
+          and s.monthKey = :monthKey
+          and s.status = com.fullstack.entity.CarOwnerSettlement.Status.REQUESTED
+    """)
+    BigDecimal sumNetByOwnerAndMonthKeyForRequested(@Param("ownerId") String ownerId,
+                                                    @Param("monthKey") LocalDate monthKey);
+
+    // ✅ 월/차주 + REQUESTED 상태 기준 건수
+    long countByOwnerIdAndMonthKeyAndStatus(String ownerId, LocalDate monthKey, Status status);
+    
+    
+  }

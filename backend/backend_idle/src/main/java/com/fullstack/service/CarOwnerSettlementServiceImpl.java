@@ -27,6 +27,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -288,30 +289,47 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
     
     @Transactional
     protected void refreshBatchTotals(String ownerId, LocalDate monthKey) {
-        BigDecimal total = settlementRepo.sumAmountByOwnerAndMonthKey(ownerId, monthKey);
-        long cnt = settlementRepo.countByOwnerIdAndMonthKey(ownerId, monthKey);
-        batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey).ifPresent(b -> {
-            b.setTotalAmount(total);
-            b.setItemCount((int) cnt);
+        BigDecimal net = Optional.ofNullable(
+                settlementRepo.sumNetByOwnerAndMonthKeyForRequested(ownerId, monthKey))
+            .orElse(BigDecimal.ZERO)
+            .setScale(0, RoundingMode.HALF_UP);
+
+        int cnt = (int) settlementRepo.countByOwnerIdAndMonthKeyAndStatus(
+                ownerId, monthKey, CarOwnerSettlement.Status.REQUESTED);
+
+        var opt = batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey);
+        if (opt.isPresent()) {
+            var b = opt.get();
+            b.setTotalAmount(net);
+            b.setItemCount(cnt);
             batchRepo.save(b);
-        });
+        }
     }
+    
     @Transactional
-    public void requestPayoutBatch(String ownerId, YearMonth ym) {
+    public void requestPayoutBatch(String ownerId, YearMonth ym, String bankCode, String accountNo) {
         LocalDate monthKey = ym.atDay(1);
+
         var b = batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey)
                 .orElseThrow(() -> new IllegalArgumentException("BATCH_NOT_FOUND"));
         if (b.getStatus() != CarOwnerSettlementBatch.Status.REQUESTED) {
             throw new IllegalStateException("BATCH_NOT_OPEN");
         }
-        // 정산 항목 일괄 요청
-        int n = settlementRepo.bulkMarkRequested(ownerId, monthKey);
-        refreshBatchTotals(ownerId, monthKey); // 합계/건수 재계산
-        b.setStatus(CarOwnerSettlementBatch.Status.REQUESTED);
+
+        // 1) READY → REQUESTED (항목)
+        settlementRepo.bulkMarkRequested(ownerId, monthKey);
+
+        // 2) 배치에 은행/계좌 저장
+        b.setBankCode(bankCode);
+        b.setBankAccountNo(accountNo);
         b.setRequestedAt(LocalDateTime.now());
+        // b.setStatus(...)는 이미 REQUESTED 상태 유지
+
+        // 3) 합계/건수 재계산
+        refreshBatchTotals(ownerId, monthKey);
+
         batchRepo.save(b);
     }
-
 
 	
 		

@@ -196,4 +196,40 @@ public class CarOwnerDashboardServiceImpl implements CarOwnerDashboardService {
 			return new DateRange(first, last);
 		}
 	}
+	
+	@Transactional
+	public void markDeparted(String ownerId, Long orderId) {
+	    Long driverKey = resolveDriverKey(ownerId);
+	    if (driverKey == null) throw new AccessDeniedException("AUTH_USER_NOT_FOUND");
+
+	   
+	    LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+
+	    int updated = orderRepository.markDeparted(orderId, driverKey, now);
+	    if (updated == 0) {
+	      
+	        throw new IllegalStateException("TRANSITION_NOT_ALLOWED: READY->ONGOING");
+	    }
+	}
+
+	@Transactional
+	public void markCompleted(String ownerId, Long orderId) {
+	    Long driverKey = resolveDriverKey(ownerId);
+	    if (driverKey == null) throw new AccessDeniedException("AUTH_USER_NOT_FOUND");
+
+	    LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+
+	    int updated = orderRepository.markCompleted(orderId, driverKey, now);
+	    if (updated == 0) {
+	        throw new IllegalStateException("TRANSITION_NOT_ALLOWED: ONGOING->COMPLETED");
+	    }
+	}
+	@Transactional
+    public void cancel(String ownerId, Long orderId) {
+        Long driverKey = resolveDriverKey(ownerId);
+        if (driverKey == null) throw new AccessDeniedException("AUTH_USER_NOT_FOUND");
+
+        int updated = orderRepository.markCanceled(orderId, driverKey, LocalDateTime.now(ZoneId.of("Asia/Seoul")));
+        if (updated == 0) throw new IllegalStateException("TRANSITION_NOT_ALLOWED: READY/ONGOING->CANCELED");
+    }
 }

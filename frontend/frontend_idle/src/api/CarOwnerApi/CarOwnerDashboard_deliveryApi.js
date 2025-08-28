@@ -46,10 +46,10 @@ export async function patchOrderStatus(orderId, nextStatus, token) {
     method: "PATCH",
     credentials: "include",
     headers: {
-      "Authorization": `Bearer ${token}`,
+      "Authorization": `Bearer ${token}`, // 쿠키 기반이면 없어도 동작. 둘 다 써도 무방.
     },
   });
-  return handle(res); // { ...OrderDetailResponse }
+  return handle(res); // ← 컨트롤러에서 JSON 반환해야 함
 }
 
 /** ✅ 취소 — 별도 /cancel 없음. 동일 엔드포인트에 status=CANCELED */

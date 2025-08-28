@@ -14,5 +14,8 @@ public interface CarOwnerDashboardService {
     List<SalesChartDTO> getSalesChart(String ownerId);
     WarmthDTO getWarmth(String ownerId);
     
+    void markDeparted(String ownerId, Long orderId);
+    void markCompleted(String ownerId, Long orderId);
+    
 }
 

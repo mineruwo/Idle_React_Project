@@ -12,13 +12,15 @@ import BubbleAnimation from "./layouts/components/carownerComponent/common/Bubbl
 
 export default function App() {
   return (
-    <>
-    <BubbleAnimation/>
     <AuthProvider>
       <Provider store={store}>
-        <RouterProvider router={root} />
+        <div className="app-root">
+          <BubbleAnimation className="bubble-layer" />
+          <div className="app-content">
+            <RouterProvider router={root} />
+          </div>
+        </div>
       </Provider>
     </AuthProvider>
-    </>
   );
 }

@@ -60,7 +60,7 @@ const EditProfilePage = () => {
       setNickOk(ok);
       if (!ok) alert("이미 사용 중인 닉네임입니다.");
     } catch (e) {
-      alert("닉네임 확인 실패: " + e.message);
+      alert("닉네임 확인: " + e.message);
     }
   };
 
@@ -157,13 +157,6 @@ const EditProfilePage = () => {
                   onChange={onChangeExtra}
                   placeholder="000-0000-000"
                 />
-                <button
-                  className="driverbtn"
-                  type="button"
-                  onClick={carOwnerMoveToLisense}
-                >
-                  증서 제출
-                </button>
               </div>
             </label>
 

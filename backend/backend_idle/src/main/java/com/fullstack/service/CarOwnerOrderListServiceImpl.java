@@ -135,39 +135,51 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
     public CarOwnerOrderListDTO.OrderDetailResponse changeStatus(
             String loginId, Long orderId, OrderStatus nextStatus) {
 
-        Long driverId = getDriverId(loginId);
-        Order o = orderRepository.findByIdAndAssignedDriverId(orderId, driverId)
-                .orElseThrow(() -> new AccessDeniedException("FORBIDDEN_ORDER_OWNER"));
+        // ⚠️ idNum null 대비 (NPE 방지)
+        CustomerEntity me = customerRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new AccessDeniedException("AUTH_USER_NOT_FOUND"));
+        if (me.getIdNum() == null) throw new AccessDeniedException("AUTH_USER_NOT_FOUND");
+        Long driverId = me.getIdNum().longValue();
 
-        OrderStatus cur  = o.getStatus();
-        OrderStatus next = nextStatus;
+        // 현재 상태 확인 (취소 정책, 전이 검증용)
+        Order cur = orderRepository.findByIdAndAssignedDriverId(orderId, driverId)
+                .orElseThrow(() -> new AccessDeniedException("FORBIDDEN_ORDER_OWNER"));
+        OrderStatus curStatus = cur.getStatus();
 
         boolean normal =
-                (cur == OrderStatus.READY   && next == OrderStatus.ONGOING) ||
-                (cur == OrderStatus.ONGOING && next == OrderStatus.COMPLETED);
+                (curStatus == OrderStatus.READY   && nextStatus == OrderStatus.ONGOING) ||
+                (curStatus == OrderStatus.ONGOING && nextStatus == OrderStatus.COMPLETED);
 
         boolean cancel =
-                (next == OrderStatus.CANCELED) &&
-                (cur == OrderStatus.READY || cur == OrderStatus.ONGOING);
+                (nextStatus == OrderStatus.CANCELED) &&
+                (curStatus == OrderStatus.READY || curStatus == OrderStatus.ONGOING);
 
-        if (!(normal || cancel)) {
-            throw new IllegalArgumentException("INVALID_STATUS_TRANSITION");
-        }
-
-        if (cancel && isSameDayKST(o.getReservedDate())) {
+        if (!(normal || cancel)) throw new IllegalArgumentException("INVALID_STATUS_TRANSITION");
+        if (cancel && isSameDayKST(cur.getReservedDate()))
             throw new IllegalArgumentException("SAME_DAY_CANCEL_NOT_ALLOWED");
+
+        LocalDateTime now = LocalDateTime.now(KST);
+        int updated = 0;
+
+        switch (nextStatus) {
+            case ONGOING -> updated = orderRepository.markDeparted(orderId, driverId, now);   // departed_at 세팅
+            case COMPLETED -> updated = orderRepository.markCompleted(orderId, driverId, now); // completed_at 세팅
+            case CANCELED -> updated = orderRepository.markCanceled(orderId, driverId, now);
+            default -> throw new IllegalArgumentException("UNSUPPORTED_STATUS");
+        }
+        if (updated == 0) {
+            // 상태가 이미 바뀌었거나, 권한/조건 불일치
+            throw new IllegalStateException("TRANSITION_NOT_ALLOWED");
         }
 
-        o.setStatus(next);
+        // 완료 시 정산 생성 (한 번만)
+        if (nextStatus == OrderStatus.COMPLETED) {
+            settlementService.createForOrder(String.valueOf(driverId), orderId);
+        }
 
-        // 정산 테이블에 오더정보 insert (ONGOING → COMPLETED 전이 시에만)
-        if (cur == OrderStatus.ONGOING && next == OrderStatus.COMPLETED) {
-            
-            orderRepository.saveAndFlush(o);
-            
-            settlementService.createForOrder(String.valueOf(driverId), o.getId());
-             }
-
+        // 최신 상태로 상세 반환
+        Order o = orderRepository.findByIdAndAssignedDriverId(orderId, driverId)
+                .orElseThrow(() -> new AccessDeniedException("FORBIDDEN_ORDER_OWNER"));
         return toDetail(o);
     }
 

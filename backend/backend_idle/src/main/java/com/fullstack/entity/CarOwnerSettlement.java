@@ -66,6 +66,8 @@ public class CarOwnerSettlement {
     private LocalDateTime approvedAt;
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
+    
+    
 
     // 월 집계키: 주문 완료일 기준 그 달의 1일 (yyyy-MM-01)
     @Column(name = "month_key", nullable = false)
