@@ -36,7 +36,7 @@ public class TokenCookieUtils {
 				.path("/").maxAge(0).build();
 		response.addHeader("Set-Cookie", cookie.toString());
 	}
-
+	
 	public static String getAccessTokenFromCookie(HttpServletRequest request) {
 		return getCookieValue(request, "accessToken");
 	}

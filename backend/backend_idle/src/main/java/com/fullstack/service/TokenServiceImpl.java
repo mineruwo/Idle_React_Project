@@ -13,7 +13,6 @@ import com.fullstack.repository.CustomerRepository;
 import com.fullstack.security.jwt.JWTUtil;
 import com.fullstack.security.util.HashUtils;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service

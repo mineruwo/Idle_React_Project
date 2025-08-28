@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.fullstack.entity.CustomerEntity;
-import com.fullstack.model.CustomerDTO;
+import com.fullstack.model.LoginRequestDTO;
 import com.fullstack.model.LoginResponseDTO;
 import com.fullstack.model.ResetPasswordDTO;
 import com.fullstack.model.SnsLinkExistingRequestDTO;
@@ -26,7 +26,7 @@ import com.fullstack.model.SnsSignupRequestDTO;
 import com.fullstack.model.TokenDTO;
 import com.fullstack.repository.CustomerRepository;
 import com.fullstack.security.util.TokenCookieUtils;
-import com.fullstack.service.CustomerService;
+import com.fullstack.service.AuthService;
 import com.fullstack.service.ResetPasswordService;
 import com.fullstack.service.SnsOnboardingService;
 import com.fullstack.service.SnsSignupService;
@@ -45,7 +45,7 @@ public class AuthController {
 	
 	private static final String OAUTH_SIGNUP_TOKEN = "oauth_signup_token";
 
-	private final CustomerService customerService;
+	private final AuthService authService;
 	private final TokenService tokenService;
 	private final CustomerRepository customerRepository;
 	private final ResetPasswordService resetPasswordService;
@@ -53,18 +53,17 @@ public class AuthController {
     private final SnsOnboardingService snsOnboardingService;
 	
 	@PostMapping("/login")
-	public ResponseEntity<Map<String, Object>> login(@RequestBody CustomerDTO customerDTO,
+	public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO loginRequestDTO,
 			HttpServletResponse response) {
-		LoginResponseDTO responseDTO = customerService.login(customerDTO);
+		LoginResponseDTO loginResponseDTO = authService.authenticate(loginRequestDTO);
 
-		TokenDTO tokenDTO = tokenService.issue(responseDTO.getId(), responseDTO.getRole());
+		TokenDTO tokenDTO = tokenService.issue(loginResponseDTO.getId(), loginResponseDTO.getRole());
 
 		TokenCookieUtils.setAccessTokenCookie(response, tokenDTO.getAccessToken(), tokenDTO.getAtExpiresIn());
 		TokenCookieUtils.setRefreshTokenCookie(response, tokenDTO.getRefreshToken(), tokenDTO.getRtExpiresIn());
 		TokenCookieUtils.setAuthHintCookie(response, true, tokenDTO.getRtExpiresIn());
 
-		return ResponseEntity.ok(Map.of("id", responseDTO.getId(), "role", responseDTO.getRole(), "atExpiresIn",
-				tokenDTO.getAtExpiresIn(), "rtExpiresIn", tokenDTO.getRtExpiresIn()));
+		return ResponseEntity.ok(loginResponseDTO);
 	}
 
 	@PostMapping("/refresh")

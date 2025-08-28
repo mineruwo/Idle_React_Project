@@ -19,6 +19,10 @@ const OrderForm = lazy(() => import("../pages/orderPage/OrderForm"));
 const Login = lazy(() => import("../pages/loginpage/LoginPage"));
 const Signup = lazy(() => import("../pages/signuppage/SignupPage"));
 const NewPassword = lazy(() => import ("../pages/loginpage/NewPasswordPage"))
+const OauthLanding = lazy(() => import("../pages/signuppage/OauthLandingPage"));
+const LinkExisting = lazy(() => import("../pages/signuppage/LinkExistingPage"));
+const SnsSignup = lazy(() => import("../pages/signuppage/SnsSignupPage"));
+
 const AdminPage = lazy(() => import("../pages/adminPage/AdminPage"));
 
 const Shipper = lazy(() => import("../pages/shipperPage/ShipperDashBoard"));
@@ -32,7 +36,6 @@ const EditProfile = lazy(() => import("../pages/carOwnerPage/EditProfile"));
 const SubmitDOC = lazy(() => import("../pages/carOwnerPage/SubmitDOC"));
 const Settlement = lazy(() => import("../pages/carOwnerPage/Settlement"));
 const Vehicles = lazy(() => import("../pages/carOwnerPage/Vehicles"));
-
 
 // 최상위 레이아웃 컴포넌트
 const RootLayout = () => {
