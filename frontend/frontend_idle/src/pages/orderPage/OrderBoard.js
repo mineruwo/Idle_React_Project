@@ -13,7 +13,7 @@ import { useAuth } from "../../auth/AuthProvider";
 
 // ===== 입찰 하한가 설정 =====
 const AVERAGE_PRICE_PER_KM = 3000; // OrderForm과 동일
-const MIN_BID_RATE = 0.6; // 평균가의 60% 하한
+const MIN_BID_RATE = 0.9; // 평균가의 90% 하한
 
 const _num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
 const basePriceFor = (o) =>
@@ -183,9 +183,12 @@ const offerStatusLabelK = (s) => {
 const canBid = (order, assign) => {
     const orderStatus = String(order?.status || "").toUpperCase();
     const assignStatus = String(assign?.status || "").toUpperCase();
-    const orderLocked = ["PAYMENT_PENDING", "READY", "ONGOING", "COMPLETED"].includes(
-        orderStatus
-    );
+    const orderLocked = [
+        "PAYMENT_PENDING",
+        "READY",
+        "ONGOING",
+        "COMPLETED",
+    ].includes(orderStatus);
     const assignLocked = ["ASSIGNED", "CONFIRMED"].includes(assignStatus);
     return !(orderLocked || assignLocked);
 };
@@ -850,7 +853,8 @@ const OrderBoard = () => {
                                                 </small>
                                             </div>
                                             <div>
-                                                {userRole?.toUpperCase() === "SHIPPER" && (
+                                                {userRole?.toUpperCase() ===
+                                                    "SHIPPER" && (
                                                     <AcceptBtn
                                                         disabled={
                                                             !canBid(

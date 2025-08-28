@@ -30,6 +30,8 @@ public class PaymentRequestDTO {
     private Integer pointsToUse;
     @JsonProperty("pgProvider")
     private String pgProvider;
+
+    @JsonProperty("orderId") // orderId 필드 추가
+    private Long orderId;
 	
 }
-

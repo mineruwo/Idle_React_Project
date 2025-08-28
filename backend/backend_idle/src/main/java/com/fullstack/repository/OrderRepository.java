@@ -1,8 +1,7 @@
-// src/main/java/com/fullstack/repository/OrderRepository.java
 package com.fullstack.repository;
 
 import com.fullstack.entity.Order;
-import com.fullstack.model.enums.OrderStatus; // Added import
+import com.fullstack.model.enums.OrderStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -16,9 +15,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import java.util.Collection;
-import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
@@ -35,6 +31,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     /* ---- 목록/검색 (기존) ---- */
     List<Order> findAllByOrderByCreatedAtDesc();
     boolean existsByOrderNo(String orderNo);
+    
+    // orderNo로 Order를 찾는 메소드 추가
+    Optional<Order> findByOrderNo(String orderNo);
+
     @Query("""
     	    select o
     	      from Order o

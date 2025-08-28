@@ -75,6 +75,12 @@ public class PaymentServiceImpl implements PaymentService {
         CustomerEntity customer = customerRepository.findById(requestDto.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + requestDto.getUserId()));
         paymentEntity.setCustomer(customer);
+
+        // 주문(Order) 정보를 찾아서 관계 설정
+        Order order = Optional.ofNullable(requestDto.getOrderId())
+        		.flatMap(orderRepository::findById)
+        		.orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다: " + requestDto.getOrderId()));
+        paymentEntity.setOrder(order);
         paymentEntity.setPointsUsed(requestDto.getPointsToUse());
         paymentEntity.setPgProvider(requestDto.getPgProvider());
         log.info("preparePayment: PaymentEntity customer ID set to: {}", paymentEntity.getCustomer().getIdNum());
@@ -387,6 +393,9 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setPointsUsed(pointsToUse);
         payment.setPgProvider("points"); // PG사를 'points'로 명시
 
+        // Order 와의 관계 설정 추가
+        payment.setOrder(order);
+
         paymentRepository.save(payment);
 
         // 2. 포인트 차감 및 히스토리 기록
@@ -420,4 +429,3 @@ public class PaymentServiceImpl implements PaymentService {
         return responseDto;
     }
 }
-     
