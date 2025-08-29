@@ -41,6 +41,7 @@ public final class CarOwnerSettlementBatchDTO {
         private long paidCount;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
+        private String status;
     }
 
     @Getter
@@ -62,5 +63,6 @@ public final class CarOwnerSettlementBatchDTO {
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
         private List<CarOwnerSettlementDTO.SettlementSummaryResponse> items;
+        private String status;
     }
 }

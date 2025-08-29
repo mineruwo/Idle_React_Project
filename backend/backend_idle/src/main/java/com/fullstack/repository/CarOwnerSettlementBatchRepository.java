@@ -1,18 +1,17 @@
 package com.fullstack.repository;
 
 import com.fullstack.entity.CarOwnerSettlementBatch;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.YearMonth;
 import java.util.Optional;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-public interface CarOwnerSettlementBatchRepository extends JpaRepository<CarOwnerSettlementBatch, Long> {
+public interface CarOwnerSettlementBatchRepository extends JpaRepository<CarOwnerSettlementBatch, Long>, JpaSpecificationExecutor<CarOwnerSettlementBatch> {
 	boolean existsByOwnerIdAndMonthKey(String ownerId, LocalDate monthKey);
 
 	Optional<CarOwnerSettlementBatch> findByOwnerIdAndMonthKey(String ownerId, LocalDate monthKey);

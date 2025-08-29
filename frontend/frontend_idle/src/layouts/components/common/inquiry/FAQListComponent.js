@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getAllFAQs } from '../../../../api/adminApi'; // Using the existing API from adminApi
+import { getAllFAQs } from '../../../../api/publicApi';
 import "../../../../CustomCSS/FAQ.css"; // Assuming a new CSS file for styling
 
 const FAQListComponent = () => {

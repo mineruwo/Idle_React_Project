@@ -171,7 +171,20 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerDTO getCustomerById(String id) {
-        Optional<CustomerEntity> result = customerRepository.findById(id);
+        // Try to parse the ID as an integer first.
+        try {
+            Integer numericId = Integer.parseInt(id);
+            // If successful, find by the numeric primary key.
+            Optional<CustomerEntity> result = customerRepository.findById(numericId);
+            if (result.isPresent()) {
+                return result.map(this::entityToDto).get();
+            }
+        } catch (NumberFormatException e) {
+            // If parsing fails, it's not a numeric ID, so proceed to find by the string 'id' field.
+        }
+
+        // Find by the string 'id' field (login ID).
+        Optional<CustomerEntity> result = customerRepository.findById(id); // This calls the custom findById(String)
         return result.map(this::entityToDto).orElse(null);
     }
 

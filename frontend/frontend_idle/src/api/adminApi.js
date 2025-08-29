@@ -154,15 +154,7 @@ export const createNotice = async (noticeData) => {
     }
 };
 
-export const getAllNotices = async () => {
-    try {
-        const response = await adminApi.get(`/admin/notices`);
-        return response.data;
-    } catch (error) {
-        console.error('Failed to fetch notices:', error.response ? error.response.data : error.message);
-        throw error;
-    }
-};
+
 
 export const getNoticeById = async (id) => {
     try {
@@ -183,6 +175,17 @@ export const getNoticeForEdit = async (id) => {
         throw error;
     }
 };
+
+export const getAllNotices = async () => {
+    try {
+        const response = await adminApi.get(`/admin/notices`);
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch notices:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
 
 export const updateNotice = async (id, noticeData) => {
     try {
@@ -391,6 +394,37 @@ export const getDailyInquiryCounts = async (year, month) => {
         return response.data;
     } catch (error) {
         console.error('Failed to fetch daily inquiry counts:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+// Car Owner Settlement Batch APIs
+export const getCarOwnerSettlementBatches = async (params = {}) => {
+    try {
+        const response = await adminApi.get(`/admin/car-owner-settlements`, { params });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch car owner settlement batches:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const getCarOwnerSettlementBatchDetails = async (id) => {
+    try {
+        const response = await adminApi.get(`/admin/car-owner-settlements/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Failed to fetch car owner settlement batch details for id ${id}:`, error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
+export const updateCarOwnerSettlementStatus = async (id, newStatus) => {
+    try {
+        const response = await adminApi.put(`/admin/car-owner-settlements/${id}/status`, { status: newStatus });
+        return response.data;
+    } catch (error) {
+        console.error(`Failed to update car owner settlement status for id ${id}:`, error.response ? error.response.data : error.message);
         throw error;
     }
 };

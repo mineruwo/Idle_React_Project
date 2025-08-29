@@ -24,6 +24,7 @@ import com.fullstack.model.CustomerDTO;
 import com.fullstack.model.FaqDTO;
 import com.fullstack.model.NoticeDTO;
 import com.fullstack.model.SalesSummaryDTO;
+import com.fullstack.model.CarOwnerSettlementBatchDTO;
 import com.fullstack.service.CustomerService;
 import com.fullstack.service.FaqService;
 import com.fullstack.service.NoticeService;
@@ -555,9 +556,41 @@ public class AdminController {
         return ResponseEntity.ok(dailySalesData);
     }
 
-    @GetMapping("/sales/summary")
+        @GetMapping("/sales/summary")
     public ResponseEntity<SalesSummaryDTO> getSalesSummary() {
         SalesSummaryDTO salesSummary = salesService.getSalesSummary();
         return ResponseEntity.ok(salesSummary);
+    }
+
+    // Car Owner Settlement Batch Endpoints
+    @GetMapping("/car-owner-settlements")
+    @PreAuthorize("hasAnyRole('DEV_ADMIN', 'ADMIN', 'ALL_PERMISSION', 'MANAGER_SALES')")
+    public ResponseEntity<Page<CarOwnerSettlementBatchDTO.BatchSummaryResponse>> getCarOwnerSettlementBatches(
+            Pageable pageable,
+            @RequestParam(required = false) String ownerId,
+            @RequestParam(required = false) String yearMonth,
+            @RequestParam(required = false) String status) {
+        Page<CarOwnerSettlementBatchDTO.BatchSummaryResponse> batches = salesService.getCarOwnerSettlementBatches(pageable, ownerId, yearMonth, status);
+        return ResponseEntity.ok(batches);
+    }
+
+    @GetMapping("/car-owner-settlements/{id}")
+    @PreAuthorize("hasAnyRole('DEV_ADMIN', 'ADMIN', 'ALL_PERMISSION', 'MANAGER_SALES')")
+    public ResponseEntity<CarOwnerSettlementBatchDTO.BatchDetailResponse> getCarOwnerSettlementBatchDetails(@PathVariable Long id) {
+        CarOwnerSettlementBatchDTO.BatchDetailResponse batchDetails = salesService.getCarOwnerSettlementBatchDetails(id);
+        return ResponseEntity.ok(batchDetails);
+    }
+
+    @PutMapping("/car-owner-settlements/{id}/status")
+    @PreAuthorize("hasAnyRole('DEV_ADMIN', 'ADMIN', 'ALL_PERMISSION', 'MANAGER_SALES')")
+    public ResponseEntity<CarOwnerSettlementBatchDTO.BatchSummaryResponse> updateCarOwnerSettlementStatus(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> statusUpdate) {
+        String newStatus = statusUpdate.get("status");
+        if (newStatus == null || newStatus.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        CarOwnerSettlementBatchDTO.BatchSummaryResponse updatedBatch = salesService.updateCarOwnerSettlementStatus(id, newStatus);
+        return ResponseEntity.ok(updatedBatch);
     }
 }

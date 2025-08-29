@@ -69,7 +69,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
 
                 // 관리자(요구 반영: 공개, 운영 전환 시 제한 권장)
-                .requestMatchers(
+                                .requestMatchers(
+                    "/api/public/**", // Public API for notices
                     "/api/orders/**",   // 🚚 오더 등록/조회/삭제 전부 허용
                     "/auth/**",   
                     "/api/auth/login",
