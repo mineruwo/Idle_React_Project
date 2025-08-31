@@ -40,6 +40,10 @@ public class ReviewEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_id", nullable = false)
     private CustomerEntity target;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private Order order;
 
     // TODO: 리뷰가 어떤 주문에 대한 것인지 연결해야 합니다.
     // 예시: OrderEntity가 있다면 아래와 같이 연결합니다.
