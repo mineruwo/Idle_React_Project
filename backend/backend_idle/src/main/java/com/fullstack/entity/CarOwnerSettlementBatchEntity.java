@@ -22,7 +22,7 @@ import lombok.Setter;
 @Entity @Table(name = "settlement_batch",
 indexes = {@Index(columnList = "owner_id, month_key")})
 @Getter @Setter
-public class CarOwnerSettlementBatch {
+public class  CarOwnerSettlementBatchEntity{
 public enum Status { REQUESTED, APPROVED, PAID, CANCELED }
 
 @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

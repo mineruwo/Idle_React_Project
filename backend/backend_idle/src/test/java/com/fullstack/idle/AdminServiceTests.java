@@ -1,6 +1,6 @@
 package com.fullstack.idle;
 
-import com.fullstack.entity.Admin;
+import com.fullstack.entity.AdminEntity;
 import com.fullstack.model.AdminDTO;
 import com.fullstack.model.enums.AdminRole;
 import com.fullstack.repository.AdminRepository;
@@ -43,7 +43,7 @@ class AdminServiceTests {
         adminService.createAdmin(adminDTO);
 
         // then
-        Admin foundAdminEntity = adminRepository.findByAdminIdAndIsDelFalse("admin").orElse(null);
+        AdminEntity foundAdminEntity = adminRepository.findByAdminIdAndIsDelFalse("admin").orElse(null);
         assertThat(foundAdminEntity).isNotNull();
         assertThat(passwordEncoder.matches(rawPassword, foundAdminEntity.getPassword())).isTrue();
         assertThat(foundAdminEntity.getName()).isEqualTo("개발 관리자");
@@ -73,16 +73,11 @@ class AdminServiceTests {
    // @Test
     void testDeleteAdmin() {
 
-
-        // when
-       // adminService.deleteAdmin("admin");
-
         // then
         AdminDTO deletedAdmin = adminService.getAdmin("admin");
         assertThat(deletedAdmin).isNull();
 
-        // isDel 플래그가 true로 설정되었는지 직접 확인
-        Admin softDeletedAdmin = adminRepository.findAll().stream()
+        AdminEntity softDeletedAdmin = adminRepository.findAll().stream()
                 .filter(a -> a.getAdminId().equals("admin"))
                 .findFirst().orElse(null);
         assertThat(softDeletedAdmin).isNotNull();

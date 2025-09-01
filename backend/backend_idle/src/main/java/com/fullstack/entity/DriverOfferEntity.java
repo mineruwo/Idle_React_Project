@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Table(name = "driver_offers")
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor @Builder
-public class DriverOffer {
+public class DriverOfferEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

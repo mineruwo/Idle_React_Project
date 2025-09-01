@@ -8,7 +8,7 @@ import com.fullstack.repository.OrderRepository;
 import com.fullstack.repository.CustomerRepository;
 import com.fullstack.repository.PaymentRepository;
 import com.fullstack.repository.DriverOfferRepository;
-import com.fullstack.entity.DriverOffer;
+import com.fullstack.entity.DriverOfferEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -87,7 +87,7 @@ public class OrderService {
                     paymentRepository.findTopByOrderAndPaymentStatusOrderByPaidAtDesc(order, "PAID").ifPresent(payment -> {
                         dto.setPaidAt(payment.getPaidAt());
                     });
-                    driverOfferRepository.findByOrderAndStatus(order, DriverOffer.Status.ACCEPTED)
+                    driverOfferRepository.findByOrderAndStatus(order, DriverOfferEntity.Status.ACCEPTED)
                             .ifPresent(acceptedOffer -> {
                                 dto.setAssignedAt(acceptedOffer.getCreatedAt());
                             });
@@ -105,7 +105,7 @@ public class OrderService {
                     paymentRepository.findTopByOrderAndPaymentStatusOrderByPaidAtDesc(order, "PAID").ifPresent(payment -> {
                         dto.setPaidAt(payment.getPaidAt());
                     });
-                    driverOfferRepository.findByOrderAndStatus(order, DriverOffer.Status.ACCEPTED)
+                    driverOfferRepository.findByOrderAndStatus(order, DriverOfferEntity.Status.ACCEPTED)
                             .ifPresent(acceptedOffer -> {
                                 dto.setAssignedAt(acceptedOffer.getCreatedAt());
                             });

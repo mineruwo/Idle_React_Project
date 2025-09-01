@@ -1,7 +1,7 @@
 package com.fullstack.service;
 
 import com.fullstack.model.InquiryDTO;
-import com.fullstack.model.Inquiry;
+import com.fullstack.entity.InquiryEntity;
 import com.fullstack.model.InquiryStatus;
 import com.fullstack.repository.InquiryRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,12 +26,12 @@ public class InquiryServiceImpl implements InquiryService {
 
     @Override
     public InquiryDTO createInquiry(InquiryDTO inquiryDTO) {
-        Inquiry inquiry = dtoToEntity(inquiryDTO);
+        InquiryEntity inquiry = dtoToEntity(inquiryDTO);
         inquiry.setCreatedAt(LocalDateTime.now());
         if (inquiry.getStatus() == null) {
             inquiry.setStatus(InquiryStatus.INQUIRY_PENDING);
         }
-        Inquiry savedInquiry = inquiryRepository.save(inquiry);
+        InquiryEntity savedInquiry = inquiryRepository.save(inquiry);
         return entityToDto(savedInquiry);
     }
 
@@ -116,7 +116,7 @@ public class InquiryServiceImpl implements InquiryService {
         int currentMonth = today.getMonthValue();
         String currentDate = today.format(DateTimeFormatter.ofPattern("YYYY-MM-dd"));
 
-        List<Inquiry> inquiries = inquiryRepository.findInquiriesByFilter(
+        List<InquiryEntity> inquiries = inquiryRepository.findInquiriesByFilter(
                 filter,
                 currentDate,
                 sevenDaysAgo,

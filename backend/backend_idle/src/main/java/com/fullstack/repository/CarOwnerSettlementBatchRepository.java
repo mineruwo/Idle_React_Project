@@ -1,6 +1,6 @@
 package com.fullstack.repository;
 
-import com.fullstack.entity.CarOwnerSettlementBatch;
+import com.fullstack.entity.CarOwnerSettlementBatchEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -11,12 +11,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-public interface CarOwnerSettlementBatchRepository extends JpaRepository<CarOwnerSettlementBatch, Long>, JpaSpecificationExecutor<CarOwnerSettlementBatch> {
+public interface CarOwnerSettlementBatchRepository extends JpaRepository<CarOwnerSettlementBatchEntity, Long>, JpaSpecificationExecutor<CarOwnerSettlementBatchEntity> {
 	boolean existsByOwnerIdAndMonthKey(String ownerId, LocalDate monthKey);
 
-	Optional<CarOwnerSettlementBatch> findByOwnerIdAndMonthKey(String ownerId, LocalDate monthKey);
+	Optional<CarOwnerSettlementBatchEntity> findByOwnerIdAndMonthKey(String ownerId, LocalDate monthKey);
 
-	Optional<CarOwnerSettlementBatch> findTopByOwnerIdAndMonthKeyOrderByIdDesc(String ownerId, LocalDate monthKey);
+	Optional<CarOwnerSettlementBatchEntity> findTopByOwnerIdAndMonthKeyOrderByIdDesc(String ownerId, LocalDate monthKey);
 
 
 	@Query("""

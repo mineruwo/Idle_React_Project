@@ -1,6 +1,6 @@
 package com.fullstack.service;
 
-import com.fullstack.entity.Notice;
+import com.fullstack.entity.NoticeEntity;
 import com.fullstack.model.NoticeDTO;
 import com.fullstack.repository.NoticeRepository;
 import java.time.LocalDateTime;
@@ -16,8 +16,8 @@ public class NoticeService {
     @Autowired
     private NoticeRepository noticeRepository;
 
-    public Notice createNotice(NoticeDTO noticeDTO) {
-        Notice notice = new Notice();
+    public NoticeEntity createNotice(NoticeDTO noticeDTO) {
+        NoticeEntity notice = new NoticeEntity();
         // Assuming ID is auto-generated, so not setting it here
         notice.setTitle(noticeDTO.getTitle());
         notice.setContent(noticeDTO.getContent());
@@ -26,14 +26,14 @@ public class NoticeService {
         return noticeRepository.save(notice);
     }
 
-    public List<Notice> getAllNotices() {
+    public List<NoticeEntity> getAllNotices() {
         return noticeRepository.findAll();
     }
     
-    public Notice getNoticeById(Long noticeId) {
-        Optional<Notice> optionalNotice = noticeRepository.findById(noticeId);
+    public NoticeEntity getNoticeById(Long noticeId) {
+        Optional<NoticeEntity> optionalNotice = noticeRepository.findById(noticeId);
         if (optionalNotice.isPresent()) {
-            Notice notice = optionalNotice.get();
+            NoticeEntity notice = optionalNotice.get();
             notice.setViewCount(notice.getViewCount() + 1);
             return noticeRepository.save(notice);
         } else {
@@ -42,14 +42,14 @@ public class NoticeService {
         }
     }
 
-    public Notice getNoticeForEdit(Long noticeId) {
+    public NoticeEntity getNoticeForEdit(Long noticeId) {
         return noticeRepository.findById(noticeId).orElse(null);
     }
 
-    public Notice updateNotice(Long id, NoticeDTO noticeDTO) {
-        Optional<Notice> optionalNotice = noticeRepository.findById(id);
+    public NoticeEntity updateNotice(Long id, NoticeDTO noticeDTO) {
+        Optional<NoticeEntity> optionalNotice = noticeRepository.findById(id);
         if (optionalNotice.isPresent()) {
-            Notice notice = optionalNotice.get();
+            NoticeEntity notice = optionalNotice.get();
             notice.setTitle(noticeDTO.getTitle());
             notice.setContent(noticeDTO.getContent());
             return noticeRepository.save(notice);
@@ -62,10 +62,10 @@ public class NoticeService {
         noticeRepository.deleteById(id);
     }
 
-    public Notice toggleNoticeActive(Long id) {
-        Optional<Notice> optionalNotice = noticeRepository.findById(id);
+    public NoticeEntity toggleNoticeActive(Long id) {
+        Optional<NoticeEntity> optionalNotice = noticeRepository.findById(id);
         if (optionalNotice.isPresent()) {
-            Notice notice = optionalNotice.get();
+            NoticeEntity notice = optionalNotice.get();
             notice.setIsDel(!notice.getIsDel());
             if (notice.getIsDel()) {
                 notice.setDeletedAt(LocalDateTime.now());

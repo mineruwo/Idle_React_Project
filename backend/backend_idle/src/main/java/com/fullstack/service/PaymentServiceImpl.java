@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.fullstack.entity.CustomerEntity;
 import com.fullstack.entity.OrderEntity;
 import com.fullstack.entity.PaymentEntity;
-import com.fullstack.entity.PointHistory;
+import com.fullstack.entity.PointHistoryEntity;
 import com.fullstack.model.PaymentRequestDTO;
 import com.fullstack.model.PaymentResponseDTO;
 import com.fullstack.model.PaymentVerificationDTO;
@@ -294,7 +294,7 @@ public class PaymentServiceImpl implements PaymentService {
         customerRepository.save(customer);
         log.info("usePoints: After point deduction and save, customer {} new balance: {}", customer.getIdNum(), customer.getUserPoint());
 
-        PointHistory history = PointHistory.builder()
+        PointHistoryEntity history = PointHistoryEntity.builder()
                 .customer(customer)
                 .transactionType("USE")
                 .amount(-pointsToUse)
@@ -324,7 +324,7 @@ public class PaymentServiceImpl implements PaymentService {
         customerRepository.save(customer);
         log.info("addPoints: After save, customer {} new balance (from saved entity): {}", customer.getIdNum(), customer.getUserPoint());
 
-        PointHistory history = PointHistory.builder()
+        PointHistoryEntity history = PointHistoryEntity.builder()
                 .customer(customer)
                 .transactionType("CHARGE")
                 .amount(amount)
@@ -411,7 +411,7 @@ public class PaymentServiceImpl implements PaymentService {
         customer.setUserPoint(newBalance);
         customerRepository.save(customer);
 
-        PointHistory history = PointHistory.builder()
+        PointHistoryEntity history = PointHistoryEntity.builder()
                 .customer(customer)
                 .transactionType("USE")
                 .amount(-pointsToUse)

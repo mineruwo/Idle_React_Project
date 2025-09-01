@@ -1,7 +1,7 @@
 package com.fullstack.controller;
 
-import com.fullstack.entity.Faq;
-import com.fullstack.entity.Notice;
+import com.fullstack.entity.FaqEntity;
+import com.fullstack.entity.NoticeEntity;
 import com.fullstack.service.FaqService;
 import com.fullstack.service.NoticeService;
 
@@ -26,14 +26,14 @@ public class PublicController {
     private FaqService faqService;
 
     @GetMapping("/notices")
-    public ResponseEntity<List<Notice>> getAllNotices() {
-        List<Notice> notices = noticeService.getAllNotices();
+    public ResponseEntity<List<NoticeEntity>> getAllNotices() {
+        List<NoticeEntity> notices = noticeService.getAllNotices();
         return ResponseEntity.ok(notices);
     }
 
     @GetMapping("/faqs")
-    public ResponseEntity<List<Faq>> getAllFAQs() {
-        List<Faq> faqs = faqService.getAllFAQs();
+    public ResponseEntity<List<FaqEntity>> getAllFAQs() {
+        List<FaqEntity> faqs = faqService.getAllFAQs();
         return ResponseEntity.ok(faqs);
     }
 }

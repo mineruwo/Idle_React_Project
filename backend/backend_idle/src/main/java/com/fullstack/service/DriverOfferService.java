@@ -2,7 +2,7 @@
 package com.fullstack.service;
 
 import com.fullstack.entity.CustomerEntity;
-import com.fullstack.entity.DriverOffer;
+import com.fullstack.entity.DriverOfferEntity;
 import com.fullstack.entity.OrderEntity;
 import com.fullstack.model.DriverOfferCreateRequest;
 import com.fullstack.model.DriverOfferResponse;
@@ -49,12 +49,12 @@ public class DriverOfferService {
         CustomerEntity driver = customerRepository.findById(driverIdNum)
                 .orElseThrow(() -> new IllegalArgumentException("Driver not found: " + driverIdNum));
 
-        DriverOffer offer = DriverOffer.builder()
+        DriverOfferEntity offer = DriverOfferEntity.builder()
                 .order(order)
                 .driver(driver)
                 .price(req.getPrice())
                 .memo(req.getMemo())
-                .status(DriverOffer.Status.PENDING)
+                .status(DriverOfferEntity.Status.PENDING)
                 .build();
 
         return DriverOfferResponse.from(driverOfferRepository.save(offer));
@@ -80,7 +80,7 @@ public class DriverOfferService {
     public DriverOfferResponse accept(Long offerId) {
         if (offerId == null) throw new IllegalArgumentException("offerId가 필요합니다.");
 
-        DriverOffer offer = driverOfferRepository.findByIdWithDriver(offerId) // Use new method
+        DriverOfferEntity offer = driverOfferRepository.findByIdWithDriver(offerId) // Use new method
                 .orElseThrow(() -> new IllegalArgumentException("Offer not found: " + offerId));
 
         OrderEntity order = offer.getOrder();
@@ -92,7 +92,7 @@ public class DriverOfferService {
         }
 
         // 확정
-        offer.setStatus(DriverOffer.Status.ACCEPTED);
+        offer.setStatus(DriverOfferEntity.Status.ACCEPTED);
 
         // 주문 반영
         order.setDriverPrice(offer.getPrice());
@@ -126,18 +126,18 @@ public class DriverOfferService {
         CustomerEntity driver = customerRepository.findById(req.getDriverId())
                 .orElseThrow(() -> new IllegalArgumentException("Driver not found: " + req.getDriverId()));
 
-        DriverOffer offer = driverOfferRepository.save(
-                DriverOffer.builder()
+        DriverOfferEntity offer = driverOfferRepository.save(
+                DriverOfferEntity.builder()
                         .order(order)
                         .driver(driver)
                         .price(req.getPrice())
                         .memo(req.getMemo())
-                        .status(DriverOffer.Status.PENDING)
+                        .status(DriverOfferEntity.Status.PENDING)
                         .build()
         );
 
         // 즉시 확정
-        offer.setStatus(DriverOffer.Status.ACCEPTED);
+        offer.setStatus(DriverOfferEntity.Status.ACCEPTED);
         order.setDriverPrice(offer.getPrice());
         order.setAssignedDriverId(driver.getIdNum().longValue());
         // ✅ 결제대기 전환

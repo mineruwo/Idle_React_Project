@@ -1,6 +1,6 @@
 package com.fullstack.service;
 
-import com.fullstack.entity.Faq;
+import com.fullstack.entity.FaqEntity;
 import com.fullstack.model.FaqDTO;
 import com.fullstack.repository.FaqRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +16,14 @@ public class FaqService {
     @Autowired
     private FaqRepository faqRepository;
 
-    public List<Faq> getAllFAQs() {
+    public List<FaqEntity> getAllFAQs() {
         return faqRepository.findAll();
     }
 
-    public Faq getFaqById(Long faqId) {
-        Optional<Faq> optionalFaq = faqRepository.findById(faqId);
+    public FaqEntity getFaqById(Long faqId) {
+        Optional<FaqEntity> optionalFaq = faqRepository.findById(faqId);
         if (optionalFaq.isPresent()) {
-            Faq faq = optionalFaq.get();
+            FaqEntity faq = optionalFaq.get();
             faq.setViewCount(faq.getViewCount() + 1);
             return faqRepository.save(faq);
         } else {
@@ -32,22 +32,22 @@ public class FaqService {
         }
     }
 
-    public Faq getFaqForEdit(Long faqId) {
+    public FaqEntity getFaqForEdit(Long faqId) {
         return faqRepository.findById(faqId).orElse(null);
     }
 
-    public Faq createFAQ(FaqDTO faqDTO) {
-        Faq faq = new Faq();
+    public FaqEntity createFAQ(FaqDTO faqDTO) {
+        FaqEntity faq = new FaqEntity();
         faq.setQuestion(faqDTO.getQuestion());
         faq.setAnswer(faqDTO.getAnswer());
         faq.setWriterAdminId(faqDTO.getWriterAdminId());
         return faqRepository.save(faq);
     }
 
-    public Faq updateFAQ(Long id, FaqDTO faqDTO) {
-        Optional<Faq> optionalFaq = faqRepository.findById(id);
+    public FaqEntity updateFAQ(Long id, FaqDTO faqDTO) {
+        Optional<FaqEntity> optionalFaq = faqRepository.findById(id);
         if (optionalFaq.isPresent()) {
-            Faq faq = optionalFaq.get();
+            FaqEntity faq = optionalFaq.get();
             faq.setQuestion(faqDTO.getQuestion());
             faq.setAnswer(faqDTO.getAnswer());
             return faqRepository.save(faq);
@@ -59,10 +59,10 @@ public class FaqService {
         faqRepository.deleteById(id);
     }
 
-    public Faq toggleFAQActive(Long id) {
-        Optional<Faq> optionalFaq = faqRepository.findById(id);
+    public FaqEntity toggleFAQActive(Long id) {
+        Optional<FaqEntity> optionalFaq = faqRepository.findById(id);
         if (optionalFaq.isPresent()) {
-            Faq faq = optionalFaq.get();
+            FaqEntity faq = optionalFaq.get();
             faq.setIsDel(!faq.getIsDel());
             if (faq.getIsDel()) {
                 faq.setDeletedAt(LocalDateTime.now());

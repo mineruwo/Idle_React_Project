@@ -1,8 +1,8 @@
 package com.fullstack.service;
 
-import com.fullstack.entity.CarOwnerSettlement;
-import com.fullstack.entity.CarOwnerSettlement.Status;
-import com.fullstack.entity.CarOwnerSettlementBatch;
+import com.fullstack.entity.CarOwnerSettlementEntity;
+import com.fullstack.entity.CarOwnerSettlementEntity.Status;
+import com.fullstack.entity.CarOwnerSettlementBatchEntity;
 import com.fullstack.entity.OrderEntity;
 import com.fullstack.model.CarOwnerSettlementDTO.SettlementDetailResponse;
 import com.fullstack.model.CarOwnerSettlementDTO.SettlementSummaryCardResponse;
@@ -48,14 +48,14 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
 
     @Override
     public Page<SettlementSummaryResponse> list(
-            String ownerId, LocalDate from, LocalDate to, Status status, int page, int size) {
+            String ownerId, LocalDate from, LocalDate to, CarOwnerSettlementEntity.Status status, int page, int size) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         LocalDateTime start = (from != null) ? from.atStartOfDay()
                 : LocalDate.now().minusMonths(3).withDayOfMonth(1).atStartOfDay();
         LocalDateTime end = (to != null) ? to.plusDays(1).atStartOfDay() : LocalDateTime.now();
 
-        Page<CarOwnerSettlement> p = (status == null)
+        Page<CarOwnerSettlementEntity> p = (status == null)
                 ? settlementRepo.findByOwnerIdAndCreatedAtBetween(ownerId, start, end, pageable)
                 : settlementRepo.findByOwnerIdAndStatusAndCreatedAtBetween(ownerId, status, start, end, pageable);
 
@@ -66,7 +66,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
 
     @Override
     public SettlementDetailResponse getDetail(String ownerId, Long settlementId) {
-        CarOwnerSettlement s = settlementRepo.findById(settlementId)
+        CarOwnerSettlementEntity s = settlementRepo.findById(settlementId)
                 .orElseThrow(() -> new IllegalArgumentException("SETTLEMENT_NOT_FOUND"));
         requireOwner(s, ownerId);
         return toDetailDTO(s);
@@ -94,9 +94,9 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
         BigDecimal amount = computeBaseAmount(o);
         BigDecimal commission = computeCommission(amount);
         LocalDate monthKey = resolveMonthKey(o);
-        CarOwnerSettlementBatch batch = ensureBatch(ownerId, monthKey);
+        CarOwnerSettlementBatchEntity batch = ensureBatch(ownerId, monthKey);
 
-        CarOwnerSettlement s = new CarOwnerSettlement();
+        CarOwnerSettlementEntity s = new CarOwnerSettlementEntity();
         s.setOrder(o);
         s.setOwnerId(ownerId);
         s.setAmount(amount);
@@ -169,7 +169,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
 
     /* ===================== private helpers ===================== */
 
-    private SettlementSummaryResponse toSummaryDTO(CarOwnerSettlement s) {
+    private SettlementSummaryResponse toSummaryDTO(CarOwnerSettlementEntity s) {
         OrderEntity o = s.getOrder();
         BigDecimal net = safe(s.getAmount()).subtract(safe(s.getCommission()));
         return SettlementSummaryResponse.builder()
@@ -188,7 +188,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
                 .build();
     }
 
-    private SettlementDetailResponse toDetailDTO(CarOwnerSettlement s) {
+    private SettlementDetailResponse toDetailDTO(CarOwnerSettlementEntity s) {
         OrderEntity o = s.getOrder();
         BigDecimal net = safe(s.getAmount()).subtract(safe(s.getCommission()));
         return SettlementDetailResponse.builder()
@@ -212,7 +212,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
                 .build();
     }
 
-    private void requireOwner(CarOwnerSettlement s, String ownerId) {
+    private void requireOwner(CarOwnerSettlementEntity s, String ownerId) {
         if (!Objects.equals(s.getOwnerId(), ownerId)) {
             throw new IllegalArgumentException("NO_AUTH_FOR_THIS_RESOURCE");
         }
@@ -267,14 +267,14 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
     /* ===== 배치 보장/집계 ===== */
 
     @Transactional // ← 가능하면 public 메서드에서
-    public CarOwnerSettlementBatch ensureBatch(String ownerId, LocalDate monthKey) {
+    public CarOwnerSettlementBatchEntity ensureBatch(String ownerId, LocalDate monthKey) {
         return batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey)
             .orElseGet(() -> {
                 try {
-                    CarOwnerSettlementBatch b = new CarOwnerSettlementBatch();
+                    CarOwnerSettlementBatchEntity b = new CarOwnerSettlementBatchEntity();
                     b.setOwnerId(ownerId);
                     b.setMonthKey(monthKey);
-                    b.setStatus(CarOwnerSettlementBatch.Status.REQUESTED); // 권장: READY
+                    b.setStatus(CarOwnerSettlementBatchEntity.Status.REQUESTED); // 권장: READY
                     return batchRepo.saveAndFlush(b);
                 } catch (DataIntegrityViolationException /*| ConstraintViolationException*/ ex) {
                     // flush 실패 → 1차 캐시 정리
@@ -295,7 +295,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
             .setScale(0, RoundingMode.HALF_UP);
 
         int cnt = (int) settlementRepo.countByOwnerIdAndMonthKeyAndStatus(
-                ownerId, monthKey, CarOwnerSettlement.Status.REQUESTED);
+                ownerId, monthKey, CarOwnerSettlementEntity.Status.REQUESTED);
 
         var opt = batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey);
         if (opt.isPresent()) {
@@ -312,7 +312,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
 
         var b = batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey)
                 .orElseThrow(() -> new IllegalArgumentException("BATCH_NOT_FOUND"));
-        if (b.getStatus() != CarOwnerSettlementBatch.Status.REQUESTED) {
+        if (b.getStatus() != CarOwnerSettlementBatchEntity.Status.REQUESTED) {
             throw new IllegalStateException("BATCH_NOT_OPEN");
         }
 

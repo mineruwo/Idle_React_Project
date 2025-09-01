@@ -27,7 +27,7 @@ import com.fullstack.model.enums.AdminRole;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Admin {
+public class AdminEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

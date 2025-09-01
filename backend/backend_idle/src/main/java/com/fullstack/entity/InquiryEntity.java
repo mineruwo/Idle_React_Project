@@ -1,5 +1,6 @@
-package com.fullstack.model;
+package com.fullstack.entity;
 
+import com.fullstack.model.InquiryStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,7 +25,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Inquiry {
+public class InquiryEntity {
 
         @Id
     @GeneratedValue(generator = "uuid2")

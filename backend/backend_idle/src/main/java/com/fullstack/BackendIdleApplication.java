@@ -1,6 +1,6 @@
 package com.fullstack;
 
-import com.fullstack.entity.Admin;
+import com.fullstack.entity.AdminEntity;
 import com.fullstack.model.enums.AdminRole;
 import com.fullstack.repository.AdminRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -31,7 +31,7 @@ public class BackendIdleApplication {
     public CommandLineRunner initData(AdminRepository adminRepository, PasswordEncoder passwordEncoder) {
         return args -> {
             if (adminRepository.findByAdminIdAndIsDelFalse("admin").isEmpty()) {
-                Admin admin = Admin.builder()
+                AdminEntity admin = AdminEntity.builder()
                         .adminId("admin")
                         .password(passwordEncoder.encode("admin1234")) // 안전한 비밀번호로 변경 권장
                         .name("기본 관리자")

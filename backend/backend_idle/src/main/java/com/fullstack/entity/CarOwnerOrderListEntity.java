@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
            @Index(name = "idx_order_status", columnList = "status")
        })
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class CarOwnerOrderList {
+public class CarOwnerOrderListEntity {
 
     public enum Status { READY, ONGOING, COMPLETED, CANCELED }
 

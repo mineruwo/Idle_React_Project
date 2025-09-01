@@ -29,7 +29,7 @@ import lombok.Setter;
 @Table(name = "settlement", uniqueConstraints = @UniqueConstraint(columnNames = { "order_id" })) // 주문당 1개만
 @Getter
 @Setter
-public class CarOwnerSettlement {
+public class CarOwnerSettlementEntity {
     public enum Status {
         READY, REQUESTED, APPROVED, PAID, CANCELED
     }
@@ -40,7 +40,7 @@ public class CarOwnerSettlement {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "batch_id")
-    private CarOwnerSettlementBatch batch;
+    private CarOwnerSettlementBatchEntity batch;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)

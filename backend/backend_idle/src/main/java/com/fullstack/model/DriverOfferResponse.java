@@ -2,7 +2,7 @@
 package com.fullstack.model;
 
 import com.fullstack.entity.CustomerEntity;
-import com.fullstack.entity.DriverOffer;
+import com.fullstack.entity.DriverOfferEntity;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -27,7 +27,7 @@ public class DriverOfferResponse {
     private String status;
     private LocalDateTime createdAt;
 
-    public static DriverOfferResponse from(DriverOffer o) {
+    public static DriverOfferResponse from(DriverOfferEntity o) {
         CustomerEntity drv = o.getDriver();
 
         return DriverOfferResponse.builder()

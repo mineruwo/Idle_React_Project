@@ -7,8 +7,8 @@ import com.fullstack.repository.OrderRepository;
 import com.fullstack.repository.CarOwnerSettlementRepository;
 import com.fullstack.repository.CarOwnerSettlementBatchRepository;
 import com.fullstack.entity.OrderEntity;
-import com.fullstack.entity.CarOwnerSettlement;
-import com.fullstack.entity.CarOwnerSettlementBatch;
+import com.fullstack.entity.CarOwnerSettlementBatchEntity;
+import com.fullstack.entity.CarOwnerSettlementEntity;
 import com.fullstack.model.enums.OrderStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -87,7 +87,7 @@ public class SalesService {
         BigDecimal commissionRate = BigDecimal.valueOf(0.15); // Default commission rate
 
         if (order.getAssignedDriverId() != null) {
-            // CarOwnerSettlement settlement = carOwnerSettlementRepository.findById(order.getAssignedDriverId()).orElse(null);
+            // CarOwnerSettlementEntity settlement = carOwnerSettlementRepository.findById(order.getAssignedDriverId()).orElse(null);
             // if (settlement != null) {
             //     commissionRate = settlement.getCommission();
             // }
@@ -149,7 +149,7 @@ public class SalesService {
     // New methods for CarOwnerSettlementBatch
     public Page<CarOwnerSettlementBatchDTO.BatchSummaryResponse> getCarOwnerSettlementBatches(
             Pageable pageable, String ownerId, String yearMonth, String status) {
-        Specification<CarOwnerSettlementBatch> spec = (root, query, cb) -> {
+        Specification<CarOwnerSettlementBatchEntity> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
             if (ownerId != null && !ownerId.isEmpty()) {
@@ -164,7 +164,7 @@ public class SalesService {
             }
             if (status != null && !status.isEmpty()) {
                 try {
-                    CarOwnerSettlementBatch.Status enumStatus = CarOwnerSettlementBatch.Status.valueOf(status);
+                	CarOwnerSettlementBatchEntity.Status enumStatus = CarOwnerSettlementBatchEntity.Status.valueOf(status);
                     predicates.add(cb.equal(root.get("status"), enumStatus));
                 } catch (IllegalArgumentException e) {
                     // Handle invalid status string, e.g., log or throw specific exception
@@ -175,33 +175,33 @@ public class SalesService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
-        Page<CarOwnerSettlementBatch> batches = carOwnerSettlementBatchRepository.findAll(spec, pageable);
+        Page<CarOwnerSettlementBatchEntity> batches = carOwnerSettlementBatchRepository.findAll(spec, pageable);
         return batches.map(this::convertToBatchSummaryResponseDTO);
     }
 
     public CarOwnerSettlementBatchDTO.BatchDetailResponse getCarOwnerSettlementBatchDetails(Long id) {
-        CarOwnerSettlementBatch batch = carOwnerSettlementBatchRepository.findById(id)
+    	CarOwnerSettlementBatchEntity batch = carOwnerSettlementBatchRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Settlement Batch not found with id: " + id));
         return convertToBatchDetailResponseDTO(batch);
     }
 
     @Transactional
     public CarOwnerSettlementBatchDTO.BatchSummaryResponse updateCarOwnerSettlementStatus(Long id, String newStatus) {
-        CarOwnerSettlementBatch batch = carOwnerSettlementBatchRepository.findById(id)
+    	CarOwnerSettlementBatchEntity batch = carOwnerSettlementBatchRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Settlement Batch not found with id: " + id));
 
         // Update status
         try {
-            batch.setStatus(CarOwnerSettlementBatch.Status.valueOf(newStatus));
+            batch.setStatus(CarOwnerSettlementBatchEntity.Status.valueOf(newStatus));
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid status: " + newStatus);
         }
         
-        CarOwnerSettlementBatch updatedBatch = carOwnerSettlementBatchRepository.save(batch);
+        CarOwnerSettlementBatchEntity updatedBatch = carOwnerSettlementBatchRepository.save(batch);
         return convertToBatchSummaryResponseDTO(updatedBatch);
     }
 
-    private CarOwnerSettlementBatchDTO.BatchSummaryResponse convertToBatchSummaryResponseDTO(CarOwnerSettlementBatch batch) {
+    private CarOwnerSettlementBatchDTO.BatchSummaryResponse convertToBatchSummaryResponseDTO(CarOwnerSettlementBatchEntity batch) {
         // Derive yearMonth from monthKey
         String yearMonth = batch.getMonthKey() != null ? batch.getMonthKey().format(DateTimeFormatter.ofPattern("yyyy-MM")) : null;
 
@@ -234,7 +234,7 @@ public class SalesService {
                 .build();
     }
 
-    private CarOwnerSettlementBatchDTO.BatchDetailResponse convertToBatchDetailResponseDTO(CarOwnerSettlementBatch batch) {
+    private CarOwnerSettlementBatchDTO.BatchDetailResponse convertToBatchDetailResponseDTO(CarOwnerSettlementBatchEntity batch) {
         // Derive yearMonth from monthKey
         String yearMonth = batch.getMonthKey() != null ? batch.getMonthKey().format(DateTimeFormatter.ofPattern("yyyy-MM")) : null;
 

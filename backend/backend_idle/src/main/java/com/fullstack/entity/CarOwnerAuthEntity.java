@@ -23,7 +23,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class CarOwnerAuth {
+public class CarOwnerAuthEntity {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,12 +46,12 @@ public class CarOwnerAuth {
 	
 	@OneToOne
 	@JoinColumn(name = "vehicle_id")
-	private CarOwnerVehicles vehicle;
+	private CarOwnerVehiclesEntity vehicle;
 	
 	@OneToOne(optional = false, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "business_license_id", unique = true, nullable = false)
-	private BusinessLicense businessLicense;
+	private BusinessLicenseEntity businessLicense;
 
 	@OneToOne(mappedBy = "transportAuth", cascade = CascadeType.ALL)
-	private DriverLicense driverLicense;
+	private DriverLicenseEntity driverLicense;
 }

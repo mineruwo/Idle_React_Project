@@ -1,7 +1,7 @@
 package com.fullstack.service;
 
 import com.fullstack.model.InquiryDTO;
-import com.fullstack.model.Inquiry;
+import com.fullstack.entity.InquiryEntity;
 import com.fullstack.model.DailyAnswerCountDTO;
 import com.fullstack.model.InquiryStatus;
 import org.springframework.data.domain.Page;
@@ -25,8 +25,8 @@ public interface InquiryService {
     List<DailyAnswerCountDTO> getDailyInquiryCounts(int year, int month);
     List<InquiryDTO> getInquiryDetailsByFilter(String filter, String adminId);
 
-    default Inquiry dtoToEntity(InquiryDTO dto) {
-        return Inquiry.builder()
+    default InquiryEntity dtoToEntity(InquiryDTO dto) {
+        return InquiryEntity.builder()
                 .inquiryId(dto.getInquiryId())
                 .customerIdNum(dto.getCustomerIdNum())
                 .inquiryTitle(dto.getInquiryTitle())
@@ -41,7 +41,7 @@ public interface InquiryService {
                 .build();
     }
 
-    default InquiryDTO entityToDto(Inquiry entity) {
+    default InquiryDTO entityToDto(InquiryEntity entity) {
         return InquiryDTO.builder()
                 .inquiryId(entity.getInquiryId())
                 .customerIdNum(entity.getCustomerIdNum())

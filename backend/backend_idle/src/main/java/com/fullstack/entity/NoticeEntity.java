@@ -7,34 +7,34 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "faqs")
+@Table(name = "notices")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Faq {
+public class NoticeEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Assuming auto-increment for ID
     private Long id;
 
-    @Column(nullable = false)
-    private String question;
-
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String answer;
+    private String content;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
     @Column(name = "is_del", nullable = false)
     private Boolean isDel;
-    
+
+    @Column(nullable = false)
+    private String title;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
     @Column(name = "writer_admin_id", nullable = false)
     private String writerAdminId;
 
@@ -45,7 +45,7 @@ public class Faq {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
-        this.isDel = false;
+        this.isDel = false; // Default value for is_del
         this.viewCount = 0; // Default value for viewCount
     }
 
