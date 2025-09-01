@@ -1,0 +1,187 @@
+.form-container {
+  max-width: 600px;
+  margin: auto;
+  padding: 1.5rem;
+  font-family: sans-serif;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.label {
+  display: block;
+  margin-top: 1.2rem;
+  font-weight: bold;
+}
+
+.input {
+  width: 100%;
+  padding: 0.7rem;
+  margin-top: 0.4rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+}
+.input:focus {
+  background-color: #ffffff;
+}
+
+.select {
+  width: 100%;
+  padding: 0.7rem;
+  margin-top: 0.4rem;
+  background-color: #f5f5f5;
+  color: #999;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+}
+.select:focus {
+  outline: none;
+}
+
+.radio-group {
+  display: flex;
+  gap: 1.2rem;
+  margin-top: 0.5rem;
+}
+
+.toggle-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 2rem;
+  margin-top: 0.5rem;
+}
+
+.address-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.button {
+  height: 44px;
+  padding: 0 1rem;
+  background-color: #ffb1d3ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 0.95rem;
+}
+
+.datepicker-wrapper {        /* ✅ DatePicker z-index 유지 */
+  position: relative;
+  z-index: 999;
+}
+
+.map-container {
+  width: 100%;
+  height: 300px;
+  margin-top: 30px;
+  border-radius: 20px;
+  box-shadow: 0 0 16px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.summary-box {
+  margin-top: 20px;
+  font-size: 16px;
+  color: #f48fb1;
+  line-height: 1.6;
+}
+
+.line-label {
+  font-weight: 600;
+  margin-right: 8px;
+}
+.line-value {}
+
+.divider {
+  border: none;
+  border-top: 2px solid #f48fb1;
+  margin: 12px 0;
+}
+
+.proposal-input {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  font-size: 15px;
+  border: 1px solid #c1c1c1ff;
+  border-radius: 12px;
+  box-sizing: border-box;
+  color: #444;
+}
+.proposal-input:focus {
+  outline: none;
+  border-color: #e08cab;
+  box-shadow: 0 0 0 2px rgba(224, 140, 171, 0.2);
+}
+.proposal-input::placeholder {
+  color: #888;
+}
+
+.warn-text {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #d1002e;
+}
+
+.button-row {
+  display: flex;
+  justify-content: center;
+  gap: 320px;
+  margin: 32px auto 0;
+}
+
+.back-button {
+  padding: 0.6rem 1.6rem;
+  font-size: 0.95rem;
+  background-color: white;
+  color: #f48fb1;
+  border: 2px solid #f48fb1;
+  border-radius: 8px;
+  cursor: pointer;
+  min-width: 120px;
+  transition: all 0.2s ease-in-out;
+}
+.back-button:hover {
+  background-color: #fff0f5;
+}
+
+.submit-button {
+  padding: 0.6rem 1.6rem;
+  font-size: 0.95rem;
+  background-color: #f48fb1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  min-width: 120px;
+  transition: all 0.2s ease-in-out;
+}
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 값이 들어가면 흰색으로 */
+.input.filled {
+  background-color: #ffffff;
+  color: #333;
+}
+
+.select.filled {
+  background-color: #ffffff;
+  color: #333; /* 회색이 아니라 진한 글자색 */
+}
+
+/* 선택 안 된 기본 상태는 기존처럼 회색 */
+.select:not(.filled) {
+  background-color: #f5f5f5;
+  color: #999;
+}
