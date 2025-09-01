@@ -1,51 +1,77 @@
+/* =========================
+   Global Reset + Background
+   ========================= */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #f0f5f9 !important;  /* ✅ 강제 적용 */
+  font-family: sans-serif;
+}
+
+/* =========================
+   Form Container
+   ========================= */
 .form-container {
   max-width: 600px;
-  margin: auto;
+  margin: 40px auto;         /* 위아래 여백 */
   padding: 1.5rem;
-  font-family: sans-serif;
+  background: #ffffff;       /* ✅ 폼 박스는 흰색 */
+  border: 1px solid #d7dcd9;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .title {
   text-align: center;
   margin-bottom: 2rem;
+  color: #2c464b;
 }
 
 .label {
   display: block;
   margin-top: 1.2rem;
   font-weight: bold;
+  color: #3c4b52;
 }
 
 .input {
   width: 100%;
   padding: 0.7rem;
   margin-top: 0.4rem;
-  border: 1px solid #ccc;
+  border: 1px solid #b9d5d9;
   border-radius: 8px;
-  background-color: #f5f5f5;
+  background-color: #ffffff;
+  color: #3c4b52;
 }
 .input:focus {
-  background-color: #ffffff;
+  border-color: #88b4b7;
+  box-shadow: 0 0 0 2px rgba(136, 180, 183, 0.25);
 }
 
 .select {
   width: 100%;
   padding: 0.7rem;
   margin-top: 0.4rem;
-  background-color: #f5f5f5;
-  color: #999;
-  border: 1px solid #ccc;
+  background-color: #ffffff;
+  color: #879796;
+  border: 1px solid #b9d5d9;
   border-radius: 6px;
   font-size: 15px;
 }
 .select:focus {
   outline: none;
+  border-color: #88b4b7;
+  box-shadow: 0 0 0 2px rgba(136, 180, 183, 0.25);
 }
 
 .radio-group {
   display: flex;
   gap: 1.2rem;
   margin-top: 0.5rem;
+  color: #3c4b52;
 }
 
 .toggle-group {
@@ -65,16 +91,20 @@
 .button {
   height: 44px;
   padding: 0 1rem;
-  background-color: #ffb1d3ff;
+  background-color: #88b4b7;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   white-space: nowrap;
   font-size: 0.95rem;
+  transition: all 0.2s ease-in-out;
+}
+.button:hover {
+  background-color: #2c464b;
 }
 
-.datepicker-wrapper {        /* ✅ DatePicker z-index 유지 */
+.datepicker-wrapper {
   position: relative;
   z-index: 999;
 }
@@ -91,19 +121,22 @@
 .summary-box {
   margin-top: 20px;
   font-size: 16px;
-  color: #f48fb1;
+  color: #2c464b;
   line-height: 1.6;
 }
 
 .line-label {
   font-weight: 600;
   margin-right: 8px;
+  color: #3c4b52;
 }
-.line-value {}
+.line-value {
+  color: #3c4b52;
+}
 
 .divider {
   border: none;
-  border-top: 2px solid #f48fb1;
+  border-top: 2px solid #88b4b7;
   margin: 12px 0;
 }
 
@@ -111,18 +144,19 @@
   width: 100%;
   padding: 0.7rem 1rem;
   font-size: 15px;
-  border: 1px solid #c1c1c1ff;
+  border: 1px solid #b9d5d9;
   border-radius: 12px;
   box-sizing: border-box;
-  color: #444;
+  color: #3c4b52;
+  background: #ffffff;
 }
 .proposal-input:focus {
   outline: none;
-  border-color: #e08cab;
-  box-shadow: 0 0 0 2px rgba(224, 140, 171, 0.2);
+  border-color: #88b4b7;
+  box-shadow: 0 0 0 2px rgba(136, 180, 183, 0.25);
 }
 .proposal-input::placeholder {
-  color: #888;
+  color: #879796;
 }
 
 .warn-text {
@@ -142,21 +176,21 @@
   padding: 0.6rem 1.6rem;
   font-size: 0.95rem;
   background-color: white;
-  color: #f48fb1;
-  border: 2px solid #f48fb1;
+  color: #2c464b;
+  border: 2px solid #2c464b;
   border-radius: 8px;
   cursor: pointer;
   min-width: 120px;
   transition: all 0.2s ease-in-out;
 }
 .back-button:hover {
-  background-color: #fff0f5;
+  background-color: #eef4f6;
 }
 
 .submit-button {
   padding: 0.6rem 1.6rem;
   font-size: 0.95rem;
-  background-color: #f48fb1;
+  background-color: #88b4b7;
   color: white;
   border: none;
   border-radius: 8px;
@@ -164,24 +198,27 @@
   min-width: 120px;
   transition: all 0.2s ease-in-out;
 }
+.submit-button:hover {
+  background-color: #2c464b;
+}
 .submit-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* 값이 들어가면 흰색으로 */
+/* 값이 들어가면 흰색 유지 */
 .input.filled {
   background-color: #ffffff;
-  color: #333;
+  color: #3c4b52;
 }
 
 .select.filled {
   background-color: #ffffff;
-  color: #333; /* 회색이 아니라 진한 글자색 */
+  color: #3c4b52;
 }
 
-/* 선택 안 된 기본 상태는 기존처럼 회색 */
+/* 선택 안 된 기본 상태 */
 .select:not(.filled) {
-  background-color: #f5f5f5;
-  color: #999;
+  background-color: #ffffff;
+  color: #879796;
 }
