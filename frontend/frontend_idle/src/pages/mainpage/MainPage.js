@@ -5,13 +5,12 @@ import NoticeComponent from "../../layouts/components/mainpage/NoticeComponent";
 
 const MainPage = () => {
     return (
-        <>
+        <main className="bg-third">
             <GNB />
-
             <IntroComponent />
             <NoticeComponent />
             <Footer />
-        </>
+        </main>
     );
 }
 

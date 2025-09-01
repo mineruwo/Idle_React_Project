@@ -4,11 +4,11 @@ import SignupComponent from "../../layouts/components/signup/SignupComponent"
 
 const SignupPage = () => {
     return (
-        <>
+        <main className="bg-third">
             <GNB />
             <SignupComponent />
             <Footer />
-        </>
+        </main>
     );
 }
 
