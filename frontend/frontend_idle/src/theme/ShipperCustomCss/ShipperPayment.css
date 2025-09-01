@@ -18,6 +18,7 @@
 }
 
 .summary-section {
+    background-color: #fff;
     flex-basis: 30%;
     flex-grow: 1;
     height: fit-content;
@@ -36,16 +37,15 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    background: #fef8f8;
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     padding: 2em 1.4em;
     font-family: "Noto Sans KR", sans-serif;
-    border: 1px solid #f3c7d3;
+    border: 1px solid #88b4b7;
 }
 
 .order-details-wrap {
-    border: 1px solid #eee;
+    border: 1px solid #88b4b7;
     padding: 1.5rem;
     border-radius: 8px;
     display: flex;
@@ -81,7 +81,7 @@
     font-weight: 600;
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #88b4b7;
 }
 
 .order-info-table {
@@ -99,7 +99,7 @@
 }
 
 .order-info-table li span:first-child {
-    width: 80px; /* 라벨의 너비를 고정하여 값의 시작 위치를 정렬합니다. */
+    width: 80px;
 }
 
 .order-info-table li span:last-child {
@@ -115,7 +115,7 @@
     font-size: 1.1rem;
     font-weight: 600;
     color: #fff;
-    background-color: #f3c7d3;
+    background-color: #88b4b7;
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -123,11 +123,11 @@
 }
 
 .payment-btn:hover {
-    background-color: #e0b0c0;
+    background-color: #88b4b7;
 }
 
 .payment-btn:disabled {
-    background-color: #f3c7d3;
+    background-color: #88b4b7;
     cursor: not-allowed;
     box-shadow: none;
 }
@@ -145,7 +145,7 @@
 }
 
 .current-points strong {
-    color: #f3c7d3;
+    color: #88b4b7;
 }
 
 .input-section {
@@ -174,7 +174,7 @@
 
 .max-use-btn {
     padding: 0.75rem 1rem;
-    background-color: #f3c7d3;
+    background-color: #88b4b7;
     color: #fff;
     border: none;
     border-radius: 4px;
@@ -183,7 +183,7 @@
 }
 
 .max-use-btn:hover {
-    background-color: #e0b0c0;
+    background-color: #88b4b7;
 }
 
 .final-payment-info {
@@ -194,15 +194,15 @@
 
 .final-payment-info .final-amount {
     font-weight: 700;
-    color: #f3c7d3;
+    color: #88b4b7;
 }
 
 .pay-method-list {
-    display: grid; /* Changed to grid for 2x2 layout */
-    grid-template-columns: repeat(2, 1fr); /* 2 columns, equal width */
-    gap: 1rem; /* Gap between grid items */
-    justify-items: center; /* Center items within their grid cells */
-    align-items: start; /* Align rows to the start */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    justify-items: center;
+    align-items: start;
 }
 
 .pay-method-list label {
@@ -217,12 +217,12 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    background: #fef8f8;
+    background: #fff;
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     padding: 2em 1.4em;
     font-family: "Noto Sans KR", sans-serif;
-    border: 1px solid #f3c7d3;
+    border: 1px solid #88b4b7;
     height: fit-content;
 }
 
@@ -230,10 +230,9 @@
 .payment-method-details-content,
 .summary-details-content,
 .order-item {
-    border: 1px solid #eee;
+    border: 1px solid #88b4b7;
     padding: 1.5rem;
     border-radius: 8px;
-    background-color: #f9f9f9;
 }
 
 .left-sections-wrapper {
@@ -254,7 +253,7 @@
     margin-bottom: 20px;
     color: #333;
     font-size: 1.5em;
-    border-bottom: 2px solid #eee;
+    border-bottom: 2px solid #88b4b7;
     padding-bottom: 10px;
 }
 
@@ -347,64 +346,56 @@
     }
 }
 
-/* Removed .easy-payment-options as it's no longer needed */
-
 .payment-option {
-    flex: none; /* Remove flex: 1 */
-    width: 100%; /* Make each option take full width */
-    max-width: 300px; /* Reverted max-width to previous size */
-    min-width: unset; /* Remove min-width */
-    padding: 15px; /* Increased padding for better touch targets */
+    flex: none;
+    width: 100%;
+    max-width: 300px;
+    min-width: unset;
+    padding: 15px;
     border: 2px solid #eee;
     border-radius: 8px;
-    text-align: left; /* Align text to left */
+    text-align: left;
     cursor: pointer;
     transition: all 0.3s ease;
     background-color: #fff;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
     display: flex;
-    flex-direction: row; /* Keep row for content inside option */
+    flex-direction: row;
     align-items: center;
-    justify-content: flex-start; /* Align content to start */
+    justify-content: flex-start;
     font-weight: 500;
     color: #555;
-    position: relative; /* For checkmark positioning */
+    position: relative;
 }
 
 .payment-option:hover {
-    border-color: #e0b0c0; /* Slightly darker pink on hover */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* More pronounced shadow */
-    transform: translateY(-2px); /* Slight lift effect */
+    border-color: #88b4b7;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
 }
 
 .payment-option.selected {
-    border-color: #f3c7d3; /* Keep original selected border color */
-    background-color: #f3c7d3; /* Solid pink background for selected */
-    color: #fff; /* White text for selected */
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Stronger shadow for selected */
-    transform: translateY(-2px); /* Keep lift effect */
+    border-color: #88b4b7;
+    background-color: #88b4b7;
+    color: #fff;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
 }
 
 .payment-option .checkmark {
     position: absolute;
     top: 50%;
-    right: 15px; /* Position checkmark to the right */
+    right: 15px;
     transform: translateY(-50%);
-    color: #fff; /* White checkmark */
-    font-size: 1.5em; /* Larger checkmark */
-    display: none; /* Hidden by default */
+    color: #fff;
+    font-size: 1.5em;
+    display: none;
 }
 
 .payment-option.selected .checkmark {
-    display: block; /* Show checkmark when selected */
+    display: block;
 }
 
 .payment-option input[type="radio"] {
-    margin-right: 10px; /* Add some space between radio and text */
+    margin-right: 10px;
 }
-
-
-
-
-
-

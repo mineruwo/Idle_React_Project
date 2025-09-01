@@ -14,10 +14,9 @@ const ShipperNavBarComponent = () => {
     return (
         <div className="bs-component">
             <nav
-                className="navbar navbar-expand-lg sticky-top"
+                className="navbar navbar-expand-lg sticky-top bg-secondary"
                 data-bs-theme="dark"
                 style={{
-                    backgroundColor: "rgb(244, 170, 168)",
                     zIndex: 1000,
                     top: 0,
                 }}

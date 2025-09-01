@@ -22,7 +22,7 @@
 }
 
 .card {
-    background: #fef8f8;
+    border-color: #88b4b7;
     padding: 32px 24px;
     border-radius: 14px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
@@ -55,7 +55,7 @@
 .card-action {
     margin-top: auto;
     font-size: 0.97rem;
-    color: #337ae6;
+    color: #88b4b7;
     text-decoration: underline;
     cursor: pointer;
     align-self: flex-end;
