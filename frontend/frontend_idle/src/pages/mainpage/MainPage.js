@@ -7,7 +7,6 @@ const MainPage = () => {
     return (
         <>
             <GNB />
-
             <IntroComponent />
             <NoticeComponent />
             <Footer />

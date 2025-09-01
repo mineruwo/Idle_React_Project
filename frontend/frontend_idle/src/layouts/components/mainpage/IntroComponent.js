@@ -11,7 +11,7 @@ const IntroComponent = () => {
     return (
         <div className="position-relative text-white">
             <img
-                src={process.env.PUBLIC_URL + "/img/main/MainImage.PNG"}
+                src={process.env.PUBLIC_URL + "/img/main/main3.webp"}
                 alt="소개 이미지"
                 className="img-fluid w-100"
             />

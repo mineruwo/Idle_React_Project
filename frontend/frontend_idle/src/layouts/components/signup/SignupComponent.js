@@ -9,7 +9,7 @@ import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import AppTheme from '../../../theme/muitheme/AppTheme';
-import { GoogleIcon, KakaoIcon, NaverIcon, PinkTruckIcon } from '../common/IconComponent';
+import { GoogleIcon, KakaoIcon, NaverIcon } from '../common/IconComponent';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import useCustomMove from '../../../hooks/useCustomMove';
@@ -53,7 +53,7 @@ export default function SignUp(props) {
     const customName = document.getElementById('customName').value.trim();
     const nickname = document.getElementById('nickname').value.trim();
     const phone = document.getElementById('phone').value.trim();
-    
+
 
     let isValid = true;
 
@@ -150,7 +150,16 @@ export default function SignUp(props) {
       <CssBaseline enableColorScheme />
       <SignUpContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">
-          <PinkTruckIcon />
+          <Box
+            component="img"
+            src="/img/logo/logo.png"
+            alt="Idle 고양이 로고"
+            sx={{
+              width: 64, height: 64,
+              objectFit: 'contain',
+              alignSelf: 'left'
+            }}
+          />
           <Typography
             component="h1"
             variant="h4"
@@ -341,7 +350,7 @@ export default function SignUp(props) {
       <EmailVerificationModal
         open={openModal}
         onClose={() => setOpenModal(false)}
-        email={id} 
+        email={id}
         onVerified={async () => {
           await signUp({ customName, passwordEnc: password, nickname, id, role, phone });
           alert("회원가입 성공");

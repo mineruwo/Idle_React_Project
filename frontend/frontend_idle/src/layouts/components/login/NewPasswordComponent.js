@@ -22,7 +22,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import AppTheme from "../../../theme/muitheme/AppTheme";
 import { UserCard as Card, UserContainer as SignInContainer } from "../../../theme/User/UserCard";
 import api from "../../../api/authApi";
-import { PinkTruckIcon } from "../common/IconComponent";
 
 // 비밀번호 정책 체크
 function checkPasswordRules(pw = "") {
@@ -148,7 +147,16 @@ export default function NewPasswordComponent({ onSuccess }) {
       <CssBaseline enableColorScheme />
       <SignInContainer direction="column" justifyContent="space-between">
         <Card variant="outlined" component="form" onSubmit={handleSubmit}>
-          <PinkTruckIcon />
+          <Box
+            component="img"
+            src="/img/logo/logo.png"
+            alt="Idle 고양이 로고"
+            sx={{
+              width: 64, height: 64,
+              objectFit: 'contain',
+              alignSelf: 'left'
+            }}
+          />
           <Typography
             component="h1"
             variant="h4"

@@ -8,7 +8,7 @@ import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import AppTheme from '../../../theme/muitheme/AppTheme';
-import { GoogleIcon, KakaoIcon, NaverIcon, PinkTruckIcon } from '../common/IconComponent';
+import { GoogleIcon, KakaoIcon, NaverIcon } from '../common/IconComponent';
 import useCustomMove from '../../../hooks/useCustomMove';
 import { login } from '../../../api/loginApi';
 import { UserCard as Card, UserContainer as SignInContainer } from '../../../theme/User/UserCard';
@@ -77,7 +77,7 @@ export default function LoginComponent(props) {
                 moveToMyPageByRole(role);
             } else {
                 console.warn("login 응답에 role이 없어 라우팅을 건너뜁니다");
-            }      
+            }
         } catch (err) {
             const status = err?.response?.status;
             if (status === 401 || status === 403) {
@@ -93,7 +93,16 @@ export default function LoginComponent(props) {
             <CssBaseline enableColorScheme />
             <SignInContainer direction="column" justifyContent="space-between">
                 <Card variant="outlined">
-                    <PinkTruckIcon />
+                    <Box
+                        component="img"
+                        src="/img/logo/logo.png"
+                        alt="Idle 고양이 로고"
+                        sx={{
+                            width: 64, height: 64,
+                            objectFit: 'contain',
+                            alignSelf: 'left'
+                        }}
+                    />
                     <Typography
                         component="h1"
                         variant="h4"
