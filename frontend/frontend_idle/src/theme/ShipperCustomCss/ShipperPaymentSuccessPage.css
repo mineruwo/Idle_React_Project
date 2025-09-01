@@ -3,12 +3,12 @@
     justify-content: center;
     align-items: center;
     min-height: 80vh;
-    background-color: #f4f6f8;
     padding: 2rem;
 }
 
 .spp-success-card {
     background-color: #fff;
+    border: 1px solid #88b4b7;
     border-radius: 10px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     padding: 3rem;
@@ -41,8 +41,8 @@
 }
 
 .spp-success-summary {
-    background-color: #f9f9f9;
-    border: 1px solid #eee;
+    background-color: #fff;
+    border: 1px solid #88b4b7;
     border-radius: 8px;
     padding: 1.5rem;
     margin-bottom: 2rem;
@@ -54,7 +54,7 @@
     color: #333;
     margin-bottom: 1rem;
     text-align: center;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #88b4b7;
     padding-bottom: 0.5rem;
 }
 
@@ -69,7 +69,7 @@
     justify-content: space-between;
     padding: 0.75rem 0;
     font-size: 1rem;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #88b4b7;
 }
 
 .spp-success-summary li:last-child {
@@ -92,7 +92,8 @@
 }
 
 .spp-success-btn {
-    background-color: #007bff;
+    background-color: #88b4b7;
+    width: 15rem;
     color: #fff;
     border: none;
     border-radius: 5px;
@@ -104,7 +105,7 @@
 }
 
 .spp-success-btn:hover {
-    background-color: #0056b3;
+    background-color: #88b4b7;
 }
 
 .spp-success-btn-secondary {
