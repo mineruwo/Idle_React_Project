@@ -13,7 +13,7 @@ export default function App() {
     return (
         <AuthProvider>
             <Provider store={store}>
-                <div className="app-root bg-secondary">
+                <div className="app-root bg-third">
                     <BubbleAnimation className="bubble-layer" />
                     <div className="app-content">
                         <RouterProvider router={root} />
