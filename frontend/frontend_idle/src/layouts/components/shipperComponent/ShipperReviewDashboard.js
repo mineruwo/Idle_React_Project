@@ -21,14 +21,14 @@ const ShipperReviewDashboard = () => {
                 ]);
 
                 // Process myReviewsData to get a set of reviewed driver IDs
-                const reviewedDriverIds = new Set(myReviewsData.map(review => review.targetId));
+                const reviewedOrderIds = new Set(myReviewsData.map(review => review.orderId));
 
                 // Filter COMPLETED orders that have an assigned driver and haven't been reviewed yet
                 const unreviewedCompletedOrders = allOrders
                     .filter(order => 
                         order.status === 'COMPLETED' && 
                         order.assignedDriverId != null &&
-                        !reviewedDriverIds.has(order.assignedDriverId) // Check if driver has been reviewed
+                        !reviewedOrderIds.has(order.id) // Check if driver has been reviewed
                     )
                     .map(order => ({
                         orderId: order.id,

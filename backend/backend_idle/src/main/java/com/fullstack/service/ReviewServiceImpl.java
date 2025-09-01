@@ -1,10 +1,12 @@
 package com.fullstack.service;
 
 import com.fullstack.entity.CustomerEntity;
+import com.fullstack.entity.Order;
 import com.fullstack.entity.ReviewEntity;
 import com.fullstack.model.ReviewRequestDTO;
 import com.fullstack.model.ReviewResponseDTO;
 import com.fullstack.repository.CustomerRepository;
+import com.fullstack.repository.OrderRepository;
 import com.fullstack.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -23,6 +25,8 @@ public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final CustomerRepository customerRepository;
+    private final OrderRepository orderRepository;
+    
 
     @Override
     public ReviewResponseDTO createReview(ReviewRequestDTO requestDto, String authorEmail) {
@@ -37,12 +41,15 @@ public class ReviewServiceImpl implements ReviewService {
         // TODO: 비즈니스 로직 추가
         // 1. 화주가 해당 차주와의 거래를 완료했는지 확인 (orderId 기반)
         // 2. 해당 거래에 대해 이미 리뷰를 작성했는지 확인
+        Order orderEntity = orderRepository.findById(requestDto.getOrderId())
+        		.orElseThrow(() -> new IllegalArgumentException("주문 정보를 찾을 수 없습니다."));
 
         ReviewEntity reviewEntity = ReviewEntity.builder()
                 .author(author)
                 .target(target)
                 .rating(requestDto.getRating())
                 .content(requestDto.getContent())
+                .order(orderEntity)
                 .build();
 
         reviewRepository.save(reviewEntity);

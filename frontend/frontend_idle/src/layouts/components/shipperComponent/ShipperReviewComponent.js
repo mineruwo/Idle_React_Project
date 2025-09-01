@@ -49,15 +49,15 @@ const ShipperReviewComponent = () => {
     const loadCompletedOrdersForReview = async (currentReviews) => {
         try {
             const allOrders = await fetchMyOrders();
-            const reviewedDriverIds = new Set(
-                currentReviews.map((review) => review.targetId)
+            const reviewedOrderIds = new Set(
+                currentReviews.map((review) => review.orderId)
             );
             const unreviewedCompletedOrders = allOrders
                 .filter(
                     (order) =>
                         order.status === "COMPLETED" &&
                         order.assignedDriverId != null &&
-                        !reviewedDriverIds.has(order.assignedDriverId)
+                        !reviewedOrderIds.has(order.id)
                 )
                 .map((order) => ({
                     orderId: order.id,
