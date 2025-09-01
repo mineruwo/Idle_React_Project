@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fullstack.entity.CustomerEntity;
-import com.fullstack.entity.Order;
+import com.fullstack.entity.OrderEntity;
 import com.fullstack.entity.PaymentEntity;
 import com.fullstack.entity.PointHistory;
 import com.fullstack.model.PaymentRequestDTO;
@@ -84,7 +84,7 @@ public class PaymentServiceImpl implements PaymentService {
             paymentEntity.setOrder(null); // 명시적으로 null 설정
         } else {
             // 그 외의 결제는 orderId가 필수
-            Order order = Optional.ofNullable(requestDto.getOrderId())
+            OrderEntity order = Optional.ofNullable(requestDto.getOrderId())
                     .flatMap(orderRepository::findById)
                     .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다: " + requestDto.getOrderId()));
             paymentEntity.setOrder(order);
@@ -377,7 +377,7 @@ public class PaymentServiceImpl implements PaymentService {
         CustomerEntity customer = customerRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
 
-        Order order = orderRepository.findById(orderId.longValue())
+        OrderEntity order = orderRepository.findById(orderId.longValue())
                 .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다: " + orderId));
 
         if (order.getDriverPrice() != pointsToUse) {

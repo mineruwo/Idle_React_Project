@@ -1,7 +1,7 @@
 // src/main/java/com/fullstack/controller/OrderController.java
 package com.fullstack.controller;
 
-import com.fullstack.entity.Order;
+import com.fullstack.entity.OrderEntity;
 import com.fullstack.model.OrderDto;
 import com.fullstack.model.enums.OrderStatus; // Added import
 import com.fullstack.service.OrderService;
@@ -9,6 +9,7 @@ import com.fullstack.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -36,11 +37,19 @@ public class OrderController {
 
     /** 등록 */
     @PostMapping
-    public Order save(@RequestBody OrderDto dto, Authentication authentication) {
+    public ResponseEntity<OrderDto> save(@RequestBody OrderDto dto, Authentication authentication) {
         log.info("OrderController.save: Received request. Authentication object: {}", authentication);
         String shipperId = authentication.getName();
         // 서비스에서 DTO -> 엔티티 매핑 + 주문번호(orderNo) 자동 생성 처리
-        return orderService.saveOrder(dto, shipperId);
+        OrderEntity savedOrder = orderService.saveOrder(dto, shipperId);
+
+        // Convert entity back to DTO for response
+        String shipperNickname = customerRepository.findById(savedOrder.getShipperId())
+                .map(customer -> customer.getNickname())
+                .orElse("알 수 없음");
+        OrderDto responseDto = OrderDto.fromEntity(savedOrder, shipperNickname, null); // No driver yet
+
+        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
     /**
@@ -63,7 +72,7 @@ public class OrderController {
     /** 단건 조회 */
     @GetMapping("/{id}")
     public OrderDto findById(@PathVariable("id") Long id) {
-        Order orderEntity = orderService.getOrderById(id);
+        OrderEntity orderEntity = orderService.getOrderById(id);
         String shipperId = orderEntity.getShipperId();
         String shipperNickname = customerRepository.findById(shipperId)
                 .map(customer -> customer.getNickname())
@@ -80,7 +89,7 @@ public class OrderController {
     /** 배정 정보만 전달 (우측 패널 뱃지/확정가 표시에 사용) */
     @GetMapping("/{id}/assignment")
     public Map<String, Object> getAssignment(@PathVariable(name = "id") Long id) {
-        Order o = orderService.getOrderById(id);
+        OrderEntity o = orderService.getOrderById(id);
         Map<String, Object> res = new HashMap<>();
         // Order 엔티티에 assignedDriverId(Long/Integer) 필드가 있다고 가정
         res.put("assignedDriverId", o.getAssignedDriverId()); // 배정된 기사 ID (없으면 null)

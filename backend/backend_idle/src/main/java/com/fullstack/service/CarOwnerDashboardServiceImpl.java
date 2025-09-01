@@ -1,7 +1,7 @@
 package com.fullstack.service;
 
 import com.fullstack.entity.CustomerEntity;
-import com.fullstack.entity.Order;
+import com.fullstack.entity.OrderEntity;
 import com.fullstack.model.CarOwnerDashboardDTO.DashboardSummaryDTO;
 import com.fullstack.model.CarOwnerDashboardDTO.DeliveryItemDTO;
 import com.fullstack.model.CarOwnerDashboardDTO.SalesChartDTO;

@@ -6,7 +6,7 @@ import com.fullstack.model.CarOwnerSettlementBatchDTO;
 import com.fullstack.repository.OrderRepository;
 import com.fullstack.repository.CarOwnerSettlementRepository;
 import com.fullstack.repository.CarOwnerSettlementBatchRepository;
-import com.fullstack.entity.Order;
+import com.fullstack.entity.OrderEntity;
 import com.fullstack.entity.CarOwnerSettlement;
 import com.fullstack.entity.CarOwnerSettlementBatch;
 import com.fullstack.model.enums.OrderStatus;
@@ -43,13 +43,13 @@ public class SalesService {
     private CarOwnerSettlementBatchRepository carOwnerSettlementBatchRepository;
 
     public List<DailySalesDataDTO> getDailySalesData(LocalDate startDate, LocalDate endDate) {
-        List<Order> orders = orderRepository.findByCreatedAtBetween(
+        List<OrderEntity> orders = orderRepository.findByCreatedAtBetween(
                 startDate.atStartOfDay(),
                 endDate.atTime(LocalTime.MAX)
         );
 
         // Filter orders based on status (payment_pending or later, excluding cancel, none)
-        List<Order> filteredOrders = orders.stream()
+        List<OrderEntity> filteredOrders = orders.stream()
                 .filter(order -> {
                     OrderStatus status = order.getStatus();
                     return status != null &&
@@ -59,13 +59,13 @@ public class SalesService {
                 })
                 .collect(Collectors.toList());
 
-        Map<LocalDate, List<Order>> ordersByDate = filteredOrders.stream()
+        Map<LocalDate, List<OrderEntity>> ordersByDate = filteredOrders.stream()
                 .collect(Collectors.groupingBy(order -> order.getCreatedAt().toLocalDate()));
 
         return ordersByDate.entrySet().stream()
                 .map(entry -> {
                     LocalDate date = entry.getKey();
-                    List<Order> dailyOrders = entry.getValue();
+                    List<OrderEntity> dailyOrders = entry.getValue();
 
                     long orderCount = dailyOrders.size();
                     BigDecimal totalAmount = dailyOrders.stream()
@@ -82,7 +82,7 @@ public class SalesService {
                 .collect(Collectors.toList());
     }
 
-    private BigDecimal calculateCommission(Order order) {
+    private BigDecimal calculateCommission(OrderEntity order) {
         BigDecimal driverPrice = order.getDriverPrice() != null ? new BigDecimal(order.getDriverPrice()) : BigDecimal.ZERO;
         BigDecimal commissionRate = BigDecimal.valueOf(0.15); // Default commission rate
 
@@ -105,8 +105,8 @@ public class SalesService {
         LocalDateTime endOfMonth = today.with(TemporalAdjusters.lastDayOfMonth()).atTime(LocalTime.MAX);
 
         // Today's orders
-        List<Order> todayOrders = orderRepository.findByCreatedAtBetween(startOfToday, endOfToday);
-        List<Order> filteredTodayOrders = todayOrders.stream()
+        List<OrderEntity> todayOrders = orderRepository.findByCreatedAtBetween(startOfToday, endOfToday);
+        List<OrderEntity> filteredTodayOrders = todayOrders.stream()
                 .filter(order -> {
                     OrderStatus status = order.getStatus();
                     return status != null &&
@@ -122,8 +122,8 @@ public class SalesService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         // This month's orders
-        List<Order> thisMonthOrders = orderRepository.findByCreatedAtBetween(startOfMonth, endOfMonth);
-        List<Order> filteredThisMonthOrders = thisMonthOrders.stream()
+        List<OrderEntity> thisMonthOrders = orderRepository.findByCreatedAtBetween(startOfMonth, endOfMonth);
+        List<OrderEntity> filteredThisMonthOrders = thisMonthOrders.stream()
                 .filter(order -> {
                     OrderStatus status = order.getStatus();
                     return status != null &&

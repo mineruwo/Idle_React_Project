@@ -3,7 +3,7 @@ package com.fullstack.service;
 
 import com.fullstack.entity.CustomerEntity;
 import com.fullstack.entity.DriverOffer;
-import com.fullstack.entity.Order;
+import com.fullstack.entity.OrderEntity;
 import com.fullstack.model.DriverOfferCreateRequest;
 import com.fullstack.model.DriverOfferResponse;
 import com.fullstack.model.OfferAssignRequest;
@@ -37,7 +37,7 @@ public class DriverOfferService {
         if (req.getOrderId() == null) throw new IllegalArgumentException("orderId가 필요합니다.");
         if (req.getPrice() == null || req.getPrice() <= 0) throw new IllegalArgumentException("유효한 제안가가 아닙니다.");
 
-        Order order = orderRepository.findById(req.getOrderId())
+        OrderEntity order = orderRepository.findById(req.getOrderId())
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + req.getOrderId()));
 
         // 이미 확정 단계(결제대기/완료)인 주문에는 입찰 불가
@@ -83,7 +83,7 @@ public class DriverOfferService {
         DriverOffer offer = driverOfferRepository.findByIdWithDriver(offerId) // Use new method
                 .orElseThrow(() -> new IllegalArgumentException("Offer not found: " + offerId));
 
-        Order order = offer.getOrder();
+        OrderEntity order = offer.getOrder();
 
         String os = String.valueOf(order.getStatus()).toUpperCase();
         if ("PAYMENT_PENDING".equals(os) || "ASSIGNED".equals(os) || "COMPLETED".equals(os)) {
@@ -116,7 +116,7 @@ public class DriverOfferService {
         if (req.getDriverId() == null) throw new IllegalArgumentException("driverId(=ID_NUM)가 필요합니다.");
         if (req.getPrice() == null || req.getPrice() <= 0) throw new IllegalArgumentException("유효한 제안가가 아닙니다.");
 
-        Order order = orderRepository.findById(req.getOrderId())
+        OrderEntity order = orderRepository.findById(req.getOrderId())
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + req.getOrderId()));
 
         if (OrderStatus.READY.equals(order.getStatus()) || OrderStatus.ONGOING.equals(order.getStatus())) {
@@ -152,7 +152,7 @@ public class DriverOfferService {
     @Transactional(Transactional.TxType.SUPPORTS)
     public Long getDriverPriceByOrderId(Long orderId) {
         if (orderId == null) throw new IllegalArgumentException("orderId가 필요합니다.");
-        Order order = orderRepository.findById(orderId)
+        OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
         return order.getDriverPrice();
     }

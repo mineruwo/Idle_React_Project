@@ -3,7 +3,7 @@ package com.fullstack.service;
 import com.fullstack.entity.CarOwnerSettlement;
 import com.fullstack.entity.CarOwnerSettlement.Status;
 import com.fullstack.entity.CarOwnerSettlementBatch;
-import com.fullstack.entity.Order;
+import com.fullstack.entity.OrderEntity;
 import com.fullstack.model.CarOwnerSettlementDTO.SettlementDetailResponse;
 import com.fullstack.model.CarOwnerSettlementDTO.SettlementSummaryCardResponse;
 import com.fullstack.model.CarOwnerSettlementDTO.SettlementSummaryResponse;
@@ -77,7 +77,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
     @Override
     @Transactional
     public Long createForOrder(String ownerId, Long orderId) {
-        Order o = orderRepo.findById(orderId)
+        OrderEntity o = orderRepo.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("ORDER_NOT_FOUND"));
 
         // ownerId(문자열) ↔ assignedDriverId(Long) 최소 검증
@@ -123,7 +123,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
         var orders = orderRepo.findByStatusAndCreatedAtBetween(OrderStatus.COMPLETED, start, end);
 
         int created = 0;
-        for (Order o : orders) {
+        for (OrderEntity o : orders) {
             if (o.getAssignedDriverId() == null) continue;
 
             // 이미 정산 있으면 스킵
@@ -170,7 +170,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
     /* ===================== private helpers ===================== */
 
     private SettlementSummaryResponse toSummaryDTO(CarOwnerSettlement s) {
-        Order o = s.getOrder();
+        OrderEntity o = s.getOrder();
         BigDecimal net = safe(s.getAmount()).subtract(safe(s.getCommission()));
         return SettlementSummaryResponse.builder()
                 .id(s.getId())
@@ -189,7 +189,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
     }
 
     private SettlementDetailResponse toDetailDTO(CarOwnerSettlement s) {
-        Order o = s.getOrder();
+        OrderEntity o = s.getOrder();
         BigDecimal net = safe(s.getAmount()).subtract(safe(s.getCommission()));
         return SettlementDetailResponse.builder()
                 .id(s.getId())
@@ -228,7 +228,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
         try { return Long.parseLong(s); } catch (NumberFormatException e) { return null; }
     }
 
-    private BigDecimal computeBaseAmount(Order o) {
+    private BigDecimal computeBaseAmount(OrderEntity o) {
         if (o.getDriverPrice() != null) return BigDecimal.valueOf(o.getDriverPrice());
         if (o.getProposedPrice() != null) return BigDecimal.valueOf(o.getProposedPrice().longValue());
         if (o.getAvgPrice() != null) return BigDecimal.valueOf(o.getAvgPrice());
@@ -239,7 +239,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
         return safe(baseAmount).multiply(COMMISSION_RATE).setScale(0, RoundingMode.HALF_UP);
     }
 
-    private LocalDate resolveMonthKey(Order o) {
+    private LocalDate resolveMonthKey(OrderEntity o) {
         LocalDate basis;
         if (o.getStatus() == OrderStatus.COMPLETED && o.getUpdatedAt() != null) {
             basis = o.getUpdatedAt().toLocalDate();

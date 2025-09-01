@@ -1,6 +1,6 @@
 package com.fullstack.service;
 
-import com.fullstack.entity.Order;
+import com.fullstack.entity.OrderEntity;
 import com.fullstack.entity.PaymentEntity;
 import com.fullstack.model.OrderDto;
 import com.fullstack.model.enums.OrderStatus;
@@ -44,8 +44,8 @@ public class OrderService {
     }
 
     @Transactional
-    public Order saveOrder(OrderDto dto, String shipperId) {
-        Order order = Order.builder()
+    public OrderEntity saveOrder(OrderDto dto, String shipperId) {
+        OrderEntity order = OrderEntity.builder()
                 .shipperId(shipperId)
                 .departure(dto.getDeparture())
                 .arrival(dto.getArrival())
@@ -74,7 +74,7 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<OrderDto> searchLatest(String q) {
-        List<Order> orders;
+        List<OrderEntity> orders;
         if (q == null || q.trim().isEmpty()) {
             orders = orderRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
         } else {
@@ -115,21 +115,21 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Order getOrderById(Long id) {
+    public OrderEntity getOrderById(Long id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("order not found: " + id));
     }
 
     @Transactional(readOnly = true)
-    public List<Order> getAllOrders() {
+    public List<OrderEntity> getAllOrders() {
         return orderRepository.findAll();
     }
 
     /** 주문 상태 업데이트 */
     @Transactional
-    public Order updateOrderStatus(Long orderId, OrderStatus newStatus) {
+    public OrderEntity updateOrderStatus(Long orderId, OrderStatus newStatus) {
         log.info("OrderService: Updating order status for ID: {} to {}", orderId, newStatus);
-        Order order = orderRepository.findById(orderId)
+        OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + orderId));
 
         if (newStatus == OrderStatus.ONGOING) {
@@ -142,7 +142,7 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    private OrderDto mapOrderToDtoWithNickname(Order order) {
+    private OrderDto mapOrderToDtoWithNickname(OrderEntity order) {
         String shipperNickname = customerRepository.findById(order.getShipperId())
                 .map(customer -> customer.getNickname())
                 .orElse("알 수 없음");

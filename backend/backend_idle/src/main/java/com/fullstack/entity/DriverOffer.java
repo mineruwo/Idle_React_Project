@@ -18,7 +18,7 @@ public class DriverOffer {
     /** 오더 (다:1 관계) */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    private OrderEntity order;
 
     /** 기사 (CustomerEntity.idNum 기준 FK) */
     @ManyToOne(fetch = FetchType.LAZY)
