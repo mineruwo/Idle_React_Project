@@ -5,8 +5,7 @@ import store from "./store";
 
 // bootstrap 
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
-import "./theme/bootStrap.css"
-import "./theme/custom.css"; // 덮어쓸 스타일 파일
+import "./theme/bootStrap.css" // 덮어쓸 스타일 파일
 import AuthProvider from "./auth/AuthProvider";
 import BubbleAnimation from "./layouts/components/carownerComponent/common/BubbleAnimation";
 

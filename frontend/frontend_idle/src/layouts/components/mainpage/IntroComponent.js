@@ -43,7 +43,7 @@ const IntroComponent = () => {
                             backgroundColor: "#eb6864",
                             borderColor: "#eb6864",
                         }}
-                        className="text-white px-4"
+                        className="text-white px-4 bg-primary"
                         onClick={shipperMoveToDashBoard}
                     >
                         화물주로 시작하기
