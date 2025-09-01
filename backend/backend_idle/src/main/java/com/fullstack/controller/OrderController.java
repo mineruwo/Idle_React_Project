@@ -68,7 +68,13 @@ public class OrderController {
         String shipperNickname = customerRepository.findById(shipperId)
                 .map(customer -> customer.getNickname())
                 .orElse("알 수 없음");
-        return OrderDto.fromEntity(orderEntity, shipperNickname);
+        String assignedDriverNickname = null;
+        if (orderEntity.getAssignedDriverId() != null) {
+            assignedDriverNickname = customerRepository.findById(orderEntity.getAssignedDriverId().intValue())
+                    .map(customer -> customer.getNickname())
+                    .orElse("알 수 없음");
+        }
+        return OrderDto.fromEntity(orderEntity, shipperNickname, assignedDriverNickname);
     }
 
     /** 배정 정보만 전달 (우측 패널 뱃지/확정가 표시에 사용) */

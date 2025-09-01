@@ -21,6 +21,7 @@ public class OrderDto {
     private String packingOptions;
 
     private Long assignedDriverId;
+    private String assignedDriverNickname;
 
     private String departure;
     private String arrival;
@@ -46,7 +47,7 @@ public class OrderDto {
 
     private LocalDateTime assignedAt; // assignedAt 필드 추가
 
-    public static OrderDto fromEntity(Order entity, String shipperNickname) {
+    public static OrderDto fromEntity(Order entity, String shipperNickname, String assignedDriverNickname) {
         OrderDto dto = new OrderDto();
         dto.setId(entity.getId());
         dto.setOrderNo(entity.getOrderNo());
@@ -65,6 +66,7 @@ public class OrderDto {
         dto.setCargoType(entity.getCargoType());
         dto.setCargoSize(entity.getCargoSize());
         dto.setAssignedDriverId(entity.getAssignedDriverId());
+        dto.setAssignedDriverNickname(assignedDriverNickname);
         
         dto.setCreatedAt(entity.getCreatedAt());
         dto.setDepartedAt(entity.getDepartedAt());

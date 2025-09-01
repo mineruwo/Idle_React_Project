@@ -357,9 +357,9 @@ const ShipperPaymentComponent = ({
                 <div className="order-info-section">
                     <h2 className="spp-page-title">주문 정보</h2>
                     {orderList.map((order) => (
-                        <div className="order-item" key={order.orderId}>
+                        <div className="order-item" key={order.orderNo}>
                             <div className="order-amount">
-                                <span>{order.orderId}</span>
+                                <span>{order.orderNo}</span>
                                 <span>
                                     {(order.amount || 0).toLocaleString()}원
                                 </span>

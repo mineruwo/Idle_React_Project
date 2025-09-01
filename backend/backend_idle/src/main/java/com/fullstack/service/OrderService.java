@@ -146,6 +146,13 @@ public class OrderService {
         String shipperNickname = customerRepository.findById(order.getShipperId())
                 .map(customer -> customer.getNickname())
                 .orElse("알 수 없음");
-        return OrderDto.fromEntity(order, shipperNickname);
+
+        String assignedDriverNickname = null;
+        if (order.getAssignedDriverId() != null) {
+            assignedDriverNickname = customerRepository.findById(order.getAssignedDriverId().intValue())
+                    .map(customer -> customer.getNickname())
+                    .orElse("알 수 없음");
+        }
+        return OrderDto.fromEntity(order, shipperNickname, assignedDriverNickname);
     }
 }

@@ -10,8 +10,6 @@ const ShipperReviewDashboard = () => {
     const [myReviews, setMyReviews] = useState([]);
     const navigate = useNavigate();
 
-    
-
     useEffect(() => {
         const loadReviewData = async () => {
             try {
@@ -21,26 +19,33 @@ const ShipperReviewDashboard = () => {
                 ]);
 
                 // Process myReviewsData to get a set of reviewed driver IDs
-                const reviewedOrderIds = new Set(myReviewsData.map(review => review.orderId));
+                const reviewedOrderIds = new Set(
+                    myReviewsData.map((review) => review.orderId)
+                );
 
                 // Filter COMPLETED orders that have an assigned driver and haven't been reviewed yet
                 const unreviewedCompletedOrders = allOrders
-                    .filter(order => 
-                        order.status === 'COMPLETED' && 
-                        order.assignedDriverId != null &&
-                        !reviewedOrderIds.has(order.id) // Check if driver has been reviewed
+                    .filter(
+                        (order) =>
+                            order.status === "COMPLETED" &&
+                            order.assignedDriverId != null &&
+                            !reviewedOrderIds.has(order.id) // Check if driver has been reviewed
                     )
-                    .map(order => ({
+                    .map((order) => ({
                         orderId: order.id,
                         description: `${order.departure} → ${order.arrival}`,
                         driverId: order.assignedDriverId,
-                        driverName: `Driver #${order.assignedDriverId}`,
-                        completedDate: new Date(order.createdAt).toLocaleDateString('ko-KR'),
+                        driverName:
+                            order.assignedDriverNickname ||
+                            `기사 #${order.assignedDriverId}`,
+
+                        completedDate: new Date(
+                            order.createdAt
+                        ).toLocaleDateString("ko-KR"),
                     }));
 
                 setPendingReviews(unreviewedCompletedOrders);
                 setMyReviews(myReviewsData.slice(0, 5)); // Still show only recent 5 for my reviews
-
             } catch (err) {
                 console.error("리뷰 데이터를 가져오는 데 실패했습니다.", err);
                 // Optionally set error state for display
@@ -52,17 +57,20 @@ const ShipperReviewDashboard = () => {
 
         // Re-fetch data when the window gains focus or tab becomes visible
         const handleVisibilityChange = () => {
-            if (document.visibilityState === 'visible') {
+            if (document.visibilityState === "visible") {
                 loadReviewData();
             }
         };
 
-        window.addEventListener('focus', loadReviewData);
-        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener("focus", loadReviewData);
+        document.addEventListener("visibilitychange", handleVisibilityChange);
 
         return () => {
-            window.removeEventListener('focus', loadReviewData);
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener("focus", loadReviewData);
+            document.removeEventListener(
+                "visibilitychange",
+                handleVisibilityChange
+            );
         };
     }, []);
 
@@ -117,7 +125,7 @@ const ShipperReviewDashboard = () => {
                                             <strong>
                                                 {review.description}
                                             </strong>{" "}
-                                            ({review.driverName}님)
+                                            ({review.driverName} 기사님)
                                         </span>
                                         <span className="date">
                                             완료: {review.completedDate}
