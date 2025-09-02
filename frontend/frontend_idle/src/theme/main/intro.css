@@ -1,0 +1,40 @@
+:root { --hero-ar: 0.268; }
+
+.hero {
+    position: relative;
+    width: 100%;
+    /* iOS 주소창 변화 대응: dvh 사용 + vh 폴백 */
+    height: clamp(320px, min(calc(100vw * var(--hero-ar)), 70dvh), 560px);
+    background-repeat: no-repeat, no-repeat;
+    background-size: contain, contain;            /* 잘림 방지 */
+    background-position: center 20%, center 20%; 
+    overflow: hidden; /* 오버플로 방지 */
+}
+
+/* 텍스트/버튼 레이어 */
+.content {
+  position: absolute;
+  top: 32%;
+  left: 8%;
+  z-index: 1;
+}
+
+/* 타이틀/서브타이틀 */
+.title {
+  color: #f8fafc;
+  font-size: clamp(1.1rem, 6vw, 3rem);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
+}
+.subtitle {
+  color: #e5e7eb;
+  font-size: clamp(0.8rem, 3.5vw, 1.25rem);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
+}
+
+@supports not (height: 1dvh) {
+  .hero { height: clamp(420px, 75vh, 720px); }
+}
+
+@media (max-width: 576px) {
+  height: clamp(280px, min(calc(100vw * var(--hero-ar)), 58dvh), 520px);   
+}

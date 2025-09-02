@@ -8,14 +8,12 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "./theme/bootStrap.css"
 import "./theme/custom.css"; // 덮어쓸 스타일 파일
 import AuthProvider from "./auth/AuthProvider";
-import BubbleAnimation from "./layouts/components/carownerComponent/common/BubbleAnimation";
 
 export default function App() {
   return (
     <AuthProvider>
       <Provider store={store}>
         <div className="app-root">
-          <BubbleAnimation className="bubble-layer" />
           <div className="app-content">
             <RouterProvider router={root} />
           </div>

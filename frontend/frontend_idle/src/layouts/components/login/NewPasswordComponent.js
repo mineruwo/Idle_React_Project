@@ -22,6 +22,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import AppTheme from "../../../theme/muitheme/AppTheme";
 import { UserCard as Card, UserContainer as SignInContainer } from "../../../theme/User/UserCard";
 import api from "../../../api/authApi";
+import "../../../theme/login/NewPassword.css";
 
 // 비밀번호 정책 체크
 function checkPasswordRules(pw = "") {
@@ -57,7 +58,6 @@ export default function NewPasswordComponent({ onSuccess }) {
   const location = useLocation();
 
   const [token, setToken] = useState("");
-
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -121,19 +121,14 @@ export default function NewPasswordComponent({ onSuccess }) {
       <AppTheme>
         <CssBaseline enableColorScheme />
         <SignInContainer direction="column" justifyContent="space-between">
-          <Card variant="outlined" sx={{ width: "100%", maxWidth: 480 }}>
-            <CardHeader
-              title={<Typography variant="h5">비밀번호 재설정</Typography>}
-              subheader="유효하지 않은 접근"
-            />
+          <Card variant="outlined" className="np-card np-card-sm">
+            <CardHeader title={<Typography variant="h5">비밀번호 재설정</Typography>} subheader="유효하지 않은 접근" />
             <CardContent>
-              <Alert severity="warning" sx={{ mb: 2 }}>
+              <Alert severity="warning" className="np-mb-16">
                 잘못된 접근입니다. 로그인 화면에서 다시 시도해주세요.
               </Alert>
               <Stack direction="row" spacing={1}>
-                <Button variant="contained" onClick={() => navigate("/login")}>
-                  로그인으로
-                </Button>
+                <Button variant="contained" onClick={() => navigate("/login")}>로그인으로</Button>
               </Stack>
             </CardContent>
           </Card>
@@ -146,49 +141,21 @@ export default function NewPasswordComponent({ onSuccess }) {
     <AppTheme>
       <CssBaseline enableColorScheme />
       <SignInContainer direction="column" justifyContent="space-between">
-        <Card variant="outlined" component="form" onSubmit={handleSubmit}>
-          <Box
-            component="img"
-            src="/img/logo/logo.png"
-            alt="Idle 고양이 로고"
-            sx={{
-              width: 64, height: 64,
-              objectFit: 'contain',
-              alignSelf: 'left'
-            }}
-          />
-          <Typography
-            component="h1"
-            variant="h4"
-            sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
-          >
-            새 비밀번호 설정
-          </Typography>
+        <Card variant="outlined" component="form" onSubmit={handleSubmit} className="np-card">
+          <Box component="img" src="/img/logo/logo.png" alt="Idle 고양이 로고" className="np-logo" />
+          <Typography component="h1" variant="h4" className="np-title">새 비밀번호 설정</Typography>
 
-          <Box
-            noValidate
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              width: "100%",
-              gap: 2,
-              mt: 1.5,
-            }}
-          >
+          <Box noValidate className="np-form">
             {error && <Alert severity="error">{error}</Alert>}
 
             {done ? (
               <>
-                <Alert severity="success" sx={{ mb: 2 }}>
+                <Alert severity="success" className="np-mb-16">
                   비밀번호가 성공적으로 변경되었습니다. 새 비밀번호로 로그인해 주세요.
                 </Alert>
                 <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
-                  <Button fullWidth variant="contained" onClick={() => navigate("/login")}>
-                    로그인 하러 가기
-                  </Button>
-                  <Button fullWidth variant="text" onClick={() => navigate("/")}>
-                    메인으로
-                  </Button>
+                  <Button fullWidth variant="contained" onClick={() => navigate("/login")}>로그인 하러 가기</Button>
+                  <Button fullWidth variant="text" onClick={() => navigate("/")}>메인으로</Button>
                 </Stack>
               </>
             ) : (
@@ -205,11 +172,7 @@ export default function NewPasswordComponent({ onSuccess }) {
                     input: {
                       endAdornment: (
                         <InputAdornment position="end">
-                          <IconButton
-                            onClick={() => setShowPw((v) => !v)}
-                            edge="end"
-                            aria-label="비밀번호 표시 토글"
-                          >
+                          <IconButton onClick={() => setShowPw((v) => !v)} edge="end" aria-label="비밀번호 표시 토글">
                             {showPw ? <VisibilityOff /> : <Visibility />}
                           </IconButton>
                         </InputAdornment>
@@ -219,7 +182,7 @@ export default function NewPasswordComponent({ onSuccess }) {
                 />
 
                 <Box>
-                  <LinearProgress variant="determinate" value={percent} sx={{ borderRadius: 1, mb: 1 }} />
+                  <LinearProgress variant="determinate" value={percent} className="np-strength-bar np-mb-8" />
                   <Stack direction="row" spacing={2} flexWrap="wrap">
                     <RuleRow ok={rules.length} label="8자 이상" />
                     <RuleRow ok={rules.english} label="영문자 포함" />
@@ -236,19 +199,14 @@ export default function NewPasswordComponent({ onSuccess }) {
                   required
                   autoComplete="new-password"
                   fullWidth
-                  error={confirm.length > 0 && !matches}
-                  helperText={confirm.length > 0 && !matches ? "비밀번호가 서로 일치하지 않습니다." : " "}
-
+                  error={confirm.length > 0 && password !== confirm}
+                  helperText={confirm.length > 0 && password !== confirm ? "비밀번호가 서로 일치하지 않습니다." : " "}
                   slotProps={{
                     formHelperText: { sx: { mt: 0, ml: 1 } },
                     input: {
                       endAdornment: (
                         <InputAdornment position="end">
-                          <IconButton
-                            onClick={() => setShowConfirm((v) => !v)}
-                            edge="end"
-                            aria-label="비밀번호 확인 표시 토글"
-                          >
+                          <IconButton onClick={() => setShowConfirm((v) => !v)} edge="end" aria-label="비밀번호 확인 표시 토글">
                             {showConfirm ? <VisibilityOff /> : <Visibility />}
                           </IconButton>
                         </InputAdornment>
@@ -267,16 +225,13 @@ export default function NewPasswordComponent({ onSuccess }) {
                   >
                     {submitting ? "변경 중..." : "비밀번호 변경"}
                   </Button>
-                  <Button variant="text" fullWidth onClick={() => navigate("/login")}>
-                    취소
-                  </Button>
+                  <Button variant="text" fullWidth onClick={() => navigate("/login")}>취소</Button>
                 </Stack>
               </Stack>
-
             )}
           </Box>
         </Card>
       </SignInContainer>
-    </AppTheme >
+    </AppTheme>
   );
 }
