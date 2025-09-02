@@ -61,6 +61,7 @@ const ShipperReviewComponent = () => {
                 )
                 .map((order) => ({
                     orderId: order.id,
+                    orderNo: order.orderNo, // Add orderNo
                     description: `${order.departure} -> ${order.arrival}`,
                     driverId: order.assignedDriverId,
                     driverName:
@@ -225,6 +226,7 @@ const ShipperReviewComponent = () => {
                                         key={order.orderId}
                                         value={order.orderId}
                                     >
+                                        (주문번호 : {order.orderNo}){" "}
                                         {order.description} ({order.driverName}{" "}
                                         기사님)
                                     </option>
