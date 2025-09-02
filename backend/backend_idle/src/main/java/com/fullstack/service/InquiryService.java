@@ -4,6 +4,8 @@ import com.fullstack.model.InquiryDTO;
 import com.fullstack.entity.InquiryEntity;
 import com.fullstack.model.DailyAnswerCountDTO;
 import com.fullstack.model.InquiryStatus;
+import com.fullstack.entity.AdminEntity; // Added
+import com.fullstack.entity.CustomerEntity; // Added
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -28,14 +30,14 @@ public interface InquiryService {
     default InquiryEntity dtoToEntity(InquiryDTO dto) {
         return InquiryEntity.builder()
                 .inquiryId(dto.getInquiryId())
-                .customerIdNum(dto.getCustomerIdNum())
+                .customer(CustomerEntity.builder().idNum(dto.getCustomerIdNum().intValue()).build())
                 .inquiryTitle(dto.getInquiryTitle())
                 .inquiryContent(dto.getInquiryContent())
                 .inquiryAnswer(dto.getInquiryAnswer())
                 .createdAt(dto.getCreatedAt())
                 .answeredAt(dto.getAnsweredAt())
                 
-                .adminId(dto.getAdminId())
+                
                 .status(dto.getStatus())
                 .reInquiryId(dto.getReInquiryId())
                 .build();
@@ -44,14 +46,14 @@ public interface InquiryService {
     default InquiryDTO entityToDto(InquiryEntity entity) {
         return InquiryDTO.builder()
                 .inquiryId(entity.getInquiryId())
-                .customerIdNum(entity.getCustomerIdNum())
+                .customerIdNum(entity.getCustomer() != null ? entity.getCustomer().getIdNum().longValue() : null)
                 .inquiryTitle(entity.getInquiryTitle())
                 .inquiryContent(entity.getInquiryContent())
                 .inquiryAnswer(entity.getInquiryAnswer())
                 .createdAt(entity.getCreatedAt())
                 .answeredAt(entity.getAnsweredAt())
                 
-                .adminId(entity.getAdminId())
+                .adminId(entity.getAdmin() != null ? entity.getAdmin().getAdminId() : null)
                 .status(entity.getStatus())
                 .reInquiryId(entity.getReInquiryId())
                 .build();

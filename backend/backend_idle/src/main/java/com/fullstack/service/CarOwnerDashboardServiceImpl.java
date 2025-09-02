@@ -11,6 +11,7 @@ import com.fullstack.repository.CarOwnerDashboardPaymentRepository;
 import com.fullstack.repository.CustomerRepository;
 import com.fullstack.repository.OrderRepository; // ✅ 새로 주입
 import com.fullstack.repository.ReviewRepository;
+import com.fullstack.repository.CustomerRepository; // Added
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -49,12 +50,14 @@ public class CarOwnerDashboardServiceImpl implements CarOwnerDashboardService {
 		LocalDateTime start = dr.startDate.atStartOfDay();
 		LocalDateTime end = dr.endDate.atTime(LocalTime.MAX);
 
-		long completed = driverKey == null ? 0
-				: orderRepository.countByAssignedDriverIdAndStatus(driverKey, OrderStatus.COMPLETED);
-		long inProgress = driverKey == null ? 0
-				: orderRepository.countByAssignedDriverIdAndStatus(driverKey, OrderStatus.ONGOING);
-		long scheduled = driverKey == null ? 0
-				: orderRepository.countByAssignedDriverIdAndStatus(driverKey, OrderStatus.READY);
+		CustomerEntity assignedDriver = driverKey == null ? null : customerRepository.findByIdNum(driverKey).orElse(null);
+
+		long completed = assignedDriver == null ? 0
+				: orderRepository.countByAssignedDriverAndStatus(assignedDriver, OrderStatus.COMPLETED);
+		long inProgress = assignedDriver == null ? 0
+				: orderRepository.countByAssignedDriverAndStatus(assignedDriver, OrderStatus.ONGOING);
+		long scheduled = assignedDriver == null ? 0
+				: orderRepository.countByAssignedDriverAndStatus(assignedDriver, OrderStatus.READY);
 		long total = completed + inProgress + scheduled;
 
 		// ✅ 이번달 매출: Order 기준(완료건의 driverPrice/proposedPrice 합)
@@ -152,10 +155,13 @@ public class CarOwnerDashboardServiceImpl implements CarOwnerDashboardService {
 		if (driverKey == null)
 			return List.of();
 
+		CustomerEntity assignedDriver = customerRepository.findByIdNum(driverKey)
+				.orElseThrow(() -> new AccessDeniedException("Driver not found"));
+
 		List<String> statuses = List.of("READY", "ONGOING");
 
 		return orderRepository
-				.findTop5ByAssignedDriverIdAndStatusInOrderByUpdatedAtDesc(driverKey, OrderStatus.READY,
+				.findTop5ByAssignedDriverAndStatusInOrderByUpdatedAtDesc(assignedDriver, OrderStatus.READY,
 						OrderStatus.ONGOING) // ✅ varargs
 				.stream()
 				.map(o -> DeliveryItemDTO.builder().id(o.getId()).deliveryNum(String.valueOf(o.getId()))
@@ -203,9 +209,12 @@ public class CarOwnerDashboardServiceImpl implements CarOwnerDashboardService {
 	    if (driverKey == null) throw new AccessDeniedException("AUTH_USER_NOT_FOUND");
 
 	   
+	    CustomerEntity assignedDriver = customerRepository.findByIdNum(driverKey)
+	            .orElseThrow(() -> new AccessDeniedException("Driver not found"));
+	   
 	    LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
-	    int updated = orderRepository.markDeparted(orderId, driverKey, now);
+	    int updated = orderRepository.markDeparted(orderId, assignedDriver.getIdNum().longValue(), now);
 	    if (updated == 0) {
 	      
 	        throw new IllegalStateException("TRANSITION_NOT_ALLOWED: READY->ONGOING");
@@ -217,9 +226,12 @@ public class CarOwnerDashboardServiceImpl implements CarOwnerDashboardService {
 	    Long driverKey = resolveDriverKey(ownerId);
 	    if (driverKey == null) throw new AccessDeniedException("AUTH_USER_NOT_FOUND");
 
+	    CustomerEntity assignedDriver = customerRepository.findByIdNum(driverKey)
+	            .orElseThrow(() -> new AccessDeniedException("Driver not found"));
+
 	    LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
-	    int updated = orderRepository.markCompleted(orderId, driverKey, now);
+	    int updated = orderRepository.markCompleted(orderId, assignedDriver.getIdNum().longValue(), now);
 	    if (updated == 0) {
 	        throw new IllegalStateException("TRANSITION_NOT_ALLOWED: ONGOING->COMPLETED");
 	    }
@@ -229,7 +241,10 @@ public class CarOwnerDashboardServiceImpl implements CarOwnerDashboardService {
         Long driverKey = resolveDriverKey(ownerId);
         if (driverKey == null) throw new AccessDeniedException("AUTH_USER_NOT_FOUND");
 
-        int updated = orderRepository.markCanceled(orderId, driverKey, LocalDateTime.now(ZoneId.of("Asia/Seoul")));
+        	    CustomerEntity assignedDriver = customerRepository.findByIdNum(driverKey)
+	            .orElseThrow(() -> new AccessDeniedException("Driver not found"));
+
+	            int updated = orderRepository.markCanceled(orderId, assignedDriver.getIdNum().longValue(), LocalDateTime.now(ZoneId.of("Asia/Seoul")));
         if (updated == 0) throw new IllegalStateException("TRANSITION_NOT_ALLOWED: READY/ONGOING->CANCELED");
     }
 }

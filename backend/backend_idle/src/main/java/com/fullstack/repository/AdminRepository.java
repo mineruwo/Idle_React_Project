@@ -12,6 +12,8 @@ public interface AdminRepository extends JpaRepository<AdminEntity, Integer>, Jp
 
     Optional<AdminEntity> findByAdminIdAndIsDelFalse(String adminId);
 
+    Optional<AdminEntity> findByAdminId(String adminId); // Added this line
+
     @Query("SELECT a FROM AdminEntity a WHERE a.isDel = false ORDER BY a.regDate DESC")
     List<AdminEntity> findAllActiveAdmins();
 }

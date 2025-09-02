@@ -44,9 +44,7 @@ public class OrderController {
         OrderEntity savedOrder = orderService.saveOrder(dto, shipperId);
 
         // Convert entity back to DTO for response
-        String shipperNickname = customerRepository.findById(savedOrder.getShipperId())
-                .map(customer -> customer.getNickname())
-                .orElse("알 수 없음");
+        String shipperNickname = savedOrder.getShipper() != null ? savedOrder.getShipper().getNickname() : "알 수 없음";
         OrderDto responseDto = OrderDto.fromEntity(savedOrder, shipperNickname, null); // No driver yet
 
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
@@ -73,15 +71,11 @@ public class OrderController {
     @GetMapping("/{id}")
     public OrderDto findById(@PathVariable("id") Long id) {
         OrderEntity orderEntity = orderService.getOrderById(id);
-        String shipperId = orderEntity.getShipperId();
-        String shipperNickname = customerRepository.findById(shipperId)
-                .map(customer -> customer.getNickname())
-                .orElse("알 수 없음");
+        String shipperId = orderEntity.getShipper().getId();
+        String shipperNickname = orderEntity.getShipper().getNickname();
         String assignedDriverNickname = null;
-        if (orderEntity.getAssignedDriverId() != null) {
-            assignedDriverNickname = customerRepository.findById(orderEntity.getAssignedDriverId().intValue())
-                    .map(customer -> customer.getNickname())
-                    .orElse("알 수 없음");
+        if (orderEntity.getAssignedDriver() != null) {
+            assignedDriverNickname = orderEntity.getAssignedDriver().getNickname();
         }
         return OrderDto.fromEntity(orderEntity, shipperNickname, assignedDriverNickname);
     }
@@ -92,7 +86,7 @@ public class OrderController {
         OrderEntity o = orderService.getOrderById(id);
         Map<String, Object> res = new HashMap<>();
         // Order 엔티티에 assignedDriverId(Long/Integer) 필드가 있다고 가정
-        res.put("assignedDriverId", o.getAssignedDriverId()); // 배정된 기사 ID (없으면 null)
+        res.put("assignedDriverId", o.getAssignedDriver() != null ? o.getAssignedDriver().getIdNum() : null);
         res.put("driverPrice", o.getDriverPrice());           // 확정가 (없으면 null)
         res.put("status", o.getStatus().name());                     // 예: OPEN/ASSIGNED/등록완료 등 // Converted to enum name
         return res;

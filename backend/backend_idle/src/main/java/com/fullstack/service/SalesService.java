@@ -86,7 +86,7 @@ public class SalesService {
         BigDecimal driverPrice = order.getDriverPrice() != null ? new BigDecimal(order.getDriverPrice()) : BigDecimal.ZERO;
         BigDecimal commissionRate = BigDecimal.valueOf(0.15); // Default commission rate
 
-        if (order.getAssignedDriverId() != null) {
+        if (order.getAssignedDriver() != null) {
             // CarOwnerSettlementEntity settlement = carOwnerSettlementRepository.findById(order.getAssignedDriverId()).orElse(null);
             // if (settlement != null) {
             //     commissionRate = settlement.getCommission();
@@ -153,7 +153,7 @@ public class SalesService {
             List<Predicate> predicates = new ArrayList<>();
 
             if (ownerId != null && !ownerId.isEmpty()) {
-                predicates.add(cb.equal(root.get("ownerId"), ownerId));
+                predicates.add(cb.equal(root.get("owner").get("ID"), ownerId));
             }
             if (yearMonth != null && !yearMonth.isEmpty()) {
                 // Assuming yearMonth is in "YYYY-MM" format
@@ -219,7 +219,7 @@ public class SalesService {
 
         return CarOwnerSettlementBatchDTO.BatchSummaryResponse.builder()
                 .id(batch.getId())
-                .ownerId(batch.getOwnerId())
+                .ownerId(batch.getOwner().getId())
                 .yearMonth(yearMonth)
                 .monthKey(batch.getMonthKey())
                 .totalAmount(batch.getTotalAmount())
@@ -251,7 +251,7 @@ public class SalesService {
 
         return CarOwnerSettlementBatchDTO.BatchDetailResponse.builder()
                 .id(batch.getId())
-                .ownerId(batch.getOwnerId())
+                .ownerId(batch.getOwner().getId())
                 .yearMonth(yearMonth)
                 .monthKey(batch.getMonthKey())
                 .totalAmount(batch.getTotalAmount())

@@ -11,6 +11,7 @@ import com.fullstack.model.enums.OrderStatus;
 import com.fullstack.repository.CarOwnerSettlementBatchRepository;
 import com.fullstack.repository.CarOwnerSettlementRepository;
 import com.fullstack.repository.OrderRepository;
+import com.fullstack.repository.CustomerRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -37,6 +38,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
     private final CarOwnerSettlementRepository settlementRepo;
     private final CarOwnerSettlementBatchRepository batchRepo;
     private final OrderRepository orderRepo;
+    private final CustomerRepository customerRepo;
     
     @PersistenceContext
     private EntityManager em;
@@ -81,7 +83,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
                 .orElseThrow(() -> new IllegalArgumentException("ORDER_NOT_FOUND"));
 
         // ownerId(문자열) ↔ assignedDriverId(Long) 최소 검증
-        if (o.getAssignedDriverId() != null && !safeEqualsLongString(o.getAssignedDriverId(), ownerId)) {
+                if (o.getAssignedDriver() != null && !safeEqualsLongString(o.getAssignedDriver().getIdNum().longValue(), ownerId)) {
             throw new IllegalArgumentException("ORDER_NOT_OWNED_BY_THIS_OWNER");
         }
 
@@ -124,13 +126,13 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
 
         int created = 0;
         for (OrderEntity o : orders) {
-            if (o.getAssignedDriverId() == null) continue;
+            if (o.getAssignedDriver() == null) continue;
 
             // 이미 정산 있으면 스킵
             if (settlementRepo.existsByOrderId(o.getId())) continue;
 
             // 누락된 것만 생성
-            createForOrder(String.valueOf(o.getAssignedDriverId()), o.getId());
+                        createForOrder(String.valueOf(o.getAssignedDriver().getIdNum().longValue()), o.getId());
             created++;
         }
         return created;
@@ -272,7 +274,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
             .orElseGet(() -> {
                 try {
                     CarOwnerSettlementBatchEntity b = new CarOwnerSettlementBatchEntity();
-                    b.setOwnerId(ownerId);
+                    b.setOwner(customerRepo.findByIdNum(Long.parseLong(ownerId)).orElseThrow(() -> new IllegalArgumentException("Customer not found with ID: " + ownerId)));
                     b.setMonthKey(monthKey);
                     b.setStatus(CarOwnerSettlementBatchEntity.Status.REQUESTED); // 권장: READY
                     return batchRepo.saveAndFlush(b);

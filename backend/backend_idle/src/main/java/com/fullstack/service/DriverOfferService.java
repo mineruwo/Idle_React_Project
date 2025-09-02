@@ -98,7 +98,7 @@ public class DriverOfferService {
         order.setDriverPrice(offer.getPrice());
         Long assigned = (offer.getDriver() != null && offer.getDriver().getIdNum() != null)
                 ? offer.getDriver().getIdNum().longValue() : null;
-        order.setAssignedDriverId(assigned);
+        order.setAssignedDriver(customerRepository.findByIdNum(assigned).orElse(null));
         order.setStatus(OrderStatus.PAYMENT_PENDING);
         // 다른 PENDING 전부 거절
         driverOfferRepository.rejectOthers(order.getId(), offer.getId());
@@ -139,7 +139,7 @@ public class DriverOfferService {
         // 즉시 확정
         offer.setStatus(DriverOfferEntity.Status.ACCEPTED);
         order.setDriverPrice(offer.getPrice());
-        order.setAssignedDriverId(driver.getIdNum().longValue());
+        order.setAssignedDriver(driver);
         // ✅ 결제대기 전환
         order.setStatus(OrderStatus.PAYMENT_PENDING);
 

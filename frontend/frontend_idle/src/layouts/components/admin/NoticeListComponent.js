@@ -58,7 +58,7 @@ const NoticeListComponent = () => {
     const columns = [
         { header: '번호', key: 'id', render: (item) => item.id },
         { header: '제목', key: 'title', render: (item) => item.title },
-        { header: '작성자', key: 'writerAdminId', render: (item) => item.writerAdminId },
+        { header: '작성자', key: 'writerAdmin', render: (item) => item.writerAdmin?.adminId },
         { header: '작성일', key: 'createdAt', render: (item) => new Date(item.createdAt).toLocaleDateString() },
         { header: '조회수', key: 'viewCount', render: (item) => item.viewCount },
         {

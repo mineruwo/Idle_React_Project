@@ -65,7 +65,7 @@ public class OrderDto {
         dto.setVehicle(entity.getVehicle());
         dto.setCargoType(entity.getCargoType());
         dto.setCargoSize(entity.getCargoSize());
-        dto.setAssignedDriverId(entity.getAssignedDriverId());
+        dto.setAssignedDriverId(entity.getAssignedDriver() != null ? entity.getAssignedDriver().getIdNum().longValue() : null);
         dto.setAssignedDriverNickname(assignedDriverNickname);
         
         dto.setCreatedAt(entity.getCreatedAt());

@@ -21,7 +21,7 @@ const NoticeEditComponent = () => {
         const notice = await getNoticeForEdit(id);
         setTitle(notice.title);
         setContent(notice.content);
-        setWriterAdminId(notice.writerAdminId);
+        setWriterAdminId(notice.writerAdmin?.adminId);
       } catch (error) {
         console.error('Error fetching notice:', error);
         alert('공지사항 정보를 가져오는데 실패했습니다.');

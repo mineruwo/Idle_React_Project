@@ -32,7 +32,7 @@ public class CustomerEntity {
 	@Column(name = "ID_NUM")
 	private Integer idNum;
 
-	@Column(name = "ID", nullable = false)
+	@Column(name = "ID", nullable = false, unique = true)
 	private String id;
 
 	@Column(name = "PASSWORD_ENC")

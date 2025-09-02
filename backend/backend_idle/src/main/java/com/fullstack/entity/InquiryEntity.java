@@ -14,6 +14,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.ManyToOne; // Added
+import jakarta.persistence.JoinColumn; // Added
+import jakarta.persistence.FetchType; // Added
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -32,8 +35,9 @@ public class InquiryEntity {
     @Column(name = "inquiry_id")
     private UUID inquiryId;
 
-    @Column(name = "customer_id_num", nullable = false)
-    private Long customerIdNum;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id_num", referencedColumnName = "ID_NUM", nullable = false)
+    private CustomerEntity customer;
 
     @Column(name = "inquiry_title", nullable = false, length = 255)
     private String inquiryTitle;
@@ -52,8 +56,9 @@ public class InquiryEntity {
 
     
 
-    @Column(name = "admin_id", length = 255)
-    private String adminId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "admin_id", referencedColumnName = "ADMIN_ID")
+    private AdminEntity admin;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 50)

@@ -46,7 +46,7 @@ public class OrderService {
     @Transactional
     public OrderEntity saveOrder(OrderDto dto, String shipperId) {
         OrderEntity order = OrderEntity.builder()
-                .shipperId(shipperId)
+                .shipper(customerRepository.findById(shipperId).orElseThrow(() -> new IllegalArgumentException("Shipper not found with ID: " + shipperId)))
                 .departure(dto.getDeparture())
                 .arrival(dto.getArrival())
                 .distance(dto.getDistance())
@@ -58,7 +58,7 @@ public class OrderService {
                 .cargoSize(dto.getCargoSize())
                 .packingOption(dto.getPackingOption())
                 .proposedPrice(dto.getProposedPrice())
-                .driverPrice(null)
+                .assignedDriver(null)
                 .avgPrice(dto.getAvgPrice())
                 .status(OrderStatus.CREATED)
                 .build();
@@ -98,7 +98,9 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<OrderDto> findMyOrders(String shipperId) {
-        return orderRepository.findByShipperIdOrderByCreatedAtDesc(shipperId).stream()
+        CustomerEntity shipper = customerRepository.findById(shipperId)
+                                    .orElseThrow(() -> new IllegalArgumentException("Shipper not found with ID: " + shipperId));
+        return orderRepository.findByShipperOrderByCreatedAtDesc(shipper).stream()
                 .map(order -> {
                     OrderDto dto = this.mapOrderToDtoWithNickname(order);
                     // Use new method for payment and remove debug log
@@ -143,15 +145,11 @@ public class OrderService {
     }
 
     private OrderDto mapOrderToDtoWithNickname(OrderEntity order) {
-        String shipperNickname = customerRepository.findById(order.getShipperId())
-                .map(customer -> customer.getNickname())
-                .orElse("알 수 없음");
+        String shipperNickname = order.getShipper() != null ? order.getShipper().getNickname() : "알 수 없음";
 
         String assignedDriverNickname = null;
-        if (order.getAssignedDriverId() != null) {
-            assignedDriverNickname = customerRepository.findById(order.getAssignedDriverId().intValue())
-                    .map(customer -> customer.getNickname())
-                    .orElse("알 수 없음");
+        if (order.getAssignedDriver() != null) {
+            assignedDriverNickname = order.getAssignedDriver().getNickname();
         }
         return OrderDto.fromEntity(order, shipperNickname, assignedDriverNickname);
     }

@@ -39,7 +39,7 @@ public interface CarOwnerSettlementRepository extends JpaRepository<CarOwnerSett
       select s
       from CarOwnerSettlementEntity s
       join s.batch b
-      where b.ownerId = :ownerId
+      where b.owner.id = :ownerId
         and (:status is null or b.status = :status)
         and (:fromMonth is null or b.monthKey >= :fromMonth)
         and (:toNextMonth   is null or b.monthKey <  :toNextMonth)
@@ -74,7 +74,7 @@ public interface CarOwnerSettlementRepository extends JpaRepository<CarOwnerSett
         select coalesce(sum(s.amount), 0)
         from CarOwnerSettlementEntity s
         join s.order o
-        where o.assignedDriverId = :driverId
+        where o.assignedDriver.idNum = :driverId
           and s.createdAt between :start and :end
     """)
     BigDecimal sumAmountByDriverAndCreatedAtBetween(@Param("driverId") Long driverId,
@@ -85,7 +85,7 @@ public interface CarOwnerSettlementRepository extends JpaRepository<CarOwnerSett
         select coalesce(sum(s.commission), 0)
         from CarOwnerSettlementEntity s
         join s.order o
-        where o.assignedDriverId = :driverId
+        where o.assignedDriver.idNum = :driverId
           and s.createdAt between :start and :end
     """)
     BigDecimal sumCommissionByDriverAndCreatedAtBetween(@Param("driverId") Long driverId,
@@ -96,7 +96,7 @@ public interface CarOwnerSettlementRepository extends JpaRepository<CarOwnerSett
         select count(s)
         from CarOwnerSettlementEntity s
         join s.order o
-        where o.assignedDriverId = :driverId
+        where o.assignedDriver.idNum = :driverId
           and s.status = :status
           and s.createdAt between :start and :end
     """)

@@ -3,7 +3,12 @@ package com.fullstack.service;
 import com.fullstack.model.InquiryDTO;
 import com.fullstack.entity.InquiryEntity;
 import com.fullstack.model.InquiryStatus;
+import com.fullstack.entity.AdminEntity; // Added
+import com.fullstack.entity.CustomerEntity; // Added
 import com.fullstack.repository.InquiryRepository;
+import com.fullstack.repository.AdminRepository; // Added
+import com.fullstack.repository.CustomerRepository; // Added
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +28,8 @@ import com.fullstack.model.DailyAnswerCountDTO;
 public class InquiryServiceImpl implements InquiryService {
 
     private final InquiryRepository inquiryRepository;
+    private final AdminRepository adminRepository; // Added
+    private final CustomerRepository customerRepository; // Added
 
     @Override
     public InquiryDTO createInquiry(InquiryDTO inquiryDTO) {
@@ -30,6 +37,14 @@ public class InquiryServiceImpl implements InquiryService {
         inquiry.setCreatedAt(LocalDateTime.now());
         if (inquiry.getStatus() == null) {
             inquiry.setStatus(InquiryStatus.INQUIRY_PENDING);
+        }
+        // Fetch AdminEntity if adminId is provided in DTO
+        if (inquiryDTO.getAdminId() != null) {
+            adminRepository.findByAdminId(inquiryDTO.getAdminId()).ifPresent(inquiry::setAdmin);
+        }
+        // Fetch CustomerEntity if customerIdNum is provided in DTO
+        if (inquiryDTO.getCustomerIdNum() != null) {
+            customerRepository.findByIdNum(inquiryDTO.getCustomerIdNum()).ifPresent(inquiry::setCustomer);
         }
         InquiryEntity savedInquiry = inquiryRepository.save(inquiry);
         return entityToDto(savedInquiry);
@@ -57,7 +72,12 @@ public class InquiryServiceImpl implements InquiryService {
                     existingInquiry.setInquiryAnswer(inquiryDTO.getInquiryAnswer());
                     existingInquiry.setAnsweredAt(inquiryDTO.getAnsweredAt());
                     
-                    existingInquiry.setAdminId(inquiryDTO.getAdminId());
+                    // Fetch AdminEntity if adminId is provided in DTO
+                    if (inquiryDTO.getAdminId() != null) {
+                        adminRepository.findByAdminId(inquiryDTO.getAdminId()).ifPresent(existingInquiry::setAdmin);
+                    } else {
+                        existingInquiry.setAdmin(null); // If adminId is explicitly null, set admin to null
+                    }
                     existingInquiry.setStatus(inquiryDTO.getStatus());
                     existingInquiry.setReInquiryId(inquiryDTO.getReInquiryId());
                     return entityToDto(inquiryRepository.save(existingInquiry));
@@ -71,15 +91,19 @@ public class InquiryServiceImpl implements InquiryService {
 
     @Override
     public Page<InquiryDTO> getInquiriesByCustomerId(Long customerId, Pageable pageable) {
-        // Assuming InquiryRepository has a method findByCustomerIdNum
-        return inquiryRepository.findByCustomerIdNum(customerId, pageable)
+        // Fetch CustomerEntity
+        CustomerEntity customer = customerRepository.findByIdNum(customerId)
+                                    .orElseThrow(() -> new IllegalArgumentException("Customer not found with ID: " + customerId));
+        return inquiryRepository.findByCustomer(customer, pageable)
                 .map(this::entityToDto);
     }
 
     @Override
     public Page<InquiryDTO> getInquiriesByAdminId(String adminId, Pageable pageable) {
-        // Assuming InquiryRepository has a method findByAdminId
-        return inquiryRepository.findByAdminId(adminId, pageable)
+        // Fetch AdminEntity
+        AdminEntity admin = adminRepository.findByAdminId(adminId)
+                                .orElseThrow(() -> new IllegalArgumentException("Admin not found with ID: " + adminId));
+        return inquiryRepository.findByAdmin(admin, pageable)
                 .map(this::entityToDto);
     }
 
@@ -116,6 +140,11 @@ public class InquiryServiceImpl implements InquiryService {
         int currentMonth = today.getMonthValue();
         String currentDate = today.format(DateTimeFormatter.ofPattern("YYYY-MM-dd"));
 
+        AdminEntity admin = null;
+        if (adminId != null && !adminId.isEmpty()) {
+            admin = adminRepository.findByAdminId(adminId).orElse(null);
+        }
+
         List<InquiryEntity> inquiries = inquiryRepository.findInquiriesByFilter(
                 filter,
                 currentDate,
@@ -123,7 +152,7 @@ public class InquiryServiceImpl implements InquiryService {
                 now,
                 currentYear,
                 currentMonth,
-                adminId // Pass adminId to repository
+                admin // Pass AdminEntity to repository
         );
 
         return inquiries.stream()
@@ -133,7 +162,10 @@ public class InquiryServiceImpl implements InquiryService {
 
     @Override
     public List<InquiryDTO> getRecentInquiriesByCustomerId(Long customerId) {
-        return inquiryRepository.findTop5ByCustomerIdNumOrderByCreatedAtDesc(customerId).stream()
+        // Fetch CustomerEntity
+        CustomerEntity customer = customerRepository.findByIdNum(customerId)
+                                    .orElseThrow(() -> new IllegalArgumentException("Customer not found with ID: " + customerId));
+        return inquiryRepository.findTop5ByCustomerOrderByCreatedAtDesc(customer).stream()
                 .map(this::entityToDto)
                 .collect(Collectors.toList());
     }

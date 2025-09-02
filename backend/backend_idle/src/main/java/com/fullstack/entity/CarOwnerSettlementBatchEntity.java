@@ -9,6 +9,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.ManyToOne; // Added
+import jakarta.persistence.JoinColumn; // Added
+import jakarta.persistence.FetchType; // Added
+import com.fullstack.entity.CustomerEntity; // Added
 
 import jakarta.persistence.Table;
 
@@ -28,8 +32,9 @@ public enum Status { REQUESTED, APPROVED, PAID, CANCELED }
 @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 private Long id; // 순서대로 발급
 
-@Column(name = "owner_id", nullable = false)
-private String ownerId;
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "owner_id", referencedColumnName = "ID", nullable = false)
+private CustomerEntity owner;
 
 // 신청 대상 월(yyyy-MM-01)
 @Column(name = "month_key", nullable = false)

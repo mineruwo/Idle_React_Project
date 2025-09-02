@@ -2,6 +2,8 @@ package com.fullstack.repository;
 
 import com.fullstack.entity.InquiryEntity;
 import com.fullstack.model.InquiryStatus;
+import com.fullstack.entity.AdminEntity; // Added
+import com.fullstack.entity.CustomerEntity; // Added
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,9 +18,9 @@ import org.springframework.data.domain.Pageable;
 
 @Repository
 public interface InquiryRepository extends JpaRepository<InquiryEntity, UUID> {
-    Page<InquiryEntity> findByCustomerIdNum(Long customerIdNum, Pageable pageable);
-    List<InquiryEntity> findTop5ByCustomerIdNumOrderByCreatedAtDesc(Long customerIdNum);
-    Page<InquiryEntity> findByAdminId(String adminId, Pageable pageable);
+    Page<InquiryEntity> findByCustomer(CustomerEntity customer, Pageable pageable);
+    List<InquiryEntity> findTop5ByCustomerOrderByCreatedAtDesc(CustomerEntity customer);
+    Page<InquiryEntity> findByAdmin(AdminEntity admin, Pageable pageable);
     
 
     @Query("SELECT FUNCTION('TO_CHAR', i.answeredAt, 'YYYY-MM-DD'), COUNT(i) " +
@@ -44,7 +46,7 @@ public interface InquiryRepository extends JpaRepository<InquiryEntity, UUID> {
            "(:filter = 'week' AND i.createdAt >= :sevenDaysAgo AND i.createdAt <= :now) OR " +
            "(:filter = 'month' AND YEAR(i.createdAt) = :currentYear AND MONTH(i.createdAt) = :currentMonth) OR " +
            "(:filter = 'year' AND YEAR(i.createdAt) = :currentYear)) " +
-           "AND (:adminId IS NULL OR i.adminId = :adminId) " + // Added adminId filter
+           "AND (:admin IS NULL OR i.admin = :admin) " + // Changed to AdminEntity
            "ORDER BY i.createdAt DESC")
     List<InquiryEntity> findInquiriesByFilter(
             @Param("filter") String filter,
@@ -53,14 +55,14 @@ public interface InquiryRepository extends JpaRepository<InquiryEntity, UUID> {
             @Param("now") LocalDateTime now,
             @Param("currentYear") Integer currentYear,
             @Param("currentMonth") Integer currentMonth,
-            @Param("adminId") String adminId);
+            @Param("admin") AdminEntity admin); // Changed parameter type
 
     @Query("SELECT i FROM InquiryEntity i " +
            "WHERE (:status IS NULL OR i.status = :status) " +
            "AND (:searchQuery IS NULL OR " +
            "CAST(i.inquiryId AS text) LIKE CONCAT('%', CAST(:searchQuery AS text), '%') OR " + // Search by inquiry ID
            "LOWER(i.inquiryTitle) LIKE LOWER(CONCAT('%', CAST(:searchQuery AS text), '%')) OR " +
-           "CAST(i.customerIdNum AS text) LIKE CONCAT('%', CAST(:searchQuery AS text), '%')) " + // Search by customer ID
+           "CAST(i.customer.idNum AS text) LIKE CONCAT('%', CAST(:searchQuery AS text), '%')) " + // Search by customer ID (using relationship)
            "ORDER BY i.createdAt DESC")
     Page<InquiryEntity> findAllInquiriesByStatusAndSearchQuery(
             @Param("status") com.fullstack.model.InquiryStatus status,

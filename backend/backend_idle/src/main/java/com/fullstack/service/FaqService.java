@@ -3,6 +3,7 @@ package com.fullstack.service;
 import com.fullstack.entity.FaqEntity;
 import com.fullstack.model.FaqDTO;
 import com.fullstack.repository.FaqRepository;
+import com.fullstack.repository.AdminRepository; // Added
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,9 @@ public class FaqService {
 
     @Autowired
     private FaqRepository faqRepository;
+
+    @Autowired
+    private AdminRepository adminRepository; // Added
 
     public List<FaqEntity> getAllFAQs() {
         return faqRepository.findAll();
@@ -40,7 +44,7 @@ public class FaqService {
         FaqEntity faq = new FaqEntity();
         faq.setQuestion(faqDTO.getQuestion());
         faq.setAnswer(faqDTO.getAnswer());
-        faq.setWriterAdminId(faqDTO.getWriterAdminId());
+        faq.setWriterAdmin(adminRepository.findByAdminId(faqDTO.getWriterAdminId()).orElse(null));
         return faqRepository.save(faq);
     }
 

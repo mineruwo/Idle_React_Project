@@ -35,8 +35,9 @@ public class FaqEntity {
     @Column(name = "is_del", nullable = false)
     private Boolean isDel;
     
-    @Column(name = "writer_admin_id", nullable = false)
-    private String writerAdminId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "writer_admin_id", referencedColumnName = "ADMIN_ID", nullable = false)
+    private AdminEntity writerAdmin;
 
     @Column(name = "view_count", nullable = false) // New field
     private Integer viewCount;
