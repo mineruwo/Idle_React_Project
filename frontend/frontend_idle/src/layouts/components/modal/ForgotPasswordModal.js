@@ -8,6 +8,7 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import { useState } from 'react';
 import { sendResetEmailCode, verifyResetEmailCode } from '../../../api/emailApi';
 import { CircularProgress, FormHelperText, Stack } from '@mui/material';
+import '../../../theme/login/ForgotPassword.css';
 
 function ForgotPasswordModal({ open, handleClose, onVerified }) {
   const [email, setEmail] = useState("");
@@ -49,11 +50,11 @@ function ForgotPasswordModal({ open, handleClose, onVerified }) {
     try {
       const { data } = await verifyResetEmailCode(email, code);
       const token = data?.token;
-      
-     if (token) {
+
+      if (token) {
         setVerifyMsg("인증이 완료되었습니다.");
         if (typeof onVerified === "function") {
-          onVerified({ email, token }); 
+          onVerified({ email, token });
         }
         resetStateOnClose();
       } else {
@@ -80,14 +81,15 @@ function ForgotPasswordModal({ open, handleClose, onVerified }) {
   return (
     <Dialog open={open} onClose={resetStateOnClose}>
       <DialogTitle>비밀번호 찾기</DialogTitle>
-      <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, width: 420 }}>
+
+      <DialogContent className="fp-content">
         <DialogContentText>
           이메일을 입력한 뒤 인증 코드를 받아 입력하세요.
         </DialogContentText>
 
         <Stack direction="row" spacing={1} alignItems="center">
           <OutlinedInput
-            sx={{ flex: 1, minWidth: 0 }}
+            className="fp-input"
             required
             id="email"
             name="email"
@@ -102,23 +104,23 @@ function ForgotPasswordModal({ open, handleClose, onVerified }) {
             variant="contained"
             onClick={handleSend}
             disabled={sending || !isEmailValid(email)}
-            sx={{ whiteSpace: 'nowrap', wordBreak: 'keep-all', flexShrink: 0, px: 1.5 }}
+            className="fp-btn fp-send-btn"
           >
-            {sending ? <CircularProgress size={20} /> : sent ? "재전송" : "전송"}
+            {sending ? <CircularProgress size={20} /> : (sent ? "재전송" : "전송")}
           </Button>
         </Stack>
+
         {sendMsg && (
-          <FormHelperText error={!sent} sx={{ ml: 0 }}>
+          <FormHelperText error={!sent} className="fp-helper">
             {sendMsg}
           </FormHelperText>
         )}
 
-        {/* 코드 입력 + 인증 버튼 (전송 후 노출) */}
         {sent && (
           <>
             <Stack direction="row" spacing={1} alignItems="center">
               <OutlinedInput
-              sx={{ flex: 1, minWidth: 0 }}
+                className="fp-input"
                 required
                 id="code"
                 name="code"
@@ -132,15 +134,16 @@ function ForgotPasswordModal({ open, handleClose, onVerified }) {
                 variant="outlined"
                 onClick={handleVerify}
                 disabled={verifying || !code.trim()}
-                sx={{ whiteSpace: 'nowrap', wordBreak: 'keep-all', flexShrink: 0, px: 1.5 }}
+                className="fp-btn fp-verify-btn"
               >
                 {verifying ? <CircularProgress size={20} /> : "인증하기"}
               </Button>
             </Stack>
+
             {verifyMsg && (
               <FormHelperText
                 error={verifyMsg !== "인증이 완료되었습니다."}
-                sx={{ ml: 0 }}
+                className="fp-helper"
               >
                 {verifyMsg}
               </FormHelperText>
@@ -149,7 +152,7 @@ function ForgotPasswordModal({ open, handleClose, onVerified }) {
         )}
       </DialogContent>
 
-      <DialogActions sx={{ pb: 2, px: 3 }}>
+      <DialogActions className="fp-actions">
         <Button onClick={resetStateOnClose}>닫기</Button>
       </DialogActions>
     </Dialog>

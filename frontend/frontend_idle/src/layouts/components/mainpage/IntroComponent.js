@@ -11,10 +11,7 @@ const IntroComponent = () => {
         <div
             className="text-white hero"
             style={{
-                backgroundImage: `
-                    linear-gradient(180deg, rgba(2,6,23,.35) 0%, rgba(2,6,23,.55) 100%),
-                    url(${process.env.PUBLIC_URL}/img/main/main5.png)
-                `,
+                '--hero-bg': `url(${process.env.PUBLIC_URL}/img/main/main5.png)`
             }}
         >
 

@@ -1,20 +1,19 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Box, Button, CssBaseline, Divider, FormControl, FormControlLabel, FormLabel,
+  Box, Button, CssBaseline, FormControl, FormControlLabel, FormLabel,
   Radio, RadioGroup, TextField, Typography
 } from "@mui/material";
 import AppTheme from "../../../theme/muitheme/AppTheme";
 import { UserCard as Card, UserContainer as Container } from "../../../theme/User/UserCard";
 import { snsSignup } from "../../../api/snsApi";
+import "../../../theme/signup/SnsSignup.css";
 
 export default function SnsSignupComponent(props) {
   const nav = useNavigate();
   const [customName, setCustomName] = useState("");
   const [nickname, setNickname] = useState("");
-  // 도메인에 맞게 기본값 선택 (예: 'shipper' | 'carrier')
   const [role, setRole] = useState("shipper");
-
   const [nameErr, setNameErr] = useState("");
   const [nickErr, setNickErr] = useState("");
   const [loading, setLoading] = useState(false);
@@ -51,22 +50,14 @@ export default function SnsSignupComponent(props) {
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
       <Container direction="column" justifyContent="space-between">
-        <Card variant="outlined">
-          <Box
-            component="img"
-            src="/img/logo/logo.png"
-            alt="Idle 고양이 로고"
-            sx={{
-              width: 64, height: 64,
-              objectFit: 'contain',
-              alignSelf: 'left'
-            }}
-          />
-          <Typography component="h1" variant="h4" sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}>
+        <Card variant="outlined" className="sns-card">
+          <Box component="img" src="/img/logo/logo.png" alt="Idle 고양이 로고" className="sns-logo" />
+
+          <Typography component="h1" variant="h4" className="sns-title">
             SNS 신규가입
           </Typography>
 
-          <Box component="form" onSubmit={onSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Box component="form" onSubmit={onSubmit} className="sns-form">
             {/* 사용자이름 */}
             <FormControl>
               <FormLabel htmlFor="customName">이름</FormLabel>
@@ -89,7 +80,7 @@ export default function SnsSignupComponent(props) {
               />
             </FormControl>
 
-            {/* 회원 유형(도메인 규칙에 맞게) */}
+            {/* 회원 유형 */}
             <FormControl component="fieldset">
               <FormLabel>회원 유형</FormLabel>
               <RadioGroup row name="userType" value={role} onChange={(e) => setRole(e.target.value)}>
@@ -99,7 +90,7 @@ export default function SnsSignupComponent(props) {
             </FormControl>
 
             {err && (
-              <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+              <Typography variant="body2" color="error" className="sns-err">
                 {err}
               </Typography>
             )}
@@ -108,13 +99,6 @@ export default function SnsSignupComponent(props) {
               {loading ? "가입 처리 중..." : "가입 완료"}
             </Button>
           </Box>
-
-          <Divider sx={{ mt: 2 }}>
-            <Typography sx={{ color: "text.secondary" }}>안내</Typography>
-          </Divider>
-          <Typography variant="body2" color="text.secondary">
-            가입 후에는 이 SNS 계정으로 빠르게 로그인할 수 있어요.
-          </Typography>
         </Card>
       </Container>
     </AppTheme>
