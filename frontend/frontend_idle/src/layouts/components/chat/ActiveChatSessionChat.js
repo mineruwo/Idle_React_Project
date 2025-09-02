@@ -3,7 +3,7 @@ import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import { apiConfig } from '../../../config/apiConfig';
 import { fetchChatSessionDetails, fetchCustomerRecentInquiries } from '../../../api/adminApi';
-import './ActiveChatSessionChat.css'; // CSS 파일 import
+
 
 const ActiveChatSessionChat = ({ sessionId, chatRoomId, onClose }) => {
     const [stompClient, setStompClient] = useState(null);
