@@ -126,7 +126,7 @@ const OrderForm = () => {
 
         // 마커 + 라벨
         const markerImg = new window.kakao.maps.MarkerImage(
-          process.env.PUBLIC_URL + "/img/orderimg/marker_pink.png",
+          process.env.PUBLIC_URL + "/img/orderimg/marker_navy.png",
           new window.kakao.maps.Size(32, 42)
         );
         new window.kakao.maps.Marker({ map, position: start, image: markerImg });
@@ -136,14 +136,14 @@ const OrderForm = () => {
           map,
           position: start,
           content:
-            '<div style="padding:4px 8px;background:#FF80B7;color:white;border-radius:4px;font-size:13px;">출발</div>',
+            '<div style="padding:4px 8px;background:#465d96ff;color:white;border-radius:4px;font-size:13px;">출발</div>',
           yAnchor: 1.5,
         });
         new window.kakao.maps.CustomOverlay({
           map,
           position: end,
           content:
-            '<div style="padding:4px 8px;background:#FF80B7;color:white;border-radius:4px;font-size:13px;">도착</div>',
+            '<div style="padding:4px 8px;background:#465d96ff;color:white;border-radius:4px;font-size:13px;">도착</div>',
           yAnchor: 1.5,
         });
 
@@ -186,7 +186,7 @@ const OrderForm = () => {
             new window.kakao.maps.Polyline({
               path: linePath,
               strokeWeight: 4,
-              strokeColor: "#ff006f",
+              strokeColor: "#465d96ff",
               strokeOpacity: 0.8,
               strokeStyle: "solid",
               map,

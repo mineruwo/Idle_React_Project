@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { getMe } from '../../api/loginApi';
-import FAQListComponent from '../../layouts/components/common/inquiry/FAQListComponent';
-import MyInquiriesListComponent from '../../layouts/components/common/inquiry/MyInquiriesListComponent';
-import CreateInquiryComponent from '../../layouts/components/common/inquiry/CreateInquiryComponent';
-import '../../CustomCSS/InquiryNav.css';
+import React, { useState, useEffect } from "react";
+import { getMe } from "../../api/loginApi";
+import FAQListComponent from "../../layouts/components/common/inquiry/FAQListComponent";
+import MyInquiriesListComponent from "../../layouts/components/common/inquiry/MyInquiriesListComponent";
+import CreateInquiryComponent from "../../layouts/components/common/inquiry/CreateInquiryComponent";
+import "../../CustomCSS/InquiryNav.css";
 
 const ShipperInquiriesPage = () => {
     const [showWriteForm, setShowWriteForm] = useState(false);
@@ -19,7 +19,7 @@ const ShipperInquiriesPage = () => {
                 const userData = await getMe();
                 setCurrentUser(userData);
             } catch (err) {
-                setError('사용자 정보를 불러오는데 실패했습니다.');
+                setError("사용자 정보를 불러오는데 실패했습니다.");
                 console.error(err);
             } finally {
                 setLoading(false);
@@ -43,27 +43,35 @@ const ShipperInquiriesPage = () => {
 
     return (
         <div className="inquiry-page-container">
-            {showWriteForm ? (
-                <>
-                    <CreateInquiryComponent 
-                        currentUser={currentUser} 
-                        refreshInquiries={handleInquiryCreated}
-                        onCancelWrite={() => setShowWriteForm(false)}
-                    />
-                </>
-            ) : (
-                <>
-                    <div className="inquiry-header">
-                        <h2>고객 문의</h2>
-                        <button onClick={() => setShowWriteForm(true)} className="write-inquiry-button">
-                            문의 작성
-                        </button>
-                    </div>
-                    <FAQListComponent />
-                    <hr className="inquiry-divider" />
-                    <MyInquiriesListComponent key={inquiryListKey} currentUser={currentUser} />
-                </>
-            )}
+            <div className="inquiry-page-wrapper">
+                {showWriteForm ? (
+                    <>
+                        <CreateInquiryComponent
+                            currentUser={currentUser}
+                            refreshInquiries={handleInquiryCreated}
+                            onCancelWrite={() => setShowWriteForm(false)}
+                        />
+                    </>
+                ) : (
+                    <>
+                        <div className="inquiry-header">
+                            <h2>고객 문의</h2>
+                            <button
+                                onClick={() => setShowWriteForm(true)}
+                                className="write-inquiry-button"
+                            >
+                                문의 작성
+                            </button>
+                        </div>
+                        <FAQListComponent />
+                        <hr className="inquiry-divider" />
+                        <MyInquiriesListComponent
+                            key={inquiryListKey}
+                            currentUser={currentUser}
+                        />
+                    </>
+                )}
+            </div>
         </div>
     );
 };
