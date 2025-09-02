@@ -3,7 +3,7 @@ import { PieChart, Pie, Cell } from "recharts";
 import "../../../../theme/CarOwner/warmpiechart.css";
 
 // 점수(%)와 남은 비율로 단순 도넛
-const COLORS = ["#ffccdd", "#f0f0f0"]; // 점수 / 남은 영역
+const COLORS = ["#88B4B7", "#f0f5f9"]; // 점수 / 남은 영역
 
 const WarmPieChart = ({ score }) => {
   // score가 null이면 차트는 빈 원형, 중앙엔 '—'만 표시

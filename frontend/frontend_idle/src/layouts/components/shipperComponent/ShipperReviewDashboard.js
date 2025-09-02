@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom"; // Added useLocation
-import "../../../theme/ShipperCustomCss/ShipperReviewDashBoard.css"; // CSS 파일을 임포트합니다.
-import { getMyReviews } from "../../../api/reviewApi"; // 내가 쓴 리뷰 API
-import { fetchMyOrders } from "../../../api/orderApi"; // Added
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import "../../../theme/ShipperCustomCss/ShipperReviewDashBoard.css";
+import { getMyReviews } from "../../../api/reviewApi";
+import { fetchMyOrders } from "../../../api/orderApi";
 
 const ShipperReviewDashboard = () => {
-    const [activeTab, setActiveTab] = useState("pending"); // 'pending' 또는 'completed'
+    const [activeTab, setActiveTab] = useState("pending");
     const [pendingReviews, setPendingReviews] = useState([]);
     const [myReviews, setMyReviews] = useState([]);
     const navigate = useNavigate();
@@ -18,21 +18,20 @@ const ShipperReviewDashboard = () => {
                     getMyReviews(),
                 ]);
 
-                // Process myReviewsData to get a set of reviewed driver IDs
                 const reviewedOrderIds = new Set(
                     myReviewsData.map((review) => review.orderId)
                 );
 
-                // Filter COMPLETED orders that have an assigned driver and haven't been reviewed yet
                 const unreviewedCompletedOrders = allOrders
                     .filter(
                         (order) =>
                             order.status === "COMPLETED" &&
                             order.assignedDriverId != null &&
-                            !reviewedOrderIds.has(order.id) // Check if driver has been reviewed
+                            !reviewedOrderIds.has(order.id)
                     )
                     .map((order) => ({
                         orderId: order.id,
+                        orderNo: order.orderNo,
                         description: `${order.departure} → ${order.arrival}`,
                         driverId: order.assignedDriverId,
                         driverName:
@@ -45,17 +44,14 @@ const ShipperReviewDashboard = () => {
                     }));
 
                 setPendingReviews(unreviewedCompletedOrders);
-                setMyReviews(myReviewsData.slice(0, 5)); // Still show only recent 5 for my reviews
+                setMyReviews(myReviewsData.slice(0, 5));
             } catch (err) {
                 console.error("리뷰 데이터를 가져오는 데 실패했습니다.", err);
-                // Optionally set error state for display
             }
         };
 
-        // Initial load
         loadReviewData();
 
-        // Re-fetch data when the window gains focus or tab becomes visible
         const handleVisibilityChange = () => {
             if (document.visibilityState === "visible") {
                 loadReviewData();
@@ -75,7 +71,6 @@ const ShipperReviewDashboard = () => {
     }, []);
 
     const handleWriteReview = (orderId) => {
-        // 후기 작성 페이지로 이동하면서 orderId를 전달할 수 있습니다.
         navigate(`/shipper/review`, { state: { orderId } });
     };
 
@@ -123,6 +118,7 @@ const ShipperReviewDashboard = () => {
                                     <div className="review-item-info">
                                         <span>
                                             <strong>
+                                                (주문번호 : {review.orderNo}){" "}
                                                 {review.description}
                                             </strong>{" "}
                                             ({review.driverName} 기사님)

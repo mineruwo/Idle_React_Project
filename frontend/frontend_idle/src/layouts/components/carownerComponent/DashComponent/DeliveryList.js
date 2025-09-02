@@ -15,8 +15,8 @@ const STATUS = {
 };
 
 const labelOf = (s) =>
-  s === STATUS.READY ? "🚚 상차 완료" :
-  s === STATUS.ONGOING ? "✅ 배송 완료" :
+  s === STATUS.READY ? "상차" :
+  s === STATUS.ONGOING ? "배송" :
   "완료됨";
 
 const nextStatusOf = (s) =>
@@ -141,7 +141,7 @@ export default function DeliveryList() {
   };
 
   return (
-    <div className="delivery-box">
+    <div className="delivery-box ">
       <div className="d-flex justify-content-between align-items-center">
         <h2>배송중인 건</h2>
         <button className="btn btn-outline-secondary" onClick={refetch} disabled={initialLoading}>
@@ -188,9 +188,9 @@ export default function DeliveryList() {
                     ) : isCanceled ? (
                       <span className="badge bg-danger">취소됨</span>
                     ) : (
-                      <div className="d-flex gap-2">
+                      <div className="d-flex gap-2 ">
                         <button
-                          className={`btn ${d.status === STATUS.READY ? "btn-primary" : "btn-success"}`}
+                          className={`btn ${d.status === STATUS.READY ? "btn-primary" : "btn-success "}`}
                           disabled={busy}
                           onClick={() => onClickProceed(d)}
                           title={d.status === STATUS.READY ? "상차 완료로 상태 변경" : "배송 완료로 상태 변경"}

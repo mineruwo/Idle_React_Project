@@ -1,0 +1,40 @@
+/* 레이아웃 래퍼 */
+.oauth-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;              /* p:3 */
+}
+
+/* 카드 */
+.oauth-card {
+  width: 420px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;         /* borderRadius: 2 */
+  padding: 24px;              /* p:3 */
+  background: #fff;
+}
+
+/* 타이틀/텍스트 */
+.oauth-title {
+  font-weight: 700;
+}
+.oauth-sub {
+  margin-top: 8px;            /* mt:1 */
+}
+
+/* 버튼 스택 */
+.oauth-actions {
+  margin-top: 24px;           /* mt:3 */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;                  /* gap:1.5 */
+}
+
+/* 작은 화면 대응 */
+@media (max-width: 480px) {
+  .oauth-card {
+    width: calc(100vw - 64px); /* 좌우 32px 여백 */
+  }
+}

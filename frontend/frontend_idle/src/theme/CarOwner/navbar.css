@@ -22,3 +22,14 @@
   transform: translateY(-6px);
   background-color: rgba(255, 255, 255, 0.2);
 }
+/* 균등 분배 */
+.bs-component .navbar .navbar-collapse { width: 100%; }
+.bs-component .navbar .navbar-nav { width: 100%; display: flex; }
+.bs-component .navbar .navbar-nav .nav-item { flex: 1 1 0; min-width: 0; }
+.bs-component .navbar .navbar-nav .nav-link {
+  display: block;
+  text-align: center;
+  white-space: nowrap;     /* 길어도 한 줄 유지 */
+  overflow: hidden;
+  text-overflow: ellipsis; /* 너무 길면 … 처리 (선택) */
+}

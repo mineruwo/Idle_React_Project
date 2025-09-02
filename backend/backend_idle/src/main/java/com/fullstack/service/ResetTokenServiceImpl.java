@@ -7,6 +7,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.fullstack.model.ResetPasswordTicketDTO;
+
 import lombok.RequiredArgsConstructor;
 
 
@@ -22,19 +24,22 @@ public class ResetTokenServiceImpl implements ResetTokenService {
     private long defaultTtlMinutes;
 
     @Override
-    public Token issueResetToken(String email) {
-        return issueResetToken(email, Duration.ofMinutes(defaultTtlMinutes));
+    public String issue(String id, Duration ttl) {
+        var now = LocalDateTime.now();
+        var payload = ResetPasswordTicketDTO.builder()
+                .id(id)                 // ✅ 필드명은 userId로
+                .issuedAt(now)
+                .expiresAt(now.plus(ttl))
+                .build();
+        return oneTimeTokenService.issue(PURPOSE, ttl, payload);
     }
 
     @Override
-    public Token issueResetToken(String email, Duration ttl) {
-        LocalDateTime exp = LocalDateTime.now().plus(ttl);
-        String token = oneTimeTokenService.issue(PURPOSE, ttl, email);
-        return new Token(token, exp);
+    public Optional<ResetPasswordTicketDTO> consume(String token) {
+        return oneTimeTokenService.consume(token, PURPOSE, ResetPasswordTicketDTO.class);
     }
-
-    @Override
-    public Optional<String> consume(String token) {
-        return oneTimeTokenService.consume(token, PURPOSE, String.class);
+    
+    public Optional<ResetPasswordTicketDTO> peek(String token) {
+        return oneTimeTokenService.peek(token, PURPOSE, ResetPasswordTicketDTO.class);
     }
 }

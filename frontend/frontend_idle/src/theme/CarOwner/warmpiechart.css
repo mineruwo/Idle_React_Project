@@ -2,7 +2,7 @@
   position: relative;
   width: 220px;
   height: 220px;
-  border: 2px solid #f8c5d0;
+  border: 2px solid #B9D5D9;
   border-radius: 12px;
   padding: 10px;
   background-color: #fffafa;
@@ -21,7 +21,7 @@
 .score {
   font-size: 28px;
   font-weight: bold;
-  color: #ff6699;
+  color: #B9D5D9;
 }
 
 .label {

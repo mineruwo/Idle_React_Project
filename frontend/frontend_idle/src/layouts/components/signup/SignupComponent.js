@@ -9,7 +9,7 @@ import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import AppTheme from '../../../theme/muitheme/AppTheme';
-import { GoogleIcon, KakaoIcon, NaverIcon, PinkTruckIcon } from '../common/IconComponent';
+import { GoogleIcon, KakaoIcon, NaverIcon } from '../common/IconComponent';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import useCustomMove from '../../../hooks/useCustomMove';
@@ -17,6 +17,7 @@ import { checkIdDuplicate, checkNicknameDuplicate, signUp } from '../../../api/s
 import { UserCard as Card, UserContainer as SignUpContainer } from '../../../theme/User/UserCard';
 import { useState } from 'react';
 import EmailVerificationModal from '../modal/EmailVerificationModal';
+import '../../../theme/signup/signup.css';
 
 export default function SignUp(props) {
   const [emailError, setEmailError] = useState(false);
@@ -53,7 +54,7 @@ export default function SignUp(props) {
     const customName = document.getElementById('customName').value.trim();
     const nickname = document.getElementById('nickname').value.trim();
     const phone = document.getElementById('phone').value.trim();
-    
+
 
     let isValid = true;
 
@@ -149,23 +150,28 @@ export default function SignUp(props) {
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
       <SignUpContainer direction="column" justifyContent="space-between">
-        <Card variant="outlined">
-          <PinkTruckIcon />
+        <Card variant="outlined" className="sign-card">
+          <Box
+            component="img"
+            src="/img/logo/logo.png"
+            alt="Idle 고양이 로고"
+            className="sign-logo"
+          />
           <Typography
             component="h1"
             variant="h4"
-            sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
+            className="sign-title" 
           >
             회원가입
           </Typography>
           <Box
             component="form"
             onSubmit={handleSubmit}
-            sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+            className="sign-form"
           >
             {/* 이름 */}
             <FormControl>
-              <FormLabel htmlFor="customName">이름</FormLabel>
+              <FormLabel htmlFor="customName" className="sign-formlabel">이름</FormLabel>
               <TextField
                 autoComplete="customName"
                 name="customName"
@@ -180,7 +186,7 @@ export default function SignUp(props) {
             </FormControl>
             {/* 이메일 */}
             <FormControl>
-              <FormLabel htmlFor="id">ID</FormLabel>
+              <FormLabel htmlFor="id" className="sign-formlabel">ID</FormLabel>
               <TextField
                 fullWidth
                 id="id"
@@ -196,7 +202,7 @@ export default function SignUp(props) {
             </FormControl>
             {/* 비밀번호 */}
             <FormControl>
-              <FormLabel htmlFor="password">비밀번호</FormLabel>
+              <FormLabel htmlFor="password" className="sign-formlabel">비밀번호</FormLabel>
               <TextField
                 fullWidth
                 name="password"
@@ -213,7 +219,7 @@ export default function SignUp(props) {
             </FormControl>
             {/* 비밀번호 확인 */}
             <FormControl>
-              <FormLabel htmlFor="passwordCheck">비밀번호 확인</FormLabel>
+              <FormLabel htmlFor="passwordCheck" className="sign-formlabel">비밀번호 확인</FormLabel>
               <TextField
                 fullWidth
                 name="passwordCheck"
@@ -230,7 +236,7 @@ export default function SignUp(props) {
             </FormControl>
             {/* 닉네임 */}
             <FormControl>
-              <FormLabel htmlFor="nickname">닉네임</FormLabel>
+              <FormLabel htmlFor="nickname" className="sign-formlabel">닉네임</FormLabel>
               <TextField
                 fullWidth
                 name="nickname"
@@ -247,7 +253,7 @@ export default function SignUp(props) {
             </FormControl>
             {/* 전화번호 */}
             <FormControl>
-              <FormLabel htmlFor="phone">전화번호</FormLabel>
+              <FormLabel htmlFor="phone" className="sign-formlabel">전화번호</FormLabel>
               <TextField
                 fullWidth
                 id="phone"
@@ -263,13 +269,7 @@ export default function SignUp(props) {
             </FormControl>
             {/* 회원 유형 */}
             <FormControl component="fieldset">
-              <FormLabel component="legend"
-                sx={{
-                  color: 'grey.800',
-                  '&.Mui-focused': {
-                    color: 'grey.800', // 포커스 되어도 색 유지
-                  }
-                }}>
+              <FormLabel component="legend" className="sign-formlabel">
                 회원 유형
               </FormLabel>
               <RadioGroup
@@ -291,10 +291,10 @@ export default function SignUp(props) {
               회원가입
             </Button>
           </Box>
-          <Divider sx={{ mt: 2 }}>
+          <Divider className="sign-divider">
             <Typography sx={{ color: 'text.secondary' }}>SNS 회원가입</Typography>
           </Divider>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box className="sign-sns">
             <Button
               fullWidth
               variant="outlined"
@@ -319,17 +319,11 @@ export default function SignUp(props) {
             >
               카카오 가입
             </Button>
-            <Typography sx={{ textAlign: 'center' }}>
+            <Typography className="sign-signin">
               이미 계정이 있나요?{' '}
               <Link
                 component="button"
                 variant="body2"
-                sx={{
-                  alignSelf: 'center',
-                  verticalAlign: 'baseline',
-                  padding: 0,
-                  lineHeight: 'inherit'
-                }}
                 onClick={moveToLoginPage}
               >
                 로그인
@@ -341,7 +335,7 @@ export default function SignUp(props) {
       <EmailVerificationModal
         open={openModal}
         onClose={() => setOpenModal(false)}
-        email={id} 
+        email={id}
         onVerified={async () => {
           await signUp({ customName, passwordEnc: password, nickname, id, role, phone });
           alert("회원가입 성공");
