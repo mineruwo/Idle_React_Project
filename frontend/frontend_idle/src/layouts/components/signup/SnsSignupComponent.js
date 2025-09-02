@@ -6,7 +6,6 @@ import {
 } from "@mui/material";
 import AppTheme from "../../../theme/muitheme/AppTheme";
 import { UserCard as Card, UserContainer as Container } from "../../../theme/User/UserCard";
-import { PinkTruckIcon } from "../common/IconComponent";
 import { snsSignup } from "../../../api/snsApi";
 
 export default function SnsSignupComponent(props) {
@@ -53,7 +52,16 @@ export default function SnsSignupComponent(props) {
       <CssBaseline enableColorScheme />
       <Container direction="column" justifyContent="space-between">
         <Card variant="outlined">
-          <PinkTruckIcon />
+          <Box
+            component="img"
+            src="/img/logo/logo.png"
+            alt="Idle 고양이 로고"
+            sx={{
+              width: 64, height: 64,
+              objectFit: 'contain',
+              alignSelf: 'left'
+            }}
+          />
           <Typography component="h1" variant="h4" sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}>
             SNS 신규가입
           </Typography>

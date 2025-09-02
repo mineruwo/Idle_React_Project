@@ -8,13 +8,14 @@ import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import AppTheme from '../../../theme/muitheme/AppTheme';
-import { GoogleIcon, KakaoIcon, NaverIcon, PinkTruckIcon } from '../common/IconComponent';
+import { GoogleIcon, KakaoIcon, NaverIcon } from '../common/IconComponent';
 import useCustomMove from '../../../hooks/useCustomMove';
 import { login } from '../../../api/loginApi';
 import { UserCard as Card, UserContainer as SignInContainer } from '../../../theme/User/UserCard';
 import { useState } from 'react';
 import ForgotPasswordModal from '../modal/ForgotPasswordModal';
 import { useAuth } from '../../../auth/AuthProvider';
+import '../../../theme/login/login.css'; 
 
 
 export default function LoginComponent(props) {
@@ -77,7 +78,7 @@ export default function LoginComponent(props) {
                 moveToMyPageByRole(role);
             } else {
                 console.warn("login 응답에 role이 없어 라우팅을 건너뜁니다");
-            }      
+            }
         } catch (err) {
             const status = err?.response?.status;
             if (status === 401 || status === 403) {
@@ -92,12 +93,17 @@ export default function LoginComponent(props) {
         <AppTheme {...props}>
             <CssBaseline enableColorScheme />
             <SignInContainer direction="column" justifyContent="space-between">
-                <Card variant="outlined">
-                    <PinkTruckIcon />
+                <Card variant="outlined" className="login-card">
+                    <Box
+                        component="img"
+                        src="/img/logo/logo.png"
+                        alt="Idle 고양이 로고"
+                        className="login-logo"
+                    />
                     <Typography
                         component="h1"
                         variant="h4"
-                        sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
+                        className="login-title"
                     >
                         로그인
                     </Typography>
@@ -105,12 +111,7 @@ export default function LoginComponent(props) {
                         component="form"
                         onSubmit={handleSubmit}
                         noValidate
-                        sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            width: '100%',
-                            gap: 2,
-                        }}
+                        className="login-form"
                     >
                         <FormControl>
                             <FormLabel htmlFor="id">ID</FormLabel>
@@ -158,7 +159,7 @@ export default function LoginComponent(props) {
                             type="submit"
                             fullWidth
                             variant="contained"
-                            sx={{ mt: 4 }}
+                            className="login-submit"
                         >
                             로그인
                         </Button>
@@ -166,14 +167,15 @@ export default function LoginComponent(props) {
                             component="button"
                             type="button"
                             onClick={() => setForgotOpen(true)}
-                            variant="body2" sx={{ alignSelf: 'center' }}>
+                            variant="body2" 
+                            className="login-forgot">
                             비밀번호 찾기
                         </Link>
                     </Box>
-                    <Divider sx={{ mt: 2 }}>
+                    <Divider className="login-divider">
                         <Typography sx={{ color: 'text.secondary' }}>SNS 로그인</Typography>
                     </Divider>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box className="login-sns">
                         <Button
                             fullWidth
                             variant="outlined"
@@ -198,7 +200,7 @@ export default function LoginComponent(props) {
                         >
                             카카오 로그인
                         </Button>
-                        <Typography sx={{ textAlign: 'center' }}>
+                        <Typography className="login-signup">
                             회원이 아니신가요?{' '}
                             <Link
                                 component="button"

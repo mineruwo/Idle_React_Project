@@ -71,30 +71,3 @@ export function KakaoIcon(props) {
         </SvgIcon>
     );
 }
-
-
-export function PinkTruckIcon(props) {
-    return (
-    <SvgIcon
-      viewBox="0 0 64 64"
-      fontSize="inherit"
-      {...props}
-      sx={{
-        fontSize: '70px',
-        transform: 'scaleX(-1)', // 전체 좌우 반전
-        ...props.sx,
-      }}
-    >
-      {/* 짐칸 */}
-      <rect x="2" y="24" width="42" height="20" rx="2" fill="hsl(1, 83%, 70%)" />
-
-      {/* 운전석 */}
-      <path d="M44 28h14l6 8v8H44V30z" fill="hsl(1, 83%, 70%)" />
-
-      {/* 바퀴 */}
-      <circle cx="14" cy="50" r="4" fill="#2d3436" />
-      <circle cx="52" cy="50" r="4" fill="#2d3436" />
-
-    </SvgIcon>
-  );
-}

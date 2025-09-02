@@ -15,8 +15,10 @@ import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import lombok.extern.log4j.Log4j2;
 
 @Service
+@Log4j2
 public class OneTimeTokenServiceImpl implements OneTimeTokenService {
 
 	private static final SecureRandom RNG = new SecureRandom();
@@ -52,20 +54,25 @@ public class OneTimeTokenServiceImpl implements OneTimeTokenService {
 		if (token == null || token.isBlank())
 			return Optional.empty();
 
-		// 1회용: remove 후 검증
-		Entry e = store.remove(token);
-		if (e == null)
-			return Optional.empty();
-		if (!expectedPurpose.equals(e.purpose))
-			return Optional.empty();
-		if (e.expiresAt.isBefore(LocalDateTime.now()))
-			return Optional.empty();
-
-		Object payload = e.payload;
-		if (payload == null || !type.isInstance(payload))
-			return Optional.empty();
-
-		return Optional.of((T) payload);
+		Entry e = store.remove(token); // 1회성
+	    if (e == null) {
+	        log.warn("OTT.consume: not found or already consumed. token={}", abbrev(token));
+	        return Optional.empty();
+	    }
+	    if (!expectedPurpose.equals(e.purpose)) {
+	        log.warn("OTT.consume: purpose mismatch. expected={}, actual={}", expectedPurpose, e.purpose);
+	        return Optional.empty();
+	    }
+	    if (e.expiresAt.isBefore(LocalDateTime.now())) {
+	        log.warn("OTT.consume: expired. exp={}, now={}", e.expiresAt, LocalDateTime.now());
+	        return Optional.empty();
+	    }
+	    if (e.payload == null || !type.isInstance(e.payload)) {
+	        log.warn("OTT.consume: type mismatch. required={}, actual={}", type.getName(),
+	                 (e.payload==null? "null" : e.payload.getClass().getName()));
+	        return Optional.empty();
+	    }
+	    return Optional.of(type.cast(e.payload));
 	}
 
 	private void purge() {
@@ -83,5 +90,19 @@ public class OneTimeTokenServiceImpl implements OneTimeTokenService {
 	public void shutdown() {
 		janitor.shutdownNow();
 	}
+	
+	@Override
+	public <T> Optional<T> peek(String token, String expectedPurpose, Class<T> type) {
+	    if (token == null || token.isBlank()) return Optional.empty();
+	    Entry e = store.get(token); // 소비 안 함
+	    if (e == null) return Optional.empty();
+	    if (!expectedPurpose.equals(e.purpose)) return Optional.empty();
+	    if (e.expiresAt.isBefore(LocalDateTime.now())) return Optional.empty();
+	    Object payload = e.payload;
+	    return (payload != null && type.isInstance(payload)) ? Optional.of(type.cast(payload)) : Optional.empty();
+	}
 
+	private static String abbrev(String s) {
+	    return s.length() <= 8 ? s : s.substring(0,4) + "..." + s.substring(s.length()-4);
+	}
 }
