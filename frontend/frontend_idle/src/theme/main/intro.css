@@ -3,12 +3,14 @@
 .hero {
     position: relative;
     width: 100%;
-    /* iOS 주소창 변화 대응: dvh 사용 + vh 폴백 */
-    height: clamp(320px, min(calc(100vw * var(--hero-ar)), 70dvh), 560px);
+    height: clamp(400px, 70dvh, 700px);
+    background-image:
+        linear-gradient(180deg, rgba(2,6,23,.35) 0%, rgba(2,6,23,.55) 100%),
+        var(--hero-bg);
     background-repeat: no-repeat, no-repeat;
-    background-size: contain, contain;            /* 잘림 방지 */
-    background-position: center 20%, center 20%; 
-    overflow: hidden; /* 오버플로 방지 */
+    background-size: cover, cover;                /* 데스크톱/가로형: 크롭 허용 */
+    background-position: center 22%, center 22%;
+    overflow: hidden;
 }
 
 /* 텍스트/버튼 레이어 */
@@ -35,6 +37,10 @@
   .hero { height: clamp(420px, 75vh, 720px); }
 }
 
-@media (max-width: 576px) {
-  height: clamp(280px, min(calc(100vw * var(--hero-ar)), 58dvh), 520px);   
+@media (max-aspect-ratio: 1/1), (max-width: 576px) {
+  .hero{
+    height: clamp(280px, min(calc(100vw * var(--hero-ar)), 62dvh), 560px);
+    background-size: contain, contain;          /* 둘 다 contain으로 맞춰서 잘림 방지 */
+    background-position: center 18%, center 18%;/* 초점 보정(원하면 조절) */
+  }
 }

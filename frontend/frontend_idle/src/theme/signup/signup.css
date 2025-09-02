@@ -1,0 +1,71 @@
+:root{
+  --su-gap-sm: 12px;
+  --su-gap-md: 16px;
+  --su-pad-card: 24px;
+  --su-title-size: clamp(2rem, 10vw, 2.15rem);
+  --su-logo-size: 64px;
+}
+
+/* ===== card & layout ===== */
+.sign-card{
+  display:flex;
+  flex-direction:column;
+  gap:var(--su-gap-md);
+  padding:var(--su-pad-card);
+}
+
+.sign-logo{
+  width:var(--su-logo-size);
+  height:var(--su-logo-size);
+  object-fit:contain;
+  align-self:flex-start;
+}
+
+.sign-title{
+  width:100%;
+  font-size:var(--su-title-size);
+  font-weight:700;
+}
+
+/* form */
+.sign-form{
+  display:flex;
+  flex-direction:column;
+  gap:var(--su-gap-md);
+  width:100%;
+}
+
+/* FormLabel 색상 고정(포커스에도 변경 없음) */
+.sign-formlabel{
+  color:#424242;
+}
+.sign-formlabel.Mui-focused{
+  color:#424242;
+}
+
+/* 구분선 여백 */
+.sign-divider{
+  margin-top:16px;
+}
+
+/* SNS 버튼 스택 */
+.sign-sns{
+  display:flex;
+  flex-direction:column;
+  gap:var(--su-gap-md);
+}
+
+/* 하단 로그인 문구 */
+.sign-signin{
+  text-align:center;
+}
+.sign-signin .MuiLink-root{
+  vertical-align:baseline;
+  padding:0;
+  line-height:inherit;
+}
+
+/* 소화면 카드 패딩 살짝 축소 */
+@media (max-width:480px){
+  .sign-card{ padding:20px; }
+}

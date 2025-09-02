@@ -1,0 +1,44 @@
+/* ===== tokens ===== */
+:root{
+  --le-gap-md:16px;
+  --le-pad-card:24px;
+  --le-title-size:clamp(2rem,10vw,2.15rem);
+  --le-logo-size:64px;
+}
+
+/* 카드 내부 레이아웃 */
+.le-card{
+  display:flex;
+  flex-direction:column;
+  gap:var(--le-gap-md);
+  padding:var(--le-pad-card);
+}
+
+/* 로고 */
+.le-logo{
+  width:var(--le-logo-size);
+  height:var(--le-logo-size);
+  object-fit:contain;
+  align-self:flex-start;
+}
+
+/* 타이틀 */
+.le-title{
+  width:100%;
+  font-size:var(--le-title-size);
+  font-weight:700;
+}
+
+/* 폼 레이아웃 */
+.le-form{
+  display:flex;
+  flex-direction:column;
+  gap:var(--le-gap-md);
+  width:100%;
+}
+
+
+/* 제출 버튼 여백 */
+.le-submit{
+  margin-top:32px !important;
+}
