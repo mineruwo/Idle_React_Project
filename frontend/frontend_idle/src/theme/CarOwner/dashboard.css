@@ -20,7 +20,7 @@
 .header-box, .chart-box, .delivery-box {
   background: white;
   padding: 1.5rem;
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 .chart-box{
@@ -55,7 +55,7 @@
   background-color: #fff3cd;
   color: #856404;
   padding: 15px 20px;
-  border: 1px solid #ffeeba;
+  border: 1px solid #B9D5D9;
   border-radius: 8px;
   font-size: 1rem;
   margin-top: 15px;

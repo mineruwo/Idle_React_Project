@@ -5,7 +5,7 @@ import {
   fetchSettlementSummaryCard,
   requestPayoutBatch,
 } from "../../../../api/CarOwnerApi/CarOwnerSettlementApi";
-import BankAccountModalPortal from "./BankAccountmodalPortal"; // ← 네가 만든 포탈 컴포넌트 경로
+import BankAccountModalPortal from "./BankAccountmodalPortal"; // 포탈 컴포넌트
 
 // YYYY-MM 생성
 function toYearMonth(d) {
@@ -13,7 +13,7 @@ function toYearMonth(d) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
 }
 
-// 이번 달 [from,to] 기본값
+// 이번 달 [from,to] 기본값 (한 번만 초기화용)
 function defaultMonthRange(from, to) {
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -24,11 +24,20 @@ function defaultMonthRange(from, to) {
 }
 
 const SettlementComponent = () => {
-  // 필터
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
+  // 필터 상태 (⛳ 최초 1회만 이번 달로 자동 세팅)
+  const init = defaultMonthRange();
+  const [from, setFrom] = useState(() => init.f);
+  const [to, setTo] = useState(() => init.t);
   const [status, setStatus] = useState("");
-  const [pageData, setPageData] = useState({ content: [], number: 0, size: 10, totalPages: 0, totalElements: 0 });
+
+  // 데이터 상태
+  const [pageData, setPageData] = useState({
+    content: [],
+    number: 0,
+    size: 10,
+    totalPages: 0,
+    totalElements: 0,
+  });
   const [card, setCard] = useState(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState(null);
@@ -37,7 +46,19 @@ const SettlementComponent = () => {
   const [batchSubmitting, setBatchSubmitting] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
-  // 버튼 클릭 → 모달만 열기
+  // 월 단위 빠른 선택 (선택 사항이었는데 포함해 드림)
+  const handleMonthChange = (value) => {
+    if (!value) return;
+    const [y, m] = value.split("-").map(Number);
+    const start = new Date(y, m - 1, 1);
+    const end = new Date(y, m, 0);
+    const pad = (n) => String(n).padStart(2, "0");
+    const toISO = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    setFrom(toISO(start));
+    setTo(toISO(end));
+  };
+
+  // 모달 열기 (READY 없으면 경고)
   const handleRequestPayoutBatch = () => {
     if (!card || (card.readyCount ?? 0) === 0) {
       alert("요청할 READY 건이 없습니다.");
@@ -46,7 +67,7 @@ const SettlementComponent = () => {
     setModalOpen(true);
   };
 
-  // 모달 제출 → API 호출 → 닫기 + 리프레시
+  // 모달 제출 → API → 리프레시
   const submitBankInfo = async ({ bankCode, accountNo }) => {
     const { ym } = defaultMonthRange(from, to);
     setBatchSubmitting(true);
@@ -56,7 +77,6 @@ const SettlementComponent = () => {
       setModalOpen(false);
       alert("정산 요청이 접수되었습니다.");
     } catch (e) {
-      // 에러는 모달에서 표시하고 싶으면 throw로 넘겨도 됨
       alert(e.message || "정산 요청 중 오류가 발생했습니다.");
       throw e;
     } finally {
@@ -64,11 +84,16 @@ const SettlementComponent = () => {
     }
   };
 
+  // 목록/요약 조회
   const load = async (page = 0) => {
     setLoading(true);
     setErr(null);
     try {
-      const { f, t } = defaultMonthRange(from, to);
+      // ⛳ 현재 상태 우선, 비어 있으면 이번 달로 안전 폴백
+      const base = defaultMonthRange();
+      const f = from || base.f;
+      const t = to || base.t;
+
       const [listRes, cardRes] = await Promise.all([
         fetchSettlements({ page, size: pageData.size || 10, status, from: f, to: t }),
         fetchSettlementSummaryCard({ from: f, to: t }),
@@ -95,11 +120,20 @@ const SettlementComponent = () => {
       <div className="actions" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div className="settlementtitle">
           <h1>정산 내역</h1>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
             <span>기간</span>
+            {/* 월 빠른 선택 */}
+            <input
+              type="month"
+              value={(from || init.f).slice(0, 7)}
+              onChange={(e) => handleMonthChange(e.target.value)}
+              title="월 선택 (자동으로 시작~말일 설정)"
+            />
+            {/* 날짜 범위 직접 입력 */}
             <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
             <span>~</span>
             <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+
             <select value={status} onChange={(e) => setStatus(e.target.value)}>
               <option value="">전체</option>
               <option value="READY">준비</option>
@@ -108,6 +142,7 @@ const SettlementComponent = () => {
               <option value="PAID">지급완료</option>
               <option value="CANCELED">취소</option>
             </select>
+
             <button onClick={() => load(0)}>조회</button>
           </div>
         </div>
@@ -129,19 +164,19 @@ const SettlementComponent = () => {
       {card && (
         <div className="summary-section">
           <div className="box">
-            <h3>📅 기간</h3>
+            <h3> 기간</h3>
             <p>{card.period}</p>
           </div>
           <div className="box">
-            <h3>💵 총 정산금액(Brut)</h3>
+            <h3> 총 정산금액(Brut)</h3>
             <p className="total">₩{Number(card.totalAmount ?? 0).toLocaleString()}</p>
           </div>
           <div className="box">
-            <h3>🧾 수수료</h3>
+            <h3>수수료</h3>
             <p className="total">₩{Number(card.totalCommission ?? 0).toLocaleString()}</p>
           </div>
           <div className="box">
-            <h3>✅ 순수령액(Net)</h3>
+            <h3>순수령액(Net)</h3>
             <p className="total">₩{Number(card.netAmount ?? 0).toLocaleString()}</p>
           </div>
           <div className="box smalls">
@@ -184,7 +219,7 @@ const SettlementComponent = () => {
                     <td>{it.orderNo || it.orderId}</td>
                     <td>₩{Number(it.amount ?? 0).toLocaleString()}</td>
                     <td>₩{Number(it.commission ?? 0).toLocaleString()}</td>
-                    <td>₩{Number((it.netAmount ?? 0)).toLocaleString()}</td>
+                    <td>₩{Number(it.netAmount ?? 0).toLocaleString()}</td>
                     <td>{it.status}</td>
                     <td>{(it.createdAt || "").replace("T", " ").slice(0, 16)}</td>
                   </tr>
@@ -195,7 +230,9 @@ const SettlementComponent = () => {
 
           <div className="pager" style={{ marginTop: 12 }}>
             <button disabled={pageData.number <= 0} onClick={() => load(pageData.number - 1)}>이전</button>
-            <span style={{ margin: "0 8px" }}>{(pageData.number ?? 0) + 1} / {pageData.totalPages || 1}</span>
+            <span style={{ margin: "0 8px" }}>
+              {(pageData.number ?? 0) + 1} / {pageData.totalPages || 1}
+            </span>
             <button
               disabled={(pageData.number ?? 0) + 1 >= (pageData.totalPages ?? 1)}
               onClick={() => load(pageData.number + 1)}
@@ -206,12 +243,12 @@ const SettlementComponent = () => {
         </>
       )}
 
-      {/* 🔹 모달 포탈: 버튼 누를 때만 뜨고, 제출/취소 시 사라짐 */}
+      {/* 모달 포탈 */}
       <BankAccountModalPortal
         open={modalOpen}
-        busy={batchSubmitting}                 // 선택 prop: 제출 중 비활성화
-        onClose={() => setModalOpen(false)}    // 취소 또는 성공 시 닫기
-        onSubmit={submitBankInfo}              // { bankCode, accountNo } 받음
+        busy={batchSubmitting}
+        onClose={() => setModalOpen(false)}
+        onSubmit={submitBankInfo}   // { bankCode, accountNo } 받음
       />
     </div>
   );

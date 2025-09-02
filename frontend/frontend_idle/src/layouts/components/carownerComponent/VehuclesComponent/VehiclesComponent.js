@@ -189,10 +189,6 @@ const VehicleListRegister = () => {
           <label>적재 용량</label>
           <input type="number" name="capacity" value={form.capacity} onChange={onChange} placeholder="숫자(kg/ton 규칙 합의)" />
         </div>
-        <div className="form-group" style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          <input type="checkbox" id="primary" name="primary" checked={form.primary} onChange={onChange} />
-          <label htmlFor="primary">기본 차량으로 등록</label>
-        </div>
         <button className="submit-btn" onClick={onSubmit}>등록</button>
       </div>
 

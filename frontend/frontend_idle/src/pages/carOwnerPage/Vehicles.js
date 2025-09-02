@@ -6,7 +6,7 @@ import GNB from "../../layouts/components/common/GNB";
 const Vehucles = ()  => {
     return(
         <div>
-            <div className="topmenu sticky-top">
+            <div className="topmenu">
             <GNB />
             <NaviTap />
             </div>

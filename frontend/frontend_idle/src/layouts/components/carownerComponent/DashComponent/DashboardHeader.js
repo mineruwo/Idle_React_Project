@@ -3,7 +3,7 @@ import "../../../../theme/CarOwner/cardashboard.css";
 
 const DashboardHeader = ({ name, completed, inProgress, scheduled, total, revenue, commission, settlement }) => {
   return (
-    <div className="header-box">
+    <div className="header-box ">
       <h2>👤 {name}님 운송 현황</h2>
       <ul>
         <li>✅ 완료: {completed}건</li>
