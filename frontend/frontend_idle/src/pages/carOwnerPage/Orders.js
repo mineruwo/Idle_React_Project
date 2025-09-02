@@ -9,7 +9,7 @@ const Order = () => {
     return (
 
         <div>
-            <div className="topmenu sticky-top">
+            <div className="topmenu">
                 <GNB />
                 <NaviTap />
             </div>

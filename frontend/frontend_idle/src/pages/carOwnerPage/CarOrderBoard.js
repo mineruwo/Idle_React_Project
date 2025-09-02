@@ -6,7 +6,7 @@ import OrderBoard from "../orderPage/OrderBoard";
 const CarOrderBoard = () => {
     return (
         <div>
-            <div className="topmenu sticky-top">
+            <div>
                 <GNB />
                 <NaviTap />
             </div>

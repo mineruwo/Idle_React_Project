@@ -92,8 +92,8 @@ const CarOwnerDashboard = () => {
   const warmthScore = warmth?.score; // 폴백 없음
 
   return (
-    <>
-      <div className="dashboard-container">
+    
+      <div className="dashboard-container bg-third ">
         <div className="dashborad-firstcontainer">
           <div className="dashboard-row">
             <DashboardHeader
@@ -124,8 +124,8 @@ const CarOwnerDashboard = () => {
                       {warmthScore >= 90
                         ? "와우! 완벽합니다!"
                         : warmthScore >= 70
-                        ? "좋아요! 더 좋아질 수 있어요."
-                        : "꾸준한 서비스로 점수를 올려봐요."}
+                          ? "좋아요! 더 좋아질 수 있어요."
+                          : "꾸준한 서비스로 점수를 올려봐요."}
                     </p>
                   </>
                 ) : (
@@ -137,14 +137,17 @@ const CarOwnerDashboard = () => {
 
           {/* 라인 차트 */}
           <SalesChart data={salesData} />
+
+          {/* 진행중 리스트 */}
+          <div className="delbox bg-third">
+            <DeliveryList deliveries={deliveries} onRefresh={refreshDeliveries} />
+          </div>
         </div>
       </div>
 
-      {/* 진행중 리스트 */}
-      <div className="delbox">
-        <DeliveryList deliveries={deliveries} onRefresh={refreshDeliveries} />
-      </div>
-    </>
+
+
+    
   );
 };
 

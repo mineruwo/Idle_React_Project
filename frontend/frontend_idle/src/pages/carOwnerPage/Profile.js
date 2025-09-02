@@ -8,13 +8,13 @@ import ProfileComponent from "../../layouts/components/carownerComponent/Profile
 
 const Profile = () => {
     return (
-        <div>
-            <div className="topmenu sticky-top">
+        <div className="page-container">
+            <div>
                 <GNB />
                 <NaviTap />
 
             </div>
-            <div>
+            <div className="page-content">
                 <ProfileComponent/>
             </div>
             <Footer />

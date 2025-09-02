@@ -36,12 +36,18 @@ const ProfileComponent = () => {
             <p><strong>Nickname:</strong> {user.nickname}</p>
             <p><strong>Name:</strong> {user.customName}</p>
             <p><strong>Phone:</strong> {user.phone}</p>
-          </div>
-          <div className="navbutton">
+            <p><strong>Email:</strong> {user.email ? user.email : "carowner@example.com"}</p>
+            <p><strong>driver Number:</strong>  12-34-567890</p>
+            <p><strong>Insurance:</strong> ABC-INS-2025</p>
+            
+
+            <div className="navbutton">
             <button className="btn" onClick={carOwnerMoveToEditProfile}>
               Edit Profile
             </button>
           </div>
+          </div>
+          
         </div>
       </div>
     </div>

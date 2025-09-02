@@ -1,24 +1,24 @@
 .profilewrapper{
   padding:2rem;
+  min-height: 100vh;
 }
 .profile-card {
   width: 50%;
   margin: 2rem auto;
- 
   padding: 2rem;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   font-family: sans-serif;
   display: flex;
-  flex-direction: column; /* 세로 배치 */
-  height: 100%;
+  flex-direction: column;
+  height: 855px;
   gap: 25px;
-  
-  border: 1px solid #f3c7d3;
+
+  border: 1px solid #B9D5D9;  /* ✅ 보더 색 통일 */
   margin-left: 40px;
-  height:65%;
-  
+  background-color: #ffffff;  /* ✅ 흰색 배경 지정 */
 }
+
 .editprofile-wrapper{
  
   display: flex;
@@ -27,22 +27,21 @@
   height: 100vh;           /* 뷰포트 전체 높이 */
 
 }
-.editprofile-card{
+.editprofile-card {
   width: 50%;
   margin: 2rem auto;
-  background: #fff;
   padding: 2rem;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   font-family: sans-serif;
   display: flex;
-  flex-direction: column; /* 세로 배치 */
+  flex-direction: column;
   height: 100%;
   gap: 25px;
-  background-color: #fef8f8;
-  border: 1px solid #f3c7d3;
-  margin-left: 40px;
+
+  border: 1px solid #B9D5D9;
   margin-left: 300px;
+  background-color: #ffffff;  /* ✅ 흰색 배경 지정 */
 }
 
 .infodiv {
@@ -52,17 +51,18 @@
 }
 
 .profile-avatar {
+  margin-top:150px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 320px;
+  height: 400px;
   border-radius: 1500px;
   border-radius: 12px;
 }
 .avatar-info{
-  margin-top: 50px;
-  height:320px;
+  margin-top: 150px;
+  height:360px;
   justify-items: center;
   
 }
@@ -83,6 +83,7 @@
 }
 
 .profile-info {
+  
   flex: 7;
   display: flex;
   flex-direction: column;
@@ -90,11 +91,22 @@
   align-items: center;
   text-align: center;
   margin: 1rem 0;
-  border: 1px solid #f3c7d3;
   margin-top: 32px;
+  border: 1px solid #B9D5D9;
   border-radius: 12px;
-  
+  padding-top: 150px;
+  gap: 12px;
+
+  background-color: #ffffff;  /* ✅ 흰색 배경 지정 */
+  margin-bottom: 215px;
 }
+
+.profilewrapper .navbutton .btn {
+  background-color: #88B4B7;   /* 원하는 색 */
+  color: #fff;                 /* 필요 시 */
+  border: 1px solid #B9D5D9;   /* 필요 시 */
+}
+
 
 .navbutton {
   flex: 3;
@@ -123,7 +135,7 @@
   margin-top: 0.2rem;
 }
 
-.btn {
+.profilewrapper .btn {
   margin-top: 1.5rem;
   background-color: #f3c7d3;
   color: white;
@@ -133,6 +145,6 @@
   cursor: pointer;
 }
 
-.btn:hover {
+.profilewrapper .btn:hover {
   background-color: #0056b3;
 }

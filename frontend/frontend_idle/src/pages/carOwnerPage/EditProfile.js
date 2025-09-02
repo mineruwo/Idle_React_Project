@@ -10,7 +10,7 @@ import EditProfilePage from "../../layouts/components/carownerComponent/ProfileC
 const editProfile = () => {
     return (
         <div>
-            <div className="topmenu sticky-top">
+            <div className="topmenu">
                 <GNB />
                 <NaviTap />
 
