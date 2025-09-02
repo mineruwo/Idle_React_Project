@@ -808,11 +808,8 @@ const OrderBoard = () => {
                                 <div className="offer-list">
                                     {offers.map((o) => {
                                         const driverDisplay =
-                                            selected?.assignedDriverId
-                                                ? selected?.assignedDriverNickname ||
-                                                  `기사 #${o.driverId}`
-                                                : o.driverNick ||
-                                                  `기사 #${o.driverId}`;
+                                            o.driverNickname ||
+                                            `기사 #${o.driverIdNum}`;
 
                                         return (
                                             <div
@@ -872,7 +869,7 @@ const OrderBoard = () => {
                                             style={{
                                                 marginTop: 10,
                                                 paddingTop: 10,
-                                                borderTop: "1px solid #f3c9db",
+                                                borderTop: "1px solid #eee",
                                                 display: "flex",
                                                 justifyContent: "flex-end",
                                             }}

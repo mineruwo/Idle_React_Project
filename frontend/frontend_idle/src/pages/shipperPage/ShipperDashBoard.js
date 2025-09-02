@@ -23,7 +23,7 @@ const ShipperDashBoard = () => {
                 <GNB />
                 <ShipperNavBarComponent userId={idNum} />
             </div>
-            <div style={{ padding: "0 200px 0 200px" }}>
+            <div>
                 <Outlet />
             </div>
             <Footer />
