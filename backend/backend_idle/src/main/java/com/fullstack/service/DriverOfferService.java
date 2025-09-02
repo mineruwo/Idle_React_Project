@@ -2,8 +2,8 @@
 package com.fullstack.service;
 
 import com.fullstack.entity.CustomerEntity;
-import com.fullstack.entity.DriverOffer;
-import com.fullstack.entity.Order;
+import com.fullstack.entity.DriverOfferEntity;
+import com.fullstack.entity.OrderEntity;
 import com.fullstack.model.DriverOfferCreateRequest;
 import com.fullstack.model.DriverOfferResponse;
 import com.fullstack.model.OfferAssignRequest;
@@ -37,7 +37,7 @@ public class DriverOfferService {
         if (req.getOrderId() == null) throw new IllegalArgumentException("orderId가 필요합니다.");
         if (req.getPrice() == null || req.getPrice() <= 0) throw new IllegalArgumentException("유효한 제안가가 아닙니다.");
 
-        Order order = orderRepository.findById(req.getOrderId())
+        OrderEntity order = orderRepository.findById(req.getOrderId())
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + req.getOrderId()));
 
         // 이미 확정 단계(결제대기/완료)인 주문에는 입찰 불가
@@ -49,12 +49,12 @@ public class DriverOfferService {
         CustomerEntity driver = customerRepository.findById(driverIdNum)
                 .orElseThrow(() -> new IllegalArgumentException("Driver not found: " + driverIdNum));
 
-        DriverOffer offer = DriverOffer.builder()
+        DriverOfferEntity offer = DriverOfferEntity.builder()
                 .order(order)
                 .driver(driver)
                 .price(req.getPrice())
                 .memo(req.getMemo())
-                .status(DriverOffer.Status.PENDING)
+                .status(DriverOfferEntity.Status.PENDING)
                 .build();
 
         return DriverOfferResponse.from(driverOfferRepository.save(offer));
@@ -80,10 +80,10 @@ public class DriverOfferService {
     public DriverOfferResponse accept(Long offerId) {
         if (offerId == null) throw new IllegalArgumentException("offerId가 필요합니다.");
 
-        DriverOffer offer = driverOfferRepository.findByIdWithDriver(offerId) // Use new method
+        DriverOfferEntity offer = driverOfferRepository.findByIdWithDriver(offerId) // Use new method
                 .orElseThrow(() -> new IllegalArgumentException("Offer not found: " + offerId));
 
-        Order order = offer.getOrder();
+        OrderEntity order = offer.getOrder();
 
         String os = String.valueOf(order.getStatus()).toUpperCase();
         if ("PAYMENT_PENDING".equals(os) || "ASSIGNED".equals(os) || "COMPLETED".equals(os)) {
@@ -92,13 +92,13 @@ public class DriverOfferService {
         }
 
         // 확정
-        offer.setStatus(DriverOffer.Status.ACCEPTED);
+        offer.setStatus(DriverOfferEntity.Status.ACCEPTED);
 
         // 주문 반영
         order.setDriverPrice(offer.getPrice());
         Long assigned = (offer.getDriver() != null && offer.getDriver().getIdNum() != null)
                 ? offer.getDriver().getIdNum().longValue() : null;
-        order.setAssignedDriverId(assigned);
+        order.setAssignedDriver(customerRepository.findByIdNum(assigned).orElse(null));
         order.setStatus(OrderStatus.PAYMENT_PENDING);
         // 다른 PENDING 전부 거절
         driverOfferRepository.rejectOthers(order.getId(), offer.getId());
@@ -116,7 +116,7 @@ public class DriverOfferService {
         if (req.getDriverId() == null) throw new IllegalArgumentException("driverId(=ID_NUM)가 필요합니다.");
         if (req.getPrice() == null || req.getPrice() <= 0) throw new IllegalArgumentException("유효한 제안가가 아닙니다.");
 
-        Order order = orderRepository.findById(req.getOrderId())
+        OrderEntity order = orderRepository.findById(req.getOrderId())
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + req.getOrderId()));
 
         if (OrderStatus.READY.equals(order.getStatus()) || OrderStatus.ONGOING.equals(order.getStatus())) {
@@ -126,20 +126,20 @@ public class DriverOfferService {
         CustomerEntity driver = customerRepository.findById(req.getDriverId())
                 .orElseThrow(() -> new IllegalArgumentException("Driver not found: " + req.getDriverId()));
 
-        DriverOffer offer = driverOfferRepository.save(
-                DriverOffer.builder()
+        DriverOfferEntity offer = driverOfferRepository.save(
+                DriverOfferEntity.builder()
                         .order(order)
                         .driver(driver)
                         .price(req.getPrice())
                         .memo(req.getMemo())
-                        .status(DriverOffer.Status.PENDING)
+                        .status(DriverOfferEntity.Status.PENDING)
                         .build()
         );
 
         // 즉시 확정
-        offer.setStatus(DriverOffer.Status.ACCEPTED);
+        offer.setStatus(DriverOfferEntity.Status.ACCEPTED);
         order.setDriverPrice(offer.getPrice());
-        order.setAssignedDriverId(driver.getIdNum().longValue());
+        order.setAssignedDriver(driver);
         // ✅ 결제대기 전환
         order.setStatus(OrderStatus.PAYMENT_PENDING);
 
@@ -152,7 +152,7 @@ public class DriverOfferService {
     @Transactional(Transactional.TxType.SUPPORTS)
     public Long getDriverPriceByOrderId(Long orderId) {
         if (orderId == null) throw new IllegalArgumentException("orderId가 필요합니다.");
-        Order order = orderRepository.findById(orderId)
+        OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
         return order.getDriverPrice();
     }

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { getAllNotices } from '../../../api/publicApi'; // Assuming this path is correct
-import './NoticeComponent.css'; // Import new CSS file for collapse animation
+import '../../../theme/main/NoticeComponent.css'; // Import new CSS file for collapse animation
 
 const NoticeComponent = () => {
     const [notices, setNotices] = useState([]);

@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "point_history")
-public class PointHistory {
+public class PointHistoryEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

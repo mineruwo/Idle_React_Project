@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Table(name = "driver_offers")
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor @Builder
-public class DriverOffer {
+public class DriverOfferEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,7 +18,7 @@ public class DriverOffer {
     /** 오더 (다:1 관계) */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    private OrderEntity order;
 
     /** 기사 (CustomerEntity.idNum 기준 FK) */
     @ManyToOne(fetch = FetchType.LAZY)

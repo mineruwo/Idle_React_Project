@@ -6,7 +6,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fullstack.entity.CarOwnerVehicles;
+import com.fullstack.entity.CarOwnerVehiclesEntity;
 import com.fullstack.model.CarOwnerVehiclesDTO.VehicleCreateRequest;
 import com.fullstack.model.CarOwnerVehiclesDTO.VehicleDetailResponse;
 import com.fullstack.model.CarOwnerVehiclesDTO.VehicleSummaryResponse;
@@ -25,7 +25,7 @@ public class CarOwnerVehiclesServiceImpl implements CarOwnerVehiclesService {
     @Transactional(readOnly = true)
     @Override
     public Page<VehicleSummaryResponse> list(String ownerId, int page, int size) {
-        Page<CarOwnerVehicles> p = repo.findByOwnerIdOrderByPrimaryDescIdDesc(ownerId, PageRequest.of(page, size));
+        Page<CarOwnerVehiclesEntity> p = repo.findByOwnerIdOrderByPrimaryDescIdDesc(ownerId, PageRequest.of(page, size));
         System.out.println("차량리스트 불러오는중? ==========================" + p);
         return p.map(this::toSummary);
     }
@@ -33,7 +33,7 @@ public class CarOwnerVehiclesServiceImpl implements CarOwnerVehiclesService {
     @Transactional(readOnly = true)
     @Override
     public VehicleDetailResponse get(String ownerId, Long vehicleId) {
-        CarOwnerVehicles v = repo.findByIdAndOwnerId(vehicleId, ownerId)
+        CarOwnerVehiclesEntity v = repo.findByIdAndOwnerId(vehicleId, ownerId)
                 .orElseThrow(() -> new NoSuchElementException("VEHICLE_NOT_FOUND"));
         return toDetail(v);
     }
@@ -45,7 +45,7 @@ public class CarOwnerVehiclesServiceImpl implements CarOwnerVehiclesService {
             throw new IllegalArgumentException("PLATE_DUPLICATED");
         }
 
-        CarOwnerVehicles v = CarOwnerVehicles.builder()
+        CarOwnerVehiclesEntity v = CarOwnerVehiclesEntity.builder()
                 .ownerId(ownerId)
                 .plateNumber(req.getPlateNumber())
                 .type(req.getType())
@@ -65,7 +65,7 @@ public class CarOwnerVehiclesServiceImpl implements CarOwnerVehiclesService {
     @Transactional
     @Override
     public VehicleDetailResponse update(String ownerId, Long vehicleId, VehicleUpdateRequest req) {
-    	CarOwnerVehicles v = repo.findByIdAndOwnerId(vehicleId, ownerId)
+    	CarOwnerVehiclesEntity v = repo.findByIdAndOwnerId(vehicleId, ownerId)
                 .orElseThrow(() -> new NoSuchElementException("VEHICLE_NOT_FOUND"));
 
         if (req.getType() != null) v.setType(req.getType());
@@ -78,7 +78,7 @@ public class CarOwnerVehiclesServiceImpl implements CarOwnerVehiclesService {
     @Transactional
     @Override
     public VehicleDetailResponse setPrimary(String ownerId, Long vehicleId, boolean primary) {
-    	CarOwnerVehicles target = repo.findByIdAndOwnerId(vehicleId, ownerId)
+    	CarOwnerVehiclesEntity target = repo.findByIdAndOwnerId(vehicleId, ownerId)
                 .orElseThrow(() -> new NoSuchElementException("VEHICLE_NOT_FOUND"));
 
         if (primary) {
@@ -93,13 +93,13 @@ public class CarOwnerVehiclesServiceImpl implements CarOwnerVehiclesService {
     @Transactional
     @Override
     public void delete(String ownerId, Long vehicleId) {
-    	CarOwnerVehicles v = repo.findByIdAndOwnerId(vehicleId, ownerId)
+    	CarOwnerVehiclesEntity v = repo.findByIdAndOwnerId(vehicleId, ownerId)
                 .orElseThrow(() -> new NoSuchElementException("VEHICLE_NOT_FOUND"));
         repo.delete(v);
     }
 
     // ====== mappers ======
-    private VehicleSummaryResponse toSummary(CarOwnerVehicles v) {
+    private VehicleSummaryResponse toSummary(CarOwnerVehiclesEntity v) {
         VehicleSummaryResponse dto = new VehicleSummaryResponse();
         dto.setId(v.getId());
         dto.setPlateNumber(v.getPlateNumber());
@@ -112,7 +112,7 @@ public class CarOwnerVehiclesServiceImpl implements CarOwnerVehiclesService {
         return dto;
     }
 
-    private VehicleDetailResponse toDetail(CarOwnerVehicles v) {
+    private VehicleDetailResponse toDetail(CarOwnerVehiclesEntity v) {
         VehicleDetailResponse dto = new VehicleDetailResponse();
         dto.setId(v.getId());
         dto.setPlateNumber(v.getPlateNumber());

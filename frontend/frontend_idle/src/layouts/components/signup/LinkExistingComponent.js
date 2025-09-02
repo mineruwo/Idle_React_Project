@@ -5,8 +5,8 @@ import {
 } from "@mui/material";
 import AppTheme from "../../../theme/muitheme/AppTheme";
 import { UserCard as Card, UserContainer as Container } from "../../../theme/User/UserCard";
-import { PinkTruckIcon } from "../common/IconComponent";
-import { linkExisting } from "../../../api/snsApi"; 
+import { linkExisting } from "../../../api/snsApi";
+import "../../../theme/signup/LinkExisting.css";
 
 export default function LinkExistingComponent(props) {
   const nav = useNavigate();
@@ -31,7 +31,7 @@ export default function LinkExistingComponent(props) {
       setPwErr(true); setPwMsg("비밀번호를 입력해주세요"); ok = false;
     } else { setPwErr(false); setPwMsg(""); }
     return ok;
-    };
+  };
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -51,13 +51,14 @@ export default function LinkExistingComponent(props) {
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
       <Container direction="column" justifyContent="space-between">
-        <Card variant="outlined">
-          <PinkTruckIcon />
-          <Typography component="h1" variant="h4" sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}>
-            기존 계정과 연결
+        <Card variant="outlined" className="le-card">
+          <Box component="img" src="/img/logo/logo.png" alt="Idle 고양이 로고" className="le-logo" />
+
+          <Typography component="h1" variant="h4" className="le-title">
+            기존 계정 연결
           </Typography>
 
-          <Box component="form" onSubmit={onSubmit} noValidate sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Box component="form" onSubmit={onSubmit} noValidate className="le-form">
             <FormControl>
               <FormLabel htmlFor="id">로그인 ID(이메일)</FormLabel>
               <TextField
@@ -79,22 +80,16 @@ export default function LinkExistingComponent(props) {
             </FormControl>
 
             {err && (
-              <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+              <Typography variant="body2" color="error" className="le-err">
                 {err}
               </Typography>
             )}
 
-            <Button type="submit" fullWidth variant="contained" sx={{ mt: 1 }} disabled={!canSubmit}>
+            <Button type="submit" fullWidth variant="contained" className="le-submit" disabled={!canSubmit}>
               {loading ? "연결 중..." : "연결하기"}
             </Button>
           </Box>
 
-          <Divider sx={{ mt: 2 }}>
-            <Typography sx={{ color: "text.secondary" }}>안내</Typography>
-          </Divider>
-          <Typography variant="body2" color="text.secondary">
-            연결 후에는 해당 SNS로 빠르게 로그인할 수 있어요.
-          </Typography>
         </Card>
       </Container>
     </AppTheme>

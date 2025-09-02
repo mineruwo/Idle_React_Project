@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
            @Index(name = "idx_vehicle_primary", columnList = "owner_id,is_primary")
        })
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class CarOwnerVehicles {
+public class CarOwnerVehiclesEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

@@ -2,7 +2,7 @@ package com.fullstack.entity;
 
 import java.time.LocalDateTime;
 
-import com.fullstack.entity.Order; // Order import 추가
+import com.fullstack.entity.OrderEntity; // Order import 추가
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -46,7 +46,7 @@ public class PaymentEntity {
     // Order 와의 관계 설정 추가
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
-    private Order order;
+    private OrderEntity order;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "customer_id", referencedColumnName = "ID_NUM")

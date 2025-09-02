@@ -24,6 +24,7 @@ public final class CarOwnerOrderListDTO {
         private String departure;   // 출발지
         private String arrival;     // 도착지
         private String s_date; 
+        private Long assignedDriverId; // Added 
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder

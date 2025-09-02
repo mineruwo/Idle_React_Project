@@ -10,6 +10,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.ManyToOne; // Added
+import jakarta.persistence.JoinColumn; // Added
+import jakarta.persistence.FetchType; // Added
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,7 +26,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class CarOwnerAuth {
+public class CarOwnerAuthEntity {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,8 +35,9 @@ public class CarOwnerAuth {
 	@Column(name= "CAR_NUM", nullable = true)
 	private String carNum;
 	
-	@Column(name = "ID_NUM", nullable = false)
-	private Integer idNum;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "ID_NUM", referencedColumnName = "ID_NUM", nullable = false)
+	private CustomerEntity customer;
 	
 	@Column(name = "CAR_TYPE", nullable = false)
 	private String carType;
@@ -46,12 +50,12 @@ public class CarOwnerAuth {
 	
 	@OneToOne
 	@JoinColumn(name = "vehicle_id")
-	private CarOwnerVehicles vehicle;
+	private CarOwnerVehiclesEntity vehicle;
 	
 	@OneToOne(optional = false, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "business_license_id", unique = true, nullable = false)
-	private BusinessLicense businessLicense;
+	private BusinessLicenseEntity businessLicense;
 
 	@OneToOne(mappedBy = "transportAuth", cascade = CascadeType.ALL)
-	private DriverLicense driverLicense;
+	private DriverLicenseEntity driverLicense;
 }

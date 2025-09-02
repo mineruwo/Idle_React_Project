@@ -1,9 +1,9 @@
 package com.fullstack.service;
 
-import com.fullstack.entity.CarOwnerSettlement;
-import com.fullstack.entity.CarOwnerSettlement.Status;
-import com.fullstack.entity.CarOwnerSettlementBatch;
-import com.fullstack.entity.Order;
+import com.fullstack.entity.CarOwnerSettlementEntity;
+import com.fullstack.entity.CarOwnerSettlementEntity.Status;
+import com.fullstack.entity.CarOwnerSettlementBatchEntity;
+import com.fullstack.entity.OrderEntity;
 import com.fullstack.model.CarOwnerSettlementDTO.SettlementDetailResponse;
 import com.fullstack.model.CarOwnerSettlementDTO.SettlementSummaryCardResponse;
 import com.fullstack.model.CarOwnerSettlementDTO.SettlementSummaryResponse;
@@ -11,6 +11,7 @@ import com.fullstack.model.enums.OrderStatus;
 import com.fullstack.repository.CarOwnerSettlementBatchRepository;
 import com.fullstack.repository.CarOwnerSettlementRepository;
 import com.fullstack.repository.OrderRepository;
+import com.fullstack.repository.CustomerRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -37,6 +38,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
     private final CarOwnerSettlementRepository settlementRepo;
     private final CarOwnerSettlementBatchRepository batchRepo;
     private final OrderRepository orderRepo;
+    private final CustomerRepository customerRepo;
     
     @PersistenceContext
     private EntityManager em;
@@ -48,14 +50,14 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
 
     @Override
     public Page<SettlementSummaryResponse> list(
-            String ownerId, LocalDate from, LocalDate to, Status status, int page, int size) {
+            String ownerId, LocalDate from, LocalDate to, CarOwnerSettlementEntity.Status status, int page, int size) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         LocalDateTime start = (from != null) ? from.atStartOfDay()
                 : LocalDate.now().minusMonths(3).withDayOfMonth(1).atStartOfDay();
         LocalDateTime end = (to != null) ? to.plusDays(1).atStartOfDay() : LocalDateTime.now();
 
-        Page<CarOwnerSettlement> p = (status == null)
+        Page<CarOwnerSettlementEntity> p = (status == null)
                 ? settlementRepo.findByOwnerIdAndCreatedAtBetween(ownerId, start, end, pageable)
                 : settlementRepo.findByOwnerIdAndStatusAndCreatedAtBetween(ownerId, status, start, end, pageable);
 
@@ -66,7 +68,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
 
     @Override
     public SettlementDetailResponse getDetail(String ownerId, Long settlementId) {
-        CarOwnerSettlement s = settlementRepo.findById(settlementId)
+        CarOwnerSettlementEntity s = settlementRepo.findById(settlementId)
                 .orElseThrow(() -> new IllegalArgumentException("SETTLEMENT_NOT_FOUND"));
         requireOwner(s, ownerId);
         return toDetailDTO(s);
@@ -77,11 +79,11 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
     @Override
     @Transactional
     public Long createForOrder(String ownerId, Long orderId) {
-        Order o = orderRepo.findById(orderId)
+        OrderEntity o = orderRepo.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("ORDER_NOT_FOUND"));
 
         // ownerId(문자열) ↔ assignedDriverId(Long) 최소 검증
-        if (o.getAssignedDriverId() != null && !safeEqualsLongString(o.getAssignedDriverId(), ownerId)) {
+                if (o.getAssignedDriver() != null && !safeEqualsLongString(o.getAssignedDriver().getIdNum().longValue(), ownerId)) {
             throw new IllegalArgumentException("ORDER_NOT_OWNED_BY_THIS_OWNER");
         }
 
@@ -94,9 +96,9 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
         BigDecimal amount = computeBaseAmount(o);
         BigDecimal commission = computeCommission(amount);
         LocalDate monthKey = resolveMonthKey(o);
-        CarOwnerSettlementBatch batch = ensureBatch(ownerId, monthKey);
+        CarOwnerSettlementBatchEntity batch = ensureBatch(ownerId, monthKey);
 
-        CarOwnerSettlement s = new CarOwnerSettlement();
+        CarOwnerSettlementEntity s = new CarOwnerSettlementEntity();
         s.setOrder(o);
         s.setOwnerId(ownerId);
         s.setAmount(amount);
@@ -123,14 +125,14 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
         var orders = orderRepo.findByStatusAndCreatedAtBetween(OrderStatus.COMPLETED, start, end);
 
         int created = 0;
-        for (Order o : orders) {
-            if (o.getAssignedDriverId() == null) continue;
+        for (OrderEntity o : orders) {
+            if (o.getAssignedDriver() == null) continue;
 
             // 이미 정산 있으면 스킵
             if (settlementRepo.existsByOrderId(o.getId())) continue;
 
             // 누락된 것만 생성
-            createForOrder(String.valueOf(o.getAssignedDriverId()), o.getId());
+                        createForOrder(String.valueOf(o.getAssignedDriver().getIdNum().longValue()), o.getId());
             created++;
         }
         return created;
@@ -169,8 +171,8 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
 
     /* ===================== private helpers ===================== */
 
-    private SettlementSummaryResponse toSummaryDTO(CarOwnerSettlement s) {
-        Order o = s.getOrder();
+    private SettlementSummaryResponse toSummaryDTO(CarOwnerSettlementEntity s) {
+        OrderEntity o = s.getOrder();
         BigDecimal net = safe(s.getAmount()).subtract(safe(s.getCommission()));
         return SettlementSummaryResponse.builder()
                 .id(s.getId())
@@ -188,8 +190,8 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
                 .build();
     }
 
-    private SettlementDetailResponse toDetailDTO(CarOwnerSettlement s) {
-        Order o = s.getOrder();
+    private SettlementDetailResponse toDetailDTO(CarOwnerSettlementEntity s) {
+        OrderEntity o = s.getOrder();
         BigDecimal net = safe(s.getAmount()).subtract(safe(s.getCommission()));
         return SettlementDetailResponse.builder()
                 .id(s.getId())
@@ -212,7 +214,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
                 .build();
     }
 
-    private void requireOwner(CarOwnerSettlement s, String ownerId) {
+    private void requireOwner(CarOwnerSettlementEntity s, String ownerId) {
         if (!Objects.equals(s.getOwnerId(), ownerId)) {
             throw new IllegalArgumentException("NO_AUTH_FOR_THIS_RESOURCE");
         }
@@ -228,7 +230,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
         try { return Long.parseLong(s); } catch (NumberFormatException e) { return null; }
     }
 
-    private BigDecimal computeBaseAmount(Order o) {
+    private BigDecimal computeBaseAmount(OrderEntity o) {
         if (o.getDriverPrice() != null) return BigDecimal.valueOf(o.getDriverPrice());
         if (o.getProposedPrice() != null) return BigDecimal.valueOf(o.getProposedPrice().longValue());
         if (o.getAvgPrice() != null) return BigDecimal.valueOf(o.getAvgPrice());
@@ -239,7 +241,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
         return safe(baseAmount).multiply(COMMISSION_RATE).setScale(0, RoundingMode.HALF_UP);
     }
 
-    private LocalDate resolveMonthKey(Order o) {
+    private LocalDate resolveMonthKey(OrderEntity o) {
         LocalDate basis;
         if (o.getStatus() == OrderStatus.COMPLETED && o.getUpdatedAt() != null) {
             basis = o.getUpdatedAt().toLocalDate();
@@ -267,14 +269,14 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
     /* ===== 배치 보장/집계 ===== */
 
     @Transactional // ← 가능하면 public 메서드에서
-    public CarOwnerSettlementBatch ensureBatch(String ownerId, LocalDate monthKey) {
+    public CarOwnerSettlementBatchEntity ensureBatch(String ownerId, LocalDate monthKey) {
         return batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey)
             .orElseGet(() -> {
                 try {
-                    CarOwnerSettlementBatch b = new CarOwnerSettlementBatch();
-                    b.setOwnerId(ownerId);
+                    CarOwnerSettlementBatchEntity b = new CarOwnerSettlementBatchEntity();
+                    b.setOwner(customerRepo.findByIdNum(Long.parseLong(ownerId)).orElseThrow(() -> new IllegalArgumentException("Customer not found with ID: " + ownerId)));
                     b.setMonthKey(monthKey);
-                    b.setStatus(CarOwnerSettlementBatch.Status.REQUESTED); // 권장: READY
+                    b.setStatus(CarOwnerSettlementBatchEntity.Status.REQUESTED); // 권장: READY
                     return batchRepo.saveAndFlush(b);
                 } catch (DataIntegrityViolationException /*| ConstraintViolationException*/ ex) {
                     // flush 실패 → 1차 캐시 정리
@@ -295,7 +297,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
             .setScale(0, RoundingMode.HALF_UP);
 
         int cnt = (int) settlementRepo.countByOwnerIdAndMonthKeyAndStatus(
-                ownerId, monthKey, CarOwnerSettlement.Status.REQUESTED);
+                ownerId, monthKey, CarOwnerSettlementEntity.Status.REQUESTED);
 
         var opt = batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey);
         if (opt.isPresent()) {
@@ -312,7 +314,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
 
         var b = batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey)
                 .orElseThrow(() -> new IllegalArgumentException("BATCH_NOT_FOUND"));
-        if (b.getStatus() != CarOwnerSettlementBatch.Status.REQUESTED) {
+        if (b.getStatus() != CarOwnerSettlementBatchEntity.Status.REQUESTED) {
             throw new IllegalStateException("BATCH_NOT_OPEN");
         }
 

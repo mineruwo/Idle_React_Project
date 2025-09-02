@@ -21,7 +21,7 @@ const FAQEditComponent = () => {
         const faq = await getFaqForEdit(id);
         setQuestion(faq.question);
         setAnswer(faq.answer);
-        setWriterAdminId(faq.writerAdminId);
+        setWriterAdminId(faq.writerAdmin?.adminId);
       } catch (error) {
         console.error('Error fetching FAQ:', error);
         alert('FAQ 정보를 가져오는데 실패했습니다.');

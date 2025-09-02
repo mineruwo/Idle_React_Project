@@ -18,6 +18,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.ManyToOne; // Added
+import jakarta.persistence.JoinColumn; // Added
+import jakarta.persistence.FetchType; // Added
+import com.fullstack.entity.CustomerEntity; // Added
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,7 +40,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Order {
+public class OrderEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -80,11 +84,13 @@ public class Order {
 	@Builder.Default
 	private OrderStatus status = OrderStatus.CREATED;
 
-    @Column(name = "assigned_driver_id")
-    private Long assignedDriverId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_driver_id", referencedColumnName = "ID_NUM", nullable = true)
+    private CustomerEntity assignedDriver;
 
-    @Column(name = "shipper_id")
-    private String shipperId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shipper_id", referencedColumnName = "ID")
+    private CustomerEntity shipper;
 
     @CreationTimestamp
     @Column(updatable = false)

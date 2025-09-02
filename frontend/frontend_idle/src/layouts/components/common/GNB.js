@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import "../../../theme/GNB.css";
-import BubbleAnimation from "../carownerComponent/common/BubbleAnimation";
+import styles from "../../../theme/GNB.css";
 import api from "../../../api/authApi";
 import useCustomMove from "../../../hooks/useCustomMove";
 import { useAuth } from "../../../auth/AuthProvider";
 
 const GNB = () => {
     const [hideHeader, setHideHeader] = useState(false);
-
     const { authenticated, profile, logOut } = useAuth();
 
     const {
@@ -24,12 +22,10 @@ const GNB = () => {
     useEffect(() => {
         const handleScroll = () => {
             const y = window.scrollY;
-
             if (y > lastYRef.current && y > 80) setHideHeader(true);
             else setHideHeader(false);
             lastYRef.current = y;
         };
-
         window.addEventListener("scroll", handleScroll, { passive: true });
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
@@ -46,7 +42,6 @@ const GNB = () => {
         try {
             await api.post("/auth/logout"); 
         } catch (_) {
-            // 실패해도 UI는 일관되게 처리
         } finally {
             logOut();          
             moveToMainPage();  
@@ -56,7 +51,7 @@ const GNB = () => {
     return (
         <div
             className={`navbar navbar-expand-lg sticky-top bg-primary 
-                transition-top ${hideHeader ? "hide" : ""}`}
+                ${styles.root} ${hideHeader ? "hide" : ""}`}
             data-bs-theme="light"
         >
             <div className="container-fluid">
@@ -65,7 +60,7 @@ const GNB = () => {
                     className="navbar-brand btn btn-link p-0"
                     onClick={moveToMainPage}
                 >
-                    idle
+                    <img src="/img/logo/logo.png" alt="" width="60" height="40" />
                 </button>
 
                 <button
@@ -129,9 +124,6 @@ const GNB = () => {
                     </ul>
                 </div>
             </div>
-            {/* <div className="bubblediv">
-                <BubbleAnimation warmth={100} />
-            </div> */}
         </div>
     );
 };

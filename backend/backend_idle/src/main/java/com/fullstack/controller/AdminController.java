@@ -1,8 +1,8 @@
 package com.fullstack.controller;
 
 import com.fullstack.entity.CustomerEntity;
-import com.fullstack.entity.Faq;
-import com.fullstack.entity.Notice;
+import com.fullstack.entity.FaqEntity;
+import com.fullstack.entity.NoticeEntity;
 import com.fullstack.model.AdminDTO;
 import com.fullstack.model.AdminLoginRequestDTO;
 import com.fullstack.model.AdminLoginResponseDTO;
@@ -256,7 +256,7 @@ public class AdminController {
     @PreAuthorize("hasRole('MANAGER_COUNSELING') or hasRole('DEV_ADMIN') or hasRole('ALL_PERMISSION')")
     public ResponseEntity<?> createNotice(@RequestBody NoticeDTO noticeDTO) {
         try {
-            Notice createdNotice = noticeService.createNotice(noticeDTO);
+        	NoticeEntity createdNotice = noticeService.createNotice(noticeDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdNotice);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating notice: " + e.getMessage());
@@ -264,14 +264,14 @@ public class AdminController {
     }
 
     @GetMapping("/notices")
-    public ResponseEntity<List<Notice>> getAllNotices() {
-        List<Notice> notices = noticeService.getAllNotices();
+    public ResponseEntity<List<NoticeEntity>> getAllNotices() {
+        List<NoticeEntity> notices = noticeService.getAllNotices();
         return ResponseEntity.ok(notices);
     }
 
     @GetMapping("/notices/{id}")
-    public ResponseEntity<Notice> getNoticeById(@PathVariable Long id) {
-        Notice notice = noticeService.getNoticeById(id);
+    public ResponseEntity<NoticeEntity> getNoticeById(@PathVariable Long id) {
+    	NoticeEntity notice = noticeService.getNoticeById(id);
         if (notice != null) {
             return ResponseEntity.ok(notice);
         } else {
@@ -281,8 +281,8 @@ public class AdminController {
 
     @GetMapping("/notices/edit/{id}")
     @PreAuthorize("hasRole('MANAGER_COUNSELING') or hasRole('DEV_ADMIN') or hasRole('ALL_PERMISSION')")
-    public ResponseEntity<Notice> getNoticeForEdit(@PathVariable Long id) {
-        Notice notice = noticeService.getNoticeForEdit(id);
+    public ResponseEntity<NoticeEntity> getNoticeForEdit(@PathVariable Long id) {
+    	NoticeEntity notice = noticeService.getNoticeForEdit(id);
         if (notice != null) {
             return ResponseEntity.ok(notice);
         } else {
@@ -294,7 +294,7 @@ public class AdminController {
     @PreAuthorize("hasRole('MANAGER_COUNSELING') or hasRole('DEV_ADMIN') or hasRole('ALL_PERMISSION')")
     public ResponseEntity<?> updateNotice(@PathVariable Long id, @RequestBody NoticeDTO noticeDTO) {
         try {
-            Notice updatedNotice = noticeService.updateNotice(id, noticeDTO);
+            NoticeEntity updatedNotice = noticeService.updateNotice(id, noticeDTO);
             if (updatedNotice != null) {
                 return ResponseEntity.ok(updatedNotice);
             } else {
@@ -320,7 +320,7 @@ public class AdminController {
     @PreAuthorize("hasRole('MANAGER_COUNSELING') or hasRole('DEV_ADMIN') or hasRole('ALL_PERMISSION')")
     public ResponseEntity<?> toggleNoticeActive(@PathVariable Long id) {
         try {
-            Notice updatedNotice = noticeService.toggleNoticeActive(id);
+        	NoticeEntity updatedNotice = noticeService.toggleNoticeActive(id);
             if (updatedNotice != null) {
                 return ResponseEntity.ok(updatedNotice);
             } else {
@@ -332,14 +332,14 @@ public class AdminController {
     }
 
     @GetMapping("/faqs")
-    public ResponseEntity<List<Faq>> getAllFAQs() {
-        List<Faq> faqs = faqService.getAllFAQs();
+    public ResponseEntity<List<FaqEntity>> getAllFAQs() {
+        List<FaqEntity> faqs = faqService.getAllFAQs();
         return ResponseEntity.ok(faqs);
     }
 
     @GetMapping("/faqs/{id}")
-    public ResponseEntity<Faq> getFaqById(@PathVariable Long id) {
-        Faq faq = faqService.getFaqById(id);
+    public ResponseEntity<FaqEntity> getFaqById(@PathVariable Long id) {
+        FaqEntity faq = faqService.getFaqById(id);
         if (faq != null) {
             return ResponseEntity.ok(faq);
         } else {
@@ -349,8 +349,8 @@ public class AdminController {
 
     @GetMapping("/faqs/edit/{id}")
     @PreAuthorize("hasRole('MANAGER_COUNSELING') or hasRole('DEV_ADMIN') or hasRole('ALL_PERMISSION')")
-    public ResponseEntity<Faq> getFaqForEdit(@PathVariable Long id) {
-        Faq faq = faqService.getFaqForEdit(id);
+    public ResponseEntity<FaqEntity> getFaqForEdit(@PathVariable Long id) {
+    	FaqEntity faq = faqService.getFaqForEdit(id);
         if (faq != null) {
             return ResponseEntity.ok(faq);
         } else {
@@ -410,7 +410,7 @@ public class AdminController {
     @PreAuthorize("hasRole('MANAGER_COUNSELING') or hasRole('DEV_ADMIN') or hasRole('ALL_PERMISSION')")
     public ResponseEntity<?> createFAQ(@RequestBody FaqDTO faqDTO) {
         try {
-            Faq createdFaq = faqService.createFAQ(faqDTO);
+        	FaqEntity createdFaq = faqService.createFAQ(faqDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdFaq);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating FAQ: " + e.getMessage());
@@ -421,7 +421,7 @@ public class AdminController {
     @PreAuthorize("hasRole('MANAGER_COUNSELING') or hasRole('DEV_ADMIN') or hasRole('ALL_PERMISSION')")
     public ResponseEntity<?> updateFAQ(@PathVariable Long id, @RequestBody FaqDTO faqDTO) {
         try {
-            Faq updatedFaq = faqService.updateFAQ(id, faqDTO);
+        	FaqEntity updatedFaq = faqService.updateFAQ(id, faqDTO);
             if (updatedFaq != null) {
                 return ResponseEntity.ok(updatedFaq);
             } else {
@@ -447,7 +447,7 @@ public class AdminController {
     @PreAuthorize("hasRole('MANAGER_COUNSELING') or hasRole('DEV_ADMIN') or hasRole('ALL_PERMISSION')")
     public ResponseEntity<?> toggleFAQActive(@PathVariable Long id) {
         try {
-            Faq updatedFaq = faqService.toggleFAQActive(id);
+        	FaqEntity updatedFaq = faqService.toggleFAQActive(id);
             if (updatedFaq != null) {
                 return ResponseEntity.ok(updatedFaq);
             } else {
@@ -593,4 +593,4 @@ public class AdminController {
         CarOwnerSettlementBatchDTO.BatchSummaryResponse updatedBatch = salesService.updateCarOwnerSettlementStatus(id, newStatus);
         return ResponseEntity.ok(updatedBatch);
     }
-}
+  }

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Notice {
+public class NoticeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Assuming auto-increment for ID
@@ -35,8 +35,9 @@ public class Notice {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "writer_admin_id", nullable = false)
-    private String writerAdminId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "writer_admin_id", referencedColumnName = "ADMIN_ID", nullable = false)
+    private AdminEntity writerAdmin;
 
     @Column(name = "view_count", nullable = false) // New field
     private Integer viewCount;

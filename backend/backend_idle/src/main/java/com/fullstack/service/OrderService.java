@@ -1,6 +1,6 @@
 package com.fullstack.service;
 
-import com.fullstack.entity.Order;
+import com.fullstack.entity.OrderEntity;
 import com.fullstack.entity.PaymentEntity;
 import com.fullstack.model.OrderDto;
 import com.fullstack.model.enums.OrderStatus;
@@ -8,7 +8,7 @@ import com.fullstack.repository.OrderRepository;
 import com.fullstack.repository.CustomerRepository;
 import com.fullstack.repository.PaymentRepository;
 import com.fullstack.repository.DriverOfferRepository;
-import com.fullstack.entity.DriverOffer;
+import com.fullstack.entity.DriverOfferEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -44,9 +44,9 @@ public class OrderService {
     }
 
     @Transactional
-    public Order saveOrder(OrderDto dto, String shipperId) {
-        Order order = Order.builder()
-                .shipperId(shipperId)
+    public OrderEntity saveOrder(OrderDto dto, String shipperId) {
+        OrderEntity order = OrderEntity.builder()
+                .shipper(customerRepository.findById(shipperId).orElseThrow(() -> new IllegalArgumentException("Shipper not found with ID: " + shipperId)))
                 .departure(dto.getDeparture())
                 .arrival(dto.getArrival())
                 .distance(dto.getDistance())
@@ -58,7 +58,7 @@ public class OrderService {
                 .cargoSize(dto.getCargoSize())
                 .packingOption(dto.getPackingOption())
                 .proposedPrice(dto.getProposedPrice())
-                .driverPrice(null)
+                .assignedDriver(null)
                 .avgPrice(dto.getAvgPrice())
                 .status(OrderStatus.CREATED)
                 .build();
@@ -74,7 +74,7 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<OrderDto> searchLatest(String q) {
-        List<Order> orders;
+        List<OrderEntity> orders;
         if (q == null || q.trim().isEmpty()) {
             orders = orderRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
         } else {
@@ -87,7 +87,7 @@ public class OrderService {
                     paymentRepository.findTopByOrderAndPaymentStatusOrderByPaidAtDesc(order, "PAID").ifPresent(payment -> {
                         dto.setPaidAt(payment.getPaidAt());
                     });
-                    driverOfferRepository.findByOrderAndStatus(order, DriverOffer.Status.ACCEPTED)
+                    driverOfferRepository.findByOrderAndStatus(order, DriverOfferEntity.Status.ACCEPTED)
                             .ifPresent(acceptedOffer -> {
                                 dto.setAssignedAt(acceptedOffer.getCreatedAt());
                             });
@@ -98,14 +98,16 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<OrderDto> findMyOrders(String shipperId) {
-        return orderRepository.findByShipperIdOrderByCreatedAtDesc(shipperId).stream()
+        CustomerEntity shipper = customerRepository.findById(shipperId)
+                                    .orElseThrow(() -> new IllegalArgumentException("Shipper not found with ID: " + shipperId));
+        return orderRepository.findByShipperOrderByCreatedAtDesc(shipper).stream()
                 .map(order -> {
                     OrderDto dto = this.mapOrderToDtoWithNickname(order);
                     // Use new method for payment and remove debug log
                     paymentRepository.findTopByOrderAndPaymentStatusOrderByPaidAtDesc(order, "PAID").ifPresent(payment -> {
                         dto.setPaidAt(payment.getPaidAt());
                     });
-                    driverOfferRepository.findByOrderAndStatus(order, DriverOffer.Status.ACCEPTED)
+                    driverOfferRepository.findByOrderAndStatus(order, DriverOfferEntity.Status.ACCEPTED)
                             .ifPresent(acceptedOffer -> {
                                 dto.setAssignedAt(acceptedOffer.getCreatedAt());
                             });
@@ -115,21 +117,21 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Order getOrderById(Long id) {
+    public OrderEntity getOrderById(Long id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("order not found: " + id));
     }
 
     @Transactional(readOnly = true)
-    public List<Order> getAllOrders() {
+    public List<OrderEntity> getAllOrders() {
         return orderRepository.findAll();
     }
 
     /** 주문 상태 업데이트 */
     @Transactional
-    public Order updateOrderStatus(Long orderId, OrderStatus newStatus) {
+    public OrderEntity updateOrderStatus(Long orderId, OrderStatus newStatus) {
         log.info("OrderService: Updating order status for ID: {} to {}", orderId, newStatus);
-        Order order = orderRepository.findById(orderId)
+        OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + orderId));
 
         if (newStatus == OrderStatus.ONGOING) {
@@ -142,16 +144,12 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    private OrderDto mapOrderToDtoWithNickname(Order order) {
-        String shipperNickname = customerRepository.findById(order.getShipperId())
-                .map(customer -> customer.getNickname())
-                .orElse("알 수 없음");
+    private OrderDto mapOrderToDtoWithNickname(OrderEntity order) {
+        String shipperNickname = order.getShipper() != null ? order.getShipper().getNickname() : "알 수 없음";
 
         String assignedDriverNickname = null;
-        if (order.getAssignedDriverId() != null) {
-            assignedDriverNickname = customerRepository.findById(order.getAssignedDriverId().intValue())
-                    .map(customer -> customer.getNickname())
-                    .orElse("알 수 없음");
+        if (order.getAssignedDriver() != null) {
+            assignedDriverNickname = order.getAssignedDriver().getNickname();
         }
         return OrderDto.fromEntity(order, shipperNickname, assignedDriverNickname);
     }

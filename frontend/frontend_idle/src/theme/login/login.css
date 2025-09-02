@@ -1,0 +1,59 @@
+:root {
+  --gap-sm: 12px;
+  --gap-md: 16px;
+  --gap-lg: 24px;
+}
+
+.login-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-md);
+  padding: 24px;              /* Card 내부 여백 보강 */
+}
+
+.login-logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  align-self: flex-start;
+}
+
+.login-title {
+  width: 100%;
+  font-size: clamp(2rem, 10vw, 2.15rem);
+  font-weight: 700;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: var(--gap-md);
+}
+
+.login-submit {
+  margin-top: 32px !important;           /* 버튼 위 여백 */
+}
+
+.login-forgot {
+  align-self: center;
+}
+
+.login-divider {
+  margin-top: 16px !important;           /* Divider 상단 여백 */
+}
+
+.login-sns {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-md);
+}
+
+.login-signup {
+  text-align: center;
+}
+
+/* 작은 화면에서 카드 좌우 여백 살짝 늘리기(선택) */
+@media (max-width: 480px) {
+  .login-card { padding: 20px; }
+}

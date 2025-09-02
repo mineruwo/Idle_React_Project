@@ -8,6 +8,7 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import { CircularProgress, FormHelperText, Stack } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { sendSignupEmailCode, verifySignupEmailCode } from '../../../api/emailApi';
+import '../../../theme/signup/EmailVerification.css';
 
 export default function EmailVerificationModal({ open, onClose, onVerified, email }) {
   const [sending, setSending] = useState(false);
@@ -82,21 +83,21 @@ export default function EmailVerificationModal({ open, onClose, onVerified, emai
     onClose?.();
   };
 
-  return (
+   return (
     <Dialog open={open} onClose={resetStateOnClose}>
       <DialogTitle>이메일 인증</DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: 420 }}>
+
+      <DialogContent className="ev-content">
         <DialogContentText>
           입력한 이메일로 인증 코드를 전송합니다
           {email ? (
             <>
               <br />
-              <strong style={{ wordBreak: 'break-all' }}>{email}</strong>
+              <strong className="ev-email">{email}</strong>
             </>
           ) : null}
         </DialogContentText>
 
-        {/* 1) 전송 전: 버튼만 노출 */}
         {!sent && (
           <>
             <Stack direction="row" spacing={1} alignItems="center">
@@ -104,25 +105,23 @@ export default function EmailVerificationModal({ open, onClose, onVerified, emai
                 variant="contained"
                 onClick={handleSend}
                 disabled={sending || !isEmailValid(email)}
-                sx={{ whiteSpace: 'nowrap', wordBreak: 'keep-all', flexShrink: 0, px: 1.5 }}
+                className="ev-btn ev-send-btn"
               >
                 {sending ? <CircularProgress size={20} /> : '인증 코드 발송'}
               </Button>
             </Stack>
             {sendMsg && (
-              <FormHelperText error={!sent} sx={{ ml: 0 }}>
+              <FormHelperText error={!sent} className="ev-helper">
                 {sendMsg}
               </FormHelperText>
             )}
           </>
         )}
-
-        {/* 2) 전송 후: 코드 입력 + 인증 버튼 노출 (ForgotPasswordModal과 동일 톤) */}
+        
         {sent && (
           <>
             <Stack direction="row" spacing={1} alignItems="center">
               <OutlinedInput
-                sx={{ flex: 1, minWidth: 0 }}
                 required
                 id="code"
                 name="code"
@@ -131,12 +130,13 @@ export default function EmailVerificationModal({ open, onClose, onVerified, emai
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 error={!!verifyMsg && verifyMsg !== '인증이 완료되었습니다.'}
+                className="ev-code-input"
               />
               <Button
                 variant="outlined"
                 onClick={handleVerify}
                 disabled={verifying || !code.trim()}
-                sx={{ whiteSpace: 'nowrap', wordBreak: 'keep-all', flexShrink: 0, px: 1.5 }}
+                className="ev-btn ev-verify-btn"
               >
                 {verifying ? <CircularProgress size={20} /> : '인증하기'}
               </Button>
@@ -147,7 +147,7 @@ export default function EmailVerificationModal({ open, onClose, onVerified, emai
                 variant="text"
                 onClick={handleSend}
                 disabled={sending}
-                sx={{ whiteSpace: 'nowrap', wordBreak: 'keep-all', flexShrink: 0, px: 1.0 }}
+                className="ev-btn ev-resend-btn"
               >
                 {sending ? <CircularProgress size={18} /> : '코드 재전송'}
               </Button>
@@ -156,7 +156,7 @@ export default function EmailVerificationModal({ open, onClose, onVerified, emai
             {verifyMsg && (
               <FormHelperText
                 error={verifyMsg !== '인증이 완료되었습니다.'}
-                sx={{ ml: 0 }}
+                className="ev-helper"
               >
                 {verifyMsg}
               </FormHelperText>
@@ -165,7 +165,8 @@ export default function EmailVerificationModal({ open, onClose, onVerified, emai
         )}
       </DialogContent>
 
-      <DialogActions sx={{ pb: 2, px: 3 }}>
+      {/* 하단 패딩 CSS로 이동 */}
+      <DialogActions className="ev-actions">
         <Button onClick={resetStateOnClose}>닫기</Button>
       </DialogActions>
     </Dialog>

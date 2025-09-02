@@ -1,6 +1,5 @@
 package com.fullstack.entity;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -18,25 +17,26 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "DRIVER_LICENSE")
+@Table(name = "BUSINESS_LICENSE")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DriverLicense {
+public class BusinessLicenseEntity {
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "LICENSE_NUMBER", nullable = false)
-    private String licenseNumber;
+    @Column(name = "BUSINESS_NUMBER", nullable = false)
+    private String businessNumber;
 
-    @Column(name = "NAME_ON_LICENSE")
-    private String nameOnLicense;
+    @Column(name = "BUSINESS_NAME")
+    private String businessName;
 
-    @Column(name = "ISSUE_DATE")
-    private LocalDate issueDate;
+    @Column(name = "START_DATE")
+    private LocalDateTime startDate;
 
     @Column(name = "VERIFIED")
     private Boolean verified;
@@ -44,7 +44,6 @@ public class DriverLicense {
     @Column(name = "VERIFIED_AT")
     private LocalDateTime verifiedAt;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "transport_auth_id", unique = true, nullable = false)
-    private CarOwnerAuth transportAuth;
+    @OneToOne(mappedBy = "businessLicense", fetch = FetchType.LAZY)
+    private CarOwnerAuthEntity carOwnerAuth;
 }

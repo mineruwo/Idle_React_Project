@@ -6,9 +6,9 @@ import com.fullstack.model.CarOwnerSettlementBatchDTO;
 import com.fullstack.repository.OrderRepository;
 import com.fullstack.repository.CarOwnerSettlementRepository;
 import com.fullstack.repository.CarOwnerSettlementBatchRepository;
-import com.fullstack.entity.Order;
-import com.fullstack.entity.CarOwnerSettlement;
-import com.fullstack.entity.CarOwnerSettlementBatch;
+import com.fullstack.entity.OrderEntity;
+import com.fullstack.entity.CarOwnerSettlementBatchEntity;
+import com.fullstack.entity.CarOwnerSettlementEntity;
 import com.fullstack.model.enums.OrderStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,13 +43,13 @@ public class SalesService {
     private CarOwnerSettlementBatchRepository carOwnerSettlementBatchRepository;
 
     public List<DailySalesDataDTO> getDailySalesData(LocalDate startDate, LocalDate endDate) {
-        List<Order> orders = orderRepository.findByCreatedAtBetween(
+        List<OrderEntity> orders = orderRepository.findByCreatedAtBetween(
                 startDate.atStartOfDay(),
                 endDate.atTime(LocalTime.MAX)
         );
 
         // Filter orders based on status (payment_pending or later, excluding cancel, none)
-        List<Order> filteredOrders = orders.stream()
+        List<OrderEntity> filteredOrders = orders.stream()
                 .filter(order -> {
                     OrderStatus status = order.getStatus();
                     return status != null &&
@@ -59,13 +59,13 @@ public class SalesService {
                 })
                 .collect(Collectors.toList());
 
-        Map<LocalDate, List<Order>> ordersByDate = filteredOrders.stream()
+        Map<LocalDate, List<OrderEntity>> ordersByDate = filteredOrders.stream()
                 .collect(Collectors.groupingBy(order -> order.getCreatedAt().toLocalDate()));
 
         return ordersByDate.entrySet().stream()
                 .map(entry -> {
                     LocalDate date = entry.getKey();
-                    List<Order> dailyOrders = entry.getValue();
+                    List<OrderEntity> dailyOrders = entry.getValue();
 
                     long orderCount = dailyOrders.size();
                     BigDecimal totalAmount = dailyOrders.stream()
@@ -82,12 +82,12 @@ public class SalesService {
                 .collect(Collectors.toList());
     }
 
-    private BigDecimal calculateCommission(Order order) {
+    private BigDecimal calculateCommission(OrderEntity order) {
         BigDecimal driverPrice = order.getDriverPrice() != null ? new BigDecimal(order.getDriverPrice()) : BigDecimal.ZERO;
         BigDecimal commissionRate = BigDecimal.valueOf(0.15); // Default commission rate
 
-        if (order.getAssignedDriverId() != null) {
-            // CarOwnerSettlement settlement = carOwnerSettlementRepository.findById(order.getAssignedDriverId()).orElse(null);
+        if (order.getAssignedDriver() != null) {
+            // CarOwnerSettlementEntity settlement = carOwnerSettlementRepository.findById(order.getAssignedDriverId()).orElse(null);
             // if (settlement != null) {
             //     commissionRate = settlement.getCommission();
             // }
@@ -105,8 +105,8 @@ public class SalesService {
         LocalDateTime endOfMonth = today.with(TemporalAdjusters.lastDayOfMonth()).atTime(LocalTime.MAX);
 
         // Today's orders
-        List<Order> todayOrders = orderRepository.findByCreatedAtBetween(startOfToday, endOfToday);
-        List<Order> filteredTodayOrders = todayOrders.stream()
+        List<OrderEntity> todayOrders = orderRepository.findByCreatedAtBetween(startOfToday, endOfToday);
+        List<OrderEntity> filteredTodayOrders = todayOrders.stream()
                 .filter(order -> {
                     OrderStatus status = order.getStatus();
                     return status != null &&
@@ -122,8 +122,8 @@ public class SalesService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         // This month's orders
-        List<Order> thisMonthOrders = orderRepository.findByCreatedAtBetween(startOfMonth, endOfMonth);
-        List<Order> filteredThisMonthOrders = thisMonthOrders.stream()
+        List<OrderEntity> thisMonthOrders = orderRepository.findByCreatedAtBetween(startOfMonth, endOfMonth);
+        List<OrderEntity> filteredThisMonthOrders = thisMonthOrders.stream()
                 .filter(order -> {
                     OrderStatus status = order.getStatus();
                     return status != null &&
@@ -149,11 +149,11 @@ public class SalesService {
     // New methods for CarOwnerSettlementBatch
     public Page<CarOwnerSettlementBatchDTO.BatchSummaryResponse> getCarOwnerSettlementBatches(
             Pageable pageable, String ownerId, String yearMonth, String status) {
-        Specification<CarOwnerSettlementBatch> spec = (root, query, cb) -> {
+        Specification<CarOwnerSettlementBatchEntity> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
             if (ownerId != null && !ownerId.isEmpty()) {
-                predicates.add(cb.equal(root.get("ownerId"), ownerId));
+                predicates.add(cb.equal(root.get("owner").get("ID"), ownerId));
             }
             if (yearMonth != null && !yearMonth.isEmpty()) {
                 // Assuming yearMonth is in "YYYY-MM" format
@@ -164,7 +164,7 @@ public class SalesService {
             }
             if (status != null && !status.isEmpty()) {
                 try {
-                    CarOwnerSettlementBatch.Status enumStatus = CarOwnerSettlementBatch.Status.valueOf(status);
+                	CarOwnerSettlementBatchEntity.Status enumStatus = CarOwnerSettlementBatchEntity.Status.valueOf(status);
                     predicates.add(cb.equal(root.get("status"), enumStatus));
                 } catch (IllegalArgumentException e) {
                     // Handle invalid status string, e.g., log or throw specific exception
@@ -175,33 +175,33 @@ public class SalesService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
-        Page<CarOwnerSettlementBatch> batches = carOwnerSettlementBatchRepository.findAll(spec, pageable);
+        Page<CarOwnerSettlementBatchEntity> batches = carOwnerSettlementBatchRepository.findAll(spec, pageable);
         return batches.map(this::convertToBatchSummaryResponseDTO);
     }
 
     public CarOwnerSettlementBatchDTO.BatchDetailResponse getCarOwnerSettlementBatchDetails(Long id) {
-        CarOwnerSettlementBatch batch = carOwnerSettlementBatchRepository.findById(id)
+    	CarOwnerSettlementBatchEntity batch = carOwnerSettlementBatchRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Settlement Batch not found with id: " + id));
         return convertToBatchDetailResponseDTO(batch);
     }
 
     @Transactional
     public CarOwnerSettlementBatchDTO.BatchSummaryResponse updateCarOwnerSettlementStatus(Long id, String newStatus) {
-        CarOwnerSettlementBatch batch = carOwnerSettlementBatchRepository.findById(id)
+    	CarOwnerSettlementBatchEntity batch = carOwnerSettlementBatchRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Settlement Batch not found with id: " + id));
 
         // Update status
         try {
-            batch.setStatus(CarOwnerSettlementBatch.Status.valueOf(newStatus));
+            batch.setStatus(CarOwnerSettlementBatchEntity.Status.valueOf(newStatus));
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid status: " + newStatus);
         }
         
-        CarOwnerSettlementBatch updatedBatch = carOwnerSettlementBatchRepository.save(batch);
+        CarOwnerSettlementBatchEntity updatedBatch = carOwnerSettlementBatchRepository.save(batch);
         return convertToBatchSummaryResponseDTO(updatedBatch);
     }
 
-    private CarOwnerSettlementBatchDTO.BatchSummaryResponse convertToBatchSummaryResponseDTO(CarOwnerSettlementBatch batch) {
+    private CarOwnerSettlementBatchDTO.BatchSummaryResponse convertToBatchSummaryResponseDTO(CarOwnerSettlementBatchEntity batch) {
         // Derive yearMonth from monthKey
         String yearMonth = batch.getMonthKey() != null ? batch.getMonthKey().format(DateTimeFormatter.ofPattern("yyyy-MM")) : null;
 
@@ -219,7 +219,7 @@ public class SalesService {
 
         return CarOwnerSettlementBatchDTO.BatchSummaryResponse.builder()
                 .id(batch.getId())
-                .ownerId(batch.getOwnerId())
+                .ownerId(batch.getOwner().getId())
                 .yearMonth(yearMonth)
                 .monthKey(batch.getMonthKey())
                 .totalAmount(batch.getTotalAmount())
@@ -234,7 +234,7 @@ public class SalesService {
                 .build();
     }
 
-    private CarOwnerSettlementBatchDTO.BatchDetailResponse convertToBatchDetailResponseDTO(CarOwnerSettlementBatch batch) {
+    private CarOwnerSettlementBatchDTO.BatchDetailResponse convertToBatchDetailResponseDTO(CarOwnerSettlementBatchEntity batch) {
         // Derive yearMonth from monthKey
         String yearMonth = batch.getMonthKey() != null ? batch.getMonthKey().format(DateTimeFormatter.ofPattern("yyyy-MM")) : null;
 
@@ -251,7 +251,7 @@ public class SalesService {
 
         return CarOwnerSettlementBatchDTO.BatchDetailResponse.builder()
                 .id(batch.getId())
-                .ownerId(batch.getOwnerId())
+                .ownerId(batch.getOwner().getId())
                 .yearMonth(yearMonth)
                 .monthKey(batch.getMonthKey())
                 .totalAmount(batch.getTotalAmount())
