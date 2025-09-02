@@ -20,11 +20,6 @@
     padding: 1.5rem;
     margin-bottom: 1.5rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    transition: box-shadow 0.3s ease;
-}
-
-.order-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .order-header {
@@ -36,76 +31,79 @@
     border-bottom: 1px solid #88b4b7;
 }
 
-.order-info {
-    font-size: 0.9rem;
-    color: #666;
-}
-
-.order-date {
+.order-id {
     font-weight: bold;
-    color: #333;
+    font-size: 1.1rem;
 }
 
 .order-status {
-    font-weight: bold;
-    padding: 0.3rem 0.7rem;
-    border-radius: 12px;
-    color: #88b4b7;
+    font-weight: 700;
+    padding: 0.4rem 0.9rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
 }
 
 .order-status.completed {
-    background-color: #88b4b7;
+    color: #88b4b7;
+    background-color: rgba(40, 167, 69, 0.1);
 }
 
 .order-status.issued {
-    background-color: #88b4b7;
+    color: #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
 }
 
-.order-details {
+.order-body {
+    padding: 1rem 0;
+}
+
+.order-route,
+.order-item,
+.order-driver,
+.order-date-info {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.route-label,
+.item-label,
+.driver-label,
+.date-label {
+    font-weight: bold;
+    margin-right: 0.5rem;
+    color: #495057;
+}
+
+.order-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.item-name {
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin: 0;
-    color: #333;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #88b4b7;
 }
 
 .item-amount {
     font-size: 1.3rem;
-    font-weight: bold;
+    font-weight: 700;
     margin: 0;
     color: #88b4b7;
-}
-
-.card-actions {
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid #88b4b7;
-    text-align: right;
 }
 
 .action-btn {
     background-color: #88b4b7;
     color: white;
     border: none;
-    padding: 0.6rem 1.2rem;
+    padding: 0.5rem 1rem;
     border-radius: 5px;
     font-size: 0.9rem;
-    font-weight: bold;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.action-btn:hover:not(:disabled) {
-    background-color: #0056b3;
 }
 
 .action-btn:disabled {
-    background-color: #c0c0c0;
+    background-color: #ced4da;
     cursor: not-allowed;
 }
 
@@ -146,4 +144,24 @@
 
 .modal-close-btn:hover {
     color: #000;
+}
+
+.filter-controls {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.filter-controls button {
+    padding: 8px 16px;
+    border: 1px solid #ccc;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.filter-controls button.active {
+    background-color: #88b4b7;
+    color: white;
+    border-color: #88b4b7;
 }

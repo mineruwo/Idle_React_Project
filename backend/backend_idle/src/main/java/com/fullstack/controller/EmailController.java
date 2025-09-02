@@ -24,8 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 public class EmailController {
 
 	private final EmailService emailService;
-	private final ResetTokenService resetTokenService;
-	private final CustomerRepository customerRepository;
 	
 	@PostMapping("/send-code")
     public ResponseEntity<Map<String, Object>> sendCode(

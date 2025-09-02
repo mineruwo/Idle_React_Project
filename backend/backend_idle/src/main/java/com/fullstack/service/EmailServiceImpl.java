@@ -1,6 +1,7 @@
 package com.fullstack.service;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Locale;
 import java.util.Map;
@@ -92,11 +93,12 @@ public class EmailServiceImpl implements EmailService {
         // 목적 별 처리
         if (purpose == EmailPurpose.RESET_PASSWORD) {
             // ResetTokenService가 반환하는 토큰 레코드/DTO 사용
-            var token = resetTokenService.issueResetToken(normalizedEmail);
+        	var ttl = Duration.ofMinutes(15);
+            var token = resetTokenService.issue(normalizedEmail, ttl);
             return Map.of(
                     "ok", true,
-                    "token", token.token(),
-                    "expiresAt", token.expiresAt().toString()
+                    "token", token,
+                    "expiresAt", java.time.LocalDateTime.now().plus(ttl).toString()
             );
         } else {
             return Map.of("ok", true, "verified", true);

@@ -1,0 +1,52 @@
+:root { --feature-primary: #88B4B7; }
+
+.feature-root {
+  padding: 40px 0;            /* py: 5 */
+}
+
+.feature-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.feature-title {
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+/* 카드 그리드 */
+.feature-grid {
+  display: grid;
+  gap: 20px;                  /* 2.5 * 8px */
+  grid-template-columns: repeat(2, 1fr);
+}
+@media (min-width: 600px) {   /* sm */
+  .feature-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 900px) {   /* md */
+  .feature-grid { grid-template-columns: repeat(5, 1fr); }
+}
+
+/* 카드 */
+.feature-card {
+  padding: 20px;              /* 2.5 * 8px */
+  text-decoration: none;
+  text-align: center;
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #fff;
+  color: inherit;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s;
+}
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 20px rgba(0,0,0,.10);
+  border-color: var(--feature-primary);
+}
+
+/* 아이콘 */
+.feature-icon { margin-bottom: 8px; }
+.feature-icon svg {
+  font-size: 36px;
+  color: var(--feature-primary);
+}

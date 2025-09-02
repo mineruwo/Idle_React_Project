@@ -22,8 +22,7 @@
     color: #88b4b7;
     font-weight: bold;
 }
-
-.review-dashboard-tabs {
+2 .review-dashboard-tabs {
     margin-top: 20px;
     border-bottom: 2px solid #88b4b7;
     display: flex;
@@ -58,9 +57,9 @@
 
 .review-item {
     padding: 15px;
-    border: 1px solid #e0e0e0;
+    border: 1px solid #88b4b7;
     border-radius: 6px;
-    background-color: #fafafa;
+    background-color: fff;
 }
 
 .review-item.pending {

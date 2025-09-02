@@ -5,8 +5,7 @@ import {
 } from "@mui/material";
 import AppTheme from "../../../theme/muitheme/AppTheme";
 import { UserCard as Card, UserContainer as Container } from "../../../theme/User/UserCard";
-import { PinkTruckIcon } from "../common/IconComponent";
-import { linkExisting } from "../../../api/snsApi"; 
+import { linkExisting } from "../../../api/snsApi";
 
 export default function LinkExistingComponent(props) {
   const nav = useNavigate();
@@ -31,7 +30,7 @@ export default function LinkExistingComponent(props) {
       setPwErr(true); setPwMsg("비밀번호를 입력해주세요"); ok = false;
     } else { setPwErr(false); setPwMsg(""); }
     return ok;
-    };
+  };
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -52,7 +51,16 @@ export default function LinkExistingComponent(props) {
       <CssBaseline enableColorScheme />
       <Container direction="column" justifyContent="space-between">
         <Card variant="outlined">
-          <PinkTruckIcon />
+          <Box
+            component="img"
+            src="/img/logo/logo.png"
+            alt="Idle 고양이 로고"
+            sx={{
+              width: 64, height: 64,
+              objectFit: 'contain',
+              alignSelf: 'left'
+            }}
+          />
           <Typography component="h1" variant="h4" sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}>
             기존 계정과 연결
           </Typography>
