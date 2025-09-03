@@ -1,6 +1,7 @@
 package com.fullstack.service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,7 +13,6 @@ import com.fullstack.exception.PasswordUnchangedException;
 import com.fullstack.model.ResetPasswordDTO;
 import com.fullstack.model.ResetPasswordTicketDTO;
 import com.fullstack.repository.CustomerRepository;
-import com.fullstack.security.util.HashUtils;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ public class ResetPasswordServiceImpl implements ResetPasswordService {
 	
 	@Transactional
     public void resetPassword(ResetPasswordDTO resetPasswordDTO) {
-		var opt = resetTokenService.consume(resetPasswordDTO.getToken());
+		Optional<ResetPasswordTicketDTO> opt = resetTokenService.consume(resetPasswordDTO.getToken());
 		if (opt.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "유효하지 않은 토큰입니다.");
         }

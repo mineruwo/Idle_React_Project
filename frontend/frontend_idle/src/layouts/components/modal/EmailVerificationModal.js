@@ -19,7 +19,6 @@ export default function EmailVerificationModal({ open, onClose, onVerified, emai
   const [verifying, setVerifying] = useState(false);
   const [verifyMsg, setVerifyMsg] = useState('');
 
-  const isEmailValid = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
 
   useEffect(() => {
     if (open) {
@@ -34,10 +33,6 @@ export default function EmailVerificationModal({ open, onClose, onVerified, emai
 
   const handleSend = async () => {
     setSendMsg('');
-    if (!isEmailValid(email)) {
-      setSendMsg('이메일 형식이 올바르지 않습니다. 모달 열기 전 이메일을 다시 확인하세요.');
-      return;
-    }
     setSending(true);
     try {
       await sendSignupEmailCode(email);
@@ -104,7 +99,7 @@ export default function EmailVerificationModal({ open, onClose, onVerified, emai
               <Button
                 variant="contained"
                 onClick={handleSend}
-                disabled={sending || !isEmailValid(email)}
+                disabled={sending}
                 className="ev-btn ev-send-btn"
               >
                 {sending ? <CircularProgress size={20} /> : '인증 코드 발송'}
@@ -165,7 +160,6 @@ export default function EmailVerificationModal({ open, onClose, onVerified, emai
         )}
       </DialogContent>
 
-      {/* 하단 패딩 CSS로 이동 */}
       <DialogActions className="ev-actions">
         <Button onClick={resetStateOnClose}>닫기</Button>
       </DialogActions>

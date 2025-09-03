@@ -21,8 +21,8 @@ import CancelRounded from "@mui/icons-material/CancelRounded";
 import { useLocation, useNavigate } from "react-router-dom";
 import AppTheme from "../../../theme/muitheme/AppTheme";
 import { UserCard as Card, UserContainer as SignInContainer } from "../../../theme/User/UserCard";
-import api from "../../../api/authApi";
 import "../../../theme/login/NewPassword.css";
+import { resetPassword } from "../../../api/loginApi";
 
 // 비밀번호 정책 체크
 function checkPasswordRules(pw = "") {
@@ -73,7 +73,8 @@ export default function NewPasswordComponent({ onSuccess }) {
 
   useEffect(() => {
     let t = location.state?.token;
-
+    
+    // url 에서 토큰 제거 (보안용)
     if (!t) {
       const params = new URLSearchParams(location.search);
       t = params.get("token");
@@ -94,22 +95,19 @@ export default function NewPasswordComponent({ onSuccess }) {
 
     setSubmitting(true);
     setError("");
-
+    alert(token);
+    
     try {
-      await api.post("/auth/reset-password", { token, newPassword: password });
+      await resetPassword({ token, newPassword: password });
       setDone(true);
       if (typeof onSuccess === "function") onSuccess();
-    } catch (err) {
-      const status = err?.response?.status;
-      const data = err?.response?.data;
-      const msg = data?.message || data?.detail;
-
-      if (status === 403) {
+    } catch (e) {
+      if (e.code === "USED_PASSWORD") {
         setError("이미 사용 중인 비밀번호입니다. 다른 비밀번호를 입력해 주세요.");
-      } else if (status === 400) {
+      } else if (e.code === "TOKEN_INVALID_OR_USED") {
         setError("링크가 만료되었거나 이미 사용되었습니다. 다시 요청해 주세요.");
       } else {
-        setError(msg || "비밀번호 재설정에 실패했습니다. 다시 시도해 주세요.");
+        setError(e.message || "비밀번호 재설정에 실패했습니다. 다시 시도해 주세요.");
       }
     } finally {
       setSubmitting(false);

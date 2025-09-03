@@ -25,9 +25,9 @@ public class ResetTokenServiceImpl implements ResetTokenService {
 
     @Override
     public String issue(String id, Duration ttl) {
-        var now = LocalDateTime.now();
-        var payload = ResetPasswordTicketDTO.builder()
-                .id(id)                 // ✅ 필드명은 userId로
+    	LocalDateTime now = LocalDateTime.now();
+    	ResetPasswordTicketDTO payload = ResetPasswordTicketDTO.builder()
+                .id(id)                 
                 .issuedAt(now)
                 .expiresAt(now.plus(ttl))
                 .build();
@@ -39,7 +39,4 @@ public class ResetTokenServiceImpl implements ResetTokenService {
         return oneTimeTokenService.consume(token, PURPOSE, ResetPasswordTicketDTO.class);
     }
     
-    public Optional<ResetPasswordTicketDTO> peek(String token) {
-        return oneTimeTokenService.peek(token, PURPOSE, ResetPasswordTicketDTO.class);
-    }
 }

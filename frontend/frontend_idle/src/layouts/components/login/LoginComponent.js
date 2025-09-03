@@ -77,7 +77,7 @@ export default function LoginComponent(props) {
                 await refreshAuth(true);
                 moveToMyPageByRole(role);
             } else {
-                console.warn("login 응답에 role이 없어 라우팅을 건너뜁니다");
+                console.warn("회원 유형을 알 수 없습니다");
             }
         } catch (err) {
             const status = err?.response?.status;

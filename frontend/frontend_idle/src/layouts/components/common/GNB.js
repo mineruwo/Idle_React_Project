@@ -60,7 +60,7 @@ const GNB = () => {
                     className="navbar-brand btn btn-link p-0"
                     onClick={moveToMainPage}
                 >
-                    <img src="/img/logo/logo.png" alt="" width="60" height="40" />
+                    <img src="/img/logo/logo.png" alt="" width="50" height="45" />
                 </button>
 
                 <button
