@@ -2,9 +2,9 @@ import axios from "axios"
 
 const host = `${process.env.REACT_APP_API_BASE_URL}/customer`;
 
-export const signUp = async (id) => {
+export const signUp = async (payload) => {
     try {
-        const res = await axios.post(`${host}/signup`, id);
+        const res = await axios.post(`${host}/signup`, payload);
 
         return res.data;
     } catch (error) {

@@ -19,7 +19,6 @@ api.interceptors.response.use((res) => res, async (error) => {
     ? new URL(original.url).pathname.replace(/^\/api/, "")
     : original.url;
 
-
   const isAuthApi = skipAuthUrl.includes(urlPath);
   const status = error.response.status;
 
@@ -55,10 +54,7 @@ api.interceptors.response.use((res) => res, async (error) => {
   } finally {
     isRefreshing = false;
   }
-}
-
-
-);
+});
 
 export default api;
 
