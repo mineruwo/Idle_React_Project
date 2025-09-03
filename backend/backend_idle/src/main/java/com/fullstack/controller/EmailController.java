@@ -9,10 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fullstack.model.enums.EmailPurpose;
-import com.fullstack.repository.CustomerRepository;
 import com.fullstack.service.EmailService;
-import com.fullstack.service.ResetTokenService;
-
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +28,7 @@ public class EmailController {
             @RequestParam(value = "purpose", defaultValue = "SIGNUP_VERIFY_EMAIL") EmailPurpose purpose,
             HttpSession session) {
 
-        var body = emailService.sendCode(email, purpose, session);
-        // 기존과 동일하게 202 Accepted
+		Map<String, Object> body = emailService.sendCode(email, purpose, session);
         return ResponseEntity.accepted().body(body);
     }
 
@@ -43,7 +39,7 @@ public class EmailController {
             @RequestParam(value = "purpose", defaultValue = "SIGNUP_VERIFY_EMAIL") EmailPurpose purpose,
             HttpSession session) {
 
-        var body = emailService.verifyCode(email, code, purpose, session);
+    	Map<String, Object> body = emailService.verifyCode(email, code, purpose, session);
         return ResponseEntity.ok(body);
     }
 }

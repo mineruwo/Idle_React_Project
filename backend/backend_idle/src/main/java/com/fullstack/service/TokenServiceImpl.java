@@ -26,10 +26,10 @@ public class TokenServiceImpl implements TokenService {
 		String accessToken = jwtUtil.generateAccessToken(id, role, Duration.ofMinutes(15));
 		String refreshToken = jwtUtil.generateRefreshToken(id, Duration.ofDays(14));
 		
-		CustomerEntity customerEntity = customerRepository.findById(id).orElseThrow();
-		customerEntity.setRefreshToken((HashUtils.sha256(refreshToken))); 
-		customerEntity.setRtExpiresAt(jwtUtil.getExpiration(refreshToken));
-		customerRepository.save(customerEntity);
+		CustomerEntity customer = customerRepository.findById(id).orElseThrow();
+		customer.setRefreshToken((HashUtils.sha256(refreshToken))); 
+		customer.setRtExpiresAt(jwtUtil.getExpiration(refreshToken));
+		customerRepository.save(customer);
 		
 		long atExpiresIn = 15 * 60;
 		long rtExpiresIn = 14 * 24 * 60 * 60;

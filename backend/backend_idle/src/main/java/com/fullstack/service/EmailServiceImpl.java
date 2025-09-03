@@ -29,7 +29,25 @@ public class EmailServiceImpl implements EmailService {
 	@Value("${email.code.ttl-seconds:600}")
     private long ttlSeconds;
 	
-	private record CodeEntry(String codeHash, long expiresEpoch) implements Serializable {}
+	private static final class CodeEntry implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        private final String codeHash;
+        private final long expiresEpoch;
+
+        CodeEntry(String codeHash, long expiresEpoch) {
+            this.codeHash = codeHash;
+            this.expiresEpoch = expiresEpoch;
+        }
+
+        String codeHash() {
+            return codeHash;
+        }
+
+        long expiresEpoch() {
+            return expiresEpoch;
+        }
+    }
 	
 	private static String normalize(String email) {
         return email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
@@ -56,7 +74,7 @@ public class EmailServiceImpl implements EmailService {
         final String normalizedEmail = normalize(email);
         final long exp = Instant.now().getEpochSecond() + ttlSeconds;
 
-        // 비밀번호 재설정: 존재하지 않는 이메일에 대해서도 "전송 완료"로 동일 응답 (유출 방지)
+        // 비밀번호 찾기 (DB 에 존재하지 않는 ID 처리)
         if (purpose == EmailPurpose.RESET_PASSWORD) {
             boolean exists = customerRepository.existsById(normalizedEmail);
             if (!exists) {
@@ -64,7 +82,6 @@ public class EmailServiceImpl implements EmailService {
             }
         }
 
-        // 실제 코드 발송 및 세션 저장
         String code = sendVerificationEmail(normalizedEmail);
         String hash = HashUtils.sha256(code);
         session.setAttribute(key(normalizedEmail, purpose), new CodeEntry(hash, exp));
@@ -80,21 +97,19 @@ public class EmailServiceImpl implements EmailService {
 
         long now = Instant.now().getEpochSecond();
         if (entry == null || entry.expiresEpoch() < now) {
-            session.removeAttribute(k); // 만료/없음 → 일회성 삭제
+            session.removeAttribute(k); 
             return Map.of("ok", false, "reason", "expired_or_missing");
         }
         if (!HashUtils.sha256(code).equals(entry.codeHash())) {
             return Map.of("ok", false, "reason", "mismatch");
         }
 
-        // 일회성 소비
         session.removeAttribute(k);
 
-        // 목적 별 처리
+        // 비밀번호 찾기 -> 임시 토큰 발급
         if (purpose == EmailPurpose.RESET_PASSWORD) {
-            // ResetTokenService가 반환하는 토큰 레코드/DTO 사용
-        	var ttl = Duration.ofMinutes(15);
-            var token = resetTokenService.issue(normalizedEmail, ttl);
+        	Duration ttl = Duration.ofMinutes(15);
+        	String token = resetTokenService.issue(normalizedEmail, ttl);
             return Map.of(
                     "ok", true,
                     "token", token,

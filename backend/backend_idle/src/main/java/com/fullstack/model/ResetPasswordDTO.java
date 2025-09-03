@@ -13,5 +13,4 @@ public class ResetPasswordDTO {
 
 	private String token; 
 	private String newPassword;
-	
 }
