@@ -317,8 +317,29 @@ public class PaymentServiceImpl implements PaymentService {
                 });
         log.info("addPoints: Found customer with ID: {} and current points: {}", customer.getIdNum(), customer.getUserPoint());
 
+        // 신규 5단계 보너스 포인트 계산
+        int bonusPoints = 0;
+        if (amount >= 1000000) {
+            bonusPoints = (int) (amount * 0.15);
+        } else if (amount >= 500000) {
+            bonusPoints = (int) (amount * 0.12);
+        } else if (amount >= 300000) {
+            bonusPoints = (int) (amount * 0.10);
+        } else if (amount >= 100000) {
+            bonusPoints = (int) (amount * 0.07);
+        } else if (amount >= 50000) {
+            bonusPoints = (int) (amount * 0.05);
+        }
+        
+        int totalPointsToAdd = amount + bonusPoints;
+        String description = "포인트 충전";
+        if (bonusPoints > 0) {
+            description += " (보너스 " + bonusPoints + "P 포함)";
+        }
+
+
         log.info("addPoints: Before point addition, customer {} points: {}", customer.getIdNum(), customer.getUserPoint());
-        int newBalance = customer.getUserPoint() + amount;
+        int newBalance = customer.getUserPoint() + totalPointsToAdd;
         customer.setUserPoint(newBalance);
         log.info("addPoints: After setting new balance, customer {} points (in memory): {}", customer.getIdNum(), customer.getUserPoint());
         customerRepository.save(customer);
@@ -327,9 +348,9 @@ public class PaymentServiceImpl implements PaymentService {
         PointHistoryEntity history = PointHistoryEntity.builder()
                 .customer(customer)
                 .transactionType("CHARGE")
-                .amount(amount)
+                .amount(totalPointsToAdd) // 실제 충전된 총액 (원금 + 보너스)
                 .balanceAfter(newBalance)
-                .description("포인트 충전")
+                .description(description) // 보너스 정보 포함
                 .build();
         log.info("addPoints: PointHistory object created: {}", history);
         pointHistoryRepository.save(history);

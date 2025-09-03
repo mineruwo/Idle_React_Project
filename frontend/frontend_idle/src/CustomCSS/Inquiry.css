@@ -1,10 +1,13 @@
-/* Inquiry.css - Refined for a better UI */
+.inquiry-page-container {
+    padding-top: 32px;
+}
 
 .inquiry-table-container {
     background-color: #ffffff;
     border-radius: 8px;
     padding: 24px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
     margin-top: 32px; /* Spacing from FAQ section */
 }
 
@@ -22,7 +25,8 @@
     margin-bottom: 16px;
 }
 
-.inquiry-table th, .inquiry-table td {
+.inquiry-table th,
+.inquiry-table td {
     padding: 12px 16px;
     text-align: left;
     border-bottom: 1px solid #e2e8f0;
@@ -85,7 +89,8 @@
     background-color: #ffffff;
     border-radius: 8px;
     padding: 24px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
     margin-top: 32px;
 }
 
@@ -154,7 +159,8 @@
 
 .inquiry-form-button:hover {
     background-color: #38a169;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .form-buttons {

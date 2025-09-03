@@ -205,7 +205,7 @@ const ShipperReviewComponent = () => {
 
     return (
         <div className="review-rating-page">
-            <h2 className="page-title">이용후기 및 평점</h2>
+            <h2 className="review-page-main-title">이용후기 및 평점</h2>
 
             <div className="review-container">
                 <div className="write-review">

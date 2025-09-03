@@ -9,7 +9,7 @@ import {
 
 const ShipperPointComponent = ({ nickname, userId, userEmail }) => {
     const [currentPoints, setCurrentPoints] = useState(0);
-    const CHARGE_PRESETS = [10000, 30000, 50000, 100000, 200000];
+    const CHARGE_PRESETS = [50000, 100000, 300000, 500000, 1000000];
     const handlePresetClick = (amount) => setChargeAmount(amount);
 
     useEffect(() => {
@@ -30,6 +30,29 @@ const ShipperPointComponent = ({ nickname, userId, userEmail }) => {
     const [selectedPaymentType, setSelectedPaymentType] = useState("card");
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState("");
+
+    // 보너스 포인트 계산 함수
+    const getBonusPoints = (amount) => {
+        const numAmount = Number(amount);
+        if (isNaN(numAmount)) return 0;
+
+        if (numAmount >= 1000000) {
+            return Math.floor(numAmount * 0.15);
+        } else if (numAmount >= 500000) {
+            return Math.floor(numAmount * 0.12);
+        } else if (numAmount >= 300000) {
+            return Math.floor(numAmount * 0.1);
+        } else if (numAmount >= 100000) {
+            return Math.floor(numAmount * 0.07);
+        } else if (numAmount >= 50000) {
+            return Math.floor(numAmount * 0.05);
+        }
+        return 0;
+    };
+
+    const bonusPoints = getBonusPoints(chargeAmount);
+    const totalPointsAfterCharge =
+        Number(currentPoints) + Number(chargeAmount || 0) + bonusPoints;
 
     const ClickChargeBtn = async () => {
         const amount = parseInt(chargeAmount, 10);
@@ -117,8 +140,10 @@ const ShipperPointComponent = ({ nickname, userId, userEmail }) => {
                                     chargeAmount,
                                     10
                                 );
+                                const bonus = getBonusPoints(newChargeAmount);
                                 setCurrentPoints(
-                                    (prevPoints) => prevPoints + newChargeAmount
+                                    (prevPoints) =>
+                                        prevPoints + newChargeAmount + bonus
                                 );
                                 setChargeAmount("");
                             } else {
@@ -151,6 +176,26 @@ const ShipperPointComponent = ({ nickname, userId, userEmail }) => {
             <div className="sp-point-content-wrapper">
                 <div className="sp-point-management-section">
                     <h2 className="sp-page-title">포인트 충전</h2>
+                    <div className="bonus-policy-guide">
+                        <h4>✨ 보너스 포인트 정책</h4>
+                        <ul>
+                            <li>
+                                5만원 이상 충전 시 <strong>+5%</strong>
+                            </li>
+                            <li>
+                                10만원 이상 충전 시 <strong>+7%</strong>
+                            </li>
+                            <li>
+                                30만원 이상 충전 시 <strong>+10%</strong>
+                            </li>
+                            <li>
+                                50만원 이상 충전 시 <strong>+12%</strong>
+                            </li>
+                            <li>
+                                100만원 이상 충전 시 <strong>+15%</strong>
+                            </li>
+                        </ul>
+                    </div>
                     <div className="payment-method-details-content">
                         <div className="payment-group">
                             <h3 className="payment-group-title">충전금액</h3>
@@ -161,7 +206,9 @@ const ShipperPointComponent = ({ nickname, userId, userEmail }) => {
                                         key={amt}
                                         onClick={() => handlePresetClick(amt)}
                                         className={`preset-btn${
-                                            chargeAmount == amt ? " selected" : ""
+                                            chargeAmount == amt
+                                                ? " selected"
+                                                : ""
                                         }`}
                                     >
                                         {amt / 10000}만원
@@ -173,23 +220,32 @@ const ShipperPointComponent = ({ nickname, userId, userEmail }) => {
                             <ul className="charge-point-table">
                                 <li>
                                     현재 잔액{" "}
-                                    <span>{currentPoints.toLocaleString()}P</span>
+                                    <span>
+                                        {currentPoints.toLocaleString()}P
+                                    </span>
                                 </li>
                                 <li>
                                     충전할 포인트{" "}
                                     <span className="plus">
                                         +
-                                        {Number(chargeAmount || 0).toLocaleString()}
+                                        {Number(
+                                            chargeAmount || 0
+                                        ).toLocaleString()}
                                         P
                                     </span>
                                 </li>
+                                {bonusPoints > 0 && (
+                                    <li className="bonus-points">
+                                        보너스{" "}
+                                        <span className="plus">
+                                            + {bonusPoints.toLocaleString()}P
+                                        </span>
+                                    </li>
+                                )}
                                 <li className="after-charge-pt">
                                     충전 후 예상 포인트{" "}
                                     <span className="final">
-                                        {(
-                                            Number(currentPoints) +
-                                            Number(chargeAmount || 0)
-                                        ).toLocaleString()}
+                                        {totalPointsAfterCharge.toLocaleString()}
                                         P
                                     </span>
                                 </li>
@@ -201,7 +257,6 @@ const ShipperPointComponent = ({ nickname, userId, userEmail }) => {
                 <div className="payment-method-section sp-point-management-section">
                     <h2 className="sp-page-title">결제 수단</h2>
                     <div className="payment-method-details-content">
-                        
                         <div className="pay-method-list vertical-payment-options">
                             <label
                                 className={`payment-option ${
