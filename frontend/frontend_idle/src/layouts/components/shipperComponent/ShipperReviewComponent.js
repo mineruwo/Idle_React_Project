@@ -63,7 +63,10 @@ const ShipperReviewComponent = () => {
                     orderId: order.id,
                     description: `${order.departure} -> ${order.arrival}`,
                     driverId: order.assignedDriverId,
-                    driverName: `Driver #${order.assignedDriverId}`,
+                    driverName:
+                        order.assignedDriverNickname ||
+                        `Driver #${order.assignedDriverId}`,
+
                     completedDate: new Date(order.createdAt).toLocaleDateString(
                         "ko-KR"
                     ),
@@ -222,9 +225,8 @@ const ShipperReviewComponent = () => {
                                         key={order.orderId}
                                         value={order.orderId}
                                     >
-                                        {order.description} (기사:{" "}
-                                        {order.driverName} / ID:{" "}
-                                        {order.driverId})
+                                        {order.description} ({order.driverName}{" "}
+                                        기사님)
                                     </option>
                                 ))}
                             </select>
