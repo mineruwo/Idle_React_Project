@@ -1,46 +1,51 @@
 /* Invoice.css */
 
+.invoice-container {
+    /* This is a new container to wrap the printable area and the button */
+}
+
 .invoice-wrapper {
-  margin: 2rem auto;
-  padding: 2rem;
-  max-width: 800px;
-  background: white;
-  border: 1px solid #ccc;
-  font-family: 'Malgun Gothic', sans-serif;
+    margin: 1rem auto;
+    max-width: 800px;
+    background: white;
+    border: 1px solid #ccc;
+    font-family: "Malgun Gothic", sans-serif;
 }
 
 .invoice-header {
-  text-align: center;
-  margin-bottom: 2rem;
+    text-align: center;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
 }
 
 .invoice-header h1 {
-  font-size: 2.5rem;
-  color: #333;
-  margin: 0;
+    font-size: 2.5rem;
+    color: #333;
+    margin: 0;
 }
 
 .info-tables {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
 }
 
 .info-table {
-  width: 48%;
-  border-collapse: collapse;
+    width: 48%;
+    border-collapse: collapse;
 }
 
-.info-table th, .info-table td {
-  border: 1px solid #333;
-  padding: 0.5rem;
-  text-align: center;
-  font-size: 0.9rem;
+.info-table th,
+.info-table td {
+    border: 1px solid #333;
+    padding: 0.5rem;
+    text-align: center;
+    font-size: 0.9rem;
 }
 
 .info-table th {
-  background-color: #f2f2f2;
-  width: 25%;
+    background-color: #f2f2f2;
+    width: 25%;
 }
 
 .info-table td {
@@ -49,19 +54,20 @@
 }
 
 .items-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 2rem;
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
 }
 
-.items-table th, .items-table td {
-  border: 1px solid #333;
-  padding: 0.5rem;
-  text-align: center;
+.items-table th,
+.items-table td {
+    border: 1px solid #333;
+    padding: 0.5rem;
+    text-align: center;
 }
 
 .items-table thead th {
-  background-color: #f2f2f2;
+    background-color: #f2f2f2;
 }
 
 .items-table .text-right {
@@ -76,41 +82,16 @@
 }
 
 .invoice-actions {
-  text-align: center;
-  margin-top: 2rem;
+    text-align: center;
+    margin-top: 2rem;
 }
 
 .print-btn {
-  padding: 0.8rem 2rem;
-  font-size: 1rem;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-@media print {
-  body * {
-    visibility: hidden;
-  }
-  .invoice-wrapper, .invoice-wrapper * {
-    visibility: visible;
-  }
-  .invoice-wrapper {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 1rem;
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+    background-color: #007bff;
+    color: white;
     border: none;
-    font-size: 10pt;
-  }
-  .invoice-header h1 {
-    font-size: 2rem;
-  }
-  .invoice-actions {
-    display: none;
-  }
+    border-radius: 5px;
+    cursor: pointer;
 }

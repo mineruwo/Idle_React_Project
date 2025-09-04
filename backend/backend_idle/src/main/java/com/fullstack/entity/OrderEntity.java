@@ -105,6 +105,12 @@ public class OrderEntity {
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
 
+    @Column(name = "tax_invoice_issued")
+    private Boolean taxInvoiceIssued = false;
+
+    @Column(name = "tax_invoice_number", length = 50)
+    private String taxInvoiceNumber;
+
     @PrePersist
     public void ensureOrderNo() {
         if (this.status == null) {

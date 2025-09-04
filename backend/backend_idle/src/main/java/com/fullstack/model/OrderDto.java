@@ -47,6 +47,9 @@ public class OrderDto {
 
     private LocalDateTime assignedAt; // assignedAt 필드 추가
 
+    private Boolean taxInvoiceIssued;
+    private String taxInvoiceNumber;
+
     public static OrderDto fromEntity(OrderEntity entity, String shipperNickname, String assignedDriverNickname) {
         OrderDto dto = new OrderDto();
         dto.setId(entity.getId());
@@ -71,6 +74,8 @@ public class OrderDto {
         dto.setCreatedAt(entity.getCreatedAt());
         dto.setDepartedAt(entity.getDepartedAt());
         dto.setCompletedAt(entity.getCompletedAt());
+        dto.setTaxInvoiceIssued(entity.getTaxInvoiceIssued());
+        dto.setTaxInvoiceNumber(entity.getTaxInvoiceNumber());
         // assignedAt 필드는 OrderService에서 DriverOffer 정보를 조회하여 설정됩니다.
         // 여기서는 entity.getAssignedAt()을 호출하지 않습니다.
 

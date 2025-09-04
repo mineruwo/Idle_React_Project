@@ -144,6 +144,25 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
+    @Transactional
+    public OrderDto issueTaxInvoice(Long orderId, OrderDto orderDto) {
+        log.info("OrderService: Issuing tax invoice for order ID: {}", orderId);
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + orderId));
+
+        order.setTaxInvoiceIssued(orderDto.getTaxInvoiceIssued());
+        order.setTaxInvoiceNumber(orderDto.getTaxInvoiceNumber());
+
+        OrderEntity updatedOrder = orderRepository.save(order);
+
+        String shipperNickname = updatedOrder.getShipper() != null ? updatedOrder.getShipper().getNickname() : "알 수 없음";
+        String assignedDriverNickname = null;
+        if (updatedOrder.getAssignedDriver() != null) {
+            assignedDriverNickname = updatedOrder.getAssignedDriver().getNickname();
+        }
+        return OrderDto.fromEntity(updatedOrder, shipperNickname, assignedDriverNickname);
+    }
+
     private OrderDto mapOrderToDtoWithNickname(OrderEntity order) {
         String shipperNickname = order.getShipper() != null ? order.getShipper().getNickname() : "알 수 없음";
 

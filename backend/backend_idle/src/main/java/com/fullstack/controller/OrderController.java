@@ -92,7 +92,7 @@ public class OrderController {
         return res;
     }
 
-    // 주문 상태 업데이트
+        // 주문 상태 업데이트
     @PutMapping("/{id}/status")
     public ResponseEntity<Void> updateOrderStatus(@PathVariable("id") Long id, @RequestBody String statusString, Authentication authentication) { // Changed parameter type
         log.info("User authorities: {}", authentication.getAuthorities());
@@ -104,6 +104,32 @@ public class OrderController {
         } catch (IllegalArgumentException e) {
             log.error("Invalid OrderStatus received: {}", statusString, e);
             return ResponseEntity.badRequest().build(); // Return 400 for invalid status
+        }
+    }
+
+    // 일반 주문 업데이트 (세금계산서 발행 포함)
+    @PutMapping("/{id}")
+    public ResponseEntity<OrderDto> updateOrder(@PathVariable("id") Long id, @RequestBody OrderDto orderDto) {
+        log.info("Received request to update order ID: {}", id);
+        try {
+            OrderDto updatedOrder = orderService.issueTaxInvoice(id, orderDto);
+            return new ResponseEntity<>(updatedOrder, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error updating order ID: {}", id, e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // 세금계산서 발행
+    @PutMapping("/{id}/tax-invoice")
+    public ResponseEntity<OrderDto> issueTaxInvoice(@PathVariable("id") Long id, @RequestBody OrderDto orderDto) {
+        log.info("Received request to issue tax invoice for order ID: {}", id);
+        try {
+            OrderDto updatedOrder = orderService.issueTaxInvoice(id, orderDto);
+            return new ResponseEntity<>(updatedOrder, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error issuing tax invoice for order ID: {}", id, e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

@@ -1,132 +1,152 @@
-import React from 'react';
-import '../../../theme/ShipperCustomCss/Invoice.css';
+import React from "react";
+import "../../../theme/ShipperCustomCss/Invoice.css";
 
-const ShipperInvoiceComponent = ({ order, handlePrint }) => {
-  if (!order) return null;
+const ShipperInvoiceComponent = React.forwardRef(({ order }, ref) => {
+    if (!order) return null;
 
-  // TODO: Replace with actual data from API
-  const supplier = {
-    name: '(주)IDLE 로지스틱스',
-    ceo: '홍길동',
-    bizNum: '123-45-67890',
-    address: '서울특별시 강남구 테헤란로 123',
-    bizType: '서비스',
-    bizItem: '화물운송주선',
-  };
+    // TODO: Replace with actual data from API
+    const supplier = {
+        name: "(주)NaviLogistics",
+        ceo: "IDLE",
+        bizNum: "123-45-67890",
+        address: "서울특별시 강남구 강남대로 78길 8",
+        bizType: "서비스",
+        bizItem: "화물운송주선",
+    };
 
-  const totalAmount = order.driverPrice || order.proposedPrice || 0;
-  const supplyAmount = Math.round(totalAmount / 1.1);
-  const taxAmount = totalAmount - supplyAmount;
+    const totalAmount = order.driverPrice || order.proposedPrice || 0;
+    const supplyAmount = Math.round(totalAmount / 1.1);
+    const taxAmount = totalAmount - supplyAmount;
 
-  return (
-    <div className="invoice-wrapper">
-      <div className="invoice-header">
-        <h1>세금계산서</h1>
-      </div>
+    return (
+        <div className="invoice-wrapper" ref={ref}>
+            <div className="invoice-header">
+                <h1>세금계산서</h1>
+            </div>
 
-      <div className="info-tables">
-        <table className="info-table">
-          <thead>
-            <tr>
-              <th colSpan="4" style={{backgroundColor: '#e0e0e0'}}>공급자 (보내는 사람)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th>상호</th>
-              <td colSpan="3">{supplier.name}</td>
-            </tr>
-            <tr>
-              <th>대표</th>
-              <td>{supplier.ceo}</td>
-              <th>사업자등록번호</th>
-              <td>{supplier.bizNum}</td>
-            </tr>
-            <tr>
-              <th>주소</th>
-              <td colSpan="3">{supplier.address}</td>
-            </tr>
-            <tr>
-              <th>업태</th>
-              <td>{supplier.bizType}</td>
-              <th>종목</th>
-              <td>{supplier.bizItem}</td>
-            </tr>
-          </tbody>
-        </table>
+            <div className="info-tables">
+                <table className="info-table">
+                    <thead>
+                        <tr>
+                            <th
+                                colSpan="4"
+                                style={{ backgroundColor: "#e0e0e0" }}
+                            >
+                                공급자 (보내는 사람)
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th>상호</th>
+                            <td colSpan="3">{supplier.name}</td>
+                        </tr>
+                        <tr>
+                            <th>대표</th>
+                            <td>{supplier.ceo}</td>
+                            <th>사업자등록번호</th>
+                            <td>{supplier.bizNum}</td>
+                        </tr>
+                        <tr>
+                            <th>주소</th>
+                            <td colSpan="3">{supplier.address}</td>
+                        </tr>
+                        <tr>
+                            <th>업태</th>
+                            <td>{supplier.bizType}</td>
+                            <th>종목</th>
+                            <td>{supplier.bizItem}</td>
+                        </tr>
+                    </tbody>
+                </table>
 
-        <table className="info-table">
-          <thead>
-            <tr>
-              <th colSpan="4" style={{backgroundColor: '#e0e0e0'}}>공급받는 자 (받는 사람)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th>상호</th>
-              <td colSpan="3">{order.shipperName || '화주 상호명'}</td>
-            </tr>
-            <tr>
-              <th>대표</th>
-              <td>{order.shipperCeo || '화주 대표명'}</td>
-              <th>사업자등록번호</th>
-              <td>{order.shipperBizNum || '화주 사업자번호'}</td>
-            </tr>
-            <tr>
-              <th>주소</th>
-              <td colSpan="3">{order.shipperAddress || '화주 주소'}</td>
-            </tr>
-            <tr>
-              <th>업태</th>
-              <td>{order.shipperBizType || '화주 업태'}</td>
-              <th>종목</th>
-              <td>{order.shipperBizItem || '화주 종목'}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                <table className="info-table">
+                    <thead>
+                        <tr>
+                            <th
+                                colSpan="4"
+                                style={{ backgroundColor: "#e0e0e0" }}
+                            >
+                                공급받는 자 (받는 사람)
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th>상호</th>
+                            <td colSpan="3">
+                                {order.shipperNickname || "화주 상호명"}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>대표</th>
+                            <td>{order.shipperName || "화주 대표명"}</td>
+                            <th>사업자등록번호</th>
+                            <td>{order.shipperBizNum || "화주 사업자번호"}</td>
+                        </tr>
+                        <tr>
+                            <th>주소</th>
+                            <td colSpan="3">
+                                {order.shipperAddress || "화주 주소"}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>업태</th>
+                            <td>{order.shipperBizType || "화주 업태"}</td>
+                            <th>종목</th>
+                            <td>{order.shipperBizItem || "화주 종목"}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
-      <table className="items-table">
-        <thead>
-          <tr>
-            <th>작성일자</th>
-            <th>공급가액</th>
-            <th colSpan="2">세액</th>
-          </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{new Date().toLocaleDateString()}</td>
-                <td className="text-right">{supplyAmount.toLocaleString()}</td>
-                <td colSpan="2" className="text-right">{taxAmount.toLocaleString()}</td>
-            </tr>
-            <tr>
-                <th colSpan="4">합계금액: {totalAmount.toLocaleString()}원</th>
-            </tr>
-            <tr>
-                <th>품목</th>
-                <th>규격</th>
-                <th>수량</th>
-                <th>단가</th>
-            </tr>
-            <tr>
-                <td>{order.itemName}</td>
-                <td>-</td>
-                <td>1</td>
-                <td className="text-right">{supplyAmount.toLocaleString()}</td>
-            </tr>
-        </tbody>
-      </table>
-      
-      <div className="total-summary">
-        <p>이 금액을 영수함.</p>
-      </div>
+            <table className="items-table">
+                <thead>
+                    <tr>
+                        <th>작성일자</th>
+                        <th>공급가액</th>
+                        <th colSpan="2">세액</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{new Date().toLocaleDateString()}</td>
+                        <td className="text-right">
+                            {supplyAmount.toLocaleString()}
+                        </td>
+                        <td colSpan="2" className="text-right">
+                            {taxAmount.toLocaleString()}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th colSpan="4">
+                            합계금액: {totalAmount.toLocaleString()}원
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>상품명</th>
+                        <th>품목</th>
+                        <th>포장</th>
+                        <th>단가</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            (오더번호 : {order.orderNo}) {order.itemName}
+                        </td>
+                        <td>{order.cargoType}</td>
+                        <td>{order.packingOption}</td>
+                        <td className="text-right">
+                            {supplyAmount.toLocaleString()}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
 
-      <div className="invoice-actions">
-        <button className="print-btn" onClick={handlePrint}>인쇄하기</button>
-      </div>
-    </div>
-  );
-};
+            <div className="total-summary">
+                <p>이 금액을 영수함.</p>
+            </div>
+        </div>
+    );
+});
 
 export default ShipperInvoiceComponent;

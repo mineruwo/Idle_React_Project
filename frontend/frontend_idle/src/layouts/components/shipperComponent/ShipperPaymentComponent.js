@@ -51,7 +51,7 @@ const ShipperPaymentComponent = ({
     const [usePoints, setUsePoints] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState("");
-    const [selectedPaymentType, setSelectedPaymentType] = useState("card");
+    const [selectedPaymentType, setSelectedPaymentType] = useState("kakaopay");
 
     const { shipperMoveToPaymentSuccess } = useCustomMove();
 

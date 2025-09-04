@@ -27,7 +27,7 @@ const ShipperPointComponent = ({ nickname, userId, userEmail }) => {
 
     // 포인트 충전
     const [chargeAmount, setChargeAmount] = useState("");
-    const [selectedPaymentType, setSelectedPaymentType] = useState("card");
+    const [selectedPaymentType, setSelectedPaymentType] = useState("kakaopay");
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState("");
 
