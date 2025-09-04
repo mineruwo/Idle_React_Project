@@ -21,6 +21,7 @@ import com.fullstack.security.jwt.JWTFilter;
 import com.fullstack.security.oauth.OAuth2SuccessHandler;
 import com.fullstack.service.CustomOAuth2UserService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
@@ -37,7 +38,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
+     
+    	http
             // CORS & CSRF
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable()) // CSRF 보호 비활성화 (API 서버)
@@ -77,7 +79,9 @@ public class SecurityConfig {
                     "/api/auth/refresh",
                     "/api/auth/logout",
                     "/api/auth/reset-password",
-                    "/api/auth/email/**",      
+                    "/api/auth/email/**",  
+                    "/api/auth/complete-signup",
+                    "/api/auth/link-existing",
                     "/api/admin/login", // 경로 변경
                     "/api/admin/check-auth", // 추가: 인증 상태 확인 엔드포인트 허용
                     "/api/admin/logout", // 추가: 로그아웃 엔드포인트 허용
@@ -94,12 +98,11 @@ public class SecurityConfig {
                     "/oauth2/**", "/login/oauth2/**", "/oauth2/authorization/**",
                     "/api/reviews/target/**" // 특정 대상의 리뷰 목록 조회는 누구나 가능
                 ).permitAll()
-                .requestMatchers(
-                    "/api/auth/me",
-                    "/api/reviews"     // 리뷰 작성 및 삭제는 인증된 사용자만 가능
-                ).authenticated()
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/reset-password").permitAll()
+                .requestMatchers(
+                        "/api/auth/me",
+                        "/api/reviews"     // 리뷰 작성 및 삭제는 인증된 사용자만 가능
+                ).authenticated()
                 
                 .anyRequest().authenticated()
             )
@@ -111,7 +114,7 @@ public class SecurityConfig {
                     .successHandler(oAuth2SuccessHandler)
                     .failureHandler((req, res, ex) -> {  // 오류 내용을 확인하려면 임시로 추가
                         ex.printStackTrace();
-                        res.sendRedirect("/login?error=" + java.net.URLEncoder.encode(ex.getMessage(), java.nio.charset.StandardCharsets.UTF_8));
+                        res.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
                     })
                 )
             

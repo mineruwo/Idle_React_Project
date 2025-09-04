@@ -95,16 +95,13 @@ export default function NewPasswordComponent({ onSuccess }) {
 
     setSubmitting(true);
     setError("");
-    alert(token);
     
     try {
       await resetPassword({ token, newPassword: password });
       setDone(true);
       if (typeof onSuccess === "function") onSuccess();
     } catch (e) {
-      if (e.code === "USED_PASSWORD") {
-        setError("이미 사용 중인 비밀번호입니다. 다른 비밀번호를 입력해 주세요.");
-      } else if (e.code === "TOKEN_INVALID_OR_USED") {
+      if (e.code === "TOKEN_INVALID_OR_USED") {
         setError("링크가 만료되었거나 이미 사용되었습니다. 다시 요청해 주세요.");
       } else {
         setError(e.message || "비밀번호 재설정에 실패했습니다. 다시 시도해 주세요.");

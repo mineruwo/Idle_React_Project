@@ -1,12 +1,12 @@
 package com.fullstack.service;
 
 import com.fullstack.entity.CustomerEntity;
-import com.fullstack.model.SnsLinkExistingRequestDTO;
-import com.fullstack.model.SnsSignupDTO;
-import com.fullstack.model.SnsSignupRequestDTO;
+import com.fullstack.model.OauthLinkExistingDTO;
+import com.fullstack.model.OauthSignupDTO;
+import com.fullstack.model.OauthSignupRequestDTO;
 
 public interface SnsOnboardingService {
 
-	CustomerEntity completeSignup(SnsSignupDTO snsSignupDTO, SnsSignupRequestDTO req);
-    CustomerEntity linkExisting(SnsSignupDTO snsSignupDTO, SnsLinkExistingRequestDTO req);
+	public CustomerEntity completeSignup(OauthSignupDTO oauthSignupDTO, OauthSignupRequestDTO oauthSignupRequestDTO);
+	public CustomerEntity linkExisting(OauthSignupDTO oauthSignupDTO, OauthLinkExistingDTO oauthLinkExistingDTO);
 }

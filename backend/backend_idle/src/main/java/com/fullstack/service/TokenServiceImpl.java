@@ -1,7 +1,7 @@
 package com.fullstack.service;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 import org.springframework.stereotype.Service;
@@ -42,21 +42,21 @@ public class TokenServiceImpl implements TokenService {
 	public TokenDTO refresh(String rawRt) {
 	    String id = jwtUtil.getId(rawRt);
 
-	    CustomerEntity customerEntity = customerRepository.findById(id).orElseThrow();
+	    CustomerEntity customer = customerRepository.findById(id).orElseThrow();
 
-	    boolean expired = customerEntity.getRtExpiresAt().isBefore(LocalDateTime.now());
-	    boolean mismatch = !Objects.equals(customerEntity.getRefreshToken(), HashUtils.sha256(rawRt));
+	    boolean expired = customer.getRtExpiresAt().isBefore(Instant.now());
+	    boolean mismatch = !Objects.equals(customer.getRefreshToken(), HashUtils.sha256(rawRt));
 	    
 	    if (expired || mismatch) {
 	    	throw new RuntimeException("Refresh Token이 만료되었거나 일치하지 않습니다.");
         }
 
-	    String newAt = jwtUtil.generateAccessToken(id, customerEntity.getRole(), Duration.ofMinutes(15));
+	    String newAt = jwtUtil.generateAccessToken(id, customer.getRole(), Duration.ofMinutes(15));
 	    String newRt = jwtUtil.generateRefreshToken(id, Duration.ofDays(14));
 
-	    customerEntity.setRefreshToken(HashUtils.sha256(newRt));
-	    customerEntity.setRtExpiresAt(jwtUtil.getExpiration(newRt));
-	    customerRepository.save(customerEntity);
+	    customer.setRefreshToken(HashUtils.sha256(newRt));
+	    customer.setRtExpiresAt(jwtUtil.getExpiration(newRt));
+	    customerRepository.save(customer);
 	    
 	    long atExpiresIn = 15 * 60;
 		long rtExpiresIn = 14 * 24 * 60 * 60;

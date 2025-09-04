@@ -4,12 +4,9 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -20,7 +17,7 @@ import com.fullstack.entity.CustomerEntity;
 import com.fullstack.model.TokenDTO;
 import com.fullstack.repository.CustomerRepository;
 import com.fullstack.security.util.TokenCookieUtils;
-import com.fullstack.service.SnsTokenService;
+import com.fullstack.service.OauthTokenService;
 import com.fullstack.service.TokenService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,12 +30,10 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 	
 	private final CustomerRepository customerRepository;
 	private final TokenService tokenService;
-	private final SnsTokenService snsSignupService;
+	private final OauthTokenService oauthTokenService;
 	
 	@Value("${frontend.base-url}")
     private String frontendBaseUrl;
-	
-	private static final Duration OAUTH_SIGNUP_TTL = Duration.ofMinutes(10);
 	
 	@Override
     public void onAuthenticationSuccess(HttpServletRequest req, HttpServletResponse res,
@@ -67,22 +62,13 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                 return;
             }
 	        
-	        String mode = "choose";
+	        Duration TTL = Duration.ofMinutes(10);
+	        String token = oauthTokenService.issue(provider, providerId, "choose", TTL);
 	      	        
-	        String signupToken = snsSignupService.issue(provider, providerId, mode, OAUTH_SIGNUP_TTL);
+	        String redirect = frontendBaseUrl + "/oauth2/land#mode=choose&token=" +
+	                URLEncoder.encode(token, StandardCharsets.UTF_8);
 	        
-	        ResponseCookie signupCookie = ResponseCookie.from("oauth_signup_token",
-                    URLEncoder.encode(signupToken, StandardCharsets.UTF_8))
-	        	.httpOnly(true)
-	            .secure(false)          // TODO: 운영 배포 시 true
-	            .sameSite("Lax")
-	            .path("/")
-	            .maxAge(OAUTH_SIGNUP_TTL)
-	            .build();
-	        
-	        res.addHeader("Set-Cookie", signupCookie.toString());
-	        
-	        res.sendRedirect(frontendBaseUrl + "/oauth2/land?mode=choose");
+	        res.sendRedirect(redirect);
         } catch (Exception e) {
             e.printStackTrace();
             res.sendRedirect(frontendBaseUrl + "/login?error=oauth2");
@@ -92,14 +78,10 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 	private String extractProviderId(String provider, Map<String, Object> attrs) {
 	    switch (provider) {
 	        case "google":
-	            // google은 sub가 id. 혹시 라이브러리/환경에 따라 id만 있는 경우도 대비
 	            return asString(attrs.getOrDefault("sub", attrs.get("id")));
 	        case "kakao":
-	            // kakao는 기본 id가 최상위. (평탄화 전이면 그대로, 후면 어차피 최상위)
 	            return asString(attrs.get("id"));
 	        case "naver": {
-	            // ✅ 평탄화된 경우: attrs.get("id")
-	            // ✅ 평탄화 전(기존): attrs.get("response.id")
 	            Object id = attrs.get("id");
 	            if (id == null) {
 	                Map<String,Object> resp = asMap(attrs.get("response"));

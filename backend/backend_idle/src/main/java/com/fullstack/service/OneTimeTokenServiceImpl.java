@@ -55,18 +55,19 @@ public class OneTimeTokenServiceImpl implements OneTimeTokenService {
 	}
 
 	@Override
-	public <T> Optional<T> consume(String token, String expectedPurpose, Class<T> type) {
-		if (token == null || token.isBlank())
-			return Optional.empty();
-
-		Entry e = store.remove(token); 
-		
-        if (e == null) return Optional.empty();
-        if (!expectedPurpose.equals(e.purpose)) return Optional.empty();
-        if (e.expiresAt.isBefore(LocalDateTime.now())) return Optional.empty();
-        if (e.payload == null || !type.isInstance(e.payload)) return Optional.empty();
-        
+	public <T> Optional<T> peek(String token, String expectedPurpose, Class<T> type) {
+	    if (token == null || token.isBlank()) return Optional.empty();
+	    Entry e = store.get(token); 
+	    if (e == null) return Optional.empty();
+	    if (!expectedPurpose.equals(e.purpose)) return Optional.empty();
+	    if (e.expiresAt.isBefore(LocalDateTime.now())) return Optional.empty();
+	    if (e.payload == null || !type.isInstance(e.payload)) return Optional.empty();
 	    return Optional.of(type.cast(e.payload));
+	}
+	
+	@Override
+	public void invalidate(String token) {
+	    store.remove(token); // 최종 성공 시 호출
 	}
 
 	private void purge() {
@@ -84,5 +85,7 @@ public class OneTimeTokenServiceImpl implements OneTimeTokenService {
 	public void shutdown() {
 		janitor.shutdownNow();
 	}
+	
+	
 	
 }

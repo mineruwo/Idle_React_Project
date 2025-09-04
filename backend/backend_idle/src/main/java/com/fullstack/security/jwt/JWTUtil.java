@@ -2,8 +2,7 @@ package com.fullstack.security.jwt;
 
 import java.security.Key;
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.Instant;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +23,7 @@ public class JWTUtil {
     private final String issuer;
     
 	public JWTUtil(@Value("${jwt.secret}") String secret,
-			@Value("${jwt.access-ttl:PT30M}") Duration accessTtl,
+			@Value("${jwt.access-ttl:PT15M}") Duration accessTtl,
             @Value("${jwt.refresh-ttl:P14D}") Duration refreshTtl,
             @Value("${jwt.issuer:idle-api}") String issuer) 
 	{
@@ -34,6 +33,7 @@ public class JWTUtil {
         this.issuer = issuer;
 	}
 	
+	// 이거 왜 쓰는거지
 	public String generateAccessToken(String id, String role) {
         return buildToken(id, role, accessTtl);
     }
@@ -51,29 +51,26 @@ public class JWTUtil {
 	}
 	
 	// 공통 빌더
-    private String buildToken(String id, String role, Duration expire) {
-    	Date now = new Date();
-    	Date exp = new Date(now.getTime() + expire.toMillis());
+    private String buildToken(String id, String role, Duration ttl) {
+    	Instant now = Instant.now();
+    	Instant exp = now.plus(ttl);
 
     	JwtBuilder builder = Jwts.builder()
                 .setSubject(id)
                 .setIssuer(issuer)
-                .setIssuedAt(now)
-                .setExpiration(exp)
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(exp))
                 .signWith(key, SignatureAlgorithm.HS256);
-
+                
         if (role != null) {
-            builder.claim("role", role);
+        	builder.claim("role", role);
         }
 
         return builder.compact();
     }
 	
 	// 토큰에서 ID 추출
-	public String getId(String token) {
-		
-		String ids = parseClaims(token).getSubject();
-		
+	public String getId(String token) {	
 		return parseClaims(token).getSubject();
 	}
 	
@@ -83,12 +80,10 @@ public class JWTUtil {
 	}
 	
 	// 만료 시간
-	public LocalDateTime getExpiration(String token) {
-	    return parseClaims(token)
-	            .getExpiration()
-	            .toInstant()
-	            .atZone(ZoneId.systemDefault())
-	            .toLocalDateTime();
+	public Instant getExpiration(String token) {
+		return parseClaims(token)
+				.getExpiration()
+				.toInstant();
 	}
 	
 	// 토큰 유효성

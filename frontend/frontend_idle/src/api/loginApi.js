@@ -32,17 +32,13 @@ export const checkAccount = async (id, password) => {
 
 export const resetPassword = async ({ token, newPassword }) => {
   try {
-    const res = await api.post("/auth/reset-password", { token, newPassword });
-    return true;
+    await api.post("/auth/reset-password", { token, newPassword });
   } catch (err) {
     const status = err?.response?.status;
     const data = err?.response?.data;
     const message = data?.message || data?.detail || "비밀번호 재설정 실패";
 
-    const code =
-      status === 403 ? "USED_PASSWORD" :
-      status === 400 ? "TOKEN_INVALID_OR_USED" :
-      "UNKNOWN";
+    const code = status === 400 ? "TOKEN_INVALID_OR_USED" : "UNKNOWN";
 
     throw Object.assign(new Error(message), { status, code, cause: err });
   }

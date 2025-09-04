@@ -8,5 +8,6 @@ import com.fullstack.model.ResetPasswordTicketDTO;
 public interface ResetTokenService {
 
 	public String issue(String id, Duration TTL);
-    Optional<ResetPasswordTicketDTO> consume(String token);
+    Optional<ResetPasswordTicketDTO> peek(String token);
+    public void invalidate(String token);
 }
