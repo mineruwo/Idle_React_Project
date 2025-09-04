@@ -1,43 +1,40 @@
 :root {
-    /* Existing variables from theme/admin.css */
-    --admin-pink-bg: #fff7fb;
-    --admin-pink-card-border: #f9d8e8;
-    --admin-pink-card-border-hover: #f4c1d8;
-    --admin-pink-card-shadow: rgba(232, 90, 166, 0.08);
-    --admin-pink-card-shadow-hover: rgba(232, 90, 166, 0.14);
-    --admin-pink-strong: #E85AA6;
-    --admin-pink-text: #2b2330;
-    --admin-pink-sub-text: #9b7f8c;
-    --admin-pink-label: #b792a3;
-    --admin-pink-panel-border: #f3c9db;
-    --admin-pink-panel-bg: #ffffff;
-    --admin-pink-header: #cc3f88;
-    --admin-pink-back-bg: #ffe6f2;
-    --admin-pink-back-bg-hover: #ffd9ea;
-    --admin-pink-tag-bg: #ffe2ef;
-    --admin-pink-tag-text: #d84b95;
-
-    /* Merged from CustomCSS/admin.css - Form specific colors */
-    --admin-pink-form-button-bg: #ffb1d3ff;
-    --admin-pink-form-button-hover: #f48fb1;
-    --admin-pink-form-input-border: #ccc;
-    --admin-pink-form-input-bg-filled: #ffffff;
-    --admin-pink-form-input-bg-empty: #f5f5f5;
-    --admin-pink-form-input-focus-border: #e08cab;
-    --admin-pink-form-input-focus-shadow: rgba(224, 140, 171, 0.2);
-    --admin-pink-form-divider: #f48fb1;
+  --admin-bg: var(--bs-light);
+  --admin-card-border: var(--bs-border-color);
+  --admin-card-border-hover: var(--bs-primary);
+  --admin-card-shadow: var(--bs-box-shadow-sm);
+  --admin-card-shadow-hover: var(--bs-box-shadow);
+  --admin-strong: var(--bs-primary);
+  --admin-text: var(--bs-body-color);
+  --admin-sub-text: var(--bs-secondary);
+  --admin-label: var(--bs-primary);
+  --admin-panel-border: var(--bs-border-color);
+  --admin-panel-bg: var(--bs-white);
+  --admin-header: var(--bs-dark);
+  --admin-back-bg: var(--bs-secondary);
+  --admin-back-bg-hover: var(--bs-dark);
+  --admin-tag-bg: var(--bs-light);
+  --admin-tag-text: var(--bs-body-color);
+  --admin-form-button-bg: var(--bs-primary);
+  --admin-form-button-hover: var(--bs-dark);
+  --admin-form-input-border: var(--bs-border-color);
+  --admin-form-input-bg-filled: var(--bs-white);
+  --admin-form-input-bg-empty: var(--bs-light);
+  --admin-form-input-focus-border: var(--bs-primary);
+  --admin-form-input-focus-shadow: rgba(var(--bs-primary-rgb), 0.25);
+  --admin-form-divider: var(--bs-primary);
 }
 
 /* General styles for the admin page */
 body {
-    background-color: var(--admin-pink-bg);
+    background-color: var(--admin-bg);
     font-family: sans-serif; /* 기본 폰트 설정 */
-    color: var(--admin-pink-text);
+    color: var(--admin-text);
 }
 
 .admin-container {
     padding: 24px;
-    background-color: var(--admin-pink-bg);
+    background-color: var(--admin-bg);
     border-radius: 16px;
     min-height: calc(100vh - 48px);
     box-sizing: border-box;
@@ -49,19 +46,19 @@ body {
     align-items: center;
     margin-bottom: 18px;
     padding-bottom: 12px;
-    border-bottom: 1px solid var(--admin-pink-panel-border);
+    border-bottom: 1px solid var(--admin-panel-border);
 }
 
 .admin-header h2 {
     margin: 0;
     font-size: 28px;
     font-weight: 800;
-    color: var(--admin-pink-header);
+    color: var(--admin-header);
 }
 
 .admin-primary-btn {
     padding: 10px 20px;
-    background-color: var(--admin-pink-strong);
+    background-color: var(--admin-strong);
     color: white;
     border: none;
     border-radius: 10px;
@@ -73,7 +70,7 @@ body {
 }
 
 .admin-primary-btn:hover {
-    background-color: var(--admin-pink-header);
+    background-color: var(--admin-header);
 }
 
 /* --- Table Styles --- */
@@ -82,21 +79,21 @@ body {
     border-collapse: collapse;
     background-color: #fff;
     border-radius: 14px;
-    box-shadow: 0 4px 14px var(--admin-pink-card-shadow);
+    box-shadow: 0 4px 14px var(--admin-card-shadow);
     overflow: hidden; /* For border-radius to work on tables */
 }
 
 .admin-table th,
 .admin-table td {
-    border-bottom: 1px solid var(--admin-pink-panel-border);
+    border-bottom: 1px solid var(--admin-panel-border);
     padding: 14px 16px;
     text-align: center;
-    color: var(--admin-pink-text);
+    color: var(--admin-text);
 }
 
 .admin-table th {
-    background-color: var(--admin-pink-bg);
-    color: var(--admin-pink-strong);
+    background-color: var(--admin-bg);
+    color: var(--admin-strong);
     font-weight: 700;
     font-size: 15px;
 }
@@ -107,7 +104,7 @@ body {
 }
 
 .admin-table-row:hover {
-    background-color: var(--admin-pink-bg);
+    background-color: var(--admin-bg);
 }
 
 .admin-table-row.deactivated {
@@ -129,16 +126,16 @@ body {
 
 .admin-content-row td {
     padding: 0;
-    border-bottom: 1px solid var(--admin-pink-panel-border);
+    border-bottom: 1px solid var(--admin-panel-border);
 }
 
 .admin-content-box {
     padding: 24px;
-    background-color: #fffafd; /* A very light pink from the reference */
+    background-color: var(--admin-panel-bg); /* A very light pink from the reference */
     text-align: left;
     white-space: pre-wrap;
     line-height: 1.7;
-    color: var(--admin-pink-text);
+    color: var(--admin-text);
 }
 
 .admin-actions {
@@ -146,12 +143,12 @@ body {
     justify-content: flex-end;
     gap: 10px;
     padding: 16px 24px;
-    background-color: #fffafd;
+    background-color: var(--admin-panel-bg);
 }
 
 .admin-action-btn {
     padding: 8px 14px;
-    border: 1px solid var(--admin-pink-card-border);
+    border: 1px solid var(--admin-card-border);
     border-radius: 8px;
     font-size: 13px;
     font-weight: 700;
@@ -162,12 +159,12 @@ body {
     transition: all 0.2s ease;
 }
 
-.admin-modify-btn { background-color: #fff; color: var(--admin-pink-strong); }
-.admin-modify-btn:hover { background-color: var(--admin-pink-bg); border-color: var(--admin-pink-strong); }
-.admin-delete-btn { background-color: var(--admin-pink-strong); color: white; border-color: var(--admin-pink-strong); }
-.admin-delete-btn:hover { background-color: var(--admin-pink-header); border-color: var(--admin-pink-header); }
-.admin-toggle-btn { background-color: var(--admin-pink-back-bg); color: var(--admin-pink-header); border-color: var(--admin-pink-back-bg-hover); }
-.admin-toggle-btn:hover { background-color: var(--admin-pink-back-bg-hover); border-color: var(--admin-pink-panel-border); }
+.admin-modify-btn { background-color: #fff; color: var(--admin-strong); }
+.admin-modify-btn:hover { background-color: var(--admin-bg); border-color: var(--admin-strong); }
+.admin-delete-btn { background-color: var(--admin-strong); color: white; border-color: var(--admin-strong); }
+.admin-delete-btn:hover { background-color: var(--admin-header); border-color: var(--admin-header); }
+.admin-toggle-btn { background-color: var(--admin-back-bg); color: var(--admin-header); border-color: var(--admin-back-bg-hover); }
+.admin-toggle-btn:hover { background-color: var(--admin-back-bg-hover); border-color: var(--admin-panel-border); }
 
 /* --- Form Styles --- */
 /* Merged from CustomCSS/admin.css and theme/admin.css */
@@ -176,10 +173,10 @@ body {
     margin: auto; /* From CustomCSS */
     padding: 32px; /* From theme */
     font-family: sans-serif; /* From CustomCSS */
-    background: var(--admin-pink-panel-bg); /* From CustomCSS */
-    border: 1px solid var(--admin-pink-panel-border); /* From CustomCSS */
+    background: var(--admin-panel-bg); /* From CustomCSS */
+    border: 1px solid var(--admin-panel-border); /* From CustomCSS */
     border-radius: 14px; /* From theme */
-    box-shadow: 0 4px 14px var(--admin-pink-card-shadow); /* From theme (using CustomCSS's shadow value) */
+    box-shadow: 0 4px 14px var(--admin-card-shadow); /* From theme (using CustomCSS's shadow value) */
 }
 
 .admin-form-group {
@@ -189,7 +186,7 @@ body {
 .admin-form-group label {
     display: block;
     margin-bottom: 8px;
-    color: var(--admin-pink-strong); /* From theme */
+    color: var(--admin-strong); /* From theme */
     font-weight: 600; /* From theme */
     font-size: 14px; /* From theme */
 }
@@ -199,11 +196,11 @@ body {
 .admin-form-group select {
     width: 100%;
     padding: 12px; /* From theme */
-    border: 1px solid var(--admin-pink-panel-border); /* From theme */
+    border: 1px solid var(--admin-panel-border); /* From theme */
     border-radius: 8px; /* From CustomCSS */
     font-size: 15px;
-    color: var(--admin-pink-text); /* From theme */
-    background-color: var(--admin-pink-bg); /* From theme */
+    color: var(--admin-text); /* From theme */
+    background-color: var(--admin-bg); /* From theme */
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
     box-sizing: border-box;
 }
@@ -212,8 +209,8 @@ body {
 .admin-form-group textarea:focus,
 .admin-form-group select:focus {
     outline: none;
-    border-color: var(--admin-pink-strong); /* From theme */
-    box-shadow: 0 0 0 3px var(--admin-pink-back-bg); /* From theme */
+    border-color: var(--admin-strong); /* From theme */
+    box-shadow: 0 0 0 3px var(--admin-back-bg); /* From theme */
 }
 
 .admin-form-group textarea {
@@ -227,7 +224,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: var(--admin-pink-bg);
+    background-color: var(--admin-bg);
 }
 
 .login-form-box {
@@ -242,36 +239,36 @@ body {
 .login-header {
     text-align: center;
     margin-bottom: 24px;
-    color: var(--admin-pink-header);
+    color: var(--admin-header);
     font-size: 28px;
     font-weight: 800;
 }
 
 .admin-form-title {
-    color: var(--admin-pink-header);
+    color: var(--admin-header);
 }
 
 /* Card styles (mimicking OrderBoard's Card) - from CustomCSS/admin.css */
 .admin-card {
     background: #fff;
-    border: 1px solid var(--admin-pink-card-border);
+    border: 1px solid var(--admin-card-border);
     border-radius: 14px;
     padding: 18px 20px 14px;
-    box-shadow: 0 4px 14px var(--admin-pink-card-shadow);
+    box-shadow: 0 4px 14px var(--admin-card-shadow);
     cursor: pointer;
     transition: box-shadow 180ms ease, border-color 180ms ease, transform 120ms ease;
 }
 
 .admin-card:hover {
-    border-color: var(--admin-pink-card-border-hover);
-    box-shadow: 0 6px 18px var(--admin-pink-card-shadow-hover);
+    border-color: var(--admin-card-border-hover);
+    box-shadow: 0 6px 18px var(--admin-card-shadow-hover);
 }
 
 /* Button styles - from CustomCSS/admin.css */
 .admin-button {
     padding: 0.6rem 1.6rem;
     font-size: 0.95rem;
-    background-color: var(--admin-pink-form-button-bg);
+    background-color: var(--admin-form-button-bg);
     color: white;
     border: none;
     border-radius: 8px;
@@ -281,7 +278,7 @@ body {
 }
 
 .admin-button:hover {
-    background-color: var(--admin-pink-form-button-hover);
+    background-color: var(--admin-form-button-hover);
 }
 
 /* Label styles - from CustomCSS/admin.css */
@@ -289,7 +286,7 @@ body {
     display: block;
     margin-top: 1.2rem;
     font-weight: bold;
-    color: var(--admin-pink-label);
+    color: var(--admin-label);
 }
 
 /* Input and Select styles - from CustomCSS/admin.css */
@@ -299,19 +296,19 @@ body {
     width: 100%;
     padding: 0.7rem; /* From CustomCSS */
     margin-top: 0.4rem; /* From CustomCSS */
-    border: 1px solid var(--admin-pink-form-input-border); /* From CustomCSS */
+    border: 1px solid var(--admin-form-input-border); /* From CustomCSS */
     border-radius: 8px; /* From CustomCSS */
-    background-color: var(--admin-pink-form-input-bg-empty); /* From CustomCSS */
+    background-color: var(--admin-form-input-bg-empty); /* From CustomCSS */
     outline: none;
     font-size: 15px;
-    color: var(--admin-pink-text);
+    color: var(--admin-text);
 }
 
 .admin-input:focus,
 .admin-select:focus {
-    background-color: var(--admin-pink-form-input-bg-filled); /* From CustomCSS */
-    border-color: var(--admin-pink-form-input-focus-border); /* From CustomCSS */
-    box-shadow: 0 0 0 2px var(--admin-pink-form-input-focus-shadow); /* From CustomCSS */
+    background-color: var(--admin-form-input-bg-filled); /* From CustomCSS */
+    border-color: var(--admin-form-input-focus-border); /* From CustomCSS */
+    box-shadow: 0 0 0 2px var(--admin-form-input-focus-shadow); /* From CustomCSS */
 }
 
 /* Table styles (mimicking OrderBoard's info-table concept) - from CustomCSS/admin.css */
@@ -329,14 +326,14 @@ body {
 .admin-table th,
 .admin-table td {
     padding: 12px 15px; /* From CustomCSS */
-    border-bottom: 1px solid var(--admin-pink-card-border);
+    border-bottom: 1px solid var(--admin-card-border);
     text-align: left; /* From CustomCSS */
-    color: var(--admin-pink-text);
+    color: var(--admin-text);
 }
 
 .admin-table th {
-    background-color: var(--admin-pink-tag-bg);
-    color: var(--admin-pink-header);
+    background-color: var(--admin-tag-bg);
+    color: var(--admin-header);
     font-weight: 800; /* From CustomCSS */
     font-size: 14px; /* From CustomCSS */
 }
@@ -346,7 +343,7 @@ body {
 }
 
 .admin-table tbody tr:hover {
-    background-color: var(--admin-pink-bg);
+    background-color: var(--admin-bg);
 }
 
 /* Specific styles for AdminAccountCreateComponent */
@@ -371,11 +368,11 @@ body {
 .admin-search select,
 .admin-search input[type="text"] {
     padding: 8px 12px;
-    border: 1px solid var(--admin-pink-panel-border);
+    border: 1px solid var(--admin-panel-border);
     border-radius: 8px;
     font-size: 14px;
-    color: var(--admin-pink-text);
-    background-color: var(--admin-pink-bg);
+    color: var(--admin-text);
+    background-color: var(--admin-bg);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
     box-sizing: border-box;
 }
@@ -384,8 +381,8 @@ body {
 .admin-search select:focus,
 .admin-search input[type="text"]:focus {
     outline: none;
-    border-color: var(--admin-pink-strong);
-    box-shadow: 0 0 0 3px var(--admin-pink-back-bg);
+    border-color: var(--admin-strong);
+    box-shadow: 0 0 0 3px var(--admin-back-bg);
 }
 
 .admin-table th {
@@ -404,14 +401,14 @@ body {
 }
 
 .btn.active {
-    background-color: var(--admin-pink-strong);
+    background-color: var(--admin-strong);
     color: white;
-    border-color: var(--admin-pink-strong);
+    border-color: var(--admin-strong);
 }
 
 .btn.active:hover {
-    background-color: var(--admin-pink-header);
-    border-color: var(--admin-pink-header);
+    background-color: var(--admin-header);
+    border-color: var(--admin-header);
 }
 
 .filter-buttons {
@@ -422,9 +419,9 @@ body {
 
 .filter-button {
     padding: 8px 16px;
-    background-color: var(--admin-pink-back-bg); /* Light pink background */
-    color: var(--admin-pink-header); /* Darker pink text */
-    border: 1px solid var(--admin-pink-back-bg-hover); /* Slightly darker border */
+    background-color: var(--admin-back-bg); /* Light pink background */
+    color: var(--admin-header); /* Darker pink text */
+    border: 1px solid var(--admin-back-bg-hover); /* Slightly darker border */
     border-radius: 8px;
     cursor: pointer;
     font-size: 14px;
@@ -433,24 +430,24 @@ body {
 }
 
 .filter-button:hover {
-    background-color: var(--admin-pink-back-bg-hover);
-    border-color: var(--admin-pink-panel-border);
+    background-color: var(--admin-back-bg-hover);
+    border-color: var(--admin-panel-border);
 }
 
 .filter-button.active {
-    background-color: var(--admin-pink-strong); /* Strong pink for active */
+    background-color: var(--admin-strong); /* Strong pink for active */
     color: white;
-    border-color: var(--admin-pink-strong);
+    border-color: var(--admin-strong);
 }
 
 .filter-button.active:hover {
-    background-color: var(--admin-pink-header); /* Darker pink on hover for active */
-    border-color: var(--admin-pink-header);
+    background-color: var(--admin-header); /* Darker pink on hover for active */
+    border-color: var(--admin-header);
 }
 
 .admin-chart-title {
-    color: var(--admin-pink-header);
-    border-bottom: 1px solid var(--admin-pink-panel-border);
+    color: var(--admin-header);
+    border-bottom: 1px solid var(--admin-panel-border);
     padding-bottom: 10px;
     margin-bottom: 15px;
 }
@@ -475,42 +472,42 @@ body {
 .pagination-container .admin-button {
     /* Base styles for pagination buttons using admin-button default variant */
     padding: 8px 8px; /* Reduced horizontal padding */
-    border: 1px solid var(--admin-pink-panel-border);
+    border: 1px solid var(--admin-panel-border);
     border-radius: 8px;
-    background-color: var(--admin-pink-panel-bg);
-    color: var(--admin-pink-text);
+    background-color: var(--admin-panel-bg);
+    color: var(--admin-text);
     font-size: 14px;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .pagination-container .admin-button:hover:not(:disabled) {
-    background-color: var(--admin-pink-back-bg);
-    border-color: var(--admin-pink-strong);
+    background-color: var(--admin-back-bg);
+    border-color: var(--admin-strong);
 }
 
 .pagination-container .admin-button:disabled {
     background-color: #e9ecef; /* Lighter background for disabled */
-    color: var(--admin-pink-sub-text); /* Subtler text for disabled */
+    color: var(--admin-sub-text); /* Subtler text for disabled */
     cursor: not-allowed;
     border-color: #dee2e6;
 }
 
 .pagination-container .pagination-button-active {
-    background-color: var(--admin-pink-strong); /* Strong pink for active page */
+    background-color: var(--admin-strong); /* Strong pink for active page */
     color: white;
-    border-color: var(--admin-pink-strong);
+    border-color: var(--admin-strong);
     font-weight: bold;
 }
 
 .pagination-container .pagination-button-active:hover {
-    background-color: var(--admin-pink-header); /* Darker pink on hover for active */
-    border-color: var(--admin-pink-header);
+    background-color: var(--admin-header); /* Darker pink on hover for active */
+    border-color: var(--admin-header);
 }
 
 .pagination-container span {
     margin: 0 5px;
-    color: var(--admin-pink-text);
+    color: var(--admin-text);
     font-weight: 600;
 }
 
@@ -549,13 +546,13 @@ body {
 
 .detail-label {
     font-weight: 700;
-    color: var(--admin-pink-strong);
+    color: var(--admin-strong);
     font-size: 15px;
     margin-bottom: 0;
 }
 
 .detail-value {
-    color: var(--admin-pink-text);
+    color: var(--admin-text);
     font-size: 15px;
     margin-bottom: 0;
     line-height: 1.6;
@@ -563,21 +560,21 @@ body {
 
 .detail-content {
     padding: 12px;
-    background-color: var(--admin-pink-bg);
-    border: 1px solid var(--admin-pink-panel-border);
+    background-color: var(--admin-bg);
+    border: 1px solid var(--admin-panel-border);
     border-radius: 8px;
     white-space: pre-wrap;
     word-break: break-word;
     font-size: 15px;
     line-height: 1.7;
-    color: var(--admin-pink-text);
+    color: var(--admin-text);
 }
 
 .admin-button-secondary {
     padding: 8px 16px;
     background-color: transparent;
-    color: var(--admin-pink-strong);
-    border: 1px solid var(--admin-pink-strong);
+    color: var(--admin-strong);
+    border: 1px solid var(--admin-strong);
     border-radius: 8px;
     cursor: pointer;
     font-size: 14px;
@@ -586,14 +583,14 @@ body {
 }
 
 .admin-button-secondary:hover {
-    background-color: var(--admin-pink-back-bg);
-    color: var(--admin-pink-header);
-    border-color: var(--admin-pink-header);
+    background-color: var(--admin-back-bg);
+    color: var(--admin-header);
+    border-color: var(--admin-header);
 }
 
 .admin-button-primary {
     padding: 10px 20px;
-    background-color: var(--admin-pink-strong);
+    background-color: var(--admin-strong);
     color: white;
     border: none;
     border-radius: 10px;
@@ -604,7 +601,7 @@ body {
 }
 
 .admin-button-primary:hover {
-    background-color: var(--admin-pink-header);
+    background-color: var(--admin-header);
 }
 
 .recent-inquiries-list {
@@ -614,13 +611,13 @@ body {
 }
 
 .recent-inquiry-item {
-    background-color: var(--admin-pink-bg);
-    border: 1px solid var(--admin-pink-panel-border);
+    background-color: var(--admin-bg);
+    border: 1px solid var(--admin-panel-border);
     border-radius: 8px;
     padding: 8px 12px;
     margin-bottom: 8px;
     font-size: 14px;
-    color: var(--admin-pink-text);
+    color: var(--admin-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -636,10 +633,10 @@ body {
     gap: 20px;
     margin-bottom: 20px;
     background-color: #fff;
-    border: 1px solid var(--admin-pink-card-border);
+    border: 1px solid var(--admin-card-border);
     border-radius: 14px;
     padding: 20px;
-    box-shadow: 0 4px 14px var(--admin-pink-card-shadow);
+    box-shadow: 0 4px 14px var(--admin-card-shadow);
 }
 
 .sales-summary-cards .card {
@@ -653,14 +650,14 @@ body {
 
 .sales-summary-cards .card h3 {
     font-size: 16px;
-    color: var(--admin-pink-strong);
+    color: var(--admin-strong);
     margin-bottom: 8px;
 }
 
 .sales-summary-cards .card p {
     font-size: 24px;
     font-weight: bold;
-    color: var(--admin-pink-header);
+    color: var(--admin-header);
 }
 
 .pagination-button {
@@ -677,7 +674,7 @@ body {
 
 .detail-table td {
     padding: 8px 4px;
-    border-bottom: 1px solid var(--admin-pink-bg);
+    border-bottom: 1px solid var(--admin-bg);
     font-size: 14px;
 }
 
@@ -687,11 +684,203 @@ body {
 
 .detail-table .detail-label {
     font-weight: 600;
-    color: var(--admin-pink-strong);
+    color: var(--admin-strong);
     width: 150px; /* Fixed width for alignment */
     padding-right: 10px;
 }
 
 .detail-table .detail-value {
-    color: var(--admin-pink-text);
+    color: var(--admin-text);
+}
+
+.chat-page-container {
+    display: flex;
+    gap: 24px;
+    padding: 24px;
+    background-color: var(--admin-bg);
+    min-height: calc(100vh - 48px);
+    box-sizing: border-box;
+}
+
+.chat-session-container {
+    flex: 2; /* 채팅 영역이 더 넓게 */
+    padding: 24px;
+    background-color: var(--admin-panel-bg);
+    border-radius: 14px;
+    box-shadow: 0 4px 14px var(--admin-card-shadow);
+    border: 1px solid var(--admin-panel-border);
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-session-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--admin-panel-border);
+}
+
+.chat-session-header h5 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--admin-header);
+    font-weight: 700;
+}
+
+.chat-session-header .close-button {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: var(--admin-sub-text);
+    transition: color 0.2s ease;
+}
+
+.chat-session-header .close-button:hover {
+    color: var(--admin-header);
+}
+
+.chat-session-messages {
+    flex-grow: 1; /* 메시지 영역이 남은 공간을 채우도록 */
+    overflow-y: auto;
+    padding: 15px;
+    border: 1px solid var(--admin-card-border);
+    border-radius: 8px;
+    margin-bottom: 15px;
+    background-color: var(--admin-bg);
+    display: flex;
+    flex-direction: column;
+}
+
+.message-item {
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.message-item.sent {
+    align-items: flex-end;
+}
+
+.message-item.received {
+    align-items: flex-start;
+}
+
+.message-sender {
+    font-size: 0.85rem;
+    color: var(--admin-label);
+    margin-bottom: 4px;
+}
+
+.message-bubble {
+    padding: 10px 15px;
+    border-radius: 18px;
+    max-width: 75%;
+    word-break: break-word;
+    line-height: 1.4;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.message-bubble.sent {
+    background-color: var(--admin-strong);
+    color: white;
+}
+
+.message-bubble.received {
+    background-color: var(--admin-panel-border);
+    color: var(--admin-text);
+}
+
+.chat-session-input-area {
+    display: flex;
+    gap: 10px;
+}
+
+.chat-session-input {
+    flex-grow: 1;
+    border: 1px solid var(--admin-panel-border);
+    border-radius: 20px;
+    padding: 10px 15px;
+    font-size: 15px;
+    color: var(--admin-text);
+    background-color: var(--admin-bg);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chat-session-input:focus {
+    outline: none;
+    border-color: var(--admin-strong);
+    box-shadow: 0 0 0 3px var(--admin-back-bg);
+}
+
+.chat-session-send-button {
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: none;
+    background-color: var(--admin-strong);
+    color: white;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background-color 0.2s ease;
+}
+
+.chat-session-send-button:hover {
+    background-color: var(--admin-header);
+}
+
+/* --- Chat Info Panel Styles --- */
+.chat-info-panel {
+    flex: 1; /* 정보 패널이 남은 공간을 채우도록 */
+    background-color: var(--admin-panel-bg);
+    border-radius: 14px;
+    box-shadow: 0 4px 14px var(--admin-card-shadow);
+    border: 1px solid var(--admin-panel-border);
+    padding: 24px;
+    overflow-y: auto; /* 내용이 길어지면 스크롤 */
+}
+
+.info-section {
+    background-color: var(--admin-panel-bg);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid var(--admin-card-border);
+}
+
+.info-section h4 {
+    color: var(--admin-header);
+    font-size: 16px;
+    margin-top: 0;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--admin-panel-border);
+}
+
+.info-section p {
+    font-size: 14px;
+    color: var(--admin-text);
+    margin-bottom: 5px;
+}
+
+.info-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.info-table th,
+.info-table td {
+    border: 1px solid var(--admin-card-border);
+    padding: 8px;
+    font-size: 13px;
+    text-align: left;
+    color: var(--admin-text);
+}
+
+.info-table th {
+    background-color: var(--admin-bg);
+    color: var(--admin-strong);
+    font-weight: 600;
 }

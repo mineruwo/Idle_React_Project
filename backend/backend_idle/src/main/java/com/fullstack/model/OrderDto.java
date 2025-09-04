@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import com.fullstack.entity.Order;
+import com.fullstack.entity.OrderEntity;
 import com.fullstack.model.enums.OrderStatus;
 import java.time.LocalDateTime;
 
@@ -47,7 +47,7 @@ public class OrderDto {
 
     private LocalDateTime assignedAt; // assignedAt 필드 추가
 
-    public static OrderDto fromEntity(Order entity, String shipperNickname, String assignedDriverNickname) {
+    public static OrderDto fromEntity(OrderEntity entity, String shipperNickname, String assignedDriverNickname) {
         OrderDto dto = new OrderDto();
         dto.setId(entity.getId());
         dto.setOrderNo(entity.getOrderNo());
@@ -65,7 +65,7 @@ public class OrderDto {
         dto.setVehicle(entity.getVehicle());
         dto.setCargoType(entity.getCargoType());
         dto.setCargoSize(entity.getCargoSize());
-        dto.setAssignedDriverId(entity.getAssignedDriverId());
+        dto.setAssignedDriverId(entity.getAssignedDriver() != null ? entity.getAssignedDriver().getIdNum().longValue() : null);
         dto.setAssignedDriverNickname(assignedDriverNickname);
         
         dto.setCreatedAt(entity.getCreatedAt());

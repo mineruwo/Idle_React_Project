@@ -1,0 +1,53 @@
+/* ===== tokens ===== */
+:root{
+  --ss-gap-md: 16px;
+  --ss-pad-card: 24px;
+  --ss-title-size: clamp(2rem, 10vw, 2.15rem);
+  --ss-logo-size: 64px;
+}
+
+/* 카드 내부 레이아웃 */
+.sns-card{
+  display:flex;
+  flex-direction:column;
+  gap:var(--ss-gap-md);
+  padding:var(--ss-pad-card);
+}
+
+/* 로고 */
+.sns-logo{
+  width:var(--ss-logo-size);
+  height:var(--ss-logo-size);
+  object-fit:contain;
+  align-self:flex-start;
+}
+
+/* 타이틀 */
+.sns-title{
+  width:100%;
+  font-size:var(--ss-title-size);
+  font-weight:700;
+}
+
+/* 폼 레이아웃 */
+.sns-form{
+  display:flex;
+  flex-direction:column;
+  gap:var(--ss-gap-md);
+  width:100%;
+}
+
+/* 에러 메시지 여백 */
+.sns-err{
+  margin-top:8px;
+}
+
+/* 구분선 여백 */
+.sns-divider{
+  margin-top:16px;
+}
+
+/* 작은 화면에서 카드 패딩 살짝 축소 */
+@media (max-width:480px){
+  .sns-card{ padding:20px; }
+}

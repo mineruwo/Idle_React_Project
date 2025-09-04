@@ -61,6 +61,7 @@ const ShipperReviewComponent = () => {
                 )
                 .map((order) => ({
                     orderId: order.id,
+                    orderNo: order.orderNo, // Add orderNo
                     description: `${order.departure} -> ${order.arrival}`,
                     driverId: order.assignedDriverId,
                     driverName:
@@ -204,7 +205,7 @@ const ShipperReviewComponent = () => {
 
     return (
         <div className="review-rating-page">
-            <h2 className="page-title">이용후기 및 평점</h2>
+            <h2 className="review-page-main-title">이용후기 및 평점</h2>
 
             <div className="review-container">
                 <div className="write-review">
@@ -225,6 +226,7 @@ const ShipperReviewComponent = () => {
                                         key={order.orderId}
                                         value={order.orderId}
                                     >
+                                        (주문번호 : {order.orderNo}){" "}
                                         {order.description} ({order.driverName}{" "}
                                         기사님)
                                     </option>

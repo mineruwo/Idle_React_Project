@@ -1,6 +1,6 @@
 package com.fullstack.controller;
 
-import com.fullstack.entity.CarOwnerSettlement.Status;
+import com.fullstack.entity.CarOwnerSettlementEntity.Status;
 import com.fullstack.model.CarOwnerSettlementDTO.SettlementDetailResponse;
 import com.fullstack.model.CarOwnerSettlementDTO.SettlementSummaryCardResponse;
 import com.fullstack.model.CarOwnerSettlementDTO.SettlementSummaryResponse;

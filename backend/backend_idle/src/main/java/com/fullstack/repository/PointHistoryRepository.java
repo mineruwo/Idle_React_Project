@@ -1,7 +1,7 @@
 package com.fullstack.repository;
 
-import com.fullstack.entity.PointHistory;
+import com.fullstack.entity.PointHistoryEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PointHistoryRepository extends JpaRepository<PointHistory, Long> {
+public interface PointHistoryRepository extends JpaRepository<PointHistoryEntity, Long> {
 }

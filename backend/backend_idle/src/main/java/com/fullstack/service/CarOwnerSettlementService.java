@@ -1,6 +1,6 @@
 package com.fullstack.service;
 
-import com.fullstack.entity.CarOwnerSettlement;
+import com.fullstack.entity.CarOwnerSettlementEntity;
 import com.fullstack.model.CarOwnerSettlementDTO.SettlementDetailResponse;
 import com.fullstack.model.CarOwnerSettlementDTO.SettlementSummaryCardResponse;
 import com.fullstack.model.CarOwnerSettlementDTO.SettlementSummaryResponse;
@@ -18,7 +18,7 @@ public interface CarOwnerSettlementService {
             String ownerId,
             LocalDate from,   // nullable
             LocalDate to,     // nullable
-            CarOwnerSettlement.Status status, // nullable
+            CarOwnerSettlementEntity.Status status, // nullable
             int page,
             int size
     );

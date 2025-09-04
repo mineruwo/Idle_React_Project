@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fullstack.entity.CustomerEntity;
-import com.fullstack.entity.Order;
+import com.fullstack.entity.OrderEntity;
 import com.fullstack.entity.PaymentEntity;
-import com.fullstack.entity.PointHistory;
+import com.fullstack.entity.PointHistoryEntity;
 import com.fullstack.model.PaymentRequestDTO;
 import com.fullstack.model.PaymentResponseDTO;
 import com.fullstack.model.PaymentVerificationDTO;
@@ -84,7 +84,7 @@ public class PaymentServiceImpl implements PaymentService {
             paymentEntity.setOrder(null); // 명시적으로 null 설정
         } else {
             // 그 외의 결제는 orderId가 필수
-            Order order = Optional.ofNullable(requestDto.getOrderId())
+            OrderEntity order = Optional.ofNullable(requestDto.getOrderId())
                     .flatMap(orderRepository::findById)
                     .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다: " + requestDto.getOrderId()));
             paymentEntity.setOrder(order);
@@ -294,7 +294,7 @@ public class PaymentServiceImpl implements PaymentService {
         customerRepository.save(customer);
         log.info("usePoints: After point deduction and save, customer {} new balance: {}", customer.getIdNum(), customer.getUserPoint());
 
-        PointHistory history = PointHistory.builder()
+        PointHistoryEntity history = PointHistoryEntity.builder()
                 .customer(customer)
                 .transactionType("USE")
                 .amount(-pointsToUse)
@@ -317,19 +317,40 @@ public class PaymentServiceImpl implements PaymentService {
                 });
         log.info("addPoints: Found customer with ID: {} and current points: {}", customer.getIdNum(), customer.getUserPoint());
 
+        // 신규 5단계 보너스 포인트 계산
+        int bonusPoints = 0;
+        if (amount >= 1000000) {
+            bonusPoints = (int) (amount * 0.15);
+        } else if (amount >= 500000) {
+            bonusPoints = (int) (amount * 0.12);
+        } else if (amount >= 300000) {
+            bonusPoints = (int) (amount * 0.10);
+        } else if (amount >= 100000) {
+            bonusPoints = (int) (amount * 0.07);
+        } else if (amount >= 50000) {
+            bonusPoints = (int) (amount * 0.05);
+        }
+        
+        int totalPointsToAdd = amount + bonusPoints;
+        String description = "포인트 충전";
+        if (bonusPoints > 0) {
+            description += " (보너스 " + bonusPoints + "P 포함)";
+        }
+
+
         log.info("addPoints: Before point addition, customer {} points: {}", customer.getIdNum(), customer.getUserPoint());
-        int newBalance = customer.getUserPoint() + amount;
+        int newBalance = customer.getUserPoint() + totalPointsToAdd;
         customer.setUserPoint(newBalance);
         log.info("addPoints: After setting new balance, customer {} points (in memory): {}", customer.getIdNum(), customer.getUserPoint());
         customerRepository.save(customer);
         log.info("addPoints: After save, customer {} new balance (from saved entity): {}", customer.getIdNum(), customer.getUserPoint());
 
-        PointHistory history = PointHistory.builder()
+        PointHistoryEntity history = PointHistoryEntity.builder()
                 .customer(customer)
                 .transactionType("CHARGE")
-                .amount(amount)
+                .amount(totalPointsToAdd) // 실제 충전된 총액 (원금 + 보너스)
                 .balanceAfter(newBalance)
-                .description("포인트 충전")
+                .description(description) // 보너스 정보 포함
                 .build();
         log.info("addPoints: PointHistory object created: {}", history);
         pointHistoryRepository.save(history);
@@ -377,7 +398,7 @@ public class PaymentServiceImpl implements PaymentService {
         CustomerEntity customer = customerRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
 
-        Order order = orderRepository.findById(orderId.longValue())
+        OrderEntity order = orderRepository.findById(orderId.longValue())
                 .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다: " + orderId));
 
         if (order.getDriverPrice() != pointsToUse) {
@@ -411,7 +432,7 @@ public class PaymentServiceImpl implements PaymentService {
         customer.setUserPoint(newBalance);
         customerRepository.save(customer);
 
-        PointHistory history = PointHistory.builder()
+        PointHistoryEntity history = PointHistoryEntity.builder()
                 .customer(customer)
                 .transactionType("USE")
                 .amount(-pointsToUse)

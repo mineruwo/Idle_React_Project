@@ -6,7 +6,7 @@
   color: #333;
   background-color: #fff;
   background-color: #fef8f8;
-  border: 1px solid #f3c7d3;
+  border: 1px solid #B9D5D9;
   border-radius: 8px;
 }
 
@@ -36,7 +36,7 @@
   flex: 1;
   min-width: 280px;
   background-color: #f7f9fc;
-  border: 1px solid #f3c7d3;
+  border: 1px solid #B9D5D9;
   border-radius: 8px;
   padding: 15px 20px;
 }
@@ -61,9 +61,9 @@
 }
 
 .actions button {
-  background-color: #f3c7d3;
+  background-color: #B9D5D9;
   color: white;
-  border: none;
+  border: #B9D5D9;
   padding: 10px 16px;
   font-size: 0.9rem;
   border-radius: 6px;
@@ -71,10 +71,10 @@
 }
 
 .actions button:hover {
-  background-color: #f3c7d3;
+  background-color: #4a769c;
 }
 .settlementprintbtn button:hover{
-  background-color: #007bff;
+  background-color: #4a769c;
 }
 
 .delivery-table {

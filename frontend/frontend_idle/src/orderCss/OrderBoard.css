@@ -1,32 +1,38 @@
 /* =========================
-   OrderBoard.css (Cool Gray-Blue Palette)
+   OrderBoard.css (Cool Gray-Blue Palette • Strong Title & Badge)
    ========================= */
 
 /* Theme */
 :root {
-  --bg: #F0F5F9;             /* 페이지 배경 */
-  --cardBorder: #D7DCD9;      /* 카드 경계 */
-  --cardBorderHover: #B9D5D9; /* 카드 hover */
+  --bg: #F0F5F9;              /* 페이지 배경 */
+  --cardBorder: #D7DCD9;       /* 카드 경계 */
+  --cardBorderHover: #B9D5D9;  /* 카드 hover */
   --cardShadow: rgba(135, 151, 150, 0.10);
   --cardShadowHover: rgba(135, 151, 150, 0.18);
 
-  --strong: #88B4B7;          /* 포인트 블루 */
-  --text: #3c4b52;            /* 본문/오더게시판 텍스트 */
-  --subText: #879796;         /* 서브 텍스트 */
-  --label: #88B4B7;           /* 라벨 */
-  --tagBg: #B9D5D9;           /* 태그 배경 */
-  --tagText: #3c4b52;         /* 태그 텍스트 */
-  --panelBorder: #D7DCD9;     
-  --panelBg: #ffffff;         
-  --header: #88B4B7;          /* 헤더 */
-  --backBg: #88B4B7;          /* 버튼 배경 */
-  --backBgHover: #879796;     /* 버튼 hover */
+  --strong: #88B4B7;           /* 서브 포인트 블루 */
+  --text: #3c4b52;             /* 본문/오더게시판 텍스트 */
+  --subText: #879796;          /* 서브 텍스트 */
+  --label: #88B4B7;            /* 라벨 */
+  --tagBg: #B9D5D9;            /* 태그 배경 */
+  --tagText: #3c4b52;          /* 태그 텍스트 */
+  --panelBorder: #D7DCD9;      
+  --panelBg: #ffffff;          
 
-  /* 기사 배정용 */
-  --assignBg: #879796;        /* 기사 배정 바탕 */
-  --assignText: #ffffff;      /* 기사 배정 텍스트 */
+  /* 진한 포인트 컬러 */
+  --accentDark: #2c464b;       /* 헤더/배지용 딥그레이블루 */
+  --accentDarker: #22363a;     /* hover/active 더 진하게 */
 
-  /* 배지 */
+  /* 헤더/버튼/타이틀 */
+  --header: var(--accentDark);
+  --backBg: var(--accentDark);
+  --backBgHover: var(--accentDarker);
+
+  /* 기사 배정 */
+  --assignBg: var(--accentDark);
+  --assignText: #ffffff;
+
+  /* 배지 (주문번호용) */
   --badgeBlueTop: #F0F5F9;
   --badgeBlueBottom: #B9D5D9;
   --badgeBlueBorder: #88B4B7;
@@ -53,12 +59,12 @@
 }
 .list-area[data-panel-open="true"] { transform: translateX(0); }
 
-/* Title */
+/* Title (오더 게시판 큰 글씨) */
 .header {
   margin: 6px 0 12px;
   font-size: clamp(22px, 2.4vw, 28px);
   font-weight: 800;
-  color: var(--header);
+  color: var(--accentDark);   /* 진한색 적용 */
 }
 
 /* ---- Filter bar ---- */
@@ -128,8 +134,8 @@
   box-shadow: 0 6px 18px var(--cardShadowHover);
 }
 .card.selected {
-  border-color: var(--strong);
-  box-shadow: 0 8px 22px rgba(136, 180, 183, 0.28);
+  border-color: var(--header);
+  box-shadow: 0 8px 22px rgba(44, 70, 75, 0.28);
 }
 
 .row-between {
@@ -148,30 +154,32 @@
   text-overflow: ellipsis;
 }
 @media (max-width: 520px) { .from-to { white-space: normal; line-height: 1.35; } }
-.strong { font-weight: 800; color: var(--strong); }
+.strong { font-weight: 800; color: var(--header); }
 .right-meta { color: var(--tagText); font-weight: 800; }
 
 /* Order No badge */
 .order-no-badge {
-  display: inline-flex !important;
-  width: auto !important;
-  max-width: 100% !important;
-  flex: 0 0 auto !important;
-  align-self: flex-start !important;
-  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 28px;                /* 높이 */
+  line-height: 28px;           /* 텍스트 세로 정렬 */
+  padding: 0 14px;             /* 좌우 여백 */
+  border-radius: 999px;        /* 완전 둥글게 (pill형) */
+
+  background: #b9d5d9;         /* 단색 배경 */
+  border: 1px solid #a4b9bb;   /* 연한 테두리 */
+  color: #3c4b52;              /* 글씨 색 */
+  font-weight: 700;
+  font-size: 13px;
+
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 
-  height: 28px;
-  line-height: 28px;
-  padding: 0 12px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, var(--badgeBlueTop), var(--badgeBlueBottom));
-  border: 1px solid var(--badgeBlueBorder);
-  color: var(--badgeBlueText);
-  font-weight: 900;
-  font-size: 13px;
+  box-shadow: none;            /* 3D 효과 제거 */
+  vertical-align: middle;      /* 다른 텍스트와 높이 맞춤 */
 }
 .card .order-no-badge { justify-self: start !important; align-self: start !important; }
 
@@ -220,9 +228,9 @@
   cursor: pointer;
 }
 .page-number[data-active="true"] {
-  background: var(--tagBg);
-  color: var(--tagText);
-  border-color: var(--tagText);
+  background: var(--header);
+  color: #fff;
+  border-color: var(--header);
 }
 
 /* Right detail panel */
@@ -294,8 +302,8 @@
   display: inline-block;
   padding: 2px 8px;
   border-radius: 999px;
-  background: var(--tagBg);
-  color: var(--tagText);
+  background: var(--header);
+  color: #fff;
   font-size: 11px;
   font-weight: 900;
   vertical-align: middle;
@@ -309,15 +317,15 @@
   align-items: baseline;
   padding: 4px 0;
 }
-.key { font-size: 13px; color: var(--label); }
+.key { font-size: 13px; color: var(--text); opacity: 0.75; }
 .val { font-size: 15px; color: var(--text); font-weight: 700; }
 .muted { font-size: 13px; color: var(--subText); }
 
-/* Top-right badges (기사 배정 강조) */
+/* Top-right badges (Driver 배정 강조) */
 .badge-row { display: flex; justify-content: flex-end; margin: 10px 6px 0; }
 .badge,
 .badge-gray {
-  background: var(--assignBg); /* 진한 회색 */
+  background: var(--assignBg); /* 딥그레이블루 */
   color: var(--assignText);    /* 흰색 글씨 */
   padding: 6px 10px;
   border-radius: 8px;
@@ -341,11 +349,12 @@
   outline: 0;
   padding: 6px 10px;
   border-radius: 8px;
-  background: var(--assignBg);  /* 기사 배정 버튼도 진한 톤 */
+  background: var(--assignBg);
   color: var(--assignText);
   font-weight: 900;
   cursor: pointer;
 }
+.accept-btn:hover { background: var(--accentDarker); }
 .accept-btn:disabled { opacity: 0.5; cursor: default; }
 
 /* Small hint */

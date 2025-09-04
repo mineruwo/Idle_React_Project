@@ -1,6 +1,9 @@
 package com.fullstack.repository;
 
-import com.fullstack.model.Inquiry;
+import com.fullstack.entity.InquiryEntity;
+import com.fullstack.model.InquiryStatus;
+import com.fullstack.entity.AdminEntity; // Added
+import com.fullstack.entity.CustomerEntity; // Added
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,14 +17,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 @Repository
-public interface InquiryRepository extends JpaRepository<Inquiry, UUID> {
-    Page<Inquiry> findByCustomerIdNum(Long customerIdNum, Pageable pageable);
-    List<Inquiry> findTop5ByCustomerIdNumOrderByCreatedAtDesc(Long customerIdNum);
-    Page<Inquiry> findByAdminId(String adminId, Pageable pageable);
+public interface InquiryRepository extends JpaRepository<InquiryEntity, UUID> {
+    Page<InquiryEntity> findByCustomer(CustomerEntity customer, Pageable pageable);
+    List<InquiryEntity> findTop5ByCustomerOrderByCreatedAtDesc(CustomerEntity customer);
+    Page<InquiryEntity> findByAdmin(AdminEntity admin, Pageable pageable);
     
 
     @Query("SELECT FUNCTION('TO_CHAR', i.answeredAt, 'YYYY-MM-DD'), COUNT(i) " +
-           "FROM Inquiry i " +
+           "FROM InquiryEntity i " +
            "WHERE YEAR(i.answeredAt) = :year " +
            "AND MONTH(i.answeredAt) = :month " +
            "AND i.status = com.fullstack.model.InquiryStatus.ANSWERED " +
@@ -30,39 +33,40 @@ public interface InquiryRepository extends JpaRepository<Inquiry, UUID> {
     List<Object[]> countDailyAnsweredInquiriesByMonth(@Param("year") int year, @Param("month") int month);
 
     @Query("SELECT FUNCTION('TO_CHAR', i.createdAt, 'YYYY-MM-DD'), COUNT(i) " +
-           "FROM Inquiry i " +
+           "FROM InquiryEntity i " +
            "WHERE YEAR(i.createdAt) = :year " +
            "AND MONTH(i.createdAt) = :month " +
            "GROUP BY FUNCTION('TO_CHAR', i.createdAt, 'YYYY-MM-DD') " +
            "ORDER BY FUNCTION('TO_CHAR', i.createdAt, 'YYYY-MM-DD')")
     List<Object[]> countDailyCreatedInquiriesByMonth(@Param("year") int year, @Param("month") int month);
 
-    @Query("SELECT i FROM Inquiry i " +
+    @Query("SELECT i FROM InquiryEntity i " +
            "WHERE (:filter = 'all' OR " +
            "(:filter = 'day' AND FUNCTION('TO_CHAR', i.createdAt, 'YYYY-MM-DD') = :currentDate) OR " +
            "(:filter = 'week' AND i.createdAt >= :sevenDaysAgo AND i.createdAt <= :now) OR " +
            "(:filter = 'month' AND YEAR(i.createdAt) = :currentYear AND MONTH(i.createdAt) = :currentMonth) OR " +
            "(:filter = 'year' AND YEAR(i.createdAt) = :currentYear)) " +
-           "AND (:adminId IS NULL OR i.adminId = :adminId) " + // Added adminId filter
+           "AND (:admin IS NULL OR i.admin = :admin) " + // Changed to AdminEntity
            "ORDER BY i.createdAt DESC")
-    List<Inquiry> findInquiriesByFilter(
+    List<InquiryEntity> findInquiriesByFilter(
             @Param("filter") String filter,
             @Param("currentDate") String currentDate,
             @Param("sevenDaysAgo") LocalDateTime sevenDaysAgo,
             @Param("now") LocalDateTime now,
             @Param("currentYear") Integer currentYear,
             @Param("currentMonth") Integer currentMonth,
-            @Param("adminId") String adminId);
+            @Param("admin") AdminEntity admin); // Changed parameter type
 
-    @Query("SELECT i FROM Inquiry i " +
+    @Query("SELECT i FROM InquiryEntity i " +
            "WHERE (:status IS NULL OR i.status = :status) " +
            "AND (:searchQuery IS NULL OR " +
            "CAST(i.inquiryId AS text) LIKE CONCAT('%', CAST(:searchQuery AS text), '%') OR " + // Search by inquiry ID
-           "LOWER(i.inquiryTitle) LIKE LOWER(CONCAT('%', CAST(:searchQuery AS text), '%')) OR " + // Search by title
-           "CAST(i.customerIdNum AS text) LIKE CONCAT('%', CAST(:searchQuery AS text), '%')) " + // Search by customer ID
+           "LOWER(i.inquiryTitle) LIKE LOWER(CONCAT('%', CAST(:searchQuery AS text), '%')) OR " +
+           "CAST(i.customer.idNum AS text) LIKE CONCAT('%', CAST(:searchQuery AS text), '%')) " + // Search by customer ID (using relationship)
            "ORDER BY i.createdAt DESC")
-    Page<Inquiry> findAllInquiriesByStatusAndSearchQuery(
+    Page<InquiryEntity> findAllInquiriesByStatusAndSearchQuery(
             @Param("status") com.fullstack.model.InquiryStatus status,
             @Param("searchQuery") String searchQuery,
             Pageable pageable); // Added adminId parameter
 }
+

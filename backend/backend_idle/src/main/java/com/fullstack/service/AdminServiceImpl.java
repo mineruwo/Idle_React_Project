@@ -1,6 +1,6 @@
 package com.fullstack.service;
 
-import com.fullstack.entity.Admin;
+import com.fullstack.entity.AdminEntity;
 import com.fullstack.model.AdminDTO;
 import com.fullstack.repository.AdminRepository;
 
@@ -29,34 +29,34 @@ public class AdminServiceImpl implements AdminService {
     private final PasswordEncoder passwordEncoder;
 
     public AdminDTO getAdmin(String adminId) {
-        Optional<Admin> result = adminRepository.findByAdminIdAndIsDelFalse(adminId);
+        Optional<AdminEntity> result = adminRepository.findByAdminIdAndIsDelFalse(adminId);
         return result.map(this::entityToDto).orElse(null);
     }
 
         @Override
     public AdminDTO getAdminById(Integer id) {
-        Optional<Admin> result = adminRepository.findById(id);
+        Optional<AdminEntity> result = adminRepository.findById(id);
         return result.map(this::entityToDto).orElse(null);
     }
 
     @Override
     public AdminDTO createAdmin(AdminDTO adminDTO) {
-        Admin admin = dtoToEntity(adminDTO);
+        AdminEntity admin = dtoToEntity(adminDTO);
         admin.setPassword(passwordEncoder.encode(admin.getPassword())); // 비밀번호 암호화
         admin.setRegDate(LocalDateTime.now());
-        Admin savedAdmin = adminRepository.save(admin);
+        AdminEntity savedAdmin = adminRepository.save(admin);
         return entityToDto(savedAdmin);
     }
 
     @Override
     public AdminDTO updateAdmin(Integer id, AdminDTO adminDTO) {
-        Optional<Admin> result = adminRepository.findById(id);
+        Optional<AdminEntity> result = adminRepository.findById(id);
         if (result.isPresent()) {
-            Admin admin = result.get();
+            AdminEntity admin = result.get();
             admin.setName(adminDTO.getName());
             admin.setRole(adminDTO.getRole());
             // Password should be updated via a separate, dedicated process
-            Admin updatedAdmin = adminRepository.save(admin);
+            AdminEntity updatedAdmin = adminRepository.save(admin);
             return entityToDto(updatedAdmin);
         }
         return null; // Or throw a ResourceNotFoundException
@@ -64,9 +64,9 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public void deleteAdmin(Integer id) {
-        Optional<Admin> result = adminRepository.findById(id);
+        Optional<AdminEntity> result = adminRepository.findById(id);
         if (result.isPresent()) {
-            Admin admin = result.get();
+            AdminEntity admin = result.get();
             admin.setDel(true);
             admin.setDelDate(LocalDateTime.now());
             adminRepository.save(admin);
@@ -76,7 +76,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public Page<AdminDTO> getAdminList(Pageable pageable, String role, String searchType, String searchQuery) {
-        Specification<Admin> spec = (root, query, cb) -> {
+        Specification<AdminEntity> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
             // Role filter
@@ -104,7 +104,7 @@ public class AdminServiceImpl implements AdminService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
-        Page<Admin> adminPage = adminRepository.findAll(spec, pageable);
+        Page<AdminEntity> adminPage = adminRepository.findAll(spec, pageable);
         return adminPage.map(this::entityToDto);
     }
 
@@ -125,32 +125,32 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public Page<AdminDTO> getRecentlyCreatedAdmins(Pageable pageable, String dateRange) {
         LocalDateTime filterDateTime = calculateDateTime(dateRange);
-        Specification<Admin> spec = (root, query, cb) -> {
+        Specification<AdminEntity> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isFalse(root.get("isDel")));
             predicates.add(cb.greaterThanOrEqualTo(root.get("regDate"), filterDateTime));
             return cb.and(predicates.toArray(new Predicate[0]));
         };
-        Page<Admin> adminPage = adminRepository.findAll(spec, pageable);
+        Page<AdminEntity> adminPage = adminRepository.findAll(spec, pageable);
         return adminPage.map(this::entityToDto);
     }
 
     @Override
     public Page<AdminDTO> getRecentlyDeletedAdmins(Pageable pageable, String dateRange) {
         LocalDateTime filterDateTime = calculateDateTime(dateRange);
-        Specification<Admin> spec = (root, query, cb) -> {
+        Specification<AdminEntity> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isTrue(root.get("isDel")));
             predicates.add(cb.greaterThanOrEqualTo(root.get("delDate"), filterDateTime));
             return cb.and(predicates.toArray(new Predicate[0]));
         };
-        Page<Admin> adminPage = adminRepository.findAll(spec, pageable);
+        Page<AdminEntity> adminPage = adminRepository.findAll(spec, pageable);
         return adminPage.map(this::entityToDto);
     }
 
 
-    private Admin dtoToEntity(AdminDTO adminDTO) {
-        return Admin.builder()
+    private AdminEntity dtoToEntity(AdminDTO adminDTO) {
+        return AdminEntity.builder()
                 .idIndex(adminDTO.getIdIndex())
                 .adminId(adminDTO.getAdminId())
                 .role(adminDTO.getRole())
@@ -163,7 +163,7 @@ public class AdminServiceImpl implements AdminService {
                 .build();
     }
 
-    private AdminDTO entityToDto(Admin admin) {
+    private AdminDTO entityToDto(AdminEntity admin) {
         return AdminDTO.builder()
                 .idIndex(admin.getIdIndex())
                 .adminId(admin.getAdminId())

@@ -108,20 +108,21 @@ public class AuthController {
 
 		String id = authentication.getName();
 
-		CustomerEntity customerEntity = customerRepository.findById(id)
+		CustomerEntity customer = customerRepository.findById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-		LoginResponseDTO loginResponseDTO = new LoginResponseDTO(customerEntity.getId(), customerEntity.getNickname(),
-				customerEntity.getRole(), customerEntity.getIdNum());
+		LoginResponseDTO loginResponseDTO = new LoginResponseDTO(customer.getId(), customer.getNickname(),
+				customer.getRole(), customer.getIdNum());
 
 		return ResponseEntity.ok(loginResponseDTO);
 	}
 	
 	@PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO) {
+    public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO) {
         resetPasswordService.resetPassword(resetPasswordDTO);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
+	
 	
 	// sns
 	@PostMapping("/oauth/complete-signup")

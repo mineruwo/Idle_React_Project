@@ -26,6 +26,20 @@ const CARGO_TYPES = [
   { key: "etc", ko: "기타", en: "etc" },
 ];
 
+/* ===== Cool Gray-Blue Theme (OrderBoard와 통일) ===== */
+const THEME = {
+  bg: "#ffffff",
+  border: "#D7DCD9",
+  text: "#3c4b52",
+  sub: "#879796",
+  accent: "#88B4B7",
+  accentHover: "#6fa0a4",
+  headerDark: "#2c464b",
+  headerDarker: "#22363a",
+  tagBg: "#B9D5D9",
+  tagText: "#3c4b52",
+};
+
 const BidDialog = ({
   open,
   onClose,
@@ -178,35 +192,25 @@ export default BidDialog;
 
 /* ================= 스타일 ================ */
 
-const PINK = {
-  border: "#ead9e3",
-  active: "#e85aa6",
-  tagBg: "#ffe2ef",
-  tagText: "#d84b95",
-  text: "#2b2330",
-  sub: "#8c7f88",
-  bg: "#ffffff",
-};
-
 const Overlay = styled.div`
   position: fixed;
   inset: 0;
-  z-index: 2147483647;         /* 최상위로 강제 */
-  background: rgba(0, 0, 0, 0.38); /* 어둡게 */
+  z-index: 2147483647;
+  background: rgba(0, 0, 0, 0.38);
   display: grid;
   place-items: center;
-  padding: 24px;               /* 좁은 화면 여백 */
+  padding: 24px;
 `;
 
 const Dialog = styled.div`
   width: min(1100px, 96vw);
   height: min(92vh, 960px);
-  background: ${PINK.bg};
+  background: ${THEME.bg};
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.35);
   display: flex;
   flex-direction: column;
-  overflow: hidden;            /* 내부 스크롤만 */
+  overflow: hidden;
 `;
 
 const Topbar = styled.div`
@@ -216,7 +220,7 @@ const Topbar = styled.div`
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
-  border-bottom: 1px solid ${PINK.border};
+  border-bottom: 1px solid ${THEME.border};
   background: #fff;
   position: sticky;
   top: 0;
@@ -227,7 +231,7 @@ const Title = styled.h2`
   margin: 0;
   font-size: 20px;
   font-weight: 900;
-  color: ${PINK.text};
+  color: ${THEME.text};
 `;
 
 const TopActions = styled.div`
@@ -238,28 +242,32 @@ const TopActions = styled.div`
 
 const MinInfo = styled.div`
   font-size: 12px;
-  color: ${PINK.sub};
+  color: ${THEME.sub};
   margin-right: 6px;
 `;
 
 const BtnGhost = styled.button`
-  border: 1px solid ${PINK.border};
+  border: 1px solid ${THEME.border};
   background: #fff;
-  color: ${PINK.text};
+  color: ${THEME.text};
   padding: 8px 12px;
   border-radius: 8px;
   font-weight: 800;
   cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+  &:hover { background: #f7f9fa; border-color: ${THEME.accent}; }
 `;
 
 const BtnPrimary = styled.button`
   border: 0;
-  background: ${PINK.tagBg};
-  color: ${PINK.tagText};
+  background: ${THEME.headerDark};
+  color: #fff;
   padding: 9px 14px;
   border-radius: 8px;
   font-weight: 900;
   cursor: pointer;
+  transition: background 120ms ease, opacity 120ms ease;
+  &:hover { background: ${THEME.headerDarker}; }
   &:disabled { opacity: 0.5; cursor: default; }
 `;
 
@@ -267,6 +275,7 @@ const ContentArea = styled.div`
   flex: 1 1 auto;
   overflow: auto;
   padding: 16px;
+  background: #fff;
 `;
 
 const TwoCol = styled.div`
@@ -281,7 +290,7 @@ const TwoCol = styled.div`
 const Col = styled.div``;
 
 const Section = styled.section`
-  border: 1px solid ${PINK.border};
+  border: 1px solid ${THEME.border};
   border-radius: 10px;
   background: #fff;
   padding: 12px;
@@ -290,7 +299,7 @@ const Section = styled.section`
 
 const SectionTitle = styled.div`
   font-weight: 900;
-  color: ${PINK.text};
+  color: ${THEME.text};
   margin-bottom: 10px;
 `;
 
@@ -303,25 +312,27 @@ const CardGrid = styled.div`
 `;
 
 const Card = styled.button`
-  border: 1px solid ${PINK.border};
+  border: 1px solid ${THEME.border};
   background: #fff;
   text-align: left;
   padding: 12px 12px 10px;
   border-radius: 10px;
   cursor: pointer;
+  transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+  &:hover { border-color: ${THEME.accent}; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
   &[data-active="true"] {
-    border-color: ${PINK.active};
-    background: #fff7fb;
+    border-color: ${THEME.accent};
+    background: ${THEME.tagBg};
   }
 `;
 
 const CardKo = styled.div`
   font-weight: 900;
-  color: ${PINK.text};
+  color: ${THEME.text};
 `;
 const CardEn = styled.div`
   font-size: 12px;
-  color: ${PINK.sub};
+  color: ${THEME.sub};
   margin-top: 2px;
 `;
 
@@ -336,18 +347,20 @@ const ChipRow = styled.div`
 `;
 
 const Chip = styled.button`
-  border: 1px solid ${PINK.border};
+  border: 1px solid ${THEME.border};
   background: #fff;
-  color: ${PINK.text};
+  color: ${THEME.text};
   padding: 8px 12px;
   border-radius: 999px;
   font-weight: 800;
   white-space: nowrap;
   cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+  &:hover { border-color: ${THEME.accent}; background: #f7fbfc; }
   &[data-active="true"] {
-    border-color: ${PINK.tagText};
-    background: ${PINK.tagBg};
-    color: ${PINK.tagText};
+    border-color: ${THEME.accent};
+    background: ${THEME.tagBg};
+    color: ${THEME.tagText};
   }
 `;
 
@@ -356,21 +369,33 @@ const Input = styled.input`
   height: 42px;
   padding: 0 12px;
   border-radius: 8px;
-  border: 1px solid ${PINK.border};
+  border: 1px solid ${THEME.border};
   outline: none;
+  color: ${THEME.text};
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+  &:focus {
+    border-color: ${THEME.accent};
+    box-shadow: 0 0 0 2px rgba(136, 180, 183, 0.25);
+  }
 `;
 
 const Textarea = styled.textarea`
   width: 100%;
   padding: 10px 12px;
   border-radius: 8px;
-  border: 1px solid ${PINK.border};
+  border: 1px solid ${THEME.border};
   outline: none;
   resize: vertical;
+  color: ${THEME.text};
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+  &:focus {
+    border-color: ${THEME.accent};
+    box-shadow: 0 0 0 2px rgba(136, 180, 183, 0.25);
+  }
 `;
 
 const Hint = styled.div`
   margin-top: 6px;
   font-size: 12px;
-  color: ${PINK.sub};
+  color: ${THEME.sub};
 `;

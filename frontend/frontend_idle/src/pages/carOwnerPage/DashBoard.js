@@ -8,7 +8,7 @@ const CarDashpage = () => {
   return (
     <div>
       {/* 상단 고정 메뉴: 기존 className 유지 */}
-      <div className="topmenu sticky-top">
+      <div className="topmenu">
         <GNB />
         <NaviTap />
       </div>

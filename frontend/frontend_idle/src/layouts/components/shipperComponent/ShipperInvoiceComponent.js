@@ -4,9 +4,19 @@ import '../../../theme/ShipperCustomCss/Invoice.css';
 const ShipperInvoiceComponent = ({ order, handlePrint }) => {
   if (!order) return null;
 
-  // Calculate amounts
-  const supplyAmount = Math.round(order.amount / 1.1);
-  const taxAmount = order.amount - supplyAmount;
+  // TODO: Replace with actual data from API
+  const supplier = {
+    name: '(주)IDLE 로지스틱스',
+    ceo: '홍길동',
+    bizNum: '123-45-67890',
+    address: '서울특별시 강남구 테헤란로 123',
+    bizType: '서비스',
+    bizItem: '화물운송주선',
+  };
+
+  const totalAmount = order.driverPrice || order.proposedPrice || 0;
+  const supplyAmount = Math.round(totalAmount / 1.1);
+  const taxAmount = totalAmount - supplyAmount;
 
   return (
     <div className="invoice-wrapper">
@@ -24,23 +34,23 @@ const ShipperInvoiceComponent = ({ order, handlePrint }) => {
           <tbody>
             <tr>
               <th>상호</th>
-              <td colSpan="3">(주)IDLE 로지스틱스</td>
+              <td colSpan="3">{supplier.name}</td>
             </tr>
             <tr>
               <th>대표</th>
-              <td>홍길동</td>
+              <td>{supplier.ceo}</td>
               <th>사업자등록번호</th>
-              <td>123-45-67890</td>
+              <td>{supplier.bizNum}</td>
             </tr>
             <tr>
               <th>주소</th>
-              <td colSpan="3">서울특별시 강남구 테헤란로 123</td>
+              <td colSpan="3">{supplier.address}</td>
             </tr>
             <tr>
               <th>업태</th>
-              <td>서비스</td>
+              <td>{supplier.bizType}</td>
               <th>종목</th>
-              <td>화물운송주선</td>
+              <td>{supplier.bizItem}</td>
             </tr>
           </tbody>
         </table>
@@ -91,7 +101,7 @@ const ShipperInvoiceComponent = ({ order, handlePrint }) => {
                 <td colSpan="2" className="text-right">{taxAmount.toLocaleString()}</td>
             </tr>
             <tr>
-                <th colSpan="4">합계금액: {order.amount.toLocaleString()}원</th>
+                <th colSpan="4">합계금액: {totalAmount.toLocaleString()}원</th>
             </tr>
             <tr>
                 <th>품목</th>

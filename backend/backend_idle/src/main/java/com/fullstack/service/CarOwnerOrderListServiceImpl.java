@@ -1,12 +1,14 @@
 package com.fullstack.service;
 
 import com.fullstack.entity.CustomerEntity;
-import com.fullstack.entity.Order;
+import com.fullstack.entity.OrderEntity;
 import com.fullstack.model.CarOwnerOrderListDTO;
 import com.fullstack.model.enums.OrderStatus;
 import com.fullstack.repository.CustomerRepository;
 import com.fullstack.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
 import org.springframework.data.domain.*;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import java.time.*;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
 
     private final OrderRepository orderRepository;
@@ -59,7 +62,7 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
             statusEnum = OrderStatus.valueOf(status.toUpperCase());
         }
 
-        Page<Order> pageData = orderRepository.searchForDriver(
+        Page<OrderEntity> pageData = orderRepository.searchForDriver(
                 driverId,
                 statusEnum,
                 start,
@@ -75,7 +78,8 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
     @Override
     public CarOwnerOrderListDTO.OrderDetailResponse detail(String loginId, Long orderId) {
         Long driverId = getDriverId(loginId);
-        Order o = orderRepository.findByIdAndAssignedDriverId(orderId, driverId)
+        CustomerEntity assignedDriver = customerRepository.findByIdNum(driverId).orElseThrow(() -> new AccessDeniedException("FORBIDDEN_ORDER_OWNER"));
+        OrderEntity o = orderRepository.findByIdAndAssignedDriver(orderId, assignedDriver)
                 .orElseThrow(() -> new AccessDeniedException("FORBIDDEN_ORDER_OWNER"));
         return toDetail(o);
     }
@@ -84,8 +88,10 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
     @Override
     public CarOwnerOrderListDTO.OrderDetailResponse create(String loginId, CarOwnerOrderListDTO.OrderCreateRequest req) {
         Long driverId = getDriverId(loginId);
-        Order o = Order.builder()
-                .assignedDriverId(driverId)
+        CustomerEntity assignedDriver = customerRepository.findByIdNum(driverId)
+                .orElseThrow(() -> new AccessDeniedException("Driver not found"));
+        OrderEntity o = OrderEntity.builder()
+                .assignedDriver(assignedDriver)
                 .status(OrderStatus.READY)
                 .departure(req.getDeparture())
                 .arrival(req.getArrival())
@@ -107,7 +113,9 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
     @Override
     public CarOwnerOrderListDTO.OrderDetailResponse update(String loginId, Long orderId, CarOwnerOrderListDTO.OrderUpdateRequest req) {
         Long driverId = getDriverId(loginId);
-        Order o = orderRepository.findByIdAndAssignedDriverId(orderId, driverId)
+        CustomerEntity assignedDriver = customerRepository.findByIdNum(driverId)
+                .orElseThrow(() -> new AccessDeniedException("FORBIDDEN_ORDER_OWNER"));
+        OrderEntity o = orderRepository.findByIdAndAssignedDriver(orderId, assignedDriver)
                 .orElseThrow(() -> new AccessDeniedException("FORBIDDEN_ORDER_OWNER"));
 
         if (req.getDeparture() != null) o.setDeparture(req.getDeparture());
@@ -140,9 +148,11 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
                 .orElseThrow(() -> new AccessDeniedException("AUTH_USER_NOT_FOUND"));
         if (me.getIdNum() == null) throw new AccessDeniedException("AUTH_USER_NOT_FOUND");
         Long driverId = me.getIdNum().longValue();
+        CustomerEntity assignedDriver = customerRepository.findByIdNum(driverId)
+                .orElseThrow(() -> new AccessDeniedException("Driver not found"));
 
         // 현재 상태 확인 (취소 정책, 전이 검증용)
-        Order cur = orderRepository.findByIdAndAssignedDriverId(orderId, driverId)
+        OrderEntity cur = orderRepository.findByIdAndAssignedDriver(orderId, assignedDriver)
                 .orElseThrow(() -> new AccessDeniedException("FORBIDDEN_ORDER_OWNER"));
         OrderStatus curStatus = cur.getStatus();
 
@@ -162,9 +172,9 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
         int updated = 0;
 
         switch (nextStatus) {
-            case ONGOING -> updated = orderRepository.markDeparted(orderId, driverId, now);   // departed_at 세팅
-            case COMPLETED -> updated = orderRepository.markCompleted(orderId, driverId, now); // completed_at 세팅
-            case CANCELED -> updated = orderRepository.markCanceled(orderId, driverId, now);
+            case ONGOING -> updated = orderRepository.markDeparted(orderId, assignedDriver.getIdNum().longValue(), now);   // departed_at 세팅
+            case COMPLETED -> updated = orderRepository.markCompleted(orderId, assignedDriver.getIdNum().longValue(), now); // completed_at 세팅
+            case CANCELED -> updated = orderRepository.markCanceled(orderId, assignedDriver.getIdNum().longValue(), now);
             default -> throw new IllegalArgumentException("UNSUPPORTED_STATUS");
         }
         if (updated == 0) {
@@ -174,11 +184,13 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
 
         // 완료 시 정산 생성 (한 번만)
         if (nextStatus == OrderStatus.COMPLETED) {
+            log.info("Attempting to create settlement for orderId: {} by driverId: {}", orderId, driverId);
             settlementService.createForOrder(String.valueOf(driverId), orderId);
+            log.info("Settlement creation successful for orderId: {}", orderId);
         }
 
         // 최신 상태로 상세 반환
-        Order o = orderRepository.findByIdAndAssignedDriverId(orderId, driverId)
+        OrderEntity o = orderRepository.findByIdAndAssignedDriver(orderId, assignedDriver)
                 .orElseThrow(() -> new AccessDeniedException("FORBIDDEN_ORDER_OWNER"));
         return toDetail(o);
     }
@@ -187,7 +199,9 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
     @Override
     public void delete(String loginId, Long orderId) {
         Long driverId = getDriverId(loginId);
-        Order o = orderRepository.findByIdAndAssignedDriverId(orderId, driverId)
+        CustomerEntity assignedDriver = customerRepository.findByIdNum(driverId)
+                .orElseThrow(() -> new AccessDeniedException("Driver not found"));
+        OrderEntity o = orderRepository.findByIdAndAssignedDriver(orderId, assignedDriver)
                 .orElseThrow(() -> new AccessDeniedException("FORBIDDEN_ORDER_OWNER"));
         orderRepository.delete(o);
     }
@@ -201,7 +215,7 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
     }
 
     // ===== mappers =====
-    private CarOwnerOrderListDTO.OrderSummaryResponse toSummary(Order o) {
+    private CarOwnerOrderListDTO.OrderSummaryResponse toSummary(OrderEntity o) {
         Long price = (o.getDriverPrice() != null) ? o.getDriverPrice()
                                                   : (o.getProposedPrice() == null ? null : o.getProposedPrice().longValue());
         return CarOwnerOrderListDTO.OrderSummaryResponse.builder()
@@ -214,6 +228,11 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
                 .departure(o.getDeparture())
                 .arrival(o.getArrival())
                 .s_date(o.getReservedDate())
+                .assignedDriverId(
+                    o.getAssignedDriver() != null ?
+                        Long.valueOf(o.getAssignedDriver().getIdNum()) : // Explicitly convert Integer to Long
+                        null
+                ) // Changed
                 .build();
     }
 
@@ -227,10 +246,10 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
         return left + sep + right;
     }
 
-    private CarOwnerOrderListDTO.OrderDetailResponse toDetail(Order o) {
+    private CarOwnerOrderListDTO.OrderDetailResponse toDetail(OrderEntity o) {
         return CarOwnerOrderListDTO.OrderDetailResponse.builder()
                 .id(o.getId())
-                .assignedDriverId(o.getAssignedDriverId())
+                .assignedDriverId(o.getAssignedDriver() != null ? o.getAssignedDriver().getIdNum().longValue() : null)
                 .status(o.getStatus().name())
                 .departure(o.getDeparture())
                 .arrival(o.getArrival())

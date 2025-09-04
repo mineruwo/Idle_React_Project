@@ -21,8 +21,17 @@ public class OneTimeTokenServiceImpl implements OneTimeTokenService {
 
 	private static final SecureRandom RNG = new SecureRandom();
 
-	private record Entry(String purpose, Object payload, LocalDateTime expiresAt) {
-	}
+	private static final class Entry {
+        final String purpose;
+        final Object payload;
+        final LocalDateTime expiresAt;
+
+        Entry(String purpose, Object payload, LocalDateTime expiresAt) {
+            this.purpose = purpose;
+            this.payload = payload;
+            this.expiresAt = expiresAt;
+        }
+    }
 
 	private final ConcurrentMap<String, Entry> store = new ConcurrentHashMap<>();
 
@@ -34,7 +43,6 @@ public class OneTimeTokenServiceImpl implements OneTimeTokenService {
 
 	@PostConstruct
 	void init() {
-		// 만료 청소
 		janitor.scheduleAtFixedRate(this::purge, 1, 60, TimeUnit.SECONDS);
 	}
 
@@ -46,26 +54,19 @@ public class OneTimeTokenServiceImpl implements OneTimeTokenService {
 		return token;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <T> Optional<T> consume(String token, String expectedPurpose, Class<T> type) {
 		if (token == null || token.isBlank())
 			return Optional.empty();
 
-		// 1회용: remove 후 검증
-		Entry e = store.remove(token);
-		if (e == null)
-			return Optional.empty();
-		if (!expectedPurpose.equals(e.purpose))
-			return Optional.empty();
-		if (e.expiresAt.isBefore(LocalDateTime.now()))
-			return Optional.empty();
-
-		Object payload = e.payload;
-		if (payload == null || !type.isInstance(payload))
-			return Optional.empty();
-
-		return Optional.of((T) payload);
+		Entry e = store.remove(token); 
+		
+        if (e == null) return Optional.empty();
+        if (!expectedPurpose.equals(e.purpose)) return Optional.empty();
+        if (e.expiresAt.isBefore(LocalDateTime.now())) return Optional.empty();
+        if (e.payload == null || !type.isInstance(e.payload)) return Optional.empty();
+        
+	    return Optional.of(type.cast(e.payload));
 	}
 
 	private void purge() {
@@ -83,5 +84,5 @@ public class OneTimeTokenServiceImpl implements OneTimeTokenService {
 	public void shutdown() {
 		janitor.shutdownNow();
 	}
-
+	
 }

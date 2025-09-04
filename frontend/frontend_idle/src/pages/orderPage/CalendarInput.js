@@ -18,7 +18,7 @@ const CalendarInput = forwardRef(({ value, onClick }, ref) => {
       }}
     >
       <img
-        src={`${process.env.PUBLIC_URL}/img/orderimg/calendar.png`}
+        src={`${process.env.PUBLIC_URL}/img/orderimg/calendar_navy.png`}
         alt="달력 아이콘"
         onClick={onClick}
         style={{

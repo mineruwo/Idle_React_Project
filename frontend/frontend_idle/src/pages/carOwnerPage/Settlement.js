@@ -6,7 +6,7 @@ import SettlementComponent from "../../layouts/components/carownerComponent/Sett
 const Settlement = ()  => {
     return(
         <div>
-            <div className="topmenu sticky-top">
+            <div className="topmenu">
             <GNB />
             <NaviTap />
             </div>

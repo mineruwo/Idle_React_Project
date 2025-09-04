@@ -51,7 +51,7 @@ const InquiryListComponent = () => {
     const inquiryColumns = [
         { header: '문의 번호', key: 'inquiryId', sortable: true, render: (item) => item.inquiryId },
         { header: '제목', key: 'inquiryTitle', sortable: true, render: (item) => item.inquiryTitle },
-        { header: '사용자 ID', key: 'customerIdNum', sortable: true, render: (item) => item.customerIdNum },
+        { header: '사용자 ID', key: 'customer', sortable: true, render: (item) => item.customer?.idNum },
         { header: '문의일', key: 'createdAt', sortable: true, render: (item) => item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'N/A' },
         { header: '상태', key: 'status', sortable: true, render: (item) => item.status },
     ];

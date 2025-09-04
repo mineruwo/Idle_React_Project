@@ -1,7 +1,5 @@
 package com.fullstack.model;
 
-import java.time.LocalDateTime;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,5 +13,4 @@ public class ResetPasswordDTO {
 
 	private String token; 
 	private String newPassword;
-	
 }

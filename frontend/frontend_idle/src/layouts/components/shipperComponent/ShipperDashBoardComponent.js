@@ -9,8 +9,11 @@ import { getInquiriesByCustomerId } from "../../../api/inquiryApi";
 import { useAuth } from "../../../auth/AuthProvider";
 
 const ShipperDashBoardComponent = () => {
-    const { shipperMoveToPoint, shipperMoveToOrderHistory, shipperMoveToInquiries } =
-        useCustomMove();
+    const {
+        shipperMoveToPoint,
+        shipperMoveToOrderHistory,
+        shipperMoveToInquiries,
+    } = useCustomMove();
     const { profile } = useAuth();
 
     const [currentPoints, setCurrentPoints] = useState(0);
@@ -83,7 +86,9 @@ const ShipperDashBoardComponent = () => {
 
             const loadInquiryCounts = async () => {
                 try {
-                    const response = await getInquiriesByCustomerId(profile.idNum);
+                    const response = await getInquiriesByCustomerId(
+                        profile.idNum
+                    );
                     const inquiries = response.content; // Extract array from 'content' property
 
                     if (Array.isArray(inquiries)) {
@@ -121,14 +126,14 @@ const ShipperDashBoardComponent = () => {
                     <div className="card-title">오더상세</div>
                     <div className="card-content">{totalOrders}건</div>
                     <div className="card-desc">
-                        최근 오더: 진행중 {inProgressOrders}, 완료 {completedOrders}, 취소{" "}
-                        {cancelledOrders}
+                        최근 오더: 진행중 {inProgressOrders}, 완료{" "}
+                        {completedOrders}, 취소 {cancelledOrders}
                     </div>
                     <div
                         className="card-action"
                         onClick={shipperMoveToOrderHistory}
                     >
-                        상세보기
+                        오더 내역
                     </div>
                 </div>
                 <div className="card">
@@ -144,10 +149,14 @@ const ShipperDashBoardComponent = () => {
                     <div className="card-title">내 문의 내역</div>
                     <div className="card-content">{totalInquiries}건</div>
                     <div className="card-desc">
-                        최근 문의: 답변 완료 {answeredInquiries}, 답변 대기 {pendingInquiries}
+                        최근 문의: 답변 완료 {answeredInquiries}, 답변 대기{" "}
+                        {pendingInquiries}
                     </div>
-                    <div className="card-action" onClick={shipperMoveToInquiries}>
-                        상세보기
+                    <div
+                        className="card-action"
+                        onClick={shipperMoveToInquiries}
+                    >
+                        문의 내역
                     </div>
                 </div>
             </div>

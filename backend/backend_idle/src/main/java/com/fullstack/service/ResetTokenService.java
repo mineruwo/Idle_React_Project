@@ -1,13 +1,12 @@
 package com.fullstack.service;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.Optional;
+
+import com.fullstack.model.ResetPasswordTicketDTO;
 
 public interface ResetTokenService {
 
-	record Token(String token, LocalDateTime expiresAt) {}
-    Token issueResetToken(String email);
-    Token issueResetToken(String email, Duration ttl);
-    Optional<String> consume(String token);
+	public String issue(String id, Duration TTL);
+    Optional<ResetPasswordTicketDTO> consume(String token);
 }

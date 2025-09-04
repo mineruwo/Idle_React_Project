@@ -2,7 +2,7 @@
 package com.fullstack.model;
 
 import com.fullstack.entity.CustomerEntity;
-import com.fullstack.entity.DriverOffer;
+import com.fullstack.entity.DriverOfferEntity;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -21,13 +21,14 @@ public class DriverOfferResponse {
 
     // 화면에 보일 닉네임(=로그인 아이디). 필드명이 다르면 getUsername() 대신 알맞게 변경
     private String driverName;
+    private String driverNickname;
 
     private Long price;
     private String memo;
     private String status;
     private LocalDateTime createdAt;
 
-    public static DriverOfferResponse from(DriverOffer o) {
+    public static DriverOfferResponse from(DriverOfferEntity o) {
         CustomerEntity drv = o.getDriver();
 
         return DriverOfferResponse.builder()
@@ -35,6 +36,7 @@ public class DriverOfferResponse {
                 .orderId(o.getOrder().getId())
                 .driverIdNum(drv != null ? drv.getIdNum() : null)
                 .driverName(drv != null ? drv.getCustomName() : null) // ✅ 로그인 아이디를 노출
+                .driverNickname(drv != null ? drv.getNickname() : null)
                 .price(o.getPrice())
                 .memo(o.getMemo())
                 .status(o.getStatus().name())
