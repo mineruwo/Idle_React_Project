@@ -7,6 +7,7 @@ import {
     useState,
 } from "react";
 import { getMe, logout } from "../api/loginApi";
+import api from "../api/authApi";
 
 const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
@@ -36,7 +37,7 @@ export default function AuthProvider({ children }) {
         evaluatingRef.current = true;
 
         try {
-            const { data } = await getMe(); // 401이면 인터셉터가 /auth/refresh 처리 후 재시도
+            const { data } = await api.get("/auth/me"); // 401이면 인터셉터가 /auth/refresh 처리 후 재시도
             setState({ loading: false, authenticated: true, profile: data });
         } catch {
             setState({ loading: false, authenticated: false, profile: null });
