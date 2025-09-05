@@ -82,8 +82,8 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
         OrderEntity o = orderRepo.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("ORDER_NOT_FOUND"));
 
-        // ownerId(문자열) ↔ assignedDriverId(Long) 최소 검증
-                if (o.getAssignedDriver() != null && !safeEqualsLongString(o.getAssignedDriver().getIdNum().longValue(), ownerId)) {
+        // ownerId는 이제 문자열 이메일입니다. assignedDriver의 문자열 ID와 비교합니다.
+        if (o.getAssignedDriver() != null && !Objects.equals(o.getAssignedDriver().getId(), ownerId)) {
             throw new IllegalArgumentException("ORDER_NOT_OWNED_BY_THIS_OWNER");
         }
 
@@ -132,7 +132,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
             if (settlementRepo.existsByOrderId(o.getId())) continue;
 
             // 누락된 것만 생성
-                        createForOrder(String.valueOf(o.getAssignedDriver().getIdNum().longValue()), o.getId());
+            createForOrder(o.getAssignedDriver().getId(), o.getId());
             created++;
         }
         return created;
@@ -220,16 +220,6 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
         }
     }
 
-    private static boolean safeEqualsLongString(Long v, String s) {
-        Long parsed = parseLongOrNull(s);
-        return parsed != null && Objects.equals(v, parsed);
-    }
-
-    private static Long parseLongOrNull(String s) {
-        if (s == null) return null;
-        try { return Long.parseLong(s); } catch (NumberFormatException e) { return null; }
-    }
-
     private BigDecimal computeBaseAmount(OrderEntity o) {
         if (o.getDriverPrice() != null) return BigDecimal.valueOf(o.getDriverPrice());
         if (o.getProposedPrice() != null) return BigDecimal.valueOf(o.getProposedPrice().longValue());
@@ -268,25 +258,33 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
 
     /* ===== 배치 보장/집계 ===== */
 
-    @Transactional // ← 가능하면 public 메서드에서
+    @Transactional
     public CarOwnerSettlementBatchEntity ensureBatch(String ownerId, LocalDate monthKey) {
-        return batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey)
-            .orElseGet(() -> {
-                try {
-                    CarOwnerSettlementBatchEntity b = new CarOwnerSettlementBatchEntity();
-                    b.setOwner(customerRepo.findByIdNum(Long.parseLong(ownerId)).orElseThrow(() -> new IllegalArgumentException("Customer not found with ID: " + ownerId)));
-                    b.setMonthKey(monthKey);
-                    b.setStatus(CarOwnerSettlementBatchEntity.Status.REQUESTED); // 권장: READY
-                    return batchRepo.saveAndFlush(b);
-                } catch (DataIntegrityViolationException /*| ConstraintViolationException*/ ex) {
-                    // flush 실패 → 1차 캐시 정리
-                    em.clear();
-                    // 이미 다른 트랜잭션이 만든 케이스
-                    return batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey)
+        // ownerId는 문자열 이메일/로그인 ID입니다.
+        // batchRepo의 findByOwnerIdAndMonthKey는 관계를 통해 쿼리하기 위해
+        // findByOwner_IdAndMonthKey로 구현되어야 합니다.
+        Optional<CarOwnerSettlementBatchEntity> existingBatch = batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey);
+
+        if (existingBatch.isPresent()) {
+            return existingBatch.get();
+        } else {
+            try {
+                CarOwnerSettlementBatchEntity b = new CarOwnerSettlementBatchEntity();
+                // ownerId가 이메일 문자열이므로 findByLoginId 사용
+                b.setOwner(customerRepo.findByLoginId(ownerId)
+                        .orElseThrow(() -> new IllegalArgumentException("ID가 " + ownerId + "인 고객을 찾을 수 없습니다.")));
+                b.setMonthKey(monthKey);
+                b.setStatus(CarOwnerSettlementBatchEntity.Status.REQUESTED);
+                return batchRepo.saveAndFlush(b);
+            } catch (DataIntegrityViolationException e) {
+                // 다른 트랜잭션이 초기 확인과 saveAndFlush 사이에
+                // 배치를 생성한 경우 발생할 수 있습니다.
+                // 다시 가져와야 합니다.
+                return batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey)
                         .orElseThrow(() -> new IllegalStateException(
-                            "Batch was inserted concurrently but not found"));
-                }
-            });
+                                "무결성 위반 후 배치가 동시에 삽입되었지만 찾을 수 없습니다. Owner: " + ownerId + ", Month: " + monthKey));
+            }
+        }
     }
     
     @Transactional

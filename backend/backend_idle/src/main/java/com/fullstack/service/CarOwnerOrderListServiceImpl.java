@@ -184,8 +184,8 @@ public class CarOwnerOrderListServiceImpl implements CarOwnerOrderListService {
 
         // 완료 시 정산 생성 (한 번만)
         if (nextStatus == OrderStatus.COMPLETED) {
-            log.info("Attempting to create settlement for orderId: {} by driverId: {}", orderId, driverId);
-            settlementService.createForOrder(String.valueOf(driverId), orderId);
+            log.info("Attempting to create settlement for orderId: {} by ownerId: {}", orderId, loginId);
+            settlementService.createForOrder(loginId, orderId);
             log.info("Settlement creation successful for orderId: {}", orderId);
         }
 
