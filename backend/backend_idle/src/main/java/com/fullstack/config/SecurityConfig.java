@@ -51,6 +51,9 @@ public class SecurityConfig {
                 // 프리플라이트
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
+                // 헬스 체크 엔드포인트
+                .requestMatchers("/actuator/**").permitAll()
+
                 // 주문 생성은 SHIPPER 만 가능
                 .requestMatchers(HttpMethod.POST, "/api/orders").hasRole("SHIPPER")
 

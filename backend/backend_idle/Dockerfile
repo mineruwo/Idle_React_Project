@@ -27,4 +27,4 @@ EXPOSE 8080
 # Command to run the application
 # Replace 'backend_idle-0.0.1-SNAPSHOT.jar' with your actual JAR file name
 # You can find the exact JAR name in your build/libs/ directory after a successful local build.
-ENTRYPOINT ["sh", "-c", "java -jar -Dserver.port=${PORT:-8080} build/libs/backend_idle-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "build/libs/backend_idle-0.0.1-SNAPSHOT.jar"]
