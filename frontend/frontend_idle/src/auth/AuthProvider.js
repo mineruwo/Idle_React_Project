@@ -7,7 +7,6 @@ import {
     useState,
 } from "react";
 import { getMe, logout } from "../api/loginApi";
-import api from "../api/authApi";
 
 const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
@@ -22,7 +21,7 @@ export default function AuthProvider({ children }) {
         authenticated: false,
         profile: null,
     });
-
+ 
     // 중복 호출/루프 방지용 가드
     const evaluatingRef = useRef(false);
 
@@ -37,8 +36,8 @@ export default function AuthProvider({ children }) {
         evaluatingRef.current = true;
 
         try {
-            const { data } = await api.get("/auth/me"); // 401이면 인터셉터가 /auth/refresh 처리 후 재시도
-            setState({ loading: false, authenticated: true, profile: data });
+            const me = await getMe(); // 401이면 인터셉터가 /auth/refresh 처리 후 재시도
+            setState({ loading: false, authenticated: true, profile: me });
         } catch {
             setState({ loading: false, authenticated: false, profile: null });
         } finally {

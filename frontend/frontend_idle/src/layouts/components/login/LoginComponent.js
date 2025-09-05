@@ -73,6 +73,7 @@ export default function LoginComponent(props) {
             const res = await login({ id, passwordEnc: password });
 
             const role = res?.role;
+            
             if (role) {
                 await refreshAuth(true);
                 moveToMyPageByRole(role);

@@ -3,12 +3,10 @@ package com.fullstack.repository;
 import com.fullstack.entity.CustomerEntity;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -43,16 +41,10 @@ public interface CustomerRepository extends JpaRepository<CustomerEntity, Intege
           """)
      Optional<CustomerEntity> findActiveByEmail(@Param("email") String email);
 
-
 	Optional<CustomerEntity> findById(String id);
 	
 	Optional<CustomerEntity> findByNickname(String nickname);
-	
-	Optional<CustomerEntity> findByResetTokenHash(String resetTokenHash);
-	
-	Optional<CustomerEntity> findByResetTokenHashAndResetUsedFalseAndResetExpiresAtAfter(
-		    String resetTokenHash, LocalDateTime now);
-	
+
 	Optional<CustomerEntity> findBySnsLoginProviderAndSnsProviderId(String provider, String providerId);
 	
 	boolean existsById(String id);

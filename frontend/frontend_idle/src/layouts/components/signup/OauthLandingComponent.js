@@ -1,20 +1,48 @@
 import { useEffect } from "react";
-import { useNavigate, useSearchParams, Link as RouterLink } from "react-router-dom";
+import { useNavigate, Link as RouterLink, useLocation } from "react-router-dom";
 import { Button, CssBaseline, Typography, Box } from "@mui/material";
 import AppTheme from "../../../theme/muitheme/AppTheme";
 import "../../../theme/signup/OauthLanding.css";
 
 export default function OAuthLanding(props) {
-  const [sp] = useSearchParams();
   const nav = useNavigate();
-  const mode = (sp.get("mode") || "").toLowerCase(); // choose | link | signup
+  const loc = useLocation();
 
   useEffect(() => {
-    if (mode === "link") nav("/oauth2/link", { replace: true });
-    if (mode === "signup") nav("/oauth2/signup", { replace: true });
-  }, [mode, nav]);
+    const hash = new URLSearchParams((loc.hash || "").replace(/^#/, ""));
+    const search = new URLSearchParams(loc.search || "");
+    const token = hash.get("token") || search.get("token");
+    const mode = (hash.get("mode") || search.get("mode") || "choose").toLowerCase();
 
-   if (mode === "choose" || !mode) {
+    if (!token) {
+      nav("/login?e=no-token", { replace: true });
+      return;
+    }
+
+    try {
+      sessionStorage.setItem("oauth:token", token);
+    } catch { }
+
+    const clean = mode ? `/oauth2/land?mode=${encodeURIComponent(mode)}` : "/oauth2/land";
+    window.history.replaceState(null, "", clean);
+
+    if (mode === "link") {
+      nav("/oauth2/link", { replace: true });
+      return;
+    }
+    if (mode === "signup") {
+      nav("/oauth2/signup", { replace: true });
+      return;
+    }
+
+  }, [loc, nav]);
+
+
+  const sp = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+  const modeNow = (sp.get("mode") || "choose").toLowerCase();
+
+
+  if (modeNow === "choose") {
     return (
       <AppTheme {...props}>
         <CssBaseline enableColorScheme />

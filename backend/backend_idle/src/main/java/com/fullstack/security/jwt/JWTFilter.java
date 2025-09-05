@@ -37,6 +37,8 @@ public class JWTFilter extends OncePerRequestFilter {
         "/api/admin/login",
         "/api/admin/signup",
         "/api/auth/reset-password",
+        "/api/auth/complete-signup",
+        "/api/auth/link-existing",
         // websocket
         "/ws/**"
     );

@@ -1,5 +1,6 @@
 package com.fullstack.entity;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 
@@ -75,17 +76,10 @@ public class CustomerEntity {
 	private String refreshToken;
 	
 	@Column(name="RT_EXPIRES_AT")
-	private LocalDateTime rtExpiresAt;
+	private Instant rtExpiresAt;
 	
 	@Column(name = "AVATAR_URL", length = 200)
 	private String avatarUrl;
 	
-	// 비밀번호 찾기용 리셋 토큰
-	@Column(name = "RESET_TOKEN_HASH", length = 64, unique = true)
-	private String resetTokenHash;
-	@Column(name = "RESET_EXPIRES_AT")
-	private LocalDateTime resetExpiresAt;
-	@Column(name = "RESET_USED")
-	private Boolean resetUsed = false;
 	
 }

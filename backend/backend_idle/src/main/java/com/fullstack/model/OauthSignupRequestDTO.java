@@ -1,6 +1,5 @@
 package com.fullstack.model;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,8 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SnsLinkExistingRequestDTO {
+public class OauthSignupRequestDTO {
 
-	private String id;
-	private String passwordEnc;
+	private String customName;
+	private String nickname;
+	private String role;
 }

@@ -20,20 +20,35 @@ public class TokenCookieUtils {
 	}
 
 	public static void clearAccessTokenCookie(HttpServletResponse response) {
-		ResponseCookie cookie = ResponseCookie.from("accessToken", "").httpOnly(true).secure(false).sameSite("Lax")
-				.path("/").maxAge(0).build();
+		ResponseCookie cookie = ResponseCookie.from("accessToken", "")
+				.httpOnly(true)
+				.secure(false)
+				.sameSite("Lax")
+				.path("/")
+				.maxAge(0)
+				.build();
 		response.addHeader("Set-Cookie", cookie.toString());
 	}
 
 	public static void setRefreshTokenCookie(HttpServletResponse response, String token, long maxAgeSeconds) {
-		ResponseCookie cookie = ResponseCookie.from("refreshToken", token).httpOnly(true).secure(false).sameSite("Lax")
-				.path("/").maxAge(maxAgeSeconds).build();
+		ResponseCookie cookie = ResponseCookie.from("refreshToken", token).
+				httpOnly(true).
+				secure(false).
+				sameSite("Lax").
+				path("/").
+				maxAge(maxAgeSeconds).
+				build();
 		response.addHeader("Set-Cookie", cookie.toString());
 	}
 
 	public static void clearRefreshTokenCookie(HttpServletResponse response) {
-		ResponseCookie cookie = ResponseCookie.from("refreshToken", "").httpOnly(true).secure(false).sameSite("Lax")
-				.path("/").maxAge(0).build();
+		ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
+				.httpOnly(true)
+				.secure(false)
+				.sameSite("Lax")
+				.path("/")
+				.maxAge(0)
+				.build();
 		response.addHeader("Set-Cookie", cookie.toString());
 	}
 
@@ -66,7 +81,12 @@ public class TokenCookieUtils {
 
 	public static void clearAuthHintCookie(HttpServletResponse response) {
 	    ResponseCookie cookie = ResponseCookie.from("hasAuth", "0")
-	        .httpOnly(false).secure(false).sameSite("Lax").path("/").maxAge(0).build();
+	        .httpOnly(false)
+	        .secure(false)
+	        .sameSite("Lax")
+	        .path("/")
+	        .maxAge(0)
+	        .build();
 	    response.addHeader("Set-Cookie", cookie.toString());
 	}
 }

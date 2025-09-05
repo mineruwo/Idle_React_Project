@@ -35,8 +35,13 @@ public class ResetTokenServiceImpl implements ResetTokenService {
     }
 
     @Override
-    public Optional<ResetPasswordTicketDTO> consume(String token) {
-        return oneTimeTokenService.consume(token, PURPOSE, ResetPasswordTicketDTO.class);
+    public Optional<ResetPasswordTicketDTO> peek(String token) {
+        return oneTimeTokenService.peek(token, PURPOSE, ResetPasswordTicketDTO.class);
+    }
+    
+    @Override
+    public void invalidate(String token) {
+    	oneTimeTokenService.invalidate(token);
     }
     
 }

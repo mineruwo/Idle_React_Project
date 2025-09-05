@@ -1,5 +1,4 @@
 import { Outlet } from "react-router-dom";
-
 import "../../theme/CarOwner/cardashboard.css"
 
 const CarPage = ()=>{
