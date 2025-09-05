@@ -28,6 +28,9 @@ html, body {
   text-align: center;
   margin-bottom: 2rem;
   color: #2c464b;
+  font-size: 1.8rem;   /* ✅ 글씨 크기 줄임 (기존보다 작게) */
+  font-weight: bold;
+  text-shadow: none;   /* ✅ 그림자 효과 제거 */
 }
 
 .label {
