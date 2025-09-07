@@ -27,7 +27,7 @@ import lombok.Setter;
 indexes = {@Index(columnList = "owner_id, month_key")})
 @Getter @Setter
 public class  CarOwnerSettlementBatchEntity{
-public enum Status { REQUESTED, APPROVED, PAID, CANCELED }
+public enum Status { REQUESTED, APPROVED, PAID, CANCELED, READY }
 
 @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 private Long id; // 순서대로 발급

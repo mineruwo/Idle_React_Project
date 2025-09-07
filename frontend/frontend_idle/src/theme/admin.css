@@ -73,7 +73,12 @@ body {
     background-color: var(--admin-header);
 }
 
-/* --- Table Styles --- */
+/* General Table Styles */
+
+.quill-viewer .ql-container.ql-snow {
+    border: none;
+}
+
 .admin-table {
     width: 100%;
     border-collapse: collapse;
@@ -785,7 +790,7 @@ body {
 
 .message-bubble.sent {
     background-color: var(--admin-strong);
-    color: white;
+    color: black;
 }
 
 .message-bubble.received {

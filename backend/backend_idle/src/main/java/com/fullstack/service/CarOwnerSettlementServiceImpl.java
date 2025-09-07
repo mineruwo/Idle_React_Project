@@ -274,7 +274,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
                 b.setOwner(customerRepo.findByLoginId(ownerId)
                         .orElseThrow(() -> new IllegalArgumentException("ID가 " + ownerId + "인 고객을 찾을 수 없습니다.")));
                 b.setMonthKey(monthKey);
-                b.setStatus(CarOwnerSettlementBatchEntity.Status.REQUESTED);
+                b.setStatus(CarOwnerSettlementBatchEntity.Status.READY);
                 return batchRepo.saveAndFlush(b);
             } catch (DataIntegrityViolationException e) {
                 // 다른 트랜잭션이 초기 확인과 saveAndFlush 사이에
@@ -312,18 +312,20 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
 
         var b = batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey)
                 .orElseThrow(() -> new IllegalArgumentException("BATCH_NOT_FOUND"));
-        if (b.getStatus() != CarOwnerSettlementBatchEntity.Status.REQUESTED) {
-            throw new IllegalStateException("BATCH_NOT_OPEN");
+
+        // 정산 요청은 READY 상태의 배치에 대해서만 가능
+        if (b.getStatus() != CarOwnerSettlementBatchEntity.Status.READY) {
+            throw new IllegalStateException("정산 요청을 할 수 없는 상태입니다. 현재 상태: " + b.getStatus());
         }
 
-        // 1) READY → REQUESTED (항목)
-        settlementRepo.bulkMarkRequested(ownerId, monthKey);
-
-        // 2) 배치에 은행/계좌 저장
+        // 1) 배치 상태를 REQUESTED로 변경
+        b.setStatus(CarOwnerSettlementBatchEntity.Status.REQUESTED);
+        b.setRequestedAt(LocalDateTime.now());
         b.setBankCode(bankCode);
         b.setBankAccountNo(accountNo);
-        b.setRequestedAt(LocalDateTime.now());
-        // b.setStatus(...)는 이미 REQUESTED 상태 유지
+
+        // 2) 해당 월의 모든 READY 상태의 정산 항목들을 REQUESTED로 변경
+        settlementRepo.bulkMarkRequested(ownerId, monthKey);
 
         // 3) 합계/건수 재계산
         refreshBatchTotals(ownerId, monthKey);
