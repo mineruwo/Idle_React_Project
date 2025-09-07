@@ -54,6 +54,7 @@ const useCustomMove = () => {
     const carOwnerMoveToSettlement = () => navigate("/carPage/settlement");
     const carOwnerMoveToVehicles = () => navigate("/carPage/vehicles");
     const carOwnerMoveToLisense = () => navigate("/carPage/submitDOC");
+    const carOwnerMoveToInquiries = () => navigate("/carPage/inquiries");
 
     const moveToAdminPage = () => {
         console.log("hook admin page");
@@ -124,6 +125,7 @@ const useCustomMove = () => {
         carOwnerMoveToSettlement,
         carOwnerMoveToVehicles,
         carOwnerMoveToLisense,
+        carOwnerMoveToInquiries,
         moveToAdminPage,
         moveToWebSocketTestPage,
         moveToLoginPage,

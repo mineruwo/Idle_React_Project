@@ -36,6 +36,7 @@ const EditProfile = lazy(() => import("../pages/carOwnerPage/EditProfile"));
 const SubmitDOC = lazy(() => import("../pages/carOwnerPage/SubmitDOC"));
 const Settlement = lazy(() => import("../pages/carOwnerPage/Settlement"));
 const Vehicles = lazy(() => import("../pages/carOwnerPage/Vehicles"));
+const CarOwnerInquiriesPage = lazy(() => import("../pages/carOwnerPage/CarOwnerInquiriesPage"));
 
 
 // 최상위 레이아웃 컴포넌트
@@ -168,6 +169,14 @@ const root = createBrowserRouter([
                         element: (
                             <Suspense fallback={Loading}>
                                 <SubmitDOC />
+                            </Suspense>
+                        ),
+                    },
+                    {
+                        path: "inquiries",
+                        element: (
+                            <Suspense fallback={Loading}>
+                                <CarOwnerInquiriesPage />
                             </Suspense>
                         ),
                     },

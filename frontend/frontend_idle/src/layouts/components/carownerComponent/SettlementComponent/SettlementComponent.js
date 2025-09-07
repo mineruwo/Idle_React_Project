@@ -72,13 +72,13 @@ const SettlementComponent = () => {
     const { ym } = defaultMonthRange(from, to);
     setBatchSubmitting(true);
     try {
-      await requestPayoutBatch(ym, undefined, { bankCode, accountNo });
+      const token = sessionStorage.getItem('accessToken');
+      await requestPayoutBatch(ym, bankCode, accountNo, token);
       await load(pageData.number || 0);
       setModalOpen(false);
       alert("정산 요청이 접수되었습니다.");
     } catch (e) {
-      alert(e.message || "정산 요청 중 오류가 발생했습니다.");
-      throw e;
+      alert(e.message || "알 수 없는 오류로 정산 요청에 실패했습니다.");
     } finally {
       setBatchSubmitting(false);
     }

@@ -187,14 +187,25 @@ public class SalesService {
 
     @Transactional
     public CarOwnerSettlementBatchDTO.BatchSummaryResponse updateCarOwnerSettlementStatus(Long id, String newStatus) {
-    	CarOwnerSettlementBatchEntity batch = carOwnerSettlementBatchRepository.findById(id)
+        CarOwnerSettlementBatchEntity batch = carOwnerSettlementBatchRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Settlement Batch not found with id: " + id));
 
-        // Update status
+        CarOwnerSettlementBatchEntity.Status newStatusEnum;
         try {
-            batch.setStatus(CarOwnerSettlementBatchEntity.Status.valueOf(newStatus));
+            newStatusEnum = CarOwnerSettlementBatchEntity.Status.valueOf(newStatus);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid status: " + newStatus);
+        }
+
+        batch.setStatus(newStatusEnum);
+
+        // PAID 상태로 변경 시, 하위 정산 항목들도 상태를 동기화하고 지급일시를 기록
+        if (newStatusEnum == CarOwnerSettlementBatchEntity.Status.PAID) {
+            batch.setPaidAt(LocalDateTime.now());
+            carOwnerSettlementRepository.updateStatusByBatchId(id, CarOwnerSettlementEntity.Status.PAID);
+        } else if (newStatusEnum == CarOwnerSettlementBatchEntity.Status.CANCELED) {
+            // CANCELED 상태로 변경 시, 하위 정산 항목들도 동기화
+            carOwnerSettlementRepository.updateStatusByBatchId(id, CarOwnerSettlementEntity.Status.CANCELED);
         }
         
         CarOwnerSettlementBatchEntity updatedBatch = carOwnerSettlementBatchRepository.save(batch);

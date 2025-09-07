@@ -145,6 +145,9 @@ public interface CarOwnerSettlementRepository extends JpaRepository<CarOwnerSett
 
     // ✅ 월/차주 + REQUESTED 상태 기준 건수
     long countByOwnerIdAndMonthKeyAndStatus(String ownerId, LocalDate monthKey, Status status);
-    
+
+    @Modifying
+    @Query("UPDATE CarOwnerSettlementEntity s SET s.status = :status, s.updatedAt = CURRENT_TIMESTAMP WHERE s.batch.id = :batchId")
+    void updateStatusByBatchId(@Param("batchId") Long batchId, @Param("status") Status status);
     
   }

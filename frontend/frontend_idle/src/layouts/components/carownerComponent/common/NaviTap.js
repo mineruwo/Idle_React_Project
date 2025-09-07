@@ -15,6 +15,7 @@ const ShipperNavBarComponent = () => {
         carOwnerMoveToSettlement,
         carOwnerMoveToVehicles,
         carOwnerMoveToOrderBoard,
+        carOwnerMoveToInquiries,
     } = useCustomMove();
 
     const isOrderBoard = !!matchPath({ path: "/car-owner/board/*" }, pathname);
@@ -23,6 +24,7 @@ const ShipperNavBarComponent = () => {
     const isSettlement = !!matchPath({ path: "/car-owner/settlement/*" }, pathname);
     const isVehicles = !!matchPath({ path: "/car-owner/vehicles/*" }, pathname);
     const isDashboard = !!matchPath({ path: "/car-owner/dashboard/*" }, pathname);
+    const isInquiries = !!matchPath({ path: "/carPage/inquiries" }, pathname);
     return (
         <div className="bs-component">
             <nav className="navbar navbar-expand-lg bg-primary bg-opacity-75" data-bs-theme="dark">
@@ -64,6 +66,11 @@ const ShipperNavBarComponent = () => {
                             <li className={`nav-item flex-fill py-2 border-bottom border-light border-opacity-25 ${isVehicles ? "active" : ""}`}
                                 onClick={carOwnerMoveToVehicles}>
                                 <div className="nav-link">내 차량</div>
+                            </li>
+
+                            <li className={`nav-item flex-fill py-2 border-bottom border-light border-opacity-25 ${isInquiries ? "active" : ""}`}
+                                onClick={carOwnerMoveToInquiries}>
+                                <div className="nav-link">문의 내역</div>
                             </li>
                         </ul>
                     </div>

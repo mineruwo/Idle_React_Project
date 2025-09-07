@@ -31,12 +31,12 @@ public class CarOwnerSettlementController {
         public String accountNo; // bank_code만 쓰려면 생략 가능
       }
 
-    /** 로그인 사용자의 idNum을 문자열 키(ownerId)로 반환 */
+    /** 로그인 사용자의 id(이메일)를 문자열 키(ownerId)로 반환 */
     private String ownerKey(Principal principal) {
-        String loginId = principal.getName();
-        CustomerEntity me = customerRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new AccessDeniedException("AUTH_USER_NOT_FOUND"));
-        return String.valueOf(me.getIdNum());
+        if (principal == null) {
+            throw new AccessDeniedException("AUTH_USER_NOT_FOUND");
+        }
+        return principal.getName();
     }
 
     /** 목록 */
