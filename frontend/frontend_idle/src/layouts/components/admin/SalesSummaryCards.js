@@ -19,11 +19,11 @@ const SalesSummaryCards = ({ salesSummary, loading, error }) => {
             </div>
             <div className="card">
                 <h3>금일 거래 금액</h3>
-                <p>{salesSummary.todayTransactionAmount.toLocaleString()} 원</p>
+                <p>{salesSummary.todayTransactionAmount?.toLocaleString() || '0'} 원</p>
             </div>
             <div className="card">
                 <h3>이번 달 거래 금액</h3>
-                <p>{salesSummary.thisMonthTransactionAmount.toLocaleString()} 원</p>
+                <p>{salesSummary.thisMonthTransactionAmount?.toLocaleString() || '0'} 원</p>
             </div>
         </div>
     );
