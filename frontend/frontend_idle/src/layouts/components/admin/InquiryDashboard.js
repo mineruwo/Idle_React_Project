@@ -24,7 +24,7 @@ const InquiryDashboard = () => {
                 const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
                 const allDates = Array.from({ length: daysInMonth }, (_, i) => `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`);
 
-                const dataMap = new Map(backendData.map(item => [item.date, item.count]));
+                const dataMap = new Map((Array.isArray(backendData) ? backendData : []).map(item => [item.date, item.count]));
                 const counts = allDates.map(date => dataMap.get(date) || 0);
 
                 const maxCount = Math.max(...counts, 10); // Calculate max, ensure at least 10

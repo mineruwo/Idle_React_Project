@@ -10,7 +10,7 @@ const useDashboardData = (fetchApiFunction, limit = null) => {
             try {
                 setLoading(true);
                 const response = await fetchApiFunction();
-                setData(limit ? response.slice(0, limit) : response);
+                setData(Array.isArray(response) ? (limit ? response.slice(0, limit) : response) : []);
             } catch (err) {
                 console.error("Failed to fetch dashboard data:", err);
                 setError(err);
