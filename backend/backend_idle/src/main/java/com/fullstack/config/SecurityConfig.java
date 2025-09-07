@@ -74,8 +74,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
 
                 // 관리자(요구 반영: 공개, 운영 전환 시 제한 권장)
-                                .requestMatchers(
-                    "/api/public/**", // Public API for notices
+                                "/api/public/**", // Public API for notices
                     "/api/orders/**",   // 🚚 오더 등록/조회/삭제 전부 허용
                     "/auth/**",   
                     "/api/auth/login",
@@ -96,7 +95,9 @@ public class SecurityConfig {
                     "/api/payment/**",
                     "/api/admin/chat-sessions/**", // 채팅 세션 관련 API 허용
                     "/api/email/**",
-                    "/api/reviews/target/**" // 특정 대상의 리뷰 목록 조회는 누구나 가능
+                    "/api/reviews/target/**", // 특정 대상의 리뷰 목록 조회는 누구나 가능
+                    "/api/inquiries/**", // 추가: 문의 관련 API 허용
+                    "/api/admin/dashboard/**" // 추가: 관리자 대시보드 API 허용
                 ).permitAll()
                 .requestMatchers("/api/car-owner/**").hasRole("CARRIER") // 🚚 차주 관련 API는 CARRIER 롤 필요
                 .requestMatchers(HttpMethod.POST, "/api/auth/reset-password").permitAll()
