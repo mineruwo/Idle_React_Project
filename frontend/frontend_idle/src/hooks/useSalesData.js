@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { adminApi } from '../api/adminApi';
 import { parseISO, addDays, format } from 'date-fns';
 
 const useSalesData = (startDate, endDate) => {
@@ -13,7 +14,7 @@ const useSalesData = (startDate, endDate) => {
             setLoading(true);
             setError(null);
             try {
-                const summaryResponse = await axios.get(`/api/admin/sales/summary`);
+                const summaryResponse = await adminApi.get(`/admin/sales/summary`);
                 setSalesSummary(summaryResponse.data);
             } catch (err) {
                 setError(err);
@@ -26,7 +27,7 @@ const useSalesData = (startDate, endDate) => {
             setLoading(true);
             setError(null);
             try {
-                const dailyResponse = await axios.get(`/api/admin/sales/daily`, {
+                const dailyResponse = await adminApi.get(`/admin/sales/daily`, {
                     params: { startDate, endDate }
                 });
 
