@@ -74,7 +74,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
 
                 // 관리자(요구 반영: 공개, 운영 전환 시 제한 권장)
-                                "/api/public/**", // Public API for notices
+                                .requestMatchers(
+                    "/api/public/**", // Public API for notices
                     "/api/orders/**",   // 🚚 오더 등록/조회/삭제 전부 허용
                     "/auth/**",   
                     "/api/auth/login",
@@ -105,7 +106,7 @@ public class SecurityConfig {
                         "/api/auth/me",
                         "/api/reviews"     // 리뷰 작성 및 삭제는 인증된 사용자만 가능
                 ).authenticated()
-                
+
                 .anyRequest().authenticated()
             )
             // sns 로그인 페이지 연결
