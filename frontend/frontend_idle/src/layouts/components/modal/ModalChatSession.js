@@ -193,7 +193,7 @@ const ModalChatSession = ({ isOpen, onClose }) => {
     return (
         <div className="modal-chat-session">
             <div className="modal-chat-header">
-                <h5>WebSocket Chat</h5>
+                <h5>상담 채팅</h5>
                 <button onClick={onClose} className="close-button">&times;</button>
             </div>
             <div ref={bottomRef} className="message-container">
