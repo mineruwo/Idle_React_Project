@@ -11,6 +11,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import org.springframework.web.cors.CorsConfiguration;
@@ -46,6 +48,9 @@ public class SecurityConfig {
             .httpBasic(httpBasic -> httpBasic.disable()) // HTTP Basic 인증 비활성화
             .formLogin(formLogin -> formLogin.disable()) // 폼 로그인 비활성화
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함
+            .exceptionHandling(exceptionHandling -> exceptionHandling
+                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)) // For API calls
+            )
             //.anonymous(anonymous -> anonymous.disable()) // 익명 비활성화
             .authorizeHttpRequests(auth -> auth
                 // 프리플라이트
@@ -74,7 +79,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
 
                 // 관리자(요구 반영: 공개, 운영 전환 시 제한 권장)
-                                .requestMatchers(
+                                                                .requestMatchers(
                     "/api/public/**", // Public API for notices
                     "/api/orders/**",   // 🚚 오더 등록/조회/삭제 전부 허용
                     "/auth/**",   
@@ -88,17 +93,21 @@ public class SecurityConfig {
                     "/api/admin/login", // 경로 변경
                     "/api/admin/check-auth", // 추가: 인증 상태 확인 엔드포인트 허용
                     "/api/admin/logout", // 추가: 로그아웃 엔드포인트 허용
-                    "/api/admin/accounts", // 경로 변경
-                    "/api/admin/customers", // 고객 목록 조회 허용
-                    "/api/admin/customers/**", // 고객 생성/수정/삭제 허용 (POST, PUT, DELETE)
+                    "/api/admin/accounts/**", // 관리자 계정 관련 API 허용 (accounts, accounts/{id})
+                    "/api/admin/customers/**", // 고객 관련 API 허용 (customers, customers/{id})
                     "/ws/**", "/ws-chat/**", // 웹소켓 경로
                     "/api/customer/**", // 고객 관련 API
                     "/api/payment/**",
                     "/api/admin/chat-sessions/**", // 채팅 세션 관련 API 허용
                     "/api/email/**",
                     "/api/reviews/target/**", // 특정 대상의 리뷰 목록 조회는 누구나 가능
-                    "/api/inquiries/**", // 추가: 문의 관련 API 허용
-                    "/api/admin/dashboard/**" // 추가: 관리자 대시보드 API 허용
+                    "/api/inquiries/**", // 일반 문의 관련 API 허용 (InquiryController)
+                    "/api/admin/inquiries/**", // 관리자 문의 관련 API 허용 (AdminController)
+                    "/api/admin/dashboard/**", // 관리자 대시보드 API 허용
+                    "/api/admin/sales/**", // 관리자 매출 관련 API 허용
+                    "/api/admin/car-owner-settlements/**", // 관리자 차주 정산 관련 API 허용
+                    "/api/admin/notices/**", // 관리자 공지사항 관련 API 허용
+                    "/api/admin/faqs/**" // 관리자 FAQ 관련 API 허용
                 ).permitAll()
                 .requestMatchers("/api/car-owner/**").hasRole("CARRIER") // 🚚 차주 관련 API는 CARRIER 롤 필요
                 .requestMatchers(HttpMethod.POST, "/api/auth/reset-password").permitAll()
