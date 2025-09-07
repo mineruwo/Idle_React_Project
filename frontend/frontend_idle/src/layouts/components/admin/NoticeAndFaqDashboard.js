@@ -4,31 +4,35 @@ import { getAllNotices, getAllFAQs } from '../../../api/adminApi';
 import useDashboardData from '../../../hooks/useDashboardData';
 import '../../../theme/admin.css';
 
-const DashboardTable = ({ title, data, columns, emptyMessage }) => (
-    <div style={{ flex: 1 }}>
-        <h4>{title}</h4>
-        <table className="admin-table">
-            <thead>
-                <tr>
-                    {columns.map(col => <th key={col.header}>{col.header}</th>)}
-                </tr>
-            </thead>
-            <tbody>
-                {data.length > 0 ? (
-                    data.map(item => (
-                        <tr key={item.id}>
-                            {columns.map(col => <td key={`${item.id}-${col.accessor}`}>{col.accessor(item)}</td>)}
-                        </tr>
-                    ))
-                ) : (
+const DashboardTable = ({ title, data, columns, emptyMessage }) => {
+    const safeData = Array.isArray(data) ? data : []; // Ensure data is an array
+
+    return (
+        <div style={{ flex: 1 }}>
+            <h4>{title}</h4>
+            <table className="admin-table">
+                <thead>
                     <tr>
-                        <td colSpan={columns.length}>{emptyMessage}</td>
+                        {columns.map(col => <th key={col.header}>{col.header}</th>)}
                     </tr>
-                )}
-            </tbody>
-        </table>
-    </div>
-);
+                </thead>
+                <tbody>
+                    {safeData.length > 0 ? (
+                        safeData.map(item => (
+                            <tr key={item.id}>
+                                {columns.map(col => <td key={`${item.id}-${col.accessor}`}>{col.accessor(item)}</td>)}
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan={columns.length}>{emptyMessage}</td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
+        </div>
+    );
+};
 
 const NoticeAndFaqDashboard = () => {
     const { data: notices, loading: noticesLoading, error: noticesError } = useDashboardData(getAllNotices, 3);
