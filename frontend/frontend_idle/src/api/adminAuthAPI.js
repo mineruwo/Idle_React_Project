@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { adminApi, setAuthToken } from './adminApi';
+import { adminApi } from './adminApi';
 
 // 백엔드 API 기본 URL (실제 백엔드 URL로 변경 필요)
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080'; 
@@ -14,10 +14,3 @@ export const checkAdminAuth = async () => {
     }
 };
 
-// New function to initialize auth token on app load
-export const initializeAuth = () => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-        setAuthToken(token);
-    }
-};

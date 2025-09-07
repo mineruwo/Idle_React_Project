@@ -7,7 +7,6 @@ import {
     useState,
 } from "react";
 import { getMe, logout } from "../api/loginApi";
-import { initializeAuth } from "../api/adminAuthAPI";
 
 const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
@@ -58,7 +57,6 @@ export default function AuthProvider({ children }) {
 
     // 최초 1회 상태 결정
     useEffect(() => {
-        initializeAuth(); // Call initializeAuth here
         evaluate();
     }, [evaluate]);
 

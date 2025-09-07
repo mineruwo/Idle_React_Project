@@ -41,16 +41,24 @@ adminApi.interceptors.request.use(
     }
 );
 
+// 요청 인터셉터 설정
+adminApi.interceptors.request.use(
+    config => {
+        // HttpOnly 쿠키는 브라우저가 자동으로 전송하므로, 여기서 수동으로 헤더를 추가할 필요 없음
+        return config;
+    },
+    error => {
+        return Promise.reject(error);
+    }
+);
+
 export const loginAdmin = async (adminId, password) => {
     try {
         const response = await adminApi.post(`/admin/login`, {
             adminId,
             password
         });
-        if (response.data.token) {
-            localStorage.setItem('accessToken', response.data.token);
-            setAuthToken(response.data.token); // 로그인 성공 시 토큰 설정
-        }
+        // 토큰은 HttpOnly 쿠키로 설정되므로, 여기서 localStorage에 저장할 필요 없음
         return response.data;
     } catch (error) {
         console.error('Admin login failed:', error.response ? error.response.data : error.message);
