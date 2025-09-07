@@ -11,6 +11,7 @@ import {
     Legend,
 } from 'chart.js';
 import axios from 'axios';
+import { adminApi } from '../../../api/adminApi';
 import AdminChartCard from '../common/AdminChartCard'; // Import AdminChartCard
 import '../../../theme/admin.css';
 
@@ -46,7 +47,7 @@ const MyInquiriesComponent = () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await axios.get(`/api/admin/inquiries/daily-answers?year=${year}&month=${month}`);
+            const response = await adminApi.get(`/admin/inquiries/daily-answers`, { params: { year, month } });
             const backendData = response.data;
 
             const daysInMonth = new Date(year, month, 0).getDate();
@@ -106,7 +107,7 @@ const MyInquiriesComponent = () => {
     // Function to fetch inquiry table data based on filter
     const fetchInquiryTableData = async (filter) => {
         try {
-            const response = await axios.get(`/api/admin/inquiries/my-history?filter=${filter}`);
+            const response = await adminApi.get(`/admin/inquiries/my-history`, { params: { filter } });
             setInquiryTableData(response.data);
         } catch (error) {
             console.error('Error fetching inquiry table data:', error);
