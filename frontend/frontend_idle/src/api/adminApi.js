@@ -22,16 +22,34 @@ adminApi.interceptors.request.use(
     }
 );
 
+export const setAuthToken = (token) => {
+    if (token) {
+        adminApi.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+        delete adminApi.defaults.headers.common['Authorization'];
+    }
+};
+
+// 요청 인터셉터 설정
+adminApi.interceptors.request.use(
+    config => {
+        // 토큰이 이미 defaults.headers.common에 설정되어 있으므로, 여기서 다시 설정할 필요 없음
+        return config;
+    },
+    error => {
+        return Promise.reject(error);
+    }
+);
+
 export const loginAdmin = async (adminId, password) => {
     try {
-        // 로그인 요청은 인터셉터를 통과하지만, 보통 토큰이 없는 상태이므로 헤더가 추가되지 않음
         const response = await adminApi.post(`/admin/login`, {
             adminId,
             password
         });
-        // 로그인 성공 시 토큰을 저장하는 로직이 필요할 수 있음 (예: response.data.token)
         if (response.data.token) {
             localStorage.setItem('accessToken', response.data.token);
+            setAuthToken(response.data.token); // 로그인 성공 시 토큰 설정
         }
         return response.data;
     } catch (error) {
