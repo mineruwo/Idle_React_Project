@@ -1,5 +1,7 @@
 import React, { useState, Fragment } from 'react';
 import { Link } from 'react-router-dom';
+import ReactQuill from 'react-quill'; // Import ReactQuill
+import 'react-quill/dist/quill.snow.css'; // Import Quill styles
 import { getAllNotices, deleteNotice, toggleNoticeActive } from '../../../api/adminApi';
 import useDashboardData from '../../../hooks/useDashboardData';
 import Modal from '../common/Modal';
@@ -114,6 +116,13 @@ const NoticeListComponent = () => {
                                     <tr className="admin-content-row">
                                         <td colSpan={columns.length}>
                                             <div className="admin-content-box">
+                                                <ReactQuill
+                                                    className="quill-viewer" // 클래스 추가
+                                                    value={notice.content}
+                                                    readOnly={true}
+                                                    theme={"snow"}
+                                                    modules={{ toolbar: false }} // 툴바 숨기기
+                                                />
                                             </div>
                                             <div className="admin-actions">
                                                 <Link to={`/admin/notices/edit/${notice.id}`}> {/* Removed className from Link */}
