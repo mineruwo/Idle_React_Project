@@ -6,14 +6,14 @@ import CalendarInput from "./CalendarInput";
 import { useNavigate } from "react-router-dom";
 import { saveOrder } from "../../api/orderApi";
 import useCustomMove from "../../hooks/useCustomMove";
-import "../../orderCss/OrderForm.css";   // CSS 연결 (수정 금지)
+import "../../orderCss/OrderForm.css"; // CSS 연결 (수정 금지)
 
 const AVERAGE_PRICE_PER_KM = 3000; // km당 평균 운임(원)
 const PACK_LABELS = {
-  special: "특수포장",
-  normal: "일반포장",
-  expensive: "고가화물",
-  fragile: "파손위험물",
+    special: "특수포장",
+    normal: "일반포장",
+    expensive: "고가화물",
+    fragile: "파손위험물",
 };
 
 /** ================= 요금/하한가 유틸 =================
@@ -23,476 +23,543 @@ const PACK_LABELS = {
  * 하한가 = max(20,000, baseFare * 0.7) → 100원 단위 반올림
  */
 const calcBaseFare = (distanceKm) => {
-  const d = Number(distanceKm) || 0;
-  if (d <= 10) return 20000;
-  return 20000 + Math.ceil(d - 10) * 2000;
+    const d = Number(distanceKm) || 0;
+    if (d <= 10) return 20000;
+    return 20000 + Math.ceil(d - 10) * AVERAGE_PRICE_PER_KM;
 };
 const getMinProposedPrice = (distanceKm) => {
-  const base = calcBaseFare(distanceKm);
-  const floor = Math.round((base * 0.7) / 100) * 100;
-  return Math.max(20000, floor);
+    const base = calcBaseFare(distanceKm);
+    const floor = Math.round((base * 0.9) / 100) * 100;
+    return Math.max(20000, floor);
 };
 
 /** 숫자 콤마 문자열 → 숫자 (빈값이면 null) */
 function parseProposedPriceNumber(str) {
-  const onlyNums = (str || "").replace(/[^0-9]/g, "");
-  return onlyNums ? Number(onlyNums) : null;
+    const onlyNums = (str || "").replace(/[^0-9]/g, "");
+    return onlyNums ? Number(onlyNums) : null;
 }
 
 const OrderForm = () => {
-  const mapRef = useRef(null);
-  const navigate = useNavigate();
-  const { shipperMoveToOrderBoard } = useCustomMove();
+    const mapRef = useRef(null);
+    const navigate = useNavigate();
+    const { shipperMoveToOrderBoard } = useCustomMove();
 
-  // 상태
-  const [proposedPrice, setProposedPrice] = useState(""); // 표시용(천단위 콤마)
-  const [departure, setDeparture] = useState("");
-  const [arrival, setArrival] = useState("");
-  const [distance, setDistance] = useState(null); // "10.76" 같은 문자열(km)
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [isImmediate, setIsImmediate] = useState(true);
-  const [weight, setWeight] = useState("");
-  const [vehicle, setVehicle] = useState("");
-  const [cargoType, setCargoType] = useState("");
-  const [cargoSize, setCargoSize] = useState("");
-  const [packingOptions, setPackingOptions] = useState({
-    special: false,
-    normal: false,
-    expensive: false,
-    fragile: false,
-  });
-
-  // ===== 파생값: 하한가/검증 =====
-  const minProposed = useMemo(
-    () => (distance ? getMinProposedPrice(Number(distance)) : 20000),
-    [distance]
-  );
-  const isUnderMinProposed = useMemo(() => {
-    const n = parseProposedPriceNumber(proposedPrice);
-    return n !== null && n < minProposed;
-  }, [proposedPrice, minProposed]);
-
-  // 다음(카카오) 주소 검색 팝업
-  const handlePostcodePopup = (type) => {
-    new window.daum.Postcode({
-      oncomplete: function (data) {
-        const fullAddr = data.address;
-        if (type === "departure") setDeparture(fullAddr);
-        else if (type === "arrival") setArrival(fullAddr);
-      },
-    }).open();
-  };
-
-  // 제안가 입력(숫자만 + 콤마 표시)
-  const handleProposedPriceChange = (e) => {
-    const onlyNums = e.target.value.replace(/[^0-9]/g, "");
-    const formatted = onlyNums ? Number(onlyNums).toLocaleString("ko-KR") : "";
-    setProposedPrice(formatted);
-  };
-
-  // 포장 토글
-  const togglePacking = (key) =>
-    setPackingOptions((prev) => ({ ...prev, [key]: !prev[key] }));
-
-  // 포장 요약 텍스트
-  const getPackingSummary = (options) =>
-    Object.entries(options)
-      .filter(([_, v]) => v)
-      .map(([k]) => PACK_LABELS[k])
-      .join(", ");
-
-  // 지도 & 거리 계산
-  useEffect(() => {
-    if (!window.kakao || !window.kakao.maps) return;
-    if (!mapRef.current) return;
-    if (!departure || !arrival || !weight || !vehicle || !cargoType || !cargoSize) return;
-
-    const map = new window.kakao.maps.Map(mapRef.current, {
-      center: new window.kakao.maps.LatLng(37.5665, 126.978),
-      level: 5,
+    // 상태
+    const [proposedPrice, setProposedPrice] = useState(""); // 표시용(천단위 콤마)
+    const [departure, setDeparture] = useState("");
+    const [arrival, setArrival] = useState("");
+    const [distance, setDistance] = useState(null); // "10.76" 같은 문자열(km)
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [isImmediate, setIsImmediate] = useState(true);
+    const [weight, setWeight] = useState("");
+    const [vehicle, setVehicle] = useState("");
+    const [cargoType, setCargoType] = useState("");
+    const [cargoSize, setCargoSize] = useState("");
+    const [packingOptions, setPackingOptions] = useState({
+        special: false,
+        normal: false,
+        expensive: false,
+        fragile: false,
     });
 
-    const geocoder = new window.kakao.maps.services.Geocoder();
+    // ===== 파생값: 하한가/검증 =====
+    const minProposed = useMemo(
+        () => (distance ? getMinProposedPrice(Number(distance)) : 20000),
+        [distance]
+    );
+    const isUnderMinProposed = useMemo(() => {
+        const n = parseProposedPriceNumber(proposedPrice);
+        return n !== null && n < minProposed;
+    }, [proposedPrice, minProposed]);
 
-    // 출발지
-    geocoder.addressSearch(departure, (res1, status1) => {
-      if (status1 !== window.kakao.maps.services.Status.OK) return;
-      const start = new window.kakao.maps.LatLng(res1[0].y, res1[0].x);
-
-      // 도착지
-      geocoder.addressSearch(arrival, (res2, status2) => {
-        if (status2 !== window.kakao.maps.services.Status.OK) return;
-        const end = new window.kakao.maps.LatLng(res2[0].y, res2[0].x);
-
-        // 마커 + 라벨
-        const markerImg = new window.kakao.maps.MarkerImage(
-          process.env.PUBLIC_URL + "/img/orderimg/marker_navy.png",
-          new window.kakao.maps.Size(32, 42)
-        );
-        new window.kakao.maps.Marker({ map, position: start, image: markerImg });
-        new window.kakao.maps.Marker({ map, position: end, image: markerImg });
-
-        new window.kakao.maps.CustomOverlay({
-          map,
-          position: start,
-          content:
-            '<div style="padding:4px 8px;background:#465d96ff;color:white;border-radius:4px;font-size:13px;">출발</div>',
-          yAnchor: 1.5,
-        });
-        new window.kakao.maps.CustomOverlay({
-          map,
-          position: end,
-          content:
-            '<div style="padding:4px 8px;background:#465d96ff;color:white;border-radius:4px;font-size:13px;">도착</div>',
-          yAnchor: 1.5,
-        });
-
-        // Kakao 길찾기 API
-        const REST_KEY =
-          process.env.REACT_APP_KAKAO_REST_KEY ||
-          "b3e43f89b06cecddef5afc6058545ab2"; // 개발 편의 폴백. 배포 전 .env 설정!
-
-        fetch(
-          `https://apis-navi.kakaomobility.com/v1/directions?origin=${res1[0].x},${res1[0].y}&destination=${res2[0].x},${res2[0].y}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `KakaoAK ${REST_KEY}`,
-              "Content-Type": "application/json",
+    // 다음(카카오) 주소 검색 팝업
+    const handlePostcodePopup = (type) => {
+        new window.daum.Postcode({
+            oncomplete: function (data) {
+                const fullAddr = data.address;
+                if (type === "departure") setDeparture(fullAddr);
+                else if (type === "arrival") setArrival(fullAddr);
             },
-          }
+        }).open();
+    };
+
+    // 제안가 입력(숫자만 + 콤마 표시)
+    const handleProposedPriceChange = (e) => {
+        const onlyNums = e.target.value.replace(/[^0-9]/g, "");
+        const formatted = onlyNums
+            ? Number(onlyNums).toLocaleString("ko-KR")
+            : "";
+        setProposedPrice(formatted);
+    };
+
+    // 포장 토글
+    const togglePacking = (key) =>
+        setPackingOptions((prev) => ({ ...prev, [key]: !prev[key] }));
+
+    // 포장 요약 텍스트
+    const getPackingSummary = (options) =>
+        Object.entries(options)
+            .filter(([_, v]) => v)
+            .map(([k]) => PACK_LABELS[k])
+            .join(", ");
+
+    // 지도 & 거리 계산
+    useEffect(() => {
+        if (!window.kakao || !window.kakao.maps) return;
+        if (!mapRef.current) return;
+        if (
+            !departure ||
+            !arrival ||
+            !weight ||
+            !vehicle ||
+            !cargoType ||
+            !cargoSize
         )
-          .then((r) => r.json())
-          .then((data) => {
-            const route = data?.routes?.[0];
-            const section = route?.sections?.[0];
-            if (!section) return;
+            return;
 
-            // 경로 폴리라인
-            const linePath = section.roads.flatMap((road) =>
-              road.vertexes.reduce((acc, _, idx) => {
-                if (idx % 2 === 0) {
-                  acc.push(
-                    new window.kakao.maps.LatLng(
-                      road.vertexes[idx + 1],
-                      road.vertexes[idx]
-                    )
-                  );
-                }
-                return acc;
-              }, [])
-            );
+        const map = new window.kakao.maps.Map(mapRef.current, {
+            center: new window.kakao.maps.LatLng(37.5665, 126.978),
+            level: 5,
+        });
 
-            new window.kakao.maps.Polyline({
-              path: linePath,
-              strokeWeight: 4,
-              strokeColor: "#465d96ff",
-              strokeOpacity: 0.8,
-              strokeStyle: "solid",
-              map,
+        const geocoder = new window.kakao.maps.services.Geocoder();
+
+        // 출발지
+        geocoder.addressSearch(departure, (res1, status1) => {
+            if (status1 !== window.kakao.maps.services.Status.OK) return;
+            const start = new window.kakao.maps.LatLng(res1[0].y, res1[0].x);
+
+            // 도착지
+            geocoder.addressSearch(arrival, (res2, status2) => {
+                if (status2 !== window.kakao.maps.services.Status.OK) return;
+                const end = new window.kakao.maps.LatLng(res2[0].y, res2[0].x);
+
+                // 마커 + 라벨
+                const markerImg = new window.kakao.maps.MarkerImage(
+                    process.env.PUBLIC_URL + "/img/orderimg/marker_navy.png",
+                    new window.kakao.maps.Size(32, 42)
+                );
+                new window.kakao.maps.Marker({
+                    map,
+                    position: start,
+                    image: markerImg,
+                });
+                new window.kakao.maps.Marker({
+                    map,
+                    position: end,
+                    image: markerImg,
+                });
+
+                new window.kakao.maps.CustomOverlay({
+                    map,
+                    position: start,
+                    content:
+                        '<div style="padding:4px 8px;background:#465d96ff;color:white;border-radius:4px;font-size:13px;">출발</div>',
+                    yAnchor: 1.5,
+                });
+                new window.kakao.maps.CustomOverlay({
+                    map,
+                    position: end,
+                    content:
+                        '<div style="padding:4px 8px;background:#465d96ff;color:white;border-radius:4px;font-size:13px;">도착</div>',
+                    yAnchor: 1.5,
+                });
+
+                // Kakao 길찾기 API
+                const REST_KEY =
+                    process.env.REACT_APP_KAKAO_REST_KEY ||
+                    "b3e43f89b06cecddef5afc6058545ab2"; // 개발 편의 폴백. 배포 전 .env 설정!
+
+                fetch(
+                    `https://apis-navi.kakaomobility.com/v1/directions?origin=${res1[0].x},${res1[0].y}&destination=${res2[0].x},${res2[0].y}`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `KakaoAK ${REST_KEY}`,
+                            "Content-Type": "application/json",
+                        },
+                    }
+                )
+                    .then((r) => r.json())
+                    .then((data) => {
+                        const route = data?.routes?.[0];
+                        const section = route?.sections?.[0];
+                        if (!section) return;
+
+                        // 경로 폴리라인
+                        const linePath = section.roads.flatMap((road) =>
+                            road.vertexes.reduce((acc, _, idx) => {
+                                if (idx % 2 === 0) {
+                                    acc.push(
+                                        new window.kakao.maps.LatLng(
+                                            road.vertexes[idx + 1],
+                                            road.vertexes[idx]
+                                        )
+                                    );
+                                }
+                                return acc;
+                            }, [])
+                        );
+
+                        new window.kakao.maps.Polyline({
+                            path: linePath,
+                            strokeWeight: 4,
+                            strokeColor: "#465d96ff",
+                            strokeOpacity: 0.8,
+                            strokeStyle: "solid",
+                            map,
+                        });
+
+                        // 범위
+                        const bounds = new window.kakao.maps.LatLngBounds();
+                        bounds.extend(start);
+                        bounds.extend(end);
+                        map.setBounds(bounds);
+
+                        // 거리(km)
+                        const totalDistanceM = route.summary.distance; // meters
+                        setDistance((totalDistanceM / 1000).toFixed(2));
+                    })
+                    .catch((e) => {
+                        console.error("kakao directions error:", e);
+                        setDistance(null);
+                    });
             });
+        });
+    }, [departure, arrival, weight, vehicle, cargoType, cargoSize]);
 
-            // 범위
-            const bounds = new window.kakao.maps.LatLngBounds();
-            bounds.extend(start);
-            bounds.extend(end);
-            map.setBounds(bounds);
+    // 제출
+    const handleSubmit = async () => {
+        try {
+            // 필수값 검증
+            if (
+                !departure ||
+                !arrival ||
+                !weight ||
+                !vehicle ||
+                !cargoType ||
+                !cargoSize
+            ) {
+                alert("필수 값을 모두 입력해 주세요.");
+                return;
+            }
+            if (!distance || Number(distance) <= 0) {
+                alert("지도에서 거리를 먼저 계산해 주세요.");
+                return;
+            }
 
-            // 거리(km)
-            const totalDistanceM = route.summary.distance; // meters
-            setDistance((totalDistanceM / 1000).toFixed(2));
-          })
-          .catch((e) => {
-            console.error("kakao directions error:", e);
-            setDistance(null);
-          });
-      });
-    });
-  }, [departure, arrival, weight, vehicle, cargoType, cargoSize]);
+            const proposed = parseProposedPriceNumber(proposedPrice);
+            if (proposed === null) {
+                alert("가격 제안 값을 입력해 주세요.");
+                return;
+            }
+            if (proposed < minProposed) {
+                alert(
+                    `화주 제안가는 최소 ${minProposed.toLocaleString(
+                        "ko-KR"
+                    )}원 이상이어야 합니다.`
+                );
+                return;
+            }
 
-  // 제출
-  const handleSubmit = async () => {
-    try {
-      // 필수값 검증
-      if (!departure || !arrival || !weight || !vehicle || !cargoType || !cargoSize) {
-        alert("필수 값을 모두 입력해 주세요.");
-        return;
-      }
-      if (!distance || Number(distance) <= 0) {
-        alert("지도에서 거리를 먼저 계산해 주세요.");
-        return;
-      }
+            const payload = {
+                // 금액
+                proposedPrice: proposed,
+                driverPrice: null,
+                avgPrice: distance
+                    ? Math.round(Number(distance) * AVERAGE_PRICE_PER_KM)
+                    : null,
 
-      const proposed = parseProposedPriceNumber(proposedPrice);
-      if (proposed === null) {
-        alert("가격 제안 값을 입력해 주세요.");
-        return;
-      }
-      if (proposed < minProposed) {
-        alert(`화주 제안가는 최소 ${minProposed.toLocaleString("ko-KR")}원 이상이어야 합니다.`);
-        return;
-      }
+                // 포장
+                packingOptions: JSON.stringify(packingOptions),
+                packingOption: getPackingSummary(packingOptions),
 
-      const payload = {
-        // 금액
-        proposedPrice: proposed,
-        driverPrice: null,
-        avgPrice: distance ? Math.round(Number(distance) * AVERAGE_PRICE_PER_KM) : null,
+                // 경로
+                departure,
+                arrival,
+                distance: distance ? Number(distance) : 0,
 
-        // 포장
-        packingOptions: JSON.stringify(packingOptions),
-        packingOption: getPackingSummary(packingOptions),
+                // createdAt(등록일)은 백엔드에서 자동 기록
+                reservedDate: isImmediate
+                    ? null
+                    : selectedDate
+                    ? selectedDate.toISOString()
+                    : null,
+                isImmediate: !!isImmediate,
 
-        // 경로
-        departure,
-        arrival,
-        distance: distance ? Number(distance) : 0,
+                // 옵션
+                weight,
+                vehicle,
+                cargoType,
+                cargoSize,
 
-        // createdAt(등록일)은 백엔드에서 자동 기록
-        reservedDate: isImmediate ? null : selectedDate ? selectedDate.toISOString() : null,
-        isImmediate: !!isImmediate,
+                status: "CREATED",
+            };
 
-        // 옵션
-        weight,
-        vehicle,
-        cargoType,
-        cargoSize,
+            await saveOrder(payload); // 저장된 Order 반환 가정
+            alert("운송이 등록되었습니다\n(게시판에서 확인가능)");
+            shipperMoveToOrderBoard();
+        } catch (error) {
+            console.error("오더 등록 오류:", error);
+            alert("오더 등록에 실패했습니다.");
+        }
+    };
 
-        status: "CREATED",
-      };
+    const ready =
+        departure && arrival && weight && cargoType && cargoSize && vehicle;
 
-      await saveOrder(payload); // 저장된 Order 반환 가정
-      alert("운송이 등록되었습니다\n(게시판에서 확인가능)");
-      shipperMoveToOrderBoard();
-    } catch (error) {
-      console.error("오더 등록 오류:", error);
-      alert("오더 등록에 실패했습니다.");
-    }
-  };
+    return (
+        <div className="form-container">
+            <h2 className="title">오더 등록</h2>
 
-  const ready =
-    departure && arrival && weight && cargoType && cargoSize && vehicle;
-
-  return (
-    <div className="form-container">
-      <h2 className="title">오더 등록</h2>
-
-      {/* 출발지 */}
-      <label className="label">출발지</label>
-      <div className="address-row">
-        <input
-          className={`input ${departure ? "filled" : ""}`}
-          value={departure}
-          readOnly
-          placeholder="출발지 주소"
-        />
-        <button className="button" onClick={() => handlePostcodePopup("departure")}>
-          검색
-        </button>
-      </div>
-
-      {/* 도착지 */}
-      <label className="label">도착지</label>
-      <div className="address-row">
-        <input
-          className={`input ${arrival ? "filled" : ""}`}
-          value={arrival}
-          readOnly
-          placeholder="도착지 주소"
-        />
-        <button className="button" onClick={() => handlePostcodePopup("arrival")}>
-          검색
-        </button>
-      </div>
-
-      {/* 화물 종류 */}
-      <label className="label">화물 종류</label>
-      <select
-        className={`select ${cargoType ? "filled" : ""}`}
-        value={cargoType}
-        onChange={(e) => setCargoType(e.target.value)}
-      >
-        <option value="">선택</option>
-        <option value="box">박스</option>
-        <option value="pallet">파렛트</option>
-        <option value="appliance">가전제품</option>
-        <option value="furniture">가구</option>
-        <option value="food">식품</option>
-        <option value="clothing">의류</option>
-        <option value="machine">기계·부품</option>
-        <option value="etc">기타</option>
-      </select>
-
-      {/* 크기 */}
-      <label className="label">크기</label>
-      <select
-        className={`select ${cargoSize ? "filled" : ""}`}
-        value={cargoSize}
-        onChange={(e) => setCargoSize(e.target.value)}
-      >
-        <option value="">선택</option>
-        <option value="small">소형 (1m³ 이하)</option>
-        <option value="medium">중형 (1~3m³)</option>
-        <option value="large">대형 (3m³ 이상)</option>
-      </select>
-
-      {/* 무게 */}
-      <label className="label">무게</label>
-      <select
-        className={`select ${weight ? "filled" : ""}`}
-        value={weight}
-        onChange={(e) => setWeight(e.target.value)}
-      >
-        <option value="">선택</option>
-        <option value="50kg">~50kg</option>
-        <option value="100kg">50~100kg</option>
-        <option value="200kg">100~200kg</option>
-        <option value="300kg+">200kg 이상</option>
-      </select>
-
-      {/* 차량 종류 */}
-      <label className="label">차량 종류</label>
-      <select
-        className={`select ${vehicle ? "filled" : ""}`}
-        value={vehicle}
-        onChange={(e) => setVehicle(e.target.value)}
-      >
-        <option value="">선택</option>
-        <option value="1ton">1톤 트럭</option>
-        <option value="2.5ton">2.5톤 트럭</option>
-        <option value="5ton">5톤 트럭</option>
-        <option value="top">탑차</option>
-        <option value="cold">냉장/냉동차</option>
-      </select>
-
-      {/* 포장 */}
-      <label className="label">포장 여부 (복수선택)</label>
-      <div className="toggle-group">
-        {Object.entries(packingOptions).map(([key, val]) => (
-          <label key={key}>
-            <input
-              type="checkbox"
-              checked={val}
-              onChange={() => togglePacking(key)}
-            />{" "}
-            {PACK_LABELS[key]}
-          </label>
-        ))}
-      </div>
-
-      {/* 배송 요청 */}
-      <label className="label">배송 요청</label>
-      <div className="radio-group">
-        <label>
-          <input
-            type="radio"
-            checked={isImmediate}
-            onChange={() => setIsImmediate(true)}
-          />{" "}
-          즉시
-        </label>
-        <label>
-          <input
-            type="radio"
-            checked={!isImmediate}
-            onChange={() => setIsImmediate(false)}
-          />{" "}
-          예약
-        </label>
-      </div>
-
-      {/* 예약 시간 */}
-      {!isImmediate && (
-        <>
-          <label className="label">예약 날짜 및 시간</label>
-          <div className="datepicker-wrapper">
-            <DatePicker
-              selected={selectedDate}
-              onChange={(date) => setSelectedDate(date)}
-              showTimeSelect
-              dateFormat="yyyy-MM-dd HH:mm"
-              minDate={new Date()}
-              customInput={<CalendarInput />}
-            />
-          </div>
-        </>
-      )}
-
-      {/* 지도 + 요약/금액 */}
-      {ready && (
-        <>
-          <div className="map-container" ref={mapRef} />
-
-          <div className="summary-box">
-            <div>
-              <span className="line-label">예상 거리:</span>
-              <span className="line-value">
-                {distance ? `${distance} km` : "-"}
-              </span>
-            </div>
-            <div>
-              <span className="line-label">평균가:</span>
-              <span className="line-value">
-                {`${AVERAGE_PRICE_PER_KM.toLocaleString("ko-KR")}원/km`}
-              </span>
-            </div>
-
-            <hr className="divider" />
-
-            <div>
-              <span className="line-label">총 예상 운임:</span>
-              <span className="line-value">
-                {distance
-                  ? `${(Number(distance) * AVERAGE_PRICE_PER_KM).toLocaleString(
-                      "ko-KR"
-                    )}원`
-                  : "-"}
-              </span>
-            </div>
-
-            <div style={{ marginTop: 8 }}>
-              <span className="line-label">권장 최소가(하한):</span>
-              <span className="line-value">
-                {minProposed.toLocaleString("ko-KR")}원
-              </span>
-            </div>
-
-            <div>
-              <span className="line-label">가격 제안:</span>
-              <div style={{ marginTop: "8px" }}>
+            {/* 출발지 */}
+            <label className="label">출발지</label>
+            <div className="address-row">
                 <input
-                  className={`proposal-input ${isUnderMinProposed ? "invalid" : ""}`}
-                  type="text"
-                  placeholder={`최소 ${minProposed.toLocaleString("ko-KR")}원 이상`}
-                  value={proposedPrice}
-                  onChange={handleProposedPriceChange}
-                  aria-invalid={isUnderMinProposed}
+                    className={`input ${departure ? "filled" : ""}`}
+                    value={departure}
+                    readOnly
+                    placeholder="출발지 주소"
                 />
-                {isUnderMinProposed && (
-                  <p className="warn-text">
-                    최소 {minProposed.toLocaleString("ko-KR")}원 이상 입력해 주세요.
-                  </p>
-                )}
-              </div>
+                <button
+                    className="button"
+                    onClick={() => handlePostcodePopup("departure")}
+                >
+                    검색
+                </button>
             </div>
-          </div>
 
-          <div className="button-row">
-            <button className="back-button" onClick={() => navigate(-1)}>
-              뒤로가기
-            </button>
-            <button
-              className="submit-button"
-              onClick={handleSubmit}
-              disabled={!distance || isUnderMinProposed}
+            {/* 도착지 */}
+            <label className="label">도착지</label>
+            <div className="address-row">
+                <input
+                    className={`input ${arrival ? "filled" : ""}`}
+                    value={arrival}
+                    readOnly
+                    placeholder="도착지 주소"
+                />
+                <button
+                    className="button"
+                    onClick={() => handlePostcodePopup("arrival")}
+                >
+                    검색
+                </button>
+            </div>
+
+            {/* 화물 종류 */}
+            <label className="label">화물 종류</label>
+            <select
+                className={`select ${cargoType ? "filled" : ""}`}
+                value={cargoType}
+                onChange={(e) => setCargoType(e.target.value)}
             >
-              오더 등록
-            </button>
-          </div>
-        </>
-      )}
-    </div>
-  );
+                <option value="">선택</option>
+                <option value="box">박스</option>
+                <option value="pallet">파렛트</option>
+                <option value="appliance">가전제품</option>
+                <option value="furniture">가구</option>
+                <option value="food">식품</option>
+                <option value="clothing">의류</option>
+                <option value="machine">기계·부품</option>
+                <option value="etc">기타</option>
+            </select>
+
+            {/* 크기 */}
+            <label className="label">크기</label>
+            <select
+                className={`select ${cargoSize ? "filled" : ""}`}
+                value={cargoSize}
+                onChange={(e) => setCargoSize(e.target.value)}
+            >
+                <option value="">선택</option>
+                <option value="small">소형 (1m³ 이하)</option>
+                <option value="medium">중형 (1~3m³)</option>
+                <option value="large">대형 (3m³ 이상)</option>
+            </select>
+
+            {/* 무게 */}
+            <label className="label">무게</label>
+            <select
+                className={`select ${weight ? "filled" : ""}`}
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+            >
+                <option value="">선택</option>
+                <option value="50kg">~50kg</option>
+                <option value="100kg">50~100kg</option>
+                <option value="200kg">100~200kg</option>
+                <option value="300kg+">200kg 이상</option>
+            </select>
+
+            {/* 차량 종류 */}
+            <label className="label">차량 종류</label>
+            <select
+                className={`select ${vehicle ? "filled" : ""}`}
+                value={vehicle}
+                onChange={(e) => setVehicle(e.target.value)}
+            >
+                <option value="">선택</option>
+                <option value="1ton">1톤 트럭</option>
+                <option value="2.5ton">2.5톤 트럭</option>
+                <option value="5ton">5톤 트럭</option>
+                <option value="top">탑차</option>
+                <option value="cold">냉장/냉동차</option>
+            </select>
+
+            {/* 포장 */}
+            <label className="label">포장 여부 (복수선택)</label>
+            <div className="toggle-group">
+                {Object.entries(packingOptions).map(([key, val]) => (
+                    <label key={key}>
+                        <input
+                            type="checkbox"
+                            checked={val}
+                            onChange={() => togglePacking(key)}
+                        />{" "}
+                        {PACK_LABELS[key]}
+                    </label>
+                ))}
+            </div>
+
+            {/* 배송 요청 */}
+            <label className="label">배송 요청</label>
+            <div className="radio-group">
+                <label>
+                    <input
+                        type="radio"
+                        checked={isImmediate}
+                        onChange={() => setIsImmediate(true)}
+                    />{" "}
+                    즉시
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        checked={!isImmediate}
+                        onChange={() => setIsImmediate(false)}
+                    />{" "}
+                    예약
+                </label>
+            </div>
+
+            {/* 예약 시간 */}
+            {!isImmediate && (
+                <>
+                    <label className="label">예약 날짜 및 시간</label>
+                    <div className="datepicker-wrapper">
+                        <DatePicker
+                            selected={selectedDate}
+                            onChange={(date) => setSelectedDate(date)}
+                            showTimeSelect
+                            dateFormat="yyyy-MM-dd HH:mm"
+                            minDate={new Date()}
+                            customInput={<CalendarInput />}
+                        />
+                    </div>
+                </>
+            )}
+
+            {/* 지도 + 요약/금액 */}
+            {ready && (
+                <>
+                    <div className="map-container" ref={mapRef} />
+
+                    <div className="summary-box">
+                        <div>
+                            <span className="line-label">예상 거리:</span>
+                            <span className="line-value">
+                                {distance ? `${distance} km` : "-"}
+                            </span>
+                        </div>
+                        <div>
+                            <span className="line-label">평균가:</span>
+                            <span className="line-value">
+                                {`${AVERAGE_PRICE_PER_KM.toLocaleString(
+                                    "ko-KR"
+                                )}원/km`}
+                            </span>
+                        </div>
+
+                        <hr className="divider" />
+
+                        <div>
+                            <span className="line-label">총 예상 운임:</span>
+                            <span className="line-value">
+                                {distance
+                                    ? `${(
+                                          Number(distance) *
+                                          AVERAGE_PRICE_PER_KM
+                                      ).toLocaleString("ko-KR")}원`
+                                    : "-"}
+                            </span>
+                        </div>
+
+                        <div style={{ marginTop: 8 }}>
+                            <span className="line-label">
+                                권장 최소가(하한):
+                            </span>
+                            <span className="line-value">
+                                {distance
+                                    ? `${(
+                                          Number(distance) *
+                                          AVERAGE_PRICE_PER_KM *
+                                          0.9
+                                      ).toLocaleString("ko-KR")}원`
+                                    : "-"}
+                            </span>
+                        </div>
+
+                        <div>
+                            <span className="line-label">가격 제안:</span>
+                            <div style={{ marginTop: "8px" }}>
+                                <input
+                                    className={`proposal-input ${
+                                        isUnderMinProposed ? "invalid" : ""
+                                    }`}
+                                    type="text"
+                                    placeholder={
+                                        distance
+                                            ? `최소 ${(
+                                                  Number(distance) *
+                                                  AVERAGE_PRICE_PER_KM *
+                                                  0.9
+                                              ).toLocaleString("ko-KR")}원 이상`
+                                            : "-"
+                                    }
+                                    value={proposedPrice}
+                                    onChange={handleProposedPriceChange}
+                                    aria-invalid={isUnderMinProposed}
+                                />
+                                {isUnderMinProposed && (
+                                    <p className="warn-text">
+                                        최소{" "}
+                                        {minProposed.toLocaleString("ko-KR")}원
+                                        이상 입력해 주세요.
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="button-row">
+                        <button
+                            className="back-button"
+                            onClick={() => navigate(-1)}
+                        >
+                            뒤로가기
+                        </button>
+                        <button
+                            className="submit-button"
+                            onClick={handleSubmit}
+                            disabled={!distance || isUnderMinProposed}
+                        >
+                            오더 등록
+                        </button>
+                    </div>
+                </>
+            )}
+        </div>
+    );
 };
 
 export default OrderForm;

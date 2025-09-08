@@ -17,8 +17,7 @@ import "../../orderCss/OrderBoard.css";
 
 /* ================== 상수/유틸 ================== */
 const AVERAGE_PRICE_PER_KM = 3000; // OrderForm과 동일
-const MIN_BID_RATE = 0.6;
-
+const MIN_BID_RATE = 0.9;
 const _num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
 const basePriceFor = (o) =>
     _num(o?.avgPrice) ||
@@ -57,6 +56,14 @@ const LABEL = {
         top: "탑차",
         cold: "냉장/냉동차",
     },
+};
+
+const STATUS_KR = {
+    CREATED: "오더생성",
+    PAYMENT_PENDING: "결제대기",
+    READY: "준비",
+    ONGOING: "운송중",
+    COMPLETE: "완료",
 };
 
 const PACK_TEXT = {
@@ -136,7 +143,6 @@ const offerStatusK = (s) => {
             return "확정";
         case "REJECTED":
             return "거절";
-        case "CANCELLED":
         case "CANCELED":
             return "취소";
         default:
@@ -551,8 +557,12 @@ const OrderBoard = () => {
                                         </span>{" "}
                                         {o.arrival}
                                     </div>
-                                    <span className="right-meta">
-                                        {o.status || "READY"}
+                                    <span
+                                        className={`right-meta status-${String(
+                                            o.status || ""
+                                        ).toLowerCase()}`}
+                                    >
+                                        {STATUS_KR[o.status] || o.status}
                                     </span>
                                 </div>
 
