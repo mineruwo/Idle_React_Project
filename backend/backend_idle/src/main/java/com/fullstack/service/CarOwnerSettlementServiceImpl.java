@@ -274,7 +274,7 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
                 b.setOwner(customerRepo.findByLoginId(ownerId)
                         .orElseThrow(() -> new IllegalArgumentException("ID가 " + ownerId + "인 고객을 찾을 수 없습니다.")));
                 b.setMonthKey(monthKey);
-                b.setStatus(CarOwnerSettlementBatchEntity.Status.READY);
+                b.setStatus(CarOwnerSettlementBatchEntity.Status.REQUESTED);
                 return batchRepo.saveAndFlush(b);
             } catch (DataIntegrityViolationException e) {
                 // 다른 트랜잭션이 초기 확인과 saveAndFlush 사이에
@@ -313,8 +313,8 @@ public class CarOwnerSettlementServiceImpl implements CarOwnerSettlementService 
         var b = batchRepo.findByOwnerIdAndMonthKey(ownerId, monthKey)
                 .orElseThrow(() -> new IllegalArgumentException("BATCH_NOT_FOUND"));
 
-        // 정산 요청은 READY 상태의 배치에 대해서만 가능
-        if (b.getStatus() != CarOwnerSettlementBatchEntity.Status.READY) {
+        // 정산 요청은 READY 또는 REQUESTED 상태의 배치에 대해서만 가능
+        if (b.getStatus() != CarOwnerSettlementBatchEntity.Status.READY && b.getStatus() != CarOwnerSettlementBatchEntity.Status.REQUESTED) {
             throw new IllegalStateException("정산 요청을 할 수 없는 상태입니다. 현재 상태: " + b.getStatus());
         }
 

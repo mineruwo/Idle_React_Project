@@ -53,11 +53,14 @@ export async function patchOrderStatus(orderId, nextStatus, token) {
 }
 
 /** ✅ 취소 — 별도 /cancel 없음. 동일 엔드포인트에 status=CANCELED */
-export async function cancelOrder(orderId) {
+export async function cancelOrder(orderId, token) {
   const url = `${ORDERS}/${encodeURIComponent(orderId)}/status?status=CANCELED`;
   const res = await fetch(url, {
     method: "PATCH",
     credentials: "include",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
   });
   return handle(res); // { ...OrderDetailResponse }
 }

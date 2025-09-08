@@ -104,7 +104,12 @@ export default function DeliveryList() {
     if (!id || !canCancelStatus(row.status)) return;
 
     if (!window.confirm("정말 취소하시겠습니까?")) return;
-    const reason = window.prompt("취소 사유를 입력해주세요(선택):") || "";
+
+    const token = sessionStorage.getItem('accessToken');
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
 
     const prev = row.status;
     setLoadingIds((s) => new Set([...s, id]));
@@ -116,7 +121,7 @@ export default function DeliveryList() {
     );
 
     try {
-      await cancelOrder(id, reason);
+      await cancelOrder(id, token);
       await refetch(); // 서버 상태로 재동기화
     } catch (e) {
       const msg = e.message || "취소 실패";
