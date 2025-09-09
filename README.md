@@ -100,6 +100,35 @@
 
 <br>
 
+### 🏛️ 시스템 아키텍처
+
+```mermaid
+graph TD
+    subgraph "사용자"
+        User([<font size=6>👨‍💻</font><br>사용자<br>Web Browser])
+    end
+
+    subgraph "클라우드 플랫폼 (Render)"
+        Frontend[<font size=6>🖥️</font><br>React Frontend]
+        Backend[<font size=6>⚙️</font><br>Spring Boot Backend]
+    end
+
+    subgraph "외부 서비스 (3rd Party)"
+        Database[<font size=6>🗄️</font><br>Supabase DB<br>(PostgreSQL)]
+        Payment[<font size=6>💳</font><br>아임포트 (결제)]
+        OAuth[<font size=6>🔑</font><br>소셜 로그인<br>(Google, Kakao, Naver)]
+    end
+
+    User -- HTTPS --> Frontend
+    Frontend -- API 요청 (REST API) --> Backend
+    Backend -- DB 연결 (JDBC) --> Database
+    Backend -- 결제 API 연동 --> Payment
+    Backend -- 인증 (OAuth 2.0) --> OAuth
+    User -- 인증 리디렉션 --> OAuth
+```
+
+<br>
+
 ### 📚 Frontend Libraries
 
 #### 주요 의존성 (`dependencies`)
