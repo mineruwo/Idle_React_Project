@@ -138,6 +138,241 @@ graph TD
 
 <br>
 
+## 🧬 데이터베이스 ERD (Entity Relationship Diagram)
+
+```mermaid
+erDiagram
+    CUSTOMER {
+        int ID_NUM PK
+        string ID
+        string PASSWORD_ENC
+        string CUSTOM_NAME
+        string ROLE
+        datetime CREATED_AT
+        datetime UPDATED_AT
+        string PHONE
+        string NICKNAME
+        string SNS_LOGIN_PROVIDER
+        string SNS_PROVIDER_ID
+        datetime LEFTED_AT
+        bool IS_LEFTED
+        int USER_POINT
+        string REFRESH_TOKEN
+        instant RT_EXPIRES_AT
+        string AVATAR_URL
+    }
+
+    ORDER {
+        long id PK
+        string order_no
+        int proposed_price
+        long driver_price
+        long avg_price
+        string departure
+        string arrival
+        double distance
+        string reserved_date
+        bool is_immediate
+        string weight
+        string vehicle
+        string cargo_type
+        string cargo_size
+        string packing_option
+        OrderStatus status
+        datetime createdAt
+        datetime updatedAt
+        datetime departedAt
+        datetime completedAt
+        bool tax_invoice_issued
+        string tax_invoice_number
+    }
+
+    DRIVER_OFFER {
+        long id PK
+        long price
+        string memo
+        Status status
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    PAYMENT {
+        long id PK
+        string merchant_uid
+        string item_name
+        long amount
+        string buyer_name
+        string buyer_email
+        string payment_status
+        datetime requested_at
+        datetime paid_at
+        datetime cancelled_at
+        string imp_uid
+        int points_used
+        string pg_provider
+    }
+
+    REVIEW {
+        int id PK
+        int rating
+        string content
+        datetime createdAt
+    }
+
+    CAR_OWNER_AUTH {
+        long id PK
+        string car_num
+        string car_type
+        bool car_insurance_status
+        long get_order
+    }
+
+    BUSINESS_LICENSE {
+        long id PK
+        string business_number
+        string business_name
+        datetime start_date
+        bool verified
+        datetime verified_at
+    }
+
+    DRIVER_LICENSE {
+        long id PK
+        string license_number
+        string name_on_license
+        date issue_date
+        bool verified
+        datetime verified_at
+    }
+
+    CAR_OWNER_VEHICLES {
+        long id PK
+        string owner_id
+        string plate_number
+        string type
+        string model
+        int capacity
+        bool is_primary
+        string status
+        datetime registered_at
+    }
+
+    CAR_OWNER_SETTLEMENT {
+        long id PK
+        string owner_id
+        decimal amount
+        decimal commission
+        Status status
+        datetime requested_at
+        datetime approved_at
+        datetime paid_at
+        date month_key
+        datetime created_at
+        datetime updated_at
+    }
+
+    CAR_OWNER_SETTLEMENT_BATCH {
+        long id PK
+        date month_key
+        Status status
+        datetime requested_at
+        datetime approved_at
+        datetime paid_at
+        decimal total_amount
+        int item_count
+        string bank_code
+        string bank_account_no
+    }
+
+    POINT_HISTORY {
+        long id PK
+        string transaction_type
+        int amount
+        int balance_after
+        datetime transaction_date
+        string description
+    }
+
+    INQUIRY {
+        uuid inquiry_id PK
+        string inquiry_title
+        string inquiry_content
+        string inquiry_answer
+        datetime created_at
+        datetime answered_at
+        InquiryStatus status
+        uuid re_inquiry_id
+    }
+
+    NOTICE {
+        long id PK
+        string content
+        datetime created_at
+        datetime deleted_at
+        bool is_del
+        string title
+        datetime updated_at
+        int view_count
+    }
+
+    FAQ {
+        long id PK
+        string question
+        string answer
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
+        bool is_del
+        int view_count
+    }
+
+    ADMIN {
+        int id_index PK
+        string admin_id
+        AdminRole role
+        string password
+        string name
+        string empl_id
+        datetime reg_date
+        datetime del_date
+        bool is_del
+    }
+    
+    CHAT_SESSION {
+        long id PK
+        string chat_room_id
+        string session_id
+        datetime created_at
+    }
+
+    CUSTOMER ||--o{ ORDER : "is shipper for"
+    CUSTOMER ||--o{ ORDER : "is assigned driver for"
+    CUSTOMER ||--o{ DRIVER_OFFER : "makes"
+    CUSTOMER ||--o{ REVIEW : "writes"
+    CUSTOMER ||--o{ REVIEW : "is target of"
+    CUSTOMER ||--o{ CAR_OWNER_AUTH : "owns"
+    CUSTOMER ||--o{ CAR_OWNER_SETTLEMENT_BATCH : "is owner of"
+    CUSTOMER ||--o{ POINT_HISTORY : "has"
+    CUSTOMER ||--o{ INQUIRY : "creates"
+    CUSTOMER ||--o{ PAYMENT : "makes"
+    CUSTOMER ||--o{ CHAT_SESSION : "participates in"
+
+    ORDER ||--o{ DRIVER_OFFER : "has"
+    ORDER ||--o{ PAYMENT : "is for"
+    ORDER ||--o{ REVIEW : "is about"
+    ORDER ||--o{ CAR_OWNER_SETTLEMENT : "is for"
+
+    CAR_OWNER_AUTH ||--|{ CAR_OWNER_VEHICLES : "has"
+    CAR_OWNER_AUTH |o--|| BUSINESS_LICENSE : "has"
+    CAR_OWNER_AUTH |o--|| DRIVER_LICENSE : "has"
+
+    CAR_OWNER_SETTLEMENT_BATCH ||--o{ CAR_OWNER_SETTLEMENT : "contains"
+
+    ADMIN ||--o{ INQUIRY : "answers"
+    ADMIN ||--o{ NOTICE : "writes"
+    ADMIN ||--o{ FAQ : "writes"
+```
+
 ### 📚 Frontend Libraries
 
 #### 주요 의존성 (`dependencies`)
