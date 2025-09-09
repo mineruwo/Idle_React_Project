@@ -40,7 +40,7 @@
 
 ## 🔗 프로젝트 리소스
 
-> 프로젝트 관련 주요 리소스 및 문서 링크입니다.
+> 프로젝트 관련 주요 리소스 및 문서 링크입니다. (Jira, Confluence는 맨션을 주시면 권한을 드리겠습니다.)
 
 -   **프로젝트 정보 스프레드시트:** [Google Sheets Link](https://docs.google.com/spreadsheets/d/13hCryXbYSLaHb6xyfipq4_QhWF4vwyMtrdIA2ilF0Yg/edit?gid=1546217764#gid=1546217764)
 -   **Confluence 사이트:** [Confluence Link](https://idleteamproject2.atlassian.net/wiki/spaces/Idle/overview?homepageId=98699)
