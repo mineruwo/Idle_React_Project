@@ -9,6 +9,13 @@
 
 <br>
 
+## 🚀 배포 주소
+
+-   **Frontend:** [https://idle-react-project-front.onrender.com](https://idle-react-project-front.onrender.com)
+-   **Backend:** [https://idle-react-project-backend.onrender.com](https://idle-react-project-backend.onrender.com)
+
+<br>
+
 ## 👥 팀 소개
 
 ### 팀 명 
@@ -38,7 +45,6 @@
 -   **프로젝트 정보 스프레드시트:** [Google Sheets Link](https://docs.google.com/spreadsheets/d/13hCryXbYSLaHb6xyfipq4_QhWF4vwyMtrdIA2ilF0Yg/edit?gid=1546217764#gid=1546217764)
 -   **Confluence 사이트:** [Confluence Link](https://idleteamproject2.atlassian.net/wiki/spaces/Idle/overview?homepageId=98699)
 -   **Jira 보드:** [Jira Link](https://idleteamproject2.atlassian.net/jira/software/projects/IDRP/boards/1)
--   **GitHub 팀 프로젝트:** [GitHub Link](https://github.com/mineruwo/Idle_React_Project)
 -   **Figma 디자인:** [Figma Link](https://www.figma.com/design/W1cFsjghWtNfTYtmLDmeJf/Untitled?node-id=0-1&p=f&t=dFc4K7aIyemXFnCd-0)
 
 <br>
@@ -85,8 +91,7 @@
     -   ![React Quill](https://img.shields.io/badge/React_Quill-000000?style=for-the-badge&logo=quill&logoColor=white)
     -   ![Stomp.js](https://img.shields.io/badge/Stomp.js-000000?style=for-the-badge&logo=stomp&logoColor=white)
 -   **Database:**
-    -   ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
-    -   ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white) (Used for Supabase hosting)
+   -   ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white) (Used for Supabase hosting)
 -   **DevOps & Collaboration:**
     -   ![Render](https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)
     -   ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
@@ -94,6 +99,57 @@
     -   ![Confluence](https://img.shields.io/badge/Confluence-172B4D?style=for-the-badge&logo=confluence&logoColor=white)
     -   ![Figma](https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white)
     -   ![ERD Cloud](https://img.shields.io/badge/ERD_Cloud-4285F4?style=for-the-badge&logo=google-cloud&logoColor=white) 
+
+<br>
+
+### 📚 Frontend Libraries
+
+#### 주요 의존성 (`dependencies`)
+- **`@emotion/react`, `@emotion/styled`**: CSS-in-JS 라이브러리
+- **`@mui/material`, `@mui/icons-material`**: Material-UI 컴포넌트 및 아이콘
+- **`@reduxjs/toolkit`, `react-redux`**: 상태 관리를 위한 Redux Toolkit
+- **`@stomp/stompjs`, `sockjs-client`**: WebSocket 통신
+- **`axios`**: HTTP 클라이언트
+- **`bootstrap`, `react-bootstrap`, `bootswatch`**: UI 프레임워크
+- **`chart.js`, `react-chartjs-2`, `recharts`**: 차트 라이브러리
+- **`react`, `react-dom`**: 핵심 React 라이브러리
+- **`react-router-dom`**: 라우팅 관리
+- **`quill`, `react-quill`**: 텍스트 에디터
+- **`styled-components`**: CSS-in-JS 라이브러리
+- **`@testing-library/*`**: 테스트 유틸리티
+
+#### 개발 의존성 (`devDependencies`)
+- **`tailwindcss`, `postcss`, `autoprefixer`**: Tailwind CSS 및 관련 도구
+- **`purgecss`**: 사용하지 않는 CSS 제거 도구
+
+<br>
+
+### 📚 Backend Libraries
+
+#### 핵심 프레임워크 (Spring Boot)
+- **`spring-boot-starter-web`**: RESTful API 및 웹 애플리케이션 개발의 핵심
+- **`spring-boot-starter-data-jpa`**: 데이터베이스 연동 및 ORM(JPA)
+- **`spring-boot-starter-security`**: 인증 및 인가, 보안 관리
+- **`spring-boot-starter-validation`**: 데이터 유효성 검증
+- **`spring-boot-starter-websocket`**: 실시간 양방향 통신(채팅)
+- **`spring-boot-starter-oauth2-client`**: 소셜 로그인(OAuth2)
+- **`spring-boot-starter-mail`**: 이메일 발송 기능
+- **`spring-boot-starter-actuator`**: 애플리케이션 모니터링 및 관리
+
+#### 데이터베이스
+- **`postgresql`**: PostgreSQL 데이터베이스 드라이버
+- **`h2database`**: 인메모리 데이터베이스 (개발 및 테스트용)
+
+#### 인증 (JWT)
+- **`jjwt-api`, `jjwt-impl`, `jjwt-jackson`**: JWT(JSON Web Token) 생성 및 검증
+
+#### 외부 API 연동
+- **`iamport-rest-client-java`**: 아임포트(포트원) 결제 API
+- **`spring-boot-starter-webflux`**: 리액티브 웹 API 호출
+
+#### 개발 도구 및 기타
+- **`lombok`**: 보일러플레이트 코드(Getter, Setter 등) 자동 생성
+- **`spring-boot-starter-test`**: 테스트 코드 작성 지원
 
 <br>
 
