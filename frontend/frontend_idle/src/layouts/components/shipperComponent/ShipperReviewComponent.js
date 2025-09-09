@@ -233,7 +233,6 @@ const ShipperReviewComponent = () => {
                                 ))}
                             </select>
                         </label>
-                        <p>선택된 차주: {targetDriverName}</p>
                         <label>
                             평점 :
                             <select

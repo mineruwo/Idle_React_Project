@@ -533,8 +533,12 @@ const OrderForm = () => {
                                 {isUnderMinProposed && (
                                     <p className="warn-text">
                                         최소{" "}
-                                        {minProposed.toLocaleString("ko-KR")}원
-                                        이상 입력해 주세요.
+                                        {(
+                                            Number(distance) *
+                                            AVERAGE_PRICE_PER_KM *
+                                            0.9
+                                        ).toLocaleString("ko-KR")}
+                                        원 이상 입력해 주세요.
                                     </p>
                                 )}
                             </div>
