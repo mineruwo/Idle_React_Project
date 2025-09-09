@@ -105,18 +105,27 @@
 ```mermaid
 graph TD
     subgraph "사용자"
-        User([<font size=6>👨‍💻</font><br>사용자<br>Web Browser])
+        User["👨‍💻
+        사용자
+        Web Browser"]
     end
 
     subgraph "클라우드 플랫폼 (Render)"
-        Frontend[<font size=6>🖥️</font><br>React Frontend]
-        Backend[<font size=6>⚙️</font><br>Spring Boot Backend]
+        Frontend["🖥️
+        React Frontend"]
+        Backend["⚙️
+        Spring Boot Backend"]
     end
 
     subgraph "외부 서비스 (3rd Party)"
-        Database[<font size=6>🗄️</font><br>Supabase DB<br>(PostgreSQL)]
-        Payment[<font size=6>💳</font><br>아임포트 (결제)]
-        OAuth[<font size=6>🔑</font><br>소셜 로그인<br>(Google, Kakao, Naver)]
+        Database["🗄️
+        Supabase DB
+        (PostgreSQL)"]
+        Payment["💳
+        아임포트 (결제)"]
+        OAuth["🔑
+        소셜 로그인
+        (Google, Kakao, Naver)"]
     end
 
     User -- HTTPS --> Frontend
