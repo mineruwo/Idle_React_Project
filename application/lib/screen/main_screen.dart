@@ -1,4 +1,5 @@
 import 'package:application/screen/home_screen.dart';
+import 'package:application/screen/login_screen.dart';
 import 'package:application/screen/mypage_screen.dart';
 import 'package:application/screen/order_screen.dart';
 import 'package:application/screen/service_screen.dart';
@@ -20,7 +21,7 @@ class _MainScreenState extends State<MainScreen> {
     OrderScreen(),
     ShippingScreen(),
     ServiceScreen(),
-    MypageScreen(),
+    LoginScreen(),
   ];
 
   void _onItemTapped(int index) {
