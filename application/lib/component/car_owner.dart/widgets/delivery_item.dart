@@ -20,14 +20,21 @@ class DeliveryItem extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 날짜
             Row(
               children: [
-                const Text('•', style: TextStyle(fontSize: 18, height: 1)),
-                const SizedBox(width: 6),
-                Text(date, style: const TextStyle(fontWeight: FontWeight.w700)),
+                Text(
+                  date.isEmpty ? '날짜 없음' : date,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 8),
+
+            // 출발 -> 도착
             Row(
               children: [
                 const Icon(Icons.circle, size: 10),
@@ -35,7 +42,10 @@ class DeliveryItem extends StatelessWidget {
                 Expanded(child: Text('$from  →  $to')),
               ],
             ),
+
             const SizedBox(height: 12),
+
+            // 버튼들
             Align(
               alignment: Alignment.centerLeft,
               child: Wrap(

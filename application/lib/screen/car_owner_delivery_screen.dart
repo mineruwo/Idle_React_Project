@@ -1,7 +1,8 @@
+import 'package:application/component/car_owner.dart/widgets/delivery_list.dart';
 import 'package:flutter/material.dart';
-import '../widgets/app_top_bar.dart';
-import '../widgets/section_title.dart';
-import '../widgets/delivery_item.dart';
+
+import '../component/car_owner.dart/widgets/section_title.dart';
+import '../component/car_owner.dart/widgets/delivery_item.dart';
 
 class DeliveryScreen extends StatelessWidget {
   const DeliveryScreen({super.key});
@@ -9,12 +10,12 @@ class DeliveryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const AppTopBar(title: '배송'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SizedBox(height: 50),
             Card(
               child: Container(
                 height: 160,
@@ -44,16 +45,8 @@ class DeliveryScreen extends StatelessWidget {
               ),
             ),
             const SectionTitle('운송중'),
-            const DeliveryItem(
-              date: '09월 24일',
-              from: '서울특별시 강남구 역삼동',
-              to: '부산 해운대 해수욕장 합정리',
-            ),
-            const DeliveryItem(
-              date: '09월 24일',
-              from: '서울특별시 강남구 역삼동',
-              to: '부산 해운대 해수욕장 합정리',
-            ),
+            const DeliveryList(),
+            const DeliveryList(),
           ],
         ),
       ),
