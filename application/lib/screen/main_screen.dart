@@ -20,7 +20,7 @@ class _MainScreenState extends State<MainScreen> {
     HomeScreen(),
     OrderScreen(),
     ShippingScreen(),
-    ServiceScreen(),
+    MypageScreen(),
     LoginScreen(),
   ];
 
@@ -33,31 +33,17 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
-      ),
+      body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: '홈',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_long),
-            label: '오더',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
+          BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: '오더'),
           BottomNavigationBarItem(
             icon: Icon(Icons.local_shipping),
             label: '배송',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.build),
-            label: '서비스',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: '마이페이지',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.build), label: '서비스'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: '마이페이지'),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.blueAccent,
