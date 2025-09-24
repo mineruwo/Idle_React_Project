@@ -44,9 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
           context,
         ).showSnackBar(SnackBar(content: Text("로그인 성공")));
 
-      } catch (e, stack) {
-        print("Login error: $e");
-        print(stack);
+      } catch (e) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text("로그인 실패")));
