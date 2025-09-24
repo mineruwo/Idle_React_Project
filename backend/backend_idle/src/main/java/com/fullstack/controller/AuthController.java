@@ -59,7 +59,10 @@ public class AuthController {
 		TokenCookieUtils.setAccessTokenCookie(response, tokenDTO.getAccessToken(), tokenDTO.getAtExpiresIn());
 		TokenCookieUtils.setRefreshTokenCookie(response, tokenDTO.getRefreshToken(), tokenDTO.getRtExpiresIn());
 		TokenCookieUtils.setAuthHintCookie(response, true, tokenDTO.getRtExpiresIn());
-
+		
+		loginResponseDTO.setAccessToken(tokenDTO.getAccessToken());
+	    loginResponseDTO.setRefreshToken(tokenDTO.getRefreshToken());
+	    
 		return ResponseEntity.ok(loginResponseDTO);
 	}
 
@@ -108,8 +111,12 @@ public class AuthController {
 		CustomerEntity customer = customerRepository.findById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-		LoginResponseDTO loginResponseDTO = new LoginResponseDTO(customer.getId(), customer.getNickname(),
-				customer.getRole(), customer.getIdNum());
+		LoginResponseDTO loginResponseDTO = LoginResponseDTO.builder()
+		        .id(customer.getId())
+		        .nickname(customer.getNickname())
+		        .role(customer.getRole())
+		        .idNum(customer.getIdNum())
+		        .build();
 
 		return ResponseEntity.ok(loginResponseDTO);
 	}
