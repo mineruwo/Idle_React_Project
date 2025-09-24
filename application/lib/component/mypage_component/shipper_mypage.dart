@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'package:application/models/order.dart';
+import 'package:application/model/order.dart';
 import 'package:application/services/api_service.dart';
 
 class ShipperMypage extends StatefulWidget {
@@ -39,16 +39,16 @@ class _ShipperMypageState extends State<ShipperMypage> {
         comment: comment,
       );
       Navigator.of(context).pop(); // 다이얼로그 닫기
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('리뷰가 성공적으로 제출되었습니다.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('리뷰가 성공적으로 제출되었습니다.')));
       _refreshOrders(); // 리뷰 제출 후 목록 새로고침
     } catch (e) {
       // 에러 처리
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('리뷰 제출에 실패했습니다: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('리뷰 제출에 실패했습니다: $e')));
     }
   }
 
@@ -133,9 +133,9 @@ class _ShipperMypageState extends State<ShipperMypage> {
           }
 
           // 완료된 오더만 필터링
-          final completedOrders = snapshot.data!.
-              where((order) => order.status == 'COMPLETED').
-              toList();
+          final completedOrders = snapshot.data!
+              .where((order) => order.status == 'COMPLETED')
+              .toList();
 
           if (completedOrders.isEmpty) {
             return const Center(child: Text("완료된 주문이 없습니다."));
@@ -159,7 +159,9 @@ class _ShipperMypageState extends State<ShipperMypage> {
                     final order = completedOrders[index];
                     return Card(
                       margin: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 4.0),
+                        horizontal: 8.0,
+                        vertical: 4.0,
+                      ),
                       child: ListTile(
                         title: Text('주문번호: ${order.orderNo}'),
                         subtitle: Text(

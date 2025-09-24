@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'package:application/models/order.dart';
+import 'package:application/model/order.dart';
 import 'package:application/services/api_service.dart';
 
 class ShipperStatus extends StatefulWidget {
@@ -165,7 +165,9 @@ class _ShipperStatusState extends State<ShipperStatus> {
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isActive || isCompleted ? Colors.blue : Colors.grey.shade300,
+                color: isActive || isCompleted
+                    ? Colors.blue
+                    : Colors.grey.shade300,
               ),
               child: Icon(
                 steps[index]['icon'],
@@ -240,17 +242,44 @@ class _ShipperStatusState extends State<ShipperStatus> {
           children: [
             const TableRow(
               children: [
-                Padding(padding: EdgeInsets.all(8.0), child: Text("시간", style: TextStyle(fontWeight: FontWeight.bold))),
-                Padding(padding: EdgeInsets.all(8.0), child: Text("진행상태", style: TextStyle(fontWeight: FontWeight.bold))),
-                Padding(padding: EdgeInsets.all(8.0), child: Text("내용", style: TextStyle(fontWeight: FontWeight.bold))),
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    "시간",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    "진행상태",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    "내용",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
               ],
             ),
             ...logEntries.reversed.map((log) {
               return TableRow(
                 children: [
-                  Padding(padding: const EdgeInsets.all(8.0), child: Text(log['timestamp']!)),
-                  Padding(padding: const EdgeInsets.all(8.0), child: Text(log['statusName']!)),
-                  Padding(padding: const EdgeInsets.all(8.0), child: Text(log['description']!)),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(log['timestamp']!),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(log['statusName']!),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(log['description']!),
+                  ),
                 ],
               );
             }),
