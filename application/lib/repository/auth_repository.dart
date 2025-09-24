@@ -1,11 +1,11 @@
 
+import 'package:application/model/login_model.dart';
 import 'package:application/network/dio_client.dart';
 
 class AuthRepository {
-  
   final DioClient dioClient = DioClient();
 
-  Future<Map<String, dynamic>> login({
+  Future<LoginModel> login({
     required String id,
     required String password,
   }) async {
@@ -14,6 +14,6 @@ class AuthRepository {
       "passwordEnc": password,
     });
 
-    return response.data;
+    return LoginModel.fromJson(response.data);
   }
 }
