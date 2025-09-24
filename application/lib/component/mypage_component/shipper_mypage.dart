@@ -37,13 +37,18 @@ class _ShipperMypageState extends State<ShipperMypage> {
         orderId: order.id,
         rating: rating,
         comment: comment,
+        targetId: order.targetId,
       );
+
+      if (!mounted) return;
+
       Navigator.of(context).pop(); // 다이얼로그 닫기
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('리뷰가 성공적으로 제출되었습니다.')));
       _refreshOrders(); // 리뷰 제출 후 목록 새로고침
     } catch (e) {
+      if (!mounted) return;
       // 에러 처리
       Navigator.of(context).pop();
       ScaffoldMessenger.of(
@@ -141,48 +146,54 @@ class _ShipperMypageState extends State<ShipperMypage> {
             return const Center(child: Text("완료된 주문이 없습니다."));
           }
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  '오더 내역',
-                  style: Theme.of(context).textTheme.headlineSmall,
+          return Padding(
+            padding: EdgeInsetsGeometry.only(top: 50),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    '오더 내역',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
                 ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  itemCount: completedOrders.length,
-                  itemBuilder: (context, index) {
-                    final order = completedOrders[index];
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 8.0,
-                        vertical: 4.0,
-                      ),
-                      child: ListTile(
-                        title: Text('주문번호: ${order.orderNo}'),
-                        subtitle: Text(
-                          '${order.departure} → ${order.destination ?? '미지정'}\n완료일: ${_formatDate(order.completedAt!)}',
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    itemCount: completedOrders.length,
+                    itemBuilder: (context, index) {
+                      final order = completedOrders[index];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                          vertical: 4.0,
                         ),
-                        isThreeLine: true,
-                        trailing: order.hasReview
-                            ? const Chip(
-                                label: Text('작성 완료'),
-                                backgroundColor: Colors.grey,
-                              )
-                            : ElevatedButton(
-                                onPressed: () => _showReviewDialog(order),
-                                child: const Text('후기 작성'),
-                              ),
-                      ),
-                    );
-                  },
+                        child: ListTile(
+                          title: Text('주문번호: ${order.orderNo}'),
+                          subtitle: Text(
+                            '${order.departure} → ${order.arrival}' +
+                                (order.completedAt != null
+                                    ? '\n완료일: ${_formatDate(order.completedAt!)}'
+                                    : ''),
+                          ),
+                          isThreeLine: true,
+                          trailing: order.hasReview
+                              ? const Chip(
+                                  label: Text('작성 완료'),
+                                  backgroundColor: Colors.grey,
+                                )
+                              : ElevatedButton(
+                                  onPressed: () => _showReviewDialog(order),
+                                  child: const Text('후기 작성'),
+                                ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           );
         },
       ),

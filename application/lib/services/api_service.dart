@@ -26,12 +26,14 @@ class ApiService {
     required String orderId,
     required int rating,
     required String comment,
+    required String targetId,
   }) async {
     try {
       final body = {
         'orderId': orderId,
         'rating': rating,
         'comment': comment,
+        'targetId': targetId,
       };
 
       // Dio는 Map을 자동으로 JSON 문자열로 변환하여 전송합니다.

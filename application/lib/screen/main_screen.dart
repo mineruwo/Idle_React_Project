@@ -14,7 +14,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 2; // '배송' 탭을 기본으로 선택
+  int _selectedIndex = 0; // '배송' 탭을 기본으로 선택
 
   static const List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),

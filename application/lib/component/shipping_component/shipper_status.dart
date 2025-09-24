@@ -92,7 +92,7 @@ class _ShipperStatusState extends State<ShipperStatus> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildOrderSelector(orders),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               Card(
                 elevation: 2,
                 child: Padding(
@@ -100,10 +100,6 @@ class _ShipperStatusState extends State<ShipperStatus> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "주문 번호: ${selectedOrder.orderNo}",
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
                       const SizedBox(height: 20),
                       _buildStepper(steps, currentStepIndex),
                       const SizedBox(height: 20),
@@ -121,28 +117,31 @@ class _ShipperStatusState extends State<ShipperStatus> {
 
   // 주문 선택 드롭다운 위젯
   Widget _buildOrderSelector(List<Order> orders) {
-    return Row(
-      children: [
-        const Text("주문 선택:", style: TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(width: 10),
-        Expanded(
-          child: DropdownButton<String>(
-            value: _selectedOrderId,
-            isExpanded: true,
-            onChanged: (String? newValue) {
-              setState(() {
-                _selectedOrderId = newValue;
-              });
-            },
-            items: orders.map<DropdownMenuItem<String>>((Order order) {
-              return DropdownMenuItem<String>(
-                value: order.id,
-                child: Text("주문번호: ${order.orderNo} (출발: ${order.departure})"),
-              );
-            }).toList(),
+    return Padding(
+      padding: EdgeInsetsGeometry.only(top: 50),
+      child: Row(
+        children: [
+          const Text("주문 선택 :", style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: DropdownButton<String>(
+              value: _selectedOrderId,
+              isExpanded: true,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedOrderId = newValue;
+                });
+              },
+              items: orders.map<DropdownMenuItem<String>>((Order order) {
+                return DropdownMenuItem<String>(
+                  value: order.id,
+                  child: Text("(주문 번호) ${order.orderNo}"),
+                );
+              }).toList(),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

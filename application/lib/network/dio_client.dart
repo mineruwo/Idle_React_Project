@@ -34,8 +34,9 @@ class DioClient {
 
             if (refreshToken != null) {
               try {
+                final refreshDio = Dio()..options.baseUrl = dio.options.baseUrl;
                 // Refresh 요청 (baseUrl이 있으므로 상대 경로 사용 가능)
-                final refreshResponse = await dio.post(
+                final refreshResponse = await refreshDio.post(
                   "/auth/refresh",
                   data: {"refreshToken": refreshToken},
                 );
@@ -50,8 +51,7 @@ class DioClient {
                 }
 
                 // 실패했던 요청에 새 토큰 붙여서 재시도
-                e.requestOptions.headers["Authorization"] =
-                    "Bearer $newAccess";
+                e.requestOptions.headers["Authorization"] = "Bearer $newAccess";
                 final retryResponse = await dio.fetch(e.requestOptions);
 
                 return handler.resolve(retryResponse);
