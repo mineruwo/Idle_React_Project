@@ -53,7 +53,7 @@ class Order {
           ? DateTime.parse(json['completedAt'])
           : null,
       hasReview: json['hasReview'] ?? false,
-      targetId: json['targetId']?.toString() ?? '',
+      targetId: json['assignedDriverId']?.toString() ?? '',
     );
   }
 }

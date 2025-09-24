@@ -133,12 +133,8 @@ class _ShipperMypageState extends State<ShipperMypage> {
           if (snapshot.hasError) {
             return Center(child: Text("오류가 발생했습니다: ${snapshot.error}"));
           }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("완료된 주문이 없습니다."));
-          }
-
           // 완료된 오더만 필터링
-          final completedOrders = snapshot.data!
+          final completedOrders = (snapshot.data ?? [])
               .where((order) => order.status == 'COMPLETED')
               .toList();
 
@@ -147,7 +143,7 @@ class _ShipperMypageState extends State<ShipperMypage> {
           }
 
           return Padding(
-            padding: EdgeInsetsGeometry.only(top: 50),
+            padding: const EdgeInsets.only(top: 50),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -172,10 +168,7 @@ class _ShipperMypageState extends State<ShipperMypage> {
                         child: ListTile(
                           title: Text('주문번호: ${order.orderNo}'),
                           subtitle: Text(
-                            '${order.departure} → ${order.arrival}' +
-                                (order.completedAt != null
-                                    ? '\n완료일: ${_formatDate(order.completedAt!)}'
-                                    : ''),
+                            '${order.departure} → ${order.arrival}${order.completedAt != null ? '\n완료일: ${_formatDate(order.completedAt!)}' : ''}',
                           ),
                           isThreeLine: true,
                           trailing: order.hasReview
