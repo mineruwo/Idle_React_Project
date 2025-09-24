@@ -1,10 +1,9 @@
+import 'package:application/component/car_owner.dart/widgets/section_title.dart';
+import 'package:application/component/car_owner.dart/widgets/settlement_card.dart';
+import 'package:application/component/car_owner.dart/widgets/stat_chip.dart';
+import 'package:application/component/car_owner.dart/widgets/transport_item.dart';
+import 'package:application/component/car_owner.dart/widgets/warmth_card.dart';
 import 'package:flutter/material.dart';
-import '../widgets/app_top_bar.dart';
-import '../widgets/section_title.dart';
-import '../widgets/stat_chip.dart';
-import '../widgets/transport_item.dart';
-import '../widgets/settlement_card.dart';
-import '../widgets/warmth_card.dart';
 
 class MyPageScreen extends StatelessWidget {
   const MyPageScreen({super.key});
@@ -12,7 +11,6 @@ class MyPageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const AppTopBar(title: '마이페이지'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         child: Column(
