@@ -39,6 +39,7 @@ dependencies:
 
     dio: ^5.4.0
     flutter_secure_storage: ^9.0.0 # 토큰
+    provider: ^6.1.2
 
 dev_dependencies:
     flutter_test:

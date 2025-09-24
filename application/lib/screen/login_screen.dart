@@ -1,6 +1,8 @@
+import 'package:application/provider/user_provider.dart';
 import 'package:application/repository/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -31,21 +33,22 @@ class _LoginScreenState extends State<LoginScreen> {
           password: passwordController.text,
         );
 
-        final accessToken = res["accessToken"];
-        final refreshToken = res["refreshToken"];
-        final role = res["role"];
-
         // 토큰 저장
-        await storage.write(key: "accessToken", value: accessToken);
-        await storage.write(key: "refreshToken", value: refreshToken);
+        await storage.write(key: "accessToken", value: res.accessToken);
+        await storage.write(key: "refreshToken", value: res.refreshToken);
+
+        // User 상태 저장
+        Provider.of<UserProvider>(context, listen: false).setUser(res);
 
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text("$role 로그인 성공")));
+        ).showSnackBar(SnackBar(content: Text("로그인 성공")));
 
-        // TODO: 로그인 성공 후 화면 이동
-        // Navigator.pushReplacement(...);
-      } catch (e) {
+        // 화면 이동
+        //Navigator.pushReplacementNamed(context, "/home");
+      } catch (e, stack) {
+        print("Login error: $e");
+        print(stack);
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text("로그인 실패")));
