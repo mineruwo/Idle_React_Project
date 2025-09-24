@@ -1,4 +1,6 @@
 import 'package:application/provider/user_provider.dart';
+import 'package:application/screen/car_owner_delivery_screen.dart';
+import 'package:application/screen/car_owner_mypage_screen.dart';
 import 'package:application/screen/home_screen.dart';
 import 'package:application/screen/login_screen.dart';
 import 'package:application/screen/mypage_screen.dart';
@@ -39,7 +41,7 @@ class _MainScreenState extends State<MainScreen> {
         if (userProvider.user?.role == "shipper") {
           return const ShippingScreen(); // 화주 배송 스크린으로 바꿔주세요
         } else {
-          return const ShippingScreen(); // 차주 배송 스크린으로 바꿔주세요
+          return const DeliveryScreen(); // 차주 배송 스크린으로 바꿔주세요
         }
 
       case 3: // 서비스
@@ -51,7 +53,7 @@ class _MainScreenState extends State<MainScreen> {
         if (userProvider.user?.role == "shipper") {
           return const MypageScreen(); // 화주 마이페이지로 바꿔주세요
         } else {
-          return const MypageScreen(); // 차주 마이페이지로 바꿔주세요
+          return const MyPageScreen(); // 차주 마이페이지로 바꿔주세요
         }
 
       default:

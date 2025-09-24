@@ -1,7 +1,7 @@
+import 'package:application/component/car_owner.dart/widgets/delivery_item.dart';
+import 'package:application/component/car_owner.dart/widgets/section_title.dart';
 import 'package:flutter/material.dart';
-import '../widgets/app_top_bar.dart';
-import '../widgets/section_title.dart';
-import '../widgets/delivery_item.dart';
+
 
 class DeliveryScreen extends StatelessWidget {
   const DeliveryScreen({super.key});
@@ -9,7 +9,6 @@ class DeliveryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const AppTopBar(title: '배송'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         child: Column(
