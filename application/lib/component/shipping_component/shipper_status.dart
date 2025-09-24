@@ -86,29 +86,37 @@ class _ShipperStatusState extends State<ShipperStatus> {
           (step) => step['status'] == selectedOrder.status,
         );
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildOrderSelector(orders),
-              const SizedBox(height: 10),
-              Card(
-                elevation: 2,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 20),
-                      _buildStepper(steps, currentStepIndex),
-                      const SizedBox(height: 20),
-                      _buildStatusLogs(selectedOrder, steps, currentStepIndex),
-                    ],
+        return Padding(
+          padding: EdgeInsetsGeometry.only(top: 50),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('운송 현황', style: Theme.of(context).textTheme.titleLarge),
+                _buildOrderSelector(orders),
+                const SizedBox(height: 5),
+                Card(
+                  elevation: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 5),
+                        _buildStepper(steps, currentStepIndex),
+                        const SizedBox(height: 20),
+                        _buildStatusLogs(
+                          selectedOrder,
+                          steps,
+                          currentStepIndex,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -117,31 +125,35 @@ class _ShipperStatusState extends State<ShipperStatus> {
 
   // 주문 선택 드롭다운 위젯
   Widget _buildOrderSelector(List<Order> orders) {
-    return Padding(
-      padding: EdgeInsetsGeometry.only(top: 50),
-      child: Row(
-        children: [
-          const Text("주문 선택 :", style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(width: 10),
-          Expanded(
-            child: DropdownButton<String>(
-              value: _selectedOrderId,
-              isExpanded: true,
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedOrderId = newValue;
-                });
-              },
-              items: orders.map<DropdownMenuItem<String>>((Order order) {
-                return DropdownMenuItem<String>(
-                  value: order.id,
-                  child: Text("(주문 번호) ${order.orderNo}"),
-                );
-              }).toList(),
+    return Column(
+      children: [
+        Row(
+          children: [
+            const Text(
+              "주문 선택 :",
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-          ),
-        ],
-      ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: DropdownButton<String>(
+                value: _selectedOrderId,
+                isExpanded: true,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedOrderId = newValue;
+                  });
+                },
+                items: orders.map<DropdownMenuItem<String>>((Order order) {
+                  return DropdownMenuItem<String>(
+                    value: order.id,
+                    child: Text("(주문 번호) ${order.orderNo}"),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
