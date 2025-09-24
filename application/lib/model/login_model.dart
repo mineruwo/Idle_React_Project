@@ -16,6 +16,8 @@ class LoginModel {
   });
 
   factory LoginModel.fromJson(Map<String, dynamic> json) {
+    print(json);
+    print(json['id']);
     return LoginModel(
       id: json["id"],
       nickname: json["nickname"],

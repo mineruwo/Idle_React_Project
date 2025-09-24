@@ -1,3 +1,4 @@
+import 'package:application/component/mypage_component/shipper_mypage.dart';
 import 'package:flutter/material.dart';
 
 class MypageScreen extends StatelessWidget {
@@ -5,6 +6,6 @@ class MypageScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('마이페이지 화면')));
+    return const Scaffold(body: ShipperMypage());
   }
 }

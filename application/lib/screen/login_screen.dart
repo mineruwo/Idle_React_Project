@@ -44,8 +44,6 @@ class _LoginScreenState extends State<LoginScreen> {
           context,
         ).showSnackBar(SnackBar(content: Text("로그인 성공")));
 
-        // 화면 이동
-        //Navigator.pushReplacementNamed(context, "/home");
       } catch (e, stack) {
         print("Login error: $e");
         print(stack);
