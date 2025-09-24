@@ -16,4 +16,10 @@ class AuthRepository {
 
     return LoginModel.fromJson(response.data);
   }
+
+   // 토큰 기반 사용자 정보 복구
+  Future<LoginModel> fetchMe() async {
+    final response = await dioClient.dio.get("/auth/me");
+    return LoginModel.fromJson(response.data);
+  }
 }

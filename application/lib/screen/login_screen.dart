@@ -45,9 +45,10 @@ class _LoginScreenState extends State<LoginScreen> {
         ).showSnackBar(SnackBar(content: Text("로그인 성공")));
 
         // 화면 이동
-        Navigator.pushReplacementNamed(context, "/home");
-
-      } catch (e) {
+        //Navigator.pushReplacementNamed(context, "/home");
+      } catch (e, stack) {
+        print("Login error: $e");
+        print(stack);
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text("로그인 실패")));
