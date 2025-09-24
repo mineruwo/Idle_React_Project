@@ -32,7 +32,7 @@ class ApiService {
       final body = {
         'orderId': orderId,
         'rating': rating,
-        'comment': comment,
+        'content': comment, // Changed 'comment' to 'content'
         'targetId': targetId,
       };
 
