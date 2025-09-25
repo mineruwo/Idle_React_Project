@@ -1,5 +1,6 @@
 import 'package:application/network/dio_client.dart';
 import '../model/order.dart';
+import '../model/review.dart'; // Import the new Review model
 
 class ApiService {
   final DioClient _dioClient = DioClient();
@@ -41,6 +42,18 @@ class ApiService {
       // 성공적인 응답 (e.g., 201 Created)은 예외를 발생시키지 않습니다.
     } catch (e) {
       throw Exception('Failed to submit review: $e');
+    }
+  }
+
+  // 내 리뷰 목록 가져오기 (GET /api/reviews/my-reviews)
+  Future<List<Review>> getMyReviews() async {
+    try {
+      final response = await _dioClient.dio.get('/reviews/my-reviews');
+      final List<dynamic> body = response.data;
+      return body.map((dynamic item) => Review.fromJson(item)).toList();
+    } catch (e) {
+      print('Error in getMyReviews: $e');
+      throw Exception('Failed to load my reviews: $e');
     }
   }
 }
