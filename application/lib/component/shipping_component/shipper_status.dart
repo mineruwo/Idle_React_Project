@@ -95,7 +95,6 @@ class _ShipperStatusState extends State<ShipperStatus> {
               children: [
                 Text('운송 현황', style: Theme.of(context).textTheme.titleLarge),
                 _buildOrderSelector(orders),
-                const SizedBox(height: 5),
                 Card(
                   elevation: 2,
                   child: Padding(
@@ -183,13 +182,19 @@ class _ShipperStatusState extends State<ShipperStatus> {
               ),
               child: Icon(
                 steps[index]['icon'],
-                color: isActive || isCompleted ? Colors.white : theme.unselectedWidgetColor,
+                color: isActive || isCompleted
+                    ? Colors.white
+                    : theme.unselectedWidgetColor,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               steps[index]['name'],
-              style: TextStyle(color: isActive ? theme.primaryColor : theme.textTheme.bodyMedium?.color),
+              style: TextStyle(
+                color: isActive
+                    ? theme.primaryColor
+                    : theme.textTheme.bodyMedium?.color,
+              ),
             ),
           ],
         );
@@ -241,7 +246,7 @@ class _ShipperStatusState extends State<ShipperStatus> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          "진행 상태 로그",
+          "진행 상태",
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         const Divider(),
@@ -255,21 +260,21 @@ class _ShipperStatusState extends State<ShipperStatus> {
             const TableRow(
               children: [
                 Padding(
-                  padding: EdgeInsets.all(8.0),
+                  padding: EdgeInsets.all(7.0),
                   child: Text(
                     "시간",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.all(8.0),
+                  padding: EdgeInsets.all(7.0),
                   child: Text(
                     "진행상태",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.all(8.0),
+                  padding: EdgeInsets.all(7.0),
                   child: Text(
                     "내용",
                     style: TextStyle(fontWeight: FontWeight.bold),
@@ -281,15 +286,15 @@ class _ShipperStatusState extends State<ShipperStatus> {
               return TableRow(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(7.0),
                     child: Text(log['timestamp']!),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(7.0),
                     child: Text(log['statusName']!),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(7.0),
                     child: Text(log['description']!),
                   ),
                 ],
