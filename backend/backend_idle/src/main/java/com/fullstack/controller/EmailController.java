@@ -2,6 +2,7 @@ package com.fullstack.controller;
 
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +28,7 @@ public class EmailController {
             @RequestParam("email") String email,
             @RequestParam(value = "purpose", defaultValue = "SIGNUP_VERIFY_EMAIL") EmailPurpose purpose,
             HttpSession session) {
-
+		log.info("sessionId={}", session.getId());
 		Map<String, Object> body = emailService.sendCode(email, purpose, session);
         return ResponseEntity.accepted().body(body);
     }
@@ -38,7 +39,7 @@ public class EmailController {
             @RequestParam("code") String code,
             @RequestParam(value = "purpose", defaultValue = "SIGNUP_VERIFY_EMAIL") EmailPurpose purpose,
             HttpSession session) {
-
+    	log.info("sessionId={}", session.getId());
     	Map<String, Object> body = emailService.verifyCode(email, code, purpose, session);
         return ResponseEntity.ok(body);
     }

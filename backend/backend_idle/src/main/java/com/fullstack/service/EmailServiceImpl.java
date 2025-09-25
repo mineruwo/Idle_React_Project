@@ -17,9 +17,11 @@ import com.fullstack.security.util.HashUtils;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class EmailServiceImpl implements EmailService {
 
 	private final JavaMailSender mailSender;
@@ -97,6 +99,7 @@ public class EmailServiceImpl implements EmailService {
 
         long now = Instant.now().getEpochSecond();
         if (entry == null || entry.expiresEpoch() < now) {
+        	log.info(entry);
             session.removeAttribute(k); 
             return Map.of("ok", false, "reason", "expired_or_missing");
         }

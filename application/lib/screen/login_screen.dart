@@ -13,30 +13,21 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController idController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final _idController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
 
-  final AuthRepository authRepository = AuthRepository();
+  final authRepository = AuthRepository();
   final storage = const FlutterSecureStorage();
 
   Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
       try {
-        // 임시용임
-        // 로그인 시 이전 토큰 제거
-        await storage.delete(key: "accessToken");
-        await storage.delete(key: "refreshToken");
-
         final res = await authRepository.login(
-          id: idController.text,
-          password: passwordController.text,
+          id: _idController.text,
+          password: _passwordController.text,
         );
-
-        // 토큰 저장
-        await storage.write(key: "accessToken", value: res.accessToken);
-        await storage.write(key: "refreshToken", value: res.refreshToken);
 
         // User 상태 저장
         Provider.of<UserProvider>(context, listen: false).setUser(res);
@@ -81,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // 이메일 입력
                   TextFormField(
-                    controller: idController,
+                    controller: _idController,
                     decoration: const InputDecoration(
                       labelText: "이메일",
                       border: OutlineInputBorder(),
@@ -101,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // 비밀번호 입력
                   TextFormField(
-                    controller: passwordController,
+                    controller: _passwordController,
                     obscureText: true,
                     decoration: const InputDecoration(
                       labelText: "비밀번호",

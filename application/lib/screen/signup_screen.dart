@@ -1,3 +1,6 @@
+import 'package:application/component/signup_component/email_verification.dart';
+import 'package:application/repository/auth_repository.dart';
+import 'package:application/repository/email_repository.dart';
 import 'package:flutter/material.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -15,6 +18,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _passwordCheckController = TextEditingController();
   final _nicknameController = TextEditingController();
   final _phoneController = TextEditingController();
+
+  final emailRepo = EmailRepository();
+  final authRepo = AuthRepository();
 
   String _role = "shipper"; // 기본: 화주
 
@@ -138,32 +144,68 @@ class _SignUpScreenState extends State<SignUpScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: RadioListTile<String>(
-                      title: const Text("화주"),
+                    child: RadioMenuButton<String>(
                       value: "shipper",
                       groupValue: _role,
                       onChanged: (value) {
                         setState(() => _role = value!);
                       },
+                      child: const Text("화주"),
                     ),
                   ),
                   Expanded(
-                    child: RadioListTile(
-                      title: const Text("차주"),
+                    child: RadioMenuButton<String>(
                       value: "carrier",
                       groupValue: _role,
                       onChanged: (value) {
                         setState(() => _role = value!);
                       },
+                      child: const Text("차주"),
                     ),
                   ),
                 ],
               ),
-
               const SizedBox(height: 20),
-              ElevatedButton(onPressed: _submit, child: const Text("회원가입")),
-              const SizedBox(height: 30),
 
+              ElevatedButton(
+                onPressed: () async {
+                  if (!_formKey.currentState!.validate()) return;
+
+                  await showEmailVerification(
+                    context: context,
+                    email: _idController.text,
+                    onSendCode: emailRepo.sendCode,
+                    onVerifyCode: emailRepo.verifyCode,
+                    onVerified: () async {
+                      final payload = {
+                        "id": _idController.text,
+                        "passwordEnc": _passwordController.text,
+                        "nickname": _nicknameController.text,
+                        "customName": _nameController.text,
+                        "phone": _phoneController.text,
+                        "role": _role,
+                      };
+
+                      try {
+                        final res = await authRepo.signUp(payload);
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("회원가입 성공")),
+                        );
+
+                        // 로그인 화면으로 이동하거나 pop
+                        Navigator.pop(context);
+                      } catch (e) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text("회원가입 실패: $e")));
+                      }
+                    },
+                  );
+                },
+                child: const Text("회원가입"),
+              ),
+              const SizedBox(height: 30),
               Row(
                 children: const [
                   Expanded(child: Divider()),
