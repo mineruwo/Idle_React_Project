@@ -63,6 +63,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/orders").hasRole("SHIPPER")
 
                 
+
                 // 내 주문 목록은 인증된 사용자만
                 .requestMatchers(HttpMethod.GET, "/api/orders/my").authenticated()
 
