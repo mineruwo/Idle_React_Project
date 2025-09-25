@@ -1,8 +1,15 @@
+import 'package:application/provider/user_provider.dart';
+import 'package:application/screen/main_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import 'package:application/model/order.dart';
 import 'package:application/services/api_service.dart';
+import 'package:application/model/review.dart';
+
+enum ReviewFilter { pending, reviewed }
 
 class ShipperMypage extends StatefulWidget {
   const ShipperMypage({super.key});
@@ -12,18 +19,50 @@ class ShipperMypage extends StatefulWidget {
 }
 
 class _ShipperMypageState extends State<ShipperMypage> {
-  late Future<List<Order>> _ordersFuture;
+  ReviewFilter _selectedFilter =
+      ReviewFilter.pending; // Default to showing pending reviews
+
+  late Future<Map<String, List<Order>>>
+  _reviewDataFuture; // pendingOrders와 reviewedOrders를 담을 Future
   final ApiService _apiService = ApiService();
 
   @override
   void initState() {
     super.initState();
-    _ordersFuture = _apiService.fetchMyOrders();
+    _reviewDataFuture = _loadReviewData();
   }
 
-  void _refreshOrders() {
+  Future<Map<String, List<Order>>> _loadReviewData() async {
+    try {
+      final List<Order> allOrders = await _apiService.fetchMyOrders();
+      final List<Review> myReviews = await _apiService.getMyReviews();
+
+      final Set<String> reviewedOrderIds = myReviews
+          .map((review) => review.orderId)
+          .toSet();
+
+      final List<Order> completedOrders = allOrders
+          .where((order) => order.status == 'COMPLETED')
+          .toList();
+
+      final List<Order> pendingOrders = completedOrders
+          .where((order) => !reviewedOrderIds.contains(order.id))
+          .toList();
+
+      final List<Order> reviewedOrders = completedOrders
+          .where((order) => reviewedOrderIds.contains(order.id))
+          .toList();
+
+      return {'pending': pendingOrders, 'reviewed': reviewedOrders};
+    } catch (e) {
+      print('Error loading review data: $e');
+      throw Exception('Failed to load review data: $e');
+    }
+  }
+
+  void _refreshReviewData() {
     setState(() {
-      _ordersFuture = _apiService.fetchMyOrders();
+      _reviewDataFuture = _loadReviewData();
     });
   }
 
@@ -46,7 +85,7 @@ class _ShipperMypageState extends State<ShipperMypage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('리뷰가 성공적으로 제출되었습니다.')));
-      _refreshOrders(); // 리뷰 제출 후 목록 새로고침
+      _refreshReviewData(); // 리뷰 제출 후 목록 새로고침
     } catch (e) {
       if (!mounted) return;
       // 에러 처리
@@ -121,11 +160,45 @@ class _ShipperMypageState extends State<ShipperMypage> {
     );
   }
 
+  Future<void> _handleLogout() async {
+    // Show confirmation dialog
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('로그아웃'),
+          content: const Text('정말 로그아웃 하시겠습니까?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      if (!mounted) return;
+      const storage = FlutterSecureStorage();
+      await storage.deleteAll();
+      Provider.of<UserProvider>(context, listen: false).cleanUser();
+      Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const MainScreen()),
+        (route) => false,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<List<Order>>(
-        future: _ordersFuture,
+      body: FutureBuilder<Map<String, List<Order>>>(
+        future: _reviewDataFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -133,13 +206,28 @@ class _ShipperMypageState extends State<ShipperMypage> {
           if (snapshot.hasError) {
             return Center(child: Text("오류가 발생했습니다: ${snapshot.error}"));
           }
-          // 완료된 오더만 필터링
-          final completedOrders = (snapshot.data ?? [])
-              .where((order) => order.status == 'COMPLETED')
-              .toList();
+          if (!snapshot.hasData ||
+              snapshot.data!['pending'] == null ||
+              snapshot.data!['reviewed'] == null) {
+            return const Center(child: Text("데이터를 불러오지 못했습니다."));
+          }
 
-          if (completedOrders.isEmpty) {
-            return const Center(child: Text("완료된 주문이 없습니다."));
+          final List<Order> pendingOrders = snapshot.data!['pending']!;
+          final List<Order> reviewedOrders = snapshot.data!['reviewed']!;
+
+          final List<Order> displayOrders =
+              _selectedFilter == ReviewFilter.pending
+              ? pendingOrders
+              : reviewedOrders;
+
+          if (displayOrders.isEmpty) {
+            return Center(
+              child: Text(
+                _selectedFilter == ReviewFilter.pending
+                    ? "작성할 후기가 없습니다."
+                    : "내가 작성한 후기가 없습니다.",
+              ),
+            );
           }
 
           return Padding(
@@ -149,17 +237,49 @@ class _ShipperMypageState extends State<ShipperMypage> {
               children: [
                 Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    '오더 내역',
-                    style: Theme.of(context).textTheme.headlineSmall,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '오더 내역',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.logout),
+                        onPressed: _handleLogout,
+                        tooltip: '로그아웃',
+                      ),
+                    ],
                   ),
                 ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: SegmentedButton<ReviewFilter>(
+                    segments: <ButtonSegment<ReviewFilter>>[
+                      ButtonSegment<ReviewFilter>(
+                        value: ReviewFilter.pending,
+                        label: Text('리뷰 대기 (${pendingOrders.length})'),
+                      ),
+                      ButtonSegment<ReviewFilter>(
+                        value: ReviewFilter.reviewed,
+                        label: Text('리뷰 완료 (${reviewedOrders.length})'),
+                      ),
+                    ],
+                    selected: <ReviewFilter>{_selectedFilter},
+                    onSelectionChanged: (Set<ReviewFilter> newSelection) {
+                      setState(() {
+                        _selectedFilter = newSelection.first;
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(height: 10), // Add some spacing
                 Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    itemCount: completedOrders.length,
+                    itemCount: displayOrders.length,
                     itemBuilder: (context, index) {
-                      final order = completedOrders[index];
+                      final order = displayOrders[index];
                       return Card(
                         margin: const EdgeInsets.symmetric(
                           horizontal: 8.0,
@@ -171,7 +291,9 @@ class _ShipperMypageState extends State<ShipperMypage> {
                             '${order.departure} → ${order.arrival}${order.completedAt != null ? '\n완료일: ${_formatDate(order.completedAt!)}' : ''}',
                           ),
                           isThreeLine: true,
-                          trailing: order.hasReview
+                          trailing:
+                              order
+                                  .hasReview // hasReview는 이제 백엔드에서 오는 값 그대로 사용
                               ? const Chip(
                                   label: Text('작성 완료'),
                                   backgroundColor: Colors.grey,
