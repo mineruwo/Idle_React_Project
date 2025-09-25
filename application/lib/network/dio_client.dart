@@ -20,6 +20,13 @@ class DioClient {
               options.headers["Authorization"] = "Bearer $token";
             }
           }
+          // 🔎 디버그
+          // ignore: avoid_print
+          print("➡️ ${options.method} ${dio.options.baseUrl}${options.path}");
+          // ignore: avoid_print
+          print("➡️ AUTH=${options.headers["Authorization"]}");
+          // ignore: avoid_print
+          print("➡️ COOKIE=${options.headers["Cookie"]}");
 
           return handler.next(options);
         },
@@ -28,6 +35,14 @@ class DioClient {
           return handler.next(response);
         },
         onError: (DioException e, handler) async {
+          // 🔎 디버그
+          // ignore: avoid_print
+          print(
+            "❌ ${e.requestOptions.method} ${e.requestOptions.baseUrl}${e.requestOptions.path} "
+            "status=${e.response?.statusCode}",
+          );
+          // ignore: avoid_print
+          print("❌ RESP=${e.response?.data}");
           // AccessToken 만료 시
           if (e.response?.statusCode == 401) {
             final refreshToken = await storage.read(key: "refreshToken");
