@@ -3,8 +3,8 @@ class LoginModel {
   final String nickname;
   final String role;
   final int idNum;
-  final String accessToken;
-  final String refreshToken;
+  final String? accessToken;
+  final String? refreshToken;
 
   LoginModel({
     required this.id,
@@ -16,8 +16,6 @@ class LoginModel {
   });
 
   factory LoginModel.fromJson(Map<String, dynamic> json) {
-    print(json);
-    print(json['id']);
     return LoginModel(
       id: json["id"],
       nickname: json["nickname"],

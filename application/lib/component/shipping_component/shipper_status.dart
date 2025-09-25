@@ -86,29 +86,36 @@ class _ShipperStatusState extends State<ShipperStatus> {
           (step) => step['status'] == selectedOrder.status,
         );
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildOrderSelector(orders),
-              const SizedBox(height: 10),
-              Card(
-                elevation: 2,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 20),
-                      _buildStepper(steps, currentStepIndex),
-                      const SizedBox(height: 20),
-                      _buildStatusLogs(selectedOrder, steps, currentStepIndex),
-                    ],
+        return Padding(
+          padding: EdgeInsetsGeometry.only(top: 50),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('운송 현황', style: Theme.of(context).textTheme.titleLarge),
+                _buildOrderSelector(orders),
+                Card(
+                  elevation: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 5),
+                        _buildStepper(steps, currentStepIndex),
+                        const SizedBox(height: 20),
+                        _buildStatusLogs(
+                          selectedOrder,
+                          steps,
+                          currentStepIndex,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -117,31 +124,35 @@ class _ShipperStatusState extends State<ShipperStatus> {
 
   // 주문 선택 드롭다운 위젯
   Widget _buildOrderSelector(List<Order> orders) {
-    return Padding(
-      padding: EdgeInsetsGeometry.only(top: 50),
-      child: Row(
-        children: [
-          const Text("주문 선택 :", style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(width: 10),
-          Expanded(
-            child: DropdownButton<String>(
-              value: _selectedOrderId,
-              isExpanded: true,
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedOrderId = newValue;
-                });
-              },
-              items: orders.map<DropdownMenuItem<String>>((Order order) {
-                return DropdownMenuItem<String>(
-                  value: order.id,
-                  child: Text("(주문 번호) ${order.orderNo}"),
-                );
-              }).toList(),
+    return Column(
+      children: [
+        Row(
+          children: [
+            const Text(
+              "주문 선택 :",
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-          ),
-        ],
-      ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: DropdownButton<String>(
+                value: _selectedOrderId,
+                isExpanded: true,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedOrderId = newValue;
+                  });
+                },
+                items: orders.map<DropdownMenuItem<String>>((Order order) {
+                  return DropdownMenuItem<String>(
+                    value: order.id,
+                    child: Text("(주문 번호) ${order.orderNo}"),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -152,6 +163,7 @@ class _ShipperStatusState extends State<ShipperStatus> {
 
   // 배송 상태 스텝퍼 위젯
   Widget _buildStepper(List<Map<String, dynamic>> steps, int currentStepIndex) {
+    final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: List.generate(steps.length, (index) {
@@ -165,18 +177,24 @@ class _ShipperStatusState extends State<ShipperStatus> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isActive || isCompleted
-                    ? Colors.blue
-                    : Colors.grey.shade300,
+                    ? theme.primaryColor
+                    : theme.colorScheme.tertiary,
               ),
               child: Icon(
                 steps[index]['icon'],
-                color: isActive || isCompleted ? Colors.white : Colors.grey,
+                color: isActive || isCompleted
+                    ? Colors.white
+                    : theme.unselectedWidgetColor,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               steps[index]['name'],
-              style: TextStyle(color: isActive ? Colors.blue : Colors.black),
+              style: TextStyle(
+                color: isActive
+                    ? theme.primaryColor
+                    : theme.textTheme.bodyMedium?.color,
+              ),
             ),
           ],
         );
@@ -228,7 +246,7 @@ class _ShipperStatusState extends State<ShipperStatus> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          "진행 상태 로그",
+          "진행 상태",
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         const Divider(),
@@ -242,21 +260,21 @@ class _ShipperStatusState extends State<ShipperStatus> {
             const TableRow(
               children: [
                 Padding(
-                  padding: EdgeInsets.all(8.0),
+                  padding: EdgeInsets.all(7.0),
                   child: Text(
                     "시간",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.all(8.0),
+                  padding: EdgeInsets.all(7.0),
                   child: Text(
                     "진행상태",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.all(8.0),
+                  padding: EdgeInsets.all(7.0),
                   child: Text(
                     "내용",
                     style: TextStyle(fontWeight: FontWeight.bold),
@@ -268,15 +286,15 @@ class _ShipperStatusState extends State<ShipperStatus> {
               return TableRow(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(7.0),
                     child: Text(log['timestamp']!),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(7.0),
                     child: Text(log['statusName']!),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(7.0),
                     child: Text(log['description']!),
                   ),
                 ],
