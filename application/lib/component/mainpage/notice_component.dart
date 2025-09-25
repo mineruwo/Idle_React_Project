@@ -24,13 +24,17 @@ class _NoticeComponentState extends State<NoticeComponent> {
 
   Future<void> _fetchNotices() async {
     try {
+      if (!mounted) return;
       final apiService = ApiService();
       final fetchedNotices = await apiService.fetchNotices();
       setState(() {
-        _notices = fetchedNotices.where((notice) => !(notice.isDel ?? false)).toList();
+        _notices = fetchedNotices
+            .where((notice) => !(notice.isDel ?? false))
+            .toList();
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _isLoading = false;
@@ -95,14 +99,21 @@ class _NoticeComponentState extends State<NoticeComponent> {
                             Expanded(
                               child: Text(
                                 notice.title,
-                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                             Text(
                               '${notice.createdAt.year}-${notice.createdAt.month}-${notice.createdAt.day}',
                               style: const TextStyle(color: Colors.grey),
                             ),
-                            Icon(isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down),
+                            Icon(
+                              isExpanded
+                                  ? Icons.keyboard_arrow_up
+                                  : Icons.keyboard_arrow_down,
+                            ),
                           ],
                         ),
                         if (isExpanded)

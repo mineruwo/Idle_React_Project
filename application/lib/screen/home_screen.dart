@@ -144,177 +144,195 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }).toList();
 
+    // Fixed notification area
+    final Widget notificationArea = Container(
+      height: kToolbarHeight + 34.0, // Combined height for status bar and notification
+      padding: const EdgeInsets.only(top: kToolbarHeight, left: 16.0, right: 16.0), // Padding for status bar
+      color: Colors.white, // Add a background color to the fixed area
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end, // 우측 정렬
+        children: [
+          InkWell(
+            onTap: () {
+              // TODO: 알람 아이콘 클릭 시 수행할 동작 정의
+              print('알람 아이콘 클릭됨!');
+            },
+            child: const Icon(
+              Icons.notifications_none,
+              size: 30.0,
+            ), // 벨 아이콘
+          ),
+        ],
+      ),
+    );
+
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: kToolbarHeight), // Spacer for status bar
-            Container(
-              height: 34.0, // 사용자가 변경한 높이
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end, // 우측 정렬
+      body: Stack(
+        children: [
+          // Scrollable content
+          Padding(
+            padding: EdgeInsets.only(top: kToolbarHeight + 34.0 + 16.0), // Space for fixed notification area + SizedBox
+            child: SingleChildScrollView(
+              child: Column(
                 children: [
-                  InkWell(
-                    onTap: () {
-                      // TODO: 알람 아이콘 클릭 시 수행할 동작 정의
-                      print('알람 아이콘 클릭됨!');
-                    },
-                    child: const Icon(
-                      Icons.notifications_none,
-                      size: 30.0,
-                    ), // 벨 아이콘
-                  ),
-                ],
-              ),
-            ), // 캐러셀 상단 알림 영역
-            const SizedBox(height: 16.0),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0), // 좌우 여백
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: THIRD_COLOR, width: 3.0),
-                  borderRadius: BorderRadius.circular(30.0),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(30.0),
-                  child: AspectRatio(
-                    aspectRatio: 2 / 1, // 2:1 비율 고정
-                    child: CarouselSlider(
-                      items: imageSliders,
-                      options: CarouselOptions(
-                        height: double.infinity, // 부모(AspectRatio)의 높이를 꽉 채움
-                        autoPlay: true,
-                        autoPlayInterval: const Duration(seconds: 3),
-                        viewportFraction: 1.0,
+                  // The original SizedBox(height: kToolbarHeight) and Container for notification are removed from here
+                  // The SizedBox(height: 16.0) after the notification area is also removed from here
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0), // 좌우 여백
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: THIRD_COLOR, width: 3.0),
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30.0),
+                        child: AspectRatio(
+                          aspectRatio: 2 / 1, // 2:1 비율 고정
+                          child: CarouselSlider(
+                            items: imageSliders,
+                            options: CarouselOptions(
+                              height: double.infinity, // 부모(AspectRatio)의 높이를 꽉 채움
+                              autoPlay: true,
+                              autoPlayInterval: const Duration(seconds: 3),
+                              viewportFraction: 1.0,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 30.0), // 캐러셀과 회사 소개 섹션 사이 여백
-            // 회사 소개 섹션
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-              ), // 회사 소개 섹션 좌우 패딩
-              child: SizedBox(
-                height: 470.0, // 5개 박스 겹침을 고려한 Stack의 총 높이
-                child: Stack(
-                  children: companyIntroData
-                      .asMap()
-                      .entries
-                      .map((entry) {
-                        int index = entry.key;
-                        _CompanyIntroItem item = entry.value;
-                        return Positioned(
-                          top: index * 80.0, // 각 박스의 상단 위치 (겹침 효과)
-                          left: index % 2 == 0
-                              ? 0.0
-                              : null, // 짝수 인덱스는 좌측 정렬 (Stack의 패딩 안에서)
-                          right: index % 2 != 0
-                              ? 0.0
-                              : null, // 홀수 인덱스는 우측 정렬 (Stack의 패딩 안에서)
-                          child: Container(
-                            width:
-                                MediaQuery.of(context).size.width *
-                                0.6, // 화면 너비의 60%
-                            padding: const EdgeInsets.all(16.0),
-                            decoration: BoxDecoration(
-                              color: item.backgroundColor,
-                              borderRadius: BorderRadius.circular(15.0),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.3),
-                                  spreadRadius: 2,
-                                  blurRadius: 5,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: index % 2 == 0
-                                  ? CrossAxisAlignment.start
-                                  : CrossAxisAlignment.end, // 텍스트 정렬
-                              children: [
-                                Icon(
-                                  item.icon,
-                                  size: 30.0,
-                                  color: item.textColor,
-                                ),
-                                const SizedBox(height: 8.0),
-                                Text(
-                                  item.boldText,
-                                  style: TextStyle(
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: item.textColor,
+                  const SizedBox(height: 30.0), // 캐러셀과 회사 소개 섹션 사이 여백
+                  // 회사 소개 섹션
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                    ), // 회사 소개 섹션 좌우 패딩
+                    child: SizedBox(
+                      height: 470.0, // 5개 박스 겹침을 고려한 Stack의 총 높이
+                      child: Stack(
+                        children: companyIntroData
+                            .asMap()
+                            .entries
+                            .map((entry) {
+                              int index = entry.key;
+                              _CompanyIntroItem item = entry.value;
+                              return Positioned(
+                                top: index * 80.0, // 각 박스의 상단 위치 (겹침 효과)
+                                left: index % 2 == 0
+                                    ? 0.0
+                                    : null, // 짝수 인덱스는 좌측 정렬 (Stack의 패딩 안에서)
+                                right: index % 2 != 0
+                                    ? 0.0
+                                    : null, // 홀수 인덱스는 우측 정렬 (Stack의 패딩 안에서)
+                                child: Container(
+                                  width:
+                                      MediaQuery.of(context).size.width *
+                                      0.6, // 화면 너비의 60%
+                                  padding: const EdgeInsets.all(16.0),
+                                  decoration: BoxDecoration(
+                                    color: item.backgroundColor,
+                                    borderRadius: BorderRadius.circular(15.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.3),
+                                        spreadRadius: 2,
+                                        blurRadius: 5,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: index % 2 == 0
+                                        ? CrossAxisAlignment.start
+                                        : CrossAxisAlignment.end, // 텍스트 정렬
+                                    children: [
+                                      Icon(
+                                        item.icon,
+                                        size: 30.0,
+                                        color: item.textColor,
+                                      ),
+                                      const SizedBox(height: 8.0),
+                                      Text(
+                                        item.boldText,
+                                        style: TextStyle(
+                                          fontSize: 16.0,
+                                          fontWeight: FontWeight.bold,
+                                          color: item.textColor,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4.0),
+                                      Text(
+                                        item.regularText,
+                                        style: TextStyle(
+                                          fontSize: 14.0,
+                                          color: item.textColor,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                const SizedBox(height: 4.0),
-                                Text(
-                                  item.regularText,
-                                  style: TextStyle(
-                                    fontSize: 14.0,
-                                    color: item.textColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      })
-                      .toList()
-                      .reversed
-                      .toList(), // 리스트를 역순으로 정렬하여 첫 번째 박스가 가장 위에 오도록 함
-                ),
-              ),
-            ),
-            const SizedBox(height: 16.0),
-            const NoticeComponent(),
-            const SizedBox(height: 16.0),
-            // Footer
-            Container(
-              width: double.infinity,
-              color: Colors.grey[200],
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    '(주)Idle',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16.0,
+                              );
+                            })
+                            .toList()
+                            .reversed
+                            .toList(), // 리스트를 역순으로 정렬하여 첫 번째 박스가 가장 위에 오도록 함
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 8.0),
-                  Text(
-                    '대표: 홍길동 | 사업자등록번호: 123-45-67890',
-                    style: TextStyle(fontSize: 12.0, color: Colors.grey[700]),
-                  ),
-                  Text(
-                    '주소: 서울특별시 강남구 테헤란로 123',
-                    style: TextStyle(fontSize: 12.0, color: Colors.grey[700]),
-                  ),
-                  Text(
-                    '고객센터: 1588-0000',
-                    style: TextStyle(fontSize: 12.0, color: Colors.grey[700]),
-                  ),
                   const SizedBox(height: 16.0),
-                  const Center(
-                    child: Text(
-                      '© 2025 Idle Corp. All rights reserved.',
-                      style: TextStyle(fontSize: 10.0, color: Colors.grey),
+                  const NoticeComponent(),
+                  const SizedBox(height: 16.0),
+                  // Footer
+                  Container(
+                    width: double.infinity,
+                    color: Colors.grey[200],
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '(주)Idle',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.0,
+                          ),
+                        ),
+                        const SizedBox(height: 8.0),
+                        Text(
+                          '대표: 홍길동 | 사업자등록번호: 123-45-67890',
+                          style: TextStyle(fontSize: 12.0, color: Colors.grey[700]),
+                        ),
+                        Text(
+                          '주소: 서울특별시 강남구 테헤란로 123',
+                          style: TextStyle(fontSize: 12.0, color: Colors.grey[700]),
+                        ),
+                        Text(
+                          '고객센터: 1588-0000',
+                          style: TextStyle(fontSize: 12.0, color: Colors.grey[700]),
+                        ),
+                        const SizedBox(height: 16.0),
+                        const Center(
+                          child: Text(
+                            '© 2025 Idle Corp. All rights reserved.',
+                            style: TextStyle(fontSize: 10.0, color: Colors.grey),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+          // Fixed notification area
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: notificationArea,
+          ),
+        ],
       ),
     );
   }

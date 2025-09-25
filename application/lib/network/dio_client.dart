@@ -55,7 +55,8 @@ class DioClient {
                 final retryResponse = await dio.fetch(e.requestOptions);
 
                 return handler.resolve(retryResponse);
-              } catch (_) {
+              } catch (refreshError) {
+                print('Token refresh failed: $refreshError'); // Added logging
                 // Refresh 실패 → 로그아웃 처리 필요
                 return handler.reject(e);
               }

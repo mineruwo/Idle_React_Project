@@ -69,6 +69,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: PRIMARY_COLOR,
       body: _widgetOptions(context, _selectedIndex),
       floatingActionButton: Transform.translate(
