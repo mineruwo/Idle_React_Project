@@ -2,6 +2,7 @@ import 'package:application/const/colors.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:application/component/mainpage/notice_component.dart';
 
 // 각 캐러셀 슬라이드의 데이터를 관리하기 위한 클래스
 class _CarouselItem {
@@ -30,21 +31,6 @@ class _CompanyIntroItem {
     required this.regularText,
     required this.backgroundColor,
     required this.textColor,
-  });
-}
-
-// 각 공지사항 아이템의 데이터를 관리하기 위한 클래스
-class _NoticeItem {
-  final String id; // React 컴포넌트의 expandedNoticeId를 위해 id 추가
-  final String title;
-  final String date;
-  final String content; // 공지사항 내용 추가
-
-  _NoticeItem({
-    required this.id,
-    required this.title,
-    required this.date,
-    required this.content,
   });
 }
 
@@ -113,76 +99,6 @@ class _HomeScreenState extends State<HomeScreen> {
       textColor: Colors.white,
     ),
   ];
-
-  // 공지사항 관련 상태 변수
-  List<_NoticeItem> _notices = [];
-  bool _isLoading = true;
-  String? _error;
-  String? _expandedNoticeId; // React 컴포넌트와 동일하게 하나의 공지사항만 확장
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchNotices();
-  }
-
-  Future<void> _fetchNotices() async {
-    try {
-      setState(() {
-        _isLoading = true;
-        _error = null;
-      });
-      // 실제 API 호출 대신 지연을 시뮬레이션
-      await Future.delayed(const Duration(seconds: 1));
-
-      // 더미 데이터 (React 컴포넌트의 is_del 필터링을 반영)
-      final List<_NoticeItem> fetchedNotices = [
-        _NoticeItem(
-          id: '1',
-          title: '새로운 서비스 출시 안내',
-          date: '2023.10.26',
-          content: '저희 서비스가 새롭게 출시되었습니다. 많은 이용 부탁드립니다. <b>감사합니다.</b>',
-        ),
-        _NoticeItem(
-          id: '2',
-          title: '시스템 점검 안내',
-          date: '2023.10.25',
-          content:
-              '보다 안정적인 서비스 제공을 위해 시스템 점검이 예정되어 있습니다. <br>점검 시간: 2023.10.27 02:00 ~ 04:00',
-        ),
-        _NoticeItem(
-          id: '3',
-          title: '개인정보처리방침 변경 안내',
-          date: '2023.10.24',
-          content: '개인정보처리방침이 일부 변경되어 안내드립니다. 자세한 내용은 공지사항을 확인해주세요.',
-        ),
-        _NoticeItem(
-          id: '4',
-          title: '이벤트 당첨자 발표',
-          date: '2023.10.23',
-          content: '이벤트에 참여해주신 모든 분들께 감사드립니다. 당첨자 명단은 홈페이지에서 확인 가능합니다.',
-        ),
-      ];
-
-      setState(() {
-        _notices = fetchedNotices;
-      });
-    } catch (e) {
-      setState(() {
-        _error = e.toString();
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  void _handleNoticeClick(String id) {
-    setState(() {
-      _expandedNoticeId = _expandedNoticeId == id ? null : id;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -356,100 +272,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16.0), // 회사 소개 섹션과 공지사항 섹션 사이 여백
-            // 공지사항 섹션
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0), // 좌우 패딩
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    '공지사항',
-                    style: TextStyle(
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 10.0),
-                  _isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : _error != null
-                      ? Center(child: Text('오류 발생: $_error'))
-                      : _notices.isEmpty
-                      ? const Center(child: Text('등록된 공지사항이 없습니다.'))
-                      : ListView.builder(
-                          shrinkWrap: true, // Column 안에서 ListView 사용 시 필수
-                          physics:
-                              const NeverScrollableScrollPhysics(), // 부모 스크롤뷰에 스크롤 위임
-                          itemCount: _notices.length,
-                          itemBuilder: (context, index) {
-                            final notice = _notices[index];
-                            final isExpanded = _expandedNoticeId == notice.id;
-                            return Column(
-                              children: [
-                                InkWell(
-                                  onTap: () => _handleNoticeClick(notice.id),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 12.0,
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            notice.title,
-                                            style: const TextStyle(
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                            maxLines: isExpanded
-                                                ? null
-                                                : 1, // 확장 시 전체, 아니면 1줄
-                                            overflow: isExpanded
-                                                ? TextOverflow.visible
-                                                : TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8.0),
-                                        Text(
-                                          notice.date,
-                                          style: const TextStyle(
-                                            fontSize: 12.0,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                        Icon(
-                                          isExpanded
-                                              ? Icons.keyboard_arrow_up
-                                              : Icons.keyboard_arrow_down,
-                                          color: Colors.grey,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                if (isExpanded)
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                      left: 16.0,
-                                      right: 16.0,
-                                      bottom: 12.0,
-                                    ),
-                                    child: Html(data: notice.content),
-                                  ),
-                                Divider(
-                                  height: 1.0,
-                                  color: Colors.grey[300],
-                                ), // 구분선
-                              ],
-                            );
-                          },
-                        ),
-                ],
-              ),
-            ),
+            const SizedBox(height: 16.0),
+            const NoticeComponent(),
             const SizedBox(height: 16.0),
             // Footer
             Container(

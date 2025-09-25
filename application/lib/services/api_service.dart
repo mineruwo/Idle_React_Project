@@ -1,9 +1,22 @@
 import 'package:application/network/dio_client.dart';
 import '../model/order.dart';
 import '../model/review.dart'; // Import the new Review model
+import '../model/notice.dart'; // Import the Notice model
 
 class ApiService {
   final DioClient _dioClient = DioClient();
+
+  // 공지사항 목록 가져오기 (GET /api/public/notices)
+  Future<List<Notice>> fetchNotices() async {
+    try {
+      final response = await _dioClient.dio.get('/public/notices');
+      final List<dynamic> body = response.data;
+      return body.map((dynamic item) => Notice.fromJson(item)).toList();
+    } catch (e) {
+      print('Error in fetchNotices: $e');
+      throw Exception('Failed to load notices: $e');
+    }
+  }
 
   // 내 주문 목록 가져오기 (GET /api/orders/my)
   Future<List<Order>> fetchMyOrders() async {
