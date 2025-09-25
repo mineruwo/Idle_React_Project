@@ -14,7 +14,7 @@ class DioClient {
           // 로그인, 회원가입, 리프레시 요청은 토큰 제외
           if (!(options.path.contains("/auth/login") ||
               options.path.contains("/auth/refresh") ||
-              options.path.contains("/auth/register"))) {
+              options.path.contains("/customer/signup"))) {
             final token = await storage.read(key: "accessToken");
             if (token != null) {
               options.headers["Authorization"] = "Bearer $token";
@@ -57,6 +57,8 @@ class DioClient {
                 return handler.resolve(retryResponse);
               } catch (_) {
                 // Refresh 실패 → 로그아웃 처리 필요
+                await storage.delete(key: "accessToken");
+                await storage.delete(key: "refreshToken");
                 return handler.reject(e);
               }
             }

@@ -1,5 +1,6 @@
 import 'package:application/provider/user_provider.dart';
 import 'package:application/repository/auth_repository.dart';
+import 'package:application/screen/signup_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
@@ -43,7 +44,6 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("로그인 성공")));
-
       } catch (e) {
         ScaffoldMessenger.of(
           context,
@@ -127,6 +127,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 30),
 
+                  // 회원가입 이동 버튼
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("아직 계정이 없으신가요?"),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SignUpScreen(),
+                            ),
+                          );
+                        },
+                        child: const Text("회원가입"),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 30),
                   // Divider
                   Row(
                     children: const [
