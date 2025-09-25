@@ -128,6 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _fetchNotices() async {
     try {
+      if (!mounted) return;
       setState(() {
         _isLoading = true;
         _error = null;
@@ -164,14 +165,17 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ];
 
+      if (!mounted) return;
       setState(() {
         _notices = fetchedNotices;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
       });
     } finally {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
