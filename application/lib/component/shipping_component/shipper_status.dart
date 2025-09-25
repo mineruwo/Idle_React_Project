@@ -164,6 +164,7 @@ class _ShipperStatusState extends State<ShipperStatus> {
 
   // 배송 상태 스텝퍼 위젯
   Widget _buildStepper(List<Map<String, dynamic>> steps, int currentStepIndex) {
+    final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: List.generate(steps.length, (index) {
@@ -177,18 +178,18 @@ class _ShipperStatusState extends State<ShipperStatus> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isActive || isCompleted
-                    ? Colors.blue
-                    : Colors.grey.shade300,
+                    ? theme.primaryColor
+                    : theme.colorScheme.tertiary,
               ),
               child: Icon(
                 steps[index]['icon'],
-                color: isActive || isCompleted ? Colors.white : Colors.grey,
+                color: isActive || isCompleted ? Colors.white : theme.unselectedWidgetColor,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               steps[index]['name'],
-              style: TextStyle(color: isActive ? Colors.blue : Colors.black),
+              style: TextStyle(color: isActive ? theme.primaryColor : theme.textTheme.bodyMedium?.color),
             ),
           ],
         );
