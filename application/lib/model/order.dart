@@ -1,9 +1,42 @@
+enum OrderStatus { none, open, assigned, completed, paid }
+
+OrderStatus parseStatus(String? s) {
+  switch ((s ?? '').toUpperCase()) {
+    case 'OPEN':
+      return OrderStatus.open;
+    case 'ASSIGNED':
+      return OrderStatus.assigned;
+    case 'COMPLETED':
+      return OrderStatus.completed;
+    case 'PAID':
+      return OrderStatus.paid;
+    default:
+      return OrderStatus.none;
+  }
+}
+
+String statusToString(OrderStatus s) {
+  switch (s) {
+    case OrderStatus.open:
+      return 'OPEN';
+    case OrderStatus.assigned:
+      return 'ASSIGNED';
+    case OrderStatus.completed:
+      return 'COMPLETED';
+    case OrderStatus.paid:
+      return 'PAID';
+    case OrderStatus.none:
+    default:
+      return 'NONE';
+  }
+}
+
 class Order {
   final String id;
   final String orderNo;
   final String departure;
   final String arrival;
-  final String status;
+  final OrderStatus status;
   final DateTime? createdAt;
   final DateTime? assignedAt;
   final DateTime? paidAt;
@@ -12,12 +45,12 @@ class Order {
   final bool hasReview;
   final String targetId;
 
-  Order({
+  const Order({
     required this.id,
     required this.orderNo,
     required this.departure,
     required this.arrival,
-    required this.status,
+    this.status = OrderStatus.none,
     this.createdAt,
     this.assignedAt,
     this.paidAt,
@@ -27,33 +60,68 @@ class Order {
     required this.targetId,
   });
 
-  // JSON 데이터로부터 Order 객체를 생성하는 팩토리 생성자
+  /// JSON → Order
   factory Order.fromJson(Map<String, dynamic> json) {
-    // 백엔드에서 오는 id가 숫자일 수 있으므로 toString()으로 안전하게 변환
-    final id = json['id']?.toString() ?? '';
-
     return Order(
-      id: id,
-      orderNo: json['orderNo'] ?? '',
-      departure: json['departure'] ?? '',
-      arrival: json['arrival'] ?? '',
-      status: json['status'] ?? 'NONE',
-      // 날짜 필드들은 null일 수 있으므로 파싱 전에 null 체크
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'])
-          : null,
-      assignedAt: json['assignedAt'] != null
-          ? DateTime.parse(json['assignedAt'])
-          : null,
-      paidAt: json['paidAt'] != null ? DateTime.parse(json['paidAt']) : null,
-      departedAt: json['departedAt'] != null
-          ? DateTime.parse(json['departedAt'])
-          : null,
-      completedAt: json['completedAt'] != null
-          ? DateTime.parse(json['completedAt'])
-          : null,
-      hasReview: json['hasReview'] ?? false,
+      id: json['id']?.toString() ?? '',
+      orderNo: json['orderNo']?.toString() ?? '',
+      departure: json['departure']?.toString() ?? '',
+      arrival: json['arrival']?.toString() ?? '',
+      status: parseStatus(json['status']),
+      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? ''),
+      assignedAt: DateTime.tryParse(json['assignedAt']?.toString() ?? ''),
+      paidAt: DateTime.tryParse(json['paidAt']?.toString() ?? ''),
+      departedAt: DateTime.tryParse(json['departedAt']?.toString() ?? ''),
+      completedAt: DateTime.tryParse(json['completedAt']?.toString() ?? ''),
+      hasReview: json['hasReview'] == true,
       targetId: json['targetId']?.toString() ?? '',
+    );
+  }
+
+  /// Order → JSON
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'orderNo': orderNo,
+        'departure': departure,
+        'arrival': arrival,
+        'status': statusToString(status),
+        'createdAt': createdAt?.toIso8601String(),
+        'assignedAt': assignedAt?.toIso8601String(),
+        'paidAt': paidAt?.toIso8601String(),
+        'departedAt': departedAt?.toIso8601String(),
+        'completedAt': completedAt?.toIso8601String(),
+        'hasReview': hasReview,
+        'targetId': targetId,
+      };
+
+  /// 일부만 수정된 새 객체 반환
+  Order copyWith({
+    String? id,
+    String? orderNo,
+    String? departure,
+    String? arrival,
+    OrderStatus? status,
+    DateTime? createdAt,
+    DateTime? assignedAt,
+    DateTime? paidAt,
+    DateTime? departedAt,
+    DateTime? completedAt,
+    bool? hasReview,
+    String? targetId,
+  }) {
+    return Order(
+      id: id ?? this.id,
+      orderNo: orderNo ?? this.orderNo,
+      departure: departure ?? this.departure,
+      arrival: arrival ?? this.arrival,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      assignedAt: assignedAt ?? this.assignedAt,
+      paidAt: paidAt ?? this.paidAt,
+      departedAt: departedAt ?? this.departedAt,
+      completedAt: completedAt ?? this.completedAt,
+      hasReview: hasReview ?? this.hasReview,
+      targetId: targetId ?? this.targetId,
     );
   }
 }
