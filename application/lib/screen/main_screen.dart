@@ -52,7 +52,7 @@ class _MainScreenState extends State<MainScreen> {
         if (userProvider.user?.role == "shipper") {
           return const MypageScreen(); // 화주 마이페이지로 바꿔주세요
         } else {
-          return const MyPageScreen(); // 차주 마이페이지로 바꿔주세요
+          return MyPageScreen(); // 차주 마이페이지로 바꿔주세요
         }
 
       default:

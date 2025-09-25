@@ -1,11 +1,18 @@
-import 'package:application/component/car_owner.dart/widgets/delivery_list.dart';
 import 'package:flutter/material.dart';
-
 import '../component/car_owner.dart/widgets/section_title.dart';
-import '../component/car_owner.dart/widgets/delivery_item.dart';
+import '../component/car_owner.dart/widgets/delivery_list.dart';
+import '../component/car_owner.dart/widgets/map_route_hybrid_card.dart';
 
-class DeliveryScreen extends StatelessWidget {
+class DeliveryScreen extends StatefulWidget {
   const DeliveryScreen({super.key});
+
+  @override
+  State<DeliveryScreen> createState() => _DeliveryScreenState();
+}
+
+class _DeliveryScreenState extends State<DeliveryScreen> {
+  String? _from;
+  String? _to;
 
   @override
   Widget build(BuildContext context) {
@@ -15,38 +22,22 @@ class DeliveryScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 50),
-            Card(
-              child: Container(
-                height: 160,
-                alignment: Alignment.center,
-                margin: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Text(
-                  '배송 지도',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-                ),
-              ),
-            ),
+            const SizedBox(height: 50),
+
+            // ✅ 지도(경로 + 거리)
+            MapRouteHybridCard(originAddress: _from, destAddress: _to),
+
             const SizedBox(height: 6),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-                child: Text(
-                  '2025년 9월 24일 ~ 2025년 9월 25일',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
+
             const SectionTitle('운송중'),
-            const DeliveryList(),
-            const DeliveryList(),
+            DeliveryList(
+              onSelect: (from, to) {
+                setState(() {
+                  _from = from;
+                  _to = to;
+                });
+              },
+            ),
           ],
         ),
       ),

@@ -63,4 +63,26 @@ class CarOwnerDashboardService {
       throw Exception('getWarmth failed: $e');
     }
   }
+
+  Future<void> _updateOrderStatus(int orderId, String status) async {
+    await _dioClient.dio.put(
+      '/orders/$orderId/status', // ✅ 서버 매핑에 맞춤
+      data: status, // ✅ 본문은 순수 문자열
+      options: Options(
+        contentType: Headers.textPlainContentType, // ✅ text/plain
+      ),
+    );
+  }
+
+  // READY -> ONGOING
+  Future<void> departOrder(int orderId) =>
+      _updateOrderStatus(orderId, 'ONGOING');
+
+  // ONGOING -> COMPLETED
+  Future<void> completeOrder(int orderId) =>
+      _updateOrderStatus(orderId, 'COMPLETED');
+
+  // READY/ONGOING -> CANCELED
+  Future<void> cancelOrder(int orderId) =>
+      _updateOrderStatus(orderId, 'CANCELED');
 }

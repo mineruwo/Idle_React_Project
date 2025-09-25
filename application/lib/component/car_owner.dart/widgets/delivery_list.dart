@@ -4,10 +4,10 @@ import '../../../model/car_owner_dashboard_models.dart';
 import 'delivery_item.dart';
 
 class DeliveryList extends StatefulWidget {
-  const DeliveryList({super.key, this.period = 'month'});
+  const DeliveryList({super.key, this.period = 'month', this.onSelect});
 
-  /// 필요하면 기간 파라미터도 함께
   final String period;
+  final void Function(String from, String to)? onSelect;
 
   @override
   State<DeliveryList> createState() => _DeliveryListState();
@@ -16,22 +16,73 @@ class DeliveryList extends StatefulWidget {
 class _DeliveryListState extends State<DeliveryList> {
   late final CarOwnerDashboardService _svc;
   late Future<List<DeliveryItemDTO>> _future;
+  final Set<int> _loadingIds = <int>{};
+  int? _selectedId;
 
   @override
   void initState() {
     super.initState();
-    _svc = CarOwnerDashboardService(); // 기본 DioClient 사용
+    _svc = CarOwnerDashboardService();
     _future = _svc.getDeliveries();
   }
 
+  Future<void> _refresh() async {
+    setState(() {
+      _future = _svc.getDeliveries();
+    });
+    await _future;
+  }
+
   String _fmtKoreanDate(String ymd) {
-    // "YYYY-MM-DD" -> "MM월 DD일"
     if (ymd.length >= 10) {
       final mm = ymd.substring(5, 7);
       final dd = ymd.substring(8, 10);
       return '$mm월 $dd일';
     }
     return ymd;
+  }
+
+  void _showSnack(BuildContext ctx, String msg) {
+    ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  Future<void> _handleDepart(BuildContext ctx, int orderId) async {
+    setState(() => _loadingIds.add(orderId));
+    try {
+      await _svc.departOrder(orderId);
+      _showSnack(ctx, '상차 처리 완료');
+      await _refresh();
+    } catch (e) {
+      _showSnack(ctx, '상차 실패: $e');
+    } finally {
+      if (mounted) setState(() => _loadingIds.remove(orderId));
+    }
+  }
+
+  Future<void> _handleComplete(BuildContext ctx, int orderId) async {
+    setState(() => _loadingIds.add(orderId));
+    try {
+      await _svc.completeOrder(orderId);
+      _showSnack(ctx, '배송 완료 처리 완료');
+      await _refresh();
+    } catch (e) {
+      _showSnack(ctx, '배송 완료 실패: $e');
+    } finally {
+      if (mounted) setState(() => _loadingIds.remove(orderId));
+    }
+  }
+
+  Future<void> _handleCancel(BuildContext ctx, int orderId) async {
+    setState(() => _loadingIds.add(orderId));
+    try {
+      await _svc.cancelOrder(orderId);
+      _showSnack(ctx, '취소 처리 완료');
+      await _refresh();
+    } catch (e) {
+      _showSnack(ctx, '취소 실패: $e');
+    } finally {
+      if (mounted) setState(() => _loadingIds.remove(orderId));
+    }
   }
 
   @override
@@ -59,20 +110,57 @@ class _DeliveryListState extends State<DeliveryList> {
           );
         }
 
-        // 스크롤 뷰 안에서 사용할 수 있게 shrinkWrap + NeverScrollable
         return ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
+          itemCount: items.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 8),
           itemBuilder: (context, i) {
             final it = items[i];
-            return DeliveryItem(
-              date: _fmtKoreanDate(it.s_date),
-              from: it.from,
-              to: it.to,
+            final id = it.id ?? 0;
+            final busy = _loadingIds.contains(id);
+            final selected = _selectedId == id;
+
+            return InkWell(
+              onTap: () {
+                setState(() => _selectedId = id);
+                widget.onSelect?.call(it.from, it.to);
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: selected
+                        ? Theme.of(context).colorScheme.primary
+                        : Colors.transparent,
+                    width: selected ? 1.5 : 0,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  color: selected
+                      ? Theme.of(context).colorScheme.primary.withOpacity(0.04)
+                      : null,
+                ),
+                child: DeliveryItem(
+                  orderId: id,
+                  date: _fmtKoreanDate(it.sDate),
+                  from: it.from,
+                  to: it.to,
+                  status: it.status,
+                  busy: busy,
+                  onDepart: it.status == 'READY'
+                      ? () => _handleDepart(context, id)
+                      : null,
+                  onComplete: it.status == 'ONGOING'
+                      ? () => _handleComplete(context, id)
+                      : null,
+                  onCancel: (it.status == 'READY' || it.status == 'ONGOING')
+                      ? () => _handleCancel(context, id)
+                      : null,
+                ),
+              ),
             );
           },
-          separatorBuilder: (_, __) => const SizedBox(height: 8),
-          itemCount: items.length,
         );
       },
     );

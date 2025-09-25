@@ -56,7 +56,7 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
 
 	// ✅ 추가: 진행중 최근 5건
 	List<OrderEntity> findTop5ByAssignedDriverAndStatusInOrderByUpdatedAtDesc(
-	        CustomerEntity assignedDriver, OrderStatus... statuses);
+	        CustomerEntity assignedDriver, Collection<OrderStatus> statuses);
 	
 	 /** ✅ 로그인한 기사(driverId)에게 배정된 주문만 상태 변경 허용 */
     Optional<OrderEntity> findByIdAndAssignedDriver(Long id, CustomerEntity assignedDriver);
