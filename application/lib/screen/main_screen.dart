@@ -18,8 +18,6 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0; // '홈' 탭을 기본으로 선택
-
   // 분기 처리
   Widget _widgetOptions(BuildContext context, int index) {
     final userProvider = Provider.of<UserProvider>(context);
@@ -60,16 +58,12 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+
     return Scaffold(
-      body: _widgetOptions(context, _selectedIndex),
+      body: _widgetOptions(context, userProvider.selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
@@ -81,10 +75,12 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.build), label: '서비스'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: '마이페이지'),
         ],
-        currentIndex: _selectedIndex,
+        currentIndex: userProvider.selectedIndex,
         selectedItemColor: Colors.blueAccent,
         unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped,
+        onTap: (index) {
+          userProvider.setIndex(index); // ✅ Provider 상태 변경
+        },
         type: BottomNavigationBarType.fixed, // 탭이 4개 이상일 때 필요
       ),
     );

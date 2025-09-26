@@ -1,5 +1,6 @@
 import 'package:application/provider/user_provider.dart';
 import 'package:application/repository/auth_repository.dart';
+import 'package:application/screen/home_screen.dart';
 import 'package:application/screen/signup_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -29,13 +30,20 @@ class _LoginScreenState extends State<LoginScreen> {
           password: _passwordController.text,
         );
 
+        if (!mounted) return;
+
         // User 상태 저장
-        Provider.of<UserProvider>(context, listen: false).setUser(res);
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        userProvider.setUser(res);
+        // 홈 탭으로 이동
+        userProvider.setIndex(0);
 
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("로그인 성공")));
       } catch (e) {
+        if (!mounted) return;
+
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text("로그인 실패")));
