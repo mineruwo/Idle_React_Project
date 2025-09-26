@@ -1,42 +1,9 @@
-enum OrderStatus { none, open, assigned, completed, paid }
-
-OrderStatus parseStatus(String? s) {
-  switch ((s ?? '').toUpperCase()) {
-    case 'OPEN':
-      return OrderStatus.open;
-    case 'ASSIGNED':
-      return OrderStatus.assigned;
-    case 'COMPLETED':
-      return OrderStatus.completed;
-    case 'PAID':
-      return OrderStatus.paid;
-    default:
-      return OrderStatus.none;
-  }
-}
-
-String statusToString(OrderStatus s) {
-  switch (s) {
-    case OrderStatus.open:
-      return 'OPEN';
-    case OrderStatus.assigned:
-      return 'ASSIGNED';
-    case OrderStatus.completed:
-      return 'COMPLETED';
-    case OrderStatus.paid:
-      return 'PAID';
-    case OrderStatus.none:
-    default:
-      return 'NONE';
-  }
-}
-
 class Order {
   final String id;
   final String orderNo;
   final String departure;
   final String arrival;
-  final OrderStatus status;
+  final String status;
   final DateTime? createdAt;
   final DateTime? assignedAt;
   final DateTime? paidAt;
@@ -50,7 +17,7 @@ class Order {
     required this.orderNo,
     required this.departure,
     required this.arrival,
-    this.status = OrderStatus.none,
+    required this.status,
     this.createdAt,
     this.assignedAt,
     this.paidAt,
@@ -60,14 +27,13 @@ class Order {
     required this.targetId,
   });
 
-  /// JSON → Order
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
       id: json['id']?.toString() ?? '',
       orderNo: json['orderNo']?.toString() ?? '',
       departure: json['departure']?.toString() ?? '',
       arrival: json['arrival']?.toString() ?? '',
-      status: parseStatus(json['status']),
+      status: json['status']?.toString() ?? 'NONE',
       createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? ''),
       assignedAt: DateTime.tryParse(json['assignedAt']?.toString() ?? ''),
       paidAt: DateTime.tryParse(json['paidAt']?.toString() ?? ''),
@@ -78,21 +44,20 @@ class Order {
     );
   }
 
-  /// Order → JSON
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'orderNo': orderNo,
-        'departure': departure,
-        'arrival': arrival,
-        'status': statusToString(status),
-        'createdAt': createdAt?.toIso8601String(),
-        'assignedAt': assignedAt?.toIso8601String(),
-        'paidAt': paidAt?.toIso8601String(),
-        'departedAt': departedAt?.toIso8601String(),
-        'completedAt': completedAt?.toIso8601String(),
-        'hasReview': hasReview,
-        'targetId': targetId,
-      };
+    'id': id,
+    'orderNo': orderNo,
+    'departure': departure,
+    'arrival': arrival,
+    'status': status,
+    'createdAt': createdAt?.toIso8601String(),
+    'assignedAt': assignedAt?.toIso8601String(),
+    'paidAt': paidAt?.toIso8601String(),
+    'departedAt': departedAt?.toIso8601String(),
+    'completedAt': completedAt?.toIso8601String(),
+    'hasReview': hasReview,
+    'targetId': targetId,
+  };
 
   /// 일부만 수정된 새 객체 반환
   Order copyWith({
@@ -100,7 +65,7 @@ class Order {
     String? orderNo,
     String? departure,
     String? arrival,
-    OrderStatus? status,
+    String? status,
     DateTime? createdAt,
     DateTime? assignedAt,
     DateTime? paidAt,
