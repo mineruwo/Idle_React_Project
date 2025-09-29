@@ -28,7 +28,6 @@ class _OrderScreenState extends State<OrderScreen> {
   Future<void> _load() async {
     final roleStr = context.read<UserProvider>().user?.role ?? 'shipper';
     final isShipper = roleStr == 'shipper';
-
     setState(() {
       _loading = true;
       _error = null;
@@ -36,8 +35,8 @@ class _OrderScreenState extends State<OrderScreen> {
 
     try {
       final list = await _orderRepo.fetchOrders(isShipper: isShipper);
-      list.sort((a, b) => (b.createdAt ?? DateTime(1970))
-          .compareTo(a.createdAt ?? DateTime(1970)));
+      list.sort((a, b) =>
+          (b.createdAt ?? DateTime(1970)).compareTo(a.createdAt ?? DateTime(1970)));
       setState(() {
         _orders = list;
         _loading = false;
@@ -56,10 +55,9 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   Future<void> _createOrder() async {
-    final createdPayload = await Navigator.of(context)
-        .push<Map<String, dynamic>>(MaterialPageRoute(
-      builder: (_) => const _CreateOrderPage(),
-    ));
+    final createdPayload = await Navigator.of(context).push<Map<String, dynamic>>(
+      MaterialPageRoute(builder: (_) => const _CreateOrderPage()),
+    );
     if (createdPayload == null) return;
 
     try {
@@ -100,7 +98,7 @@ class _OrderScreenState extends State<OrderScreen> {
     return Scaffold(
       body: Column(
         children: [
-          // 상단 150px 빈 여백
+          // 상단 150px 여백
           Container(height: 150, color: Colors.transparent),
 
           // 타이틀 + 역할 뱃지
@@ -123,7 +121,6 @@ class _OrderScreenState extends State<OrderScreen> {
             ),
           ),
 
-          // 본문
           Expanded(
             child: isShipper
                 ? _ShipperList(
@@ -131,10 +128,8 @@ class _OrderScreenState extends State<OrderScreen> {
                         .where((o) => o.status != OrderStatus.completed)
                         .toList(),
                     onConfirm: (order) async {
-                      await _orderRepo.updateStatus(
-                          order.id, OrderStatus.completed);
-                      _updateLocal(
-                          order.copyWith(status: OrderStatus.completed));
+                      await _orderRepo.updateStatus(order.id, OrderStatus.completed);
+                      _updateLocal(order.copyWith(status: OrderStatus.completed));
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('오더 확정 완료')),
@@ -142,21 +137,17 @@ class _OrderScreenState extends State<OrderScreen> {
                       }
                     },
                     onAssigned: (order) async {
-                      // 입찰 수락 후 배정 상태로 동기화
-                      await _orderRepo.updateStatus(
-                          order.id, OrderStatus.assigned);
-                      _updateLocal(
-                          order.copyWith(status: OrderStatus.assigned));
+                      await _orderRepo.updateStatus(order.id, OrderStatus.assigned);
+                      _updateLocal(order.copyWith(status: OrderStatus.assigned));
                     },
                   )
                 : _DriverBoard(
                     orders: _orders,
                     onTap: (o) async {
                       final updated =
-                          await Navigator.of(context).push<Order>(
-                        MaterialPageRoute(
-                            builder: (_) => _DriverOrderDetail(order: o)),
-                      );
+                          await Navigator.of(context).push<Order>(MaterialPageRoute(
+                        builder: (_) => _DriverOrderDetail(order: o),
+                      ));
                       if (updated != null) _updateLocal(updated);
                     },
                   ),
@@ -177,17 +168,14 @@ class _OrderScreenState extends State<OrderScreen> {
 }
 
 /* =========================
-   화주 리스트 (입찰 보기/수락 + 확정)
+   화주 리스트(카드 확장 + 입찰보기/수락 + 확정하기)
    ========================= */
 class _ShipperList extends StatefulWidget {
   final List<Order> orders;
   final Future<void> Function(Order) onConfirm;
-  final Future<void> Function(Order) onAssigned;
-  const _ShipperList({
-    required this.orders,
-    required this.onConfirm,
-    required this.onAssigned,
-  });
+  final Future<void> Function(Order) onAssigned; // 입찰 수락 시 호출
+  const _ShipperList(
+      {required this.orders, required this.onConfirm, required this.onAssigned});
 
   @override
   State<_ShipperList> createState() => _ShipperListState();
@@ -289,33 +277,30 @@ class _ShipperListState extends State<_ShipperList> {
                                 child: OutlinedButton.icon(
                                   icon: const Icon(Icons.gavel),
                                   label: const Text('입찰 보기'),
-                                  onPressed: () => _openBidsBottomSheet(
-                                      context, o, widget.onAssigned),
+                                  onPressed: () => _openBidsBottomSheet(context, o),
                                 ),
                               ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: FilledButton.tonal(
-                                  onPressed:
-                                      (o.status == OrderStatus.completed ||
-                                              _confirming)
-                                          ? null
-                                          : () async {
+                                  onPressed: (o.status ==
+                                              OrderStatus.completed ||
+                                          _confirming)
+                                      ? null
+                                      : () async {
+                                          setState(() => _confirming = true);
+                                          try {
+                                            await widget.onConfirm(o);
+                                            if (mounted) {
+                                              setState(() => _expandedId = null);
+                                            }
+                                          } finally {
+                                            if (mounted) {
                                               setState(
-                                                  () => _confirming = true);
-                                              try {
-                                                await widget.onConfirm(o);
-                                                if (mounted) {
-                                                  setState(() =>
-                                                      _expandedId = null);
-                                                }
-                                              } finally {
-                                                if (mounted) {
-                                                  setState(() =>
-                                                      _confirming = false);
-                                                }
-                                              }
-                                            },
+                                                  () => _confirming = false);
+                                            }
+                                          }
+                                        },
                                   child: _confirming
                                       ? const SizedBox(
                                           height: 20,
@@ -338,13 +323,12 @@ class _ShipperListState extends State<_ShipperList> {
     );
   }
 
-  Future<void> _openBidsBottomSheet(BuildContext ctx, Order order,
-      Future<void> Function(Order) onAccepted) async {
+  Future<void> _openBidsBottomSheet(BuildContext ctx, Order order) async {
     await showModalBottomSheet(
       context: ctx,
       isScrollControlled: true,
       showDragHandle: true,
-      builder: (_) => _BidsSheet(order: order, onAccepted: onAccepted),
+      builder: (_) => _BidsSheet(order: order, onAccepted: widget.onAssigned),
     );
   }
 
@@ -385,7 +369,7 @@ class _ShipperListState extends State<_ShipperList> {
 }
 
 /* =========================
-   입찰 리스트 바텀시트 (화주)
+   입찰 리스트 바텀시트(화주가 수락)
    ========================= */
 class _BidsSheet extends StatefulWidget {
   final Order order;
@@ -454,26 +438,25 @@ class _BidsSheetState extends State<_BidsSheet> {
                       leading: const Icon(Icons.local_shipping),
                       title: Text('${_won(b.price)}원'),
                       subtitle: Text(
-                        '${b.driverNickname} • ${_fmtOpt(b.createdAt)}',
+                        '${b.driverNickname ?? "기사"}'
+                        ' • ${_fmt(b.createdAt ?? DateTime.now())}',
                       ),
                       trailing: FilledButton(
                         onPressed: () async {
                           try {
                             await _repo.acceptBid(widget.order.id, b.id);
-                            if (mounted) {
-                              Navigator.of(context).pop(); // 바텀시트 닫기
-                              await widget.onAccepted(widget.order);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(
-                                        '입찰 수락 완료: ${_won(b.price)}원')),
-                              );
-                            }
+                            if (!mounted) return;
+                            Navigator.of(context).pop(); // 바텀시트 닫기
+                            await widget.onAccepted(widget.order);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content:
+                                      Text('입찰 수락 완료: ${_won(b.price)}원')),
+                            );
                           } catch (e) {
                             if (mounted) {
-                              final msg = e.toString();
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('수락 실패: $msg')),
+                                SnackBar(content: Text('수락 실패: $e')),
                               );
                             }
                           }
@@ -492,19 +475,16 @@ class _BidsSheetState extends State<_BidsSheet> {
     );
   }
 
-  String _fmtOpt(DateTime? d) {
-    if (d == null) return '-';
-    return '${d.month.toString().padLeft(2, '0')}/${d.day.toString().padLeft(2, '0')} '
-        '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
-  }
-
-  String _won(int v) => v
-      .toString()
-      .replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
+  String _fmt(DateTime d) =>
+      '${d.month.toString().padLeft(2, '0')}/${d.day.toString().padLeft(2, '0')} '
+      '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+  String _won(int v) =>
+      v.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (m) => '${m[1]},');
 }
 
 /* =========================
-   차주 게시판 / 상세 (입찰 등록)
+   차주 게시판
    ========================= */
 class _DriverBoard extends StatelessWidget {
   final List<Order> orders;
@@ -531,10 +511,8 @@ class _DriverBoard extends StatelessWidget {
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 child: ListTile(
-                  title: Text(
-                    o.orderNo.isNotEmpty ? o.orderNo : '오더',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
+                  title: Text(o.orderNo.isNotEmpty ? o.orderNo : '오더',
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
                   subtitle: Text('${o.departure} → ${o.arrival}'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => onTap(o),
@@ -548,6 +526,9 @@ class _DriverBoard extends StatelessWidget {
   }
 }
 
+/* =========================
+   차주 상세(입찰 등록: 서버 전송 + 내 최근 입찰가 유지)
+   ========================= */
 class _DriverOrderDetail extends StatefulWidget {
   final Order order;
   const _DriverOrderDetail({required this.order});
@@ -562,13 +543,39 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
   final _bidRepo = BidRepository();
 
   bool _submitting = false;
-  Bid? _lastSubmitted; // 방금 보낸 입찰
+
+  /// 내 최근 입찰가(서버에서 로드하거나 방금 제출한 값)
+  int _lastSubmitted = 0;
 
   @override
   void initState() {
     super.initState();
     o = widget.order;
+    _loadMyLastBid(); // 입장 시 서버에서 내 최근 입찰가 로드
   }
+
+ Future<void> _loadMyLastBid() async {
+  try {
+    final me = context.read<UserProvider>().user; // LoginModel
+    final bids = await _bidRepo.fetchBids(o.id);  // List<Bid>
+
+    // 내 입찰만 필터링: idNum 또는 id(=이메일) 둘 중 하나라도 일치하면 내 입찰로 간주
+    final myBids = bids.where((b) {
+      final byIdNum   = (me?.idNum != null && b.driverIdNum == me!.idNum);
+      final byEmailId = (me?.id.isNotEmpty == true && b.driverEmail == me!.id);
+      return byIdNum || byEmailId;
+    }).toList()
+      ..sort((a, b) =>
+        (a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0))
+          .compareTo(b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0)));
+
+    if (myBids.isNotEmpty && mounted) {
+      setState(() => _lastSubmitted = myBids.last.price); // 상단 “내 최근 입찰가: …원”
+    }
+  } catch (_) {
+    // 실패해도 조용히 무시 (0원 유지)
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -592,10 +599,8 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
                 color: c.primaryContainer,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Text(
-                _statusK(o.status),
-                style: TextStyle(color: c.onPrimaryContainer),
-              ),
+              child: Text(_statusK(o.status),
+                  style: TextStyle(color: c.onPrimaryContainer)),
             ),
           ]),
           const SizedBox(height: 12),
@@ -604,18 +609,12 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
           const SizedBox(height: 8),
           Text('${o.departure} → ${o.arrival}'),
           if (o.createdAt != null) Text('등록: ${_fmt(o.createdAt!)}'),
-
-          if (_lastSubmitted != null) ...[
-            const SizedBox(height: 16),
-            Text(
-              '내 최근 입찰가: ${_won(_lastSubmitted!.price)}원'
-              '${_lastSubmitted!.createdAt != null ? ' • ${_fmt(_lastSubmitted!.createdAt!)}' : ''}',
-              style: TextStyle(color: c.primary),
-            ),
-          ],
-
+          const SizedBox(height: 12),
+          // ✅ 내 최근 입찰가 표시(서버/로컬 최신)
+          Text('내 최근 입찰가: ${_won(_lastSubmitted)}원',
+              style: TextStyle(
+                  color: c.primary, fontWeight: FontWeight.w600)),
           const Spacer(),
-
           TextField(
             controller: _bidC,
             keyboardType: TextInputType.number,
@@ -636,22 +635,24 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
                     setState(() => _submitting = true);
                     try {
                       final price = int.parse(only);
-                      final submitted =
-                          await _bidRepo.submitBid(o.id, price); // Bid 반환
-                      setState(() => _lastSubmitted = submitted);
+                      await _bidRepo.submitBid(o.id, price);
 
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('입찰 등록 완료')),
-                        );
-                        // 화면 유지(바로 확인 가능). 닫고 싶으면 아래 주석 해제:
-                        // Navigator.of(context).pop(o);
-                      }
+                      if (!mounted) return;
+
+                      // 팝업 닫지 않고 로컬 반영 + 입력값 클리어
+                      setState(() {
+                        _lastSubmitted = price;
+                        _bidC.clear();
+                      });
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text('입찰 등록 완료: ${_won(price)}원')),
+                      );
                     } catch (e) {
                       if (mounted) {
-                        final msg = e.toString();
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('입찰 실패: $msg')),
+                          SnackBar(content: Text('입찰 실패: $e')),
                         );
                       }
                     } finally {
@@ -690,9 +691,9 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
     }
   }
 
-  String _won(int v) => v
-      .toString()
-      .replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
+  String _won(int v) =>
+      v.toString().replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
 }
 
 /* =========================
@@ -708,8 +709,8 @@ class _CreateOrderPageState extends State<_CreateOrderPage> {
   final _titleC = TextEditingController();
   final _fromC = TextEditingController();
   final _toC = TextEditingController();
-  final _distanceC = TextEditingController();
-  final _proposedPriceC = TextEditingController();
+  final _distanceC = TextEditingController(); // 선택
+  final _proposedPriceC = TextEditingController(); // 선택
 
   @override
   Widget build(BuildContext context) {
