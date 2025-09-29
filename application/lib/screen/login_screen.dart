@@ -1,5 +1,6 @@
 import 'package:application/provider/user_provider.dart';
 import 'package:application/repository/auth_repository.dart';
+import 'package:application/screen/signup_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
@@ -12,30 +13,21 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController idController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final _idController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
 
-  final AuthRepository authRepository = AuthRepository();
+  final authRepository = AuthRepository();
   final storage = const FlutterSecureStorage();
 
   Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
       try {
-        // 임시용임
-        // 로그인 시 이전 토큰 제거
-        await storage.delete(key: "accessToken");
-        await storage.delete(key: "refreshToken");
-
         final res = await authRepository.login(
-          id: idController.text,
-          password: passwordController.text,
+          id: _idController.text,
+          password: _passwordController.text,
         );
-
-        // 토큰 저장
-        await storage.write(key: "accessToken", value: res.accessToken);
-        await storage.write(key: "refreshToken", value: res.refreshToken);
 
         // User 상태 저장
         Provider.of<UserProvider>(context, listen: false).setUser(res);
@@ -43,7 +35,6 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("로그인 성공")));
-
       } catch (e) {
         ScaffoldMessenger.of(
           context,
@@ -81,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // 이메일 입력
                   TextFormField(
-                    controller: idController,
+                    controller: _idController,
                     decoration: const InputDecoration(
                       labelText: "이메일",
                       border: OutlineInputBorder(),
@@ -101,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // 비밀번호 입력
                   TextFormField(
-                    controller: passwordController,
+                    controller: _passwordController,
                     obscureText: true,
                     decoration: const InputDecoration(
                       labelText: "비밀번호",
@@ -127,6 +118,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 30),
 
+                  // 회원가입 이동 버튼
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("아직 계정이 없으신가요?"),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SignUpScreen(),
+                            ),
+                          );
+                        },
+                        child: const Text("회원가입"),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 30),
                   // Divider
                   Row(
                     children: const [

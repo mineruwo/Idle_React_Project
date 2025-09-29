@@ -6,6 +6,7 @@ import com.fullstack.service.AuthService;
 import com.fullstack.service.CustomerService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.Map;
 
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/customer")
+@Log4j2
 public class CustomerController {
 
     @Autowired
@@ -26,7 +28,7 @@ public class CustomerController {
     
     // 회원가입
     @PostMapping("/signup")
-    public ResponseEntity<Void> signup(@RequestBody SignupRequestDTO signupRequestDTO) {
+    public ResponseEntity<Void> signup(@RequestBody SignupRequestDTO signupRequestDTO) {   	
     	authService.register(signupRequestDTO);
     	return ResponseEntity.ok().build();
     }

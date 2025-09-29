@@ -19,11 +19,9 @@ class ShipperMypage extends StatefulWidget {
 }
 
 class _ShipperMypageState extends State<ShipperMypage> {
-  ReviewFilter _selectedFilter =
-      ReviewFilter.pending; // Default to showing pending reviews
+  ReviewFilter _selectedFilter = ReviewFilter.pending;
 
-  late Future<Map<String, List<Order>>>
-  _reviewDataFuture; // pendingOrders와 reviewedOrders를 담을 Future
+  late Future<Map<String, dynamic>> _reviewDataFuture; // Changed to dynamic
   final ApiService _apiService = ApiService();
 
   @override
@@ -32,28 +30,37 @@ class _ShipperMypageState extends State<ShipperMypage> {
     _reviewDataFuture = _loadReviewData();
   }
 
-  Future<Map<String, List<Order>>> _loadReviewData() async {
+  Future<Map<String, dynamic>> _loadReviewData() async {
+    // Changed to dynamic
     try {
       final List<Order> allOrders = await _apiService.fetchMyOrders();
       final List<Review> myReviews = await _apiService.getMyReviews();
-
-      final Set<String> reviewedOrderIds = myReviews
-          .map((review) => review.orderId)
-          .toSet();
+      final Map<String, Review> reviewMap = {
+        for (var review in myReviews) review.orderId: review,
+      };
 
       final List<Order> completedOrders = allOrders
           .where((order) => order.status == 'COMPLETED')
           .toList();
 
       final List<Order> pendingOrders = completedOrders
-          .where((order) => !reviewedOrderIds.contains(order.id))
+          .where((order) => !reviewMap.containsKey(order.id))
           .toList();
 
-      final List<Order> reviewedOrders = completedOrders
-          .where((order) => reviewedOrderIds.contains(order.id))
+      // Create a list of maps, each containing an order and its review
+      final List<Map<String, dynamic>> reviewedItems = completedOrders
+          .where((order) => reviewMap.containsKey(order.id))
+          .map((order) => {'order': order, 'review': reviewMap[order.id]!})
           .toList();
 
-      return {'pending': pendingOrders, 'reviewed': reviewedOrders};
+      // Sort reviewed items by review creation date in descending order
+      reviewedItems.sort((a, b) {
+        final reviewA = a['review'] as Review;
+        final reviewB = b['review'] as Review;
+        return reviewB.createdAt.compareTo(reviewA.createdAt);
+      });
+
+      return {'pending': pendingOrders, 'reviewed': reviewedItems};
     } catch (e) {
       print('Error loading review data: $e');
       throw Exception('Failed to load review data: $e');
@@ -81,14 +88,13 @@ class _ShipperMypageState extends State<ShipperMypage> {
 
       if (!mounted) return;
 
-      Navigator.of(context).pop(); // 다이얼로그 닫기
+      Navigator.of(context).pop();
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('리뷰가 성공적으로 제출되었습니다.')));
-      _refreshReviewData(); // 리뷰 제출 후 목록 새로고침
+      _refreshReviewData();
     } catch (e) {
       if (!mounted) return;
-      // 에러 처리
       Navigator.of(context).pop();
       ScaffoldMessenger.of(
         context,
@@ -197,7 +203,7 @@ class _ShipperMypageState extends State<ShipperMypage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<Map<String, List<Order>>>(
+      body: FutureBuilder<Map<String, dynamic>>(
         future: _reviewDataFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -213,22 +219,13 @@ class _ShipperMypageState extends State<ShipperMypage> {
           }
 
           final List<Order> pendingOrders = snapshot.data!['pending']!;
-          final List<Order> reviewedOrders = snapshot.data!['reviewed']!;
+          final List<Map<String, dynamic>> reviewedItems =
+              snapshot.data!['reviewed']!;
 
-          final List<Order> displayOrders =
-              _selectedFilter == ReviewFilter.pending
+          final List<dynamic> displayList = // Changed to dynamic list
+          _selectedFilter == ReviewFilter.pending
               ? pendingOrders
-              : reviewedOrders;
-
-          if (displayOrders.isEmpty) {
-            return Center(
-              child: Text(
-                _selectedFilter == ReviewFilter.pending
-                    ? "작성할 후기가 없습니다."
-                    : "내가 작성한 후기가 없습니다.",
-              ),
-            );
-          }
+              : reviewedItems;
 
           return Padding(
             padding: const EdgeInsets.only(top: 50),
@@ -254,56 +251,143 @@ class _ShipperMypageState extends State<ShipperMypage> {
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: SegmentedButton<ReviewFilter>(
-                    segments: <ButtonSegment<ReviewFilter>>[
-                      ButtonSegment<ReviewFilter>(
-                        value: ReviewFilter.pending,
-                        label: Text('리뷰 대기 (${pendingOrders.length})'),
-                      ),
-                      ButtonSegment<ReviewFilter>(
-                        value: ReviewFilter.reviewed,
-                        label: Text('리뷰 완료 (${reviewedOrders.length})'),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: SegmentedButton<ReviewFilter>(
+                          segments: <ButtonSegment<ReviewFilter>>[
+                            ButtonSegment<ReviewFilter>(
+                              value: ReviewFilter.pending,
+                              label: Text('리뷰 대기 (${pendingOrders.length})'),
+                            ),
+                            ButtonSegment<ReviewFilter>(
+                              value: ReviewFilter.reviewed,
+                              label: Text('리뷰 완료 (${reviewedItems.length})'),
+                            ),
+                          ],
+                          selected: <ReviewFilter>{_selectedFilter},
+                          onSelectionChanged: (Set<ReviewFilter> newSelection) {
+                            setState(() {
+                              _selectedFilter = newSelection.first;
+                            });
+                          },
+                        ),
                       ),
                     ],
-                    selected: <ReviewFilter>{_selectedFilter},
-                    onSelectionChanged: (Set<ReviewFilter> newSelection) {
-                      setState(() {
-                        _selectedFilter = newSelection.first;
-                      });
-                    },
                   ),
                 ),
                 const SizedBox(height: 10), // Add some spacing
                 Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    itemCount: displayOrders.length,
+                    itemCount: displayList.length,
                     itemBuilder: (context, index) {
-                      final order = displayOrders[index];
-                      return Card(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 8.0,
-                          vertical: 4.0,
-                        ),
-                        child: ListTile(
-                          title: Text('주문번호: ${order.orderNo}'),
-                          subtitle: Text(
-                            '${order.departure} → ${order.arrival}${order.completedAt != null ? '\n완료일: ${_formatDate(order.completedAt!)}' : ''}',
+                      if (_selectedFilter == ReviewFilter.pending) {
+                        final order = displayList[index] as Order;
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                            vertical: 4.0,
                           ),
-                          isThreeLine: true,
-                          trailing:
-                              order
-                                  .hasReview // hasReview는 이제 백엔드에서 오는 값 그대로 사용
-                              ? const Chip(
-                                  label: Text('작성 완료'),
-                                  backgroundColor: Colors.grey,
-                                )
-                              : ElevatedButton(
-                                  onPressed: () => _showReviewDialog(order),
-                                  child: const Text('후기 작성'),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                              vertical: 12.0,
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '주문번호: ${order.orderNo}',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${order.departure} → ${order.arrival}',
+                                      ),
+                                      if (order.completedAt != null) ...[
+                                        Text(
+                                          '완료일: ${_formatDate(order.completedAt!)}',
+                                          style: const TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
                                 ),
-                        ),
-                      );
+                                const SizedBox(width: 16),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () => _showReviewDialog(order),
+                                      child: const Text('후기 작성'),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      } else {
+                        // Reviewed items
+                        final item = displayList[index] as Map<String, dynamic>;
+                        final review = item['review'] as Review;
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                            vertical: 4.0,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        'To: ${review.targetNickname}',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Row(
+                                      children: List.generate(5, (i) {
+                                        return Icon(
+                                          i < review.rating
+                                              ? Icons.star
+                                              : Icons.star_border,
+                                          color: Colors.amber,
+                                          size: 20,
+                                        );
+                                      }),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  review.content,
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
                     },
                   ),
                 ),

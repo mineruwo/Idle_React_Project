@@ -6,7 +6,7 @@ class DioClient {
   final storage = const FlutterSecureStorage();
 
   DioClient() {
-    dio.options.baseUrl = "http://10.0.2.2:8080/api";
+    dio.options.baseUrl = "http://10.0.2.2:8080/api";          
 
     dio.interceptors.add(
       InterceptorsWrapper(
@@ -14,7 +14,7 @@ class DioClient {
           // 로그인, 회원가입, 리프레시 요청은 토큰 제외
           if (!(options.path.contains("/auth/login") ||
               options.path.contains("/auth/refresh") ||
-              options.path.contains("/auth/register"))) {
+              options.path.contains("/customer/signup"))) {
             final token = await storage.read(key: "accessToken");
             if (token != null) {
               options.headers["Authorization"] = "Bearer $token";
@@ -25,8 +25,6 @@ class DioClient {
           print("➡️ ${options.method} ${dio.options.baseUrl}${options.path}");
           // ignore: avoid_print
           print("➡️ AUTH=${options.headers["Authorization"]}");
-          // ignore: avoid_print
-          print("➡️ COOKIE=${options.headers["Cookie"]}");
 
           return handler.next(options);
         },
@@ -35,14 +33,6 @@ class DioClient {
           return handler.next(response);
         },
         onError: (DioException e, handler) async {
-          // 🔎 디버그
-          // ignore: avoid_print
-          print(
-            "❌ ${e.requestOptions.method} ${e.requestOptions.baseUrl}${e.requestOptions.path} "
-            "status=${e.response?.statusCode}",
-          );
-          // ignore: avoid_print
-          print("❌ RESP=${e.response?.data}");
           // AccessToken 만료 시
           if (e.response?.statusCode == 401) {
             final refreshToken = await storage.read(key: "refreshToken");
@@ -72,6 +62,8 @@ class DioClient {
                 return handler.resolve(retryResponse);
               } catch (_) {
                 // Refresh 실패 → 로그아웃 처리 필요
+                await storage.delete(key: "accessToken");
+                await storage.delete(key: "refreshToken");
                 return handler.reject(e);
               }
             }
