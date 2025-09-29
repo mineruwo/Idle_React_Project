@@ -4,13 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class UserProvider with ChangeNotifier {
-  LoginModel? _user;
   final storage = const FlutterSecureStorage();
   final AuthRepository authRepository = AuthRepository();
 
+  LoginModel? _user;
   LoginModel? get user => _user;
-
   bool get isLoggedIn => _user != null;
+
+  int _selectedIndex = 0;
+  int get selectedIndex => _selectedIndex;
 
   void setUser(LoginModel user) {
     _user = user;
@@ -19,6 +21,11 @@ class UserProvider with ChangeNotifier {
 
   void cleanUser() {
     _user = null;
+    notifyListeners();
+  }
+
+  void setIndex(int index) {
+    _selectedIndex = index;
     notifyListeners();
   }
 
