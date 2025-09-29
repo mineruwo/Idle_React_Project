@@ -11,8 +11,8 @@ class LoginModel {
     required this.nickname,
     required this.role,
     required this.idNum,
-    required this.accessToken,
-    required this.refreshToken,
+    this.accessToken,
+    this.refreshToken,
   });
 
   factory LoginModel.fromJson(Map<String, dynamic> json) {
