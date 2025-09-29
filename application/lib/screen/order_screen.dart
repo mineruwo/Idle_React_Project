@@ -37,8 +37,11 @@ class _OrderScreenState extends State<OrderScreen> {
 
     try {
       final list = await _orderRepo.fetchOrders(isShipper: isShipper);
-      list.sort((a, b) => (b.createdAt ?? DateTime(1970))
-          .compareTo(a.createdAt ?? DateTime(1970)));
+      list.sort(
+        (a, b) => (b.createdAt ?? DateTime(1970)).compareTo(
+          a.createdAt ?? DateTime(1970),
+        ),
+      );
       setState(() {
         _orders = list;
         _loading = false;
@@ -58,22 +61,24 @@ class _OrderScreenState extends State<OrderScreen> {
 
   Future<void> _createOrder() async {
     final createdPayload = await Navigator.of(context)
-        .push<Map<String, dynamic>>(MaterialPageRoute(
-      builder: (_) => const _CreateOrderPage(),
-    ));
+        .push<Map<String, dynamic>>(
+          MaterialPageRoute(builder: (_) => const _CreateOrderPage()),
+        );
     if (createdPayload == null) return;
 
     try {
       final saved = await _orderRepo.createOrderFromPayload(createdPayload);
       setState(() => _orders.insert(0, saved));
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('등록 완료')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('등록 완료')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('등록 실패: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('등록 실패: $e')));
       }
     }
   }
@@ -89,11 +94,14 @@ class _OrderScreenState extends State<OrderScreen> {
     if (_error != null) {
       return Scaffold(
         body: Center(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Text(_error!, textAlign: TextAlign.center),
-            const SizedBox(height: 12),
-            FilledButton(onPressed: _load, child: const Text('다시 시도')),
-          ]),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(_error!, textAlign: TextAlign.center),
+              const SizedBox(height: 12),
+              FilledButton(onPressed: _load, child: const Text('다시 시도')),
+            ],
+          ),
         ),
       );
     }
@@ -110,15 +118,17 @@ class _OrderScreenState extends State<OrderScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(isShipper ? '내 오더' : '오더 게시판',
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineSmall
-                        ?.copyWith(fontWeight: FontWeight.w800)),
+                Text(
+                  isShipper ? '내 오더' : '오더 게시판',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
                 Chip(
                   label: Text(isShipper ? '화주' : '차주'),
-                  backgroundColor:
-                      Theme.of(context).colorScheme.surfaceContainerHighest,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest,
                 ),
               ],
             ),
@@ -129,12 +139,11 @@ class _OrderScreenState extends State<OrderScreen> {
             child: isShipper
                 ? _ShipperList(
                     orders: _orders
-                        .where((o) => o.status != OrderStatus.completed)
+                        .where((o) => o.status != 'COMPLETED')
                         .toList(),
                     onConfirm: (order) async {
-                      await _orderRepo.updateStatus(
-                          order.id, OrderStatus.completed);
-                      _updateLocal(order.copyWith(status: OrderStatus.completed));
+                      await _orderRepo.updateStatus(order.id, 'COMPLETED');
+                      _updateLocal(order.copyWith(status: 'COMPLETED'));
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('오더 확정 완료')),
@@ -143,18 +152,18 @@ class _OrderScreenState extends State<OrderScreen> {
                     },
                     onAssigned: (order) async {
                       // 입찰 수락 후 배정 상태로 표시
-                      await _orderRepo.updateStatus(
-                          order.id, OrderStatus.assigned);
-                      _updateLocal(order.copyWith(status: OrderStatus.assigned));
+                      await _orderRepo.updateStatus(order.id, 'ASSIGNED');
+                      _updateLocal(order.copyWith(status: 'ASSIGNED'));
                     },
                   )
                 : _DriverBoard(
                     orders: _orders,
                     onTap: (o) async {
-                      final updated =
-                          await Navigator.of(context).push<Order>(MaterialPageRoute(
-                        builder: (_) => _DriverOrderDetail(order: o),
-                      ));
+                      final updated = await Navigator.of(context).push<Order>(
+                        MaterialPageRoute(
+                          builder: (_) => _DriverOrderDetail(order: o),
+                        ),
+                      );
                       if (updated != null) _updateLocal(updated);
                     },
                   ),
@@ -219,20 +228,26 @@ class _ShipperListState extends State<_ShipperList> {
               child: InkWell(
                 onTap: () => _toggle(o.id),
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   child: Row(
                     children: [
                       Expanded(
                         child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(o.orderNo.isNotEmpty ? o.orderNo : '오더',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w700)),
-                              const SizedBox(height: 4),
-                              Text('${o.departure} → ${o.arrival}'),
-                            ]),
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              o.orderNo.isNotEmpty ? o.orderNo : '오더',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text('${o.departure} → ${o.arrival}'),
+                          ],
+                        ),
                       ),
                       Row(
                         mainAxisSize: MainAxisSize.min,
@@ -264,13 +279,14 @@ class _ShipperListState extends State<_ShipperList> {
                       margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color:
-                              Theme.of(context).dividerColor.withOpacity(0.4),
+                          color: Theme.of(
+                            context,
+                          ).dividerColor.withOpacity(0.4),
                         ),
                       ),
                       child: Column(
@@ -288,24 +304,30 @@ class _ShipperListState extends State<_ShipperList> {
                                 child: OutlinedButton.icon(
                                   icon: const Icon(Icons.gavel),
                                   label: const Text('입찰 보기'),
-                                  onPressed: () => _openBidsBottomSheet(context, o),
+                                  onPressed: () =>
+                                      _openBidsBottomSheet(context, o),
                                 ),
                               ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: FilledButton.tonal(
-                                  onPressed: (o.status == OrderStatus.completed || _confirming)
+                                  onPressed:
+                                      (o.status == 'COMPLETED' || _confirming)
                                       ? null
                                       : () async {
                                           setState(() => _confirming = true);
                                           try {
                                             await widget.onConfirm(o);
                                             if (mounted) {
-                                              setState(() => _expandedId = null);
+                                              setState(
+                                                () => _expandedId = null,
+                                              );
                                             }
                                           } finally {
                                             if (mounted) {
-                                              setState(() => _confirming = false);
+                                              setState(
+                                                () => _confirming = false,
+                                              );
                                             }
                                           }
                                         },
@@ -314,7 +336,9 @@ class _ShipperListState extends State<_ShipperList> {
                                           height: 20,
                                           width: 20,
                                           child: CircularProgressIndicator(
-                                              strokeWidth: 2))
+                                            strokeWidth: 2,
+                                          ),
+                                        )
                                       : const Text('확정하기'),
                                 ),
                               ),
@@ -344,17 +368,17 @@ class _ShipperListState extends State<_ShipperList> {
       '${d.year.toString().padLeft(4, '0')}.${d.month.toString().padLeft(2, '0')}.${d.day.toString().padLeft(2, '0')} '
       '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
 
-  String _statusK(OrderStatus s) {
+  String _statusK(String s) {
     switch (s) {
-      case OrderStatus.open:
+      case 'OPEN':
         return '진행중';
-      case OrderStatus.assigned:
+      case 'ASSIGNED':
         return '배정';
-      case OrderStatus.completed:
+      case 'COMPLETED':
         return '완료';
-      case OrderStatus.paid:
+      case 'PAID':
         return '결제완료';
-      case OrderStatus.none:
+      case 'NONE':
       default:
         return '없음';
     }
@@ -366,8 +390,9 @@ class _ShipperListState extends State<_ShipperList> {
       child: Row(
         children: [
           SizedBox(
-              width: 110,
-              child: Text(k, style: const TextStyle(fontWeight: FontWeight.w600))),
+            width: 110,
+            child: Text(k, style: const TextStyle(fontWeight: FontWeight.w600)),
+          ),
           Expanded(child: Text(v, textAlign: TextAlign.right)),
         ],
       ),
@@ -403,7 +428,9 @@ class _BidsSheetState extends State<_BidsSheet> {
       child: Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 16, right: 16, top: 8,
+          left: 16,
+          right: 16,
+          top: 8,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -453,11 +480,14 @@ class _BidsSheetState extends State<_BidsSheet> {
                               Navigator.of(context).pop(); // 닫기
                               await widget.onAccepted(widget.order); // 배정 처리
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('입찰 수락 완료: ${_won(b.price)}원')),
+                                SnackBar(
+                                  content: Text('입찰 수락 완료: ${_won(b.price)}원'),
+                                ),
                               );
                             }
                           } on DioException catch (e) {
-                            final msg = e.response?.data?.toString() ??
+                            final msg =
+                                e.response?.data?.toString() ??
                                 e.message ??
                                 '알 수 없는 오류';
                             if (mounted) {
@@ -490,8 +520,10 @@ class _BidsSheetState extends State<_BidsSheet> {
   String _fmt(DateTime d) =>
       '${d.month.toString().padLeft(2, '0')}/${d.day.toString().padLeft(2, '0')} '
       '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
-  String _won(int v) =>
-      v.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
+  String _won(int v) => v.toString().replaceAllMapped(
+    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+    (m) => '${m[1]},',
+  );
 }
 
 /* =========================
@@ -510,8 +542,10 @@ class _DriverBoard extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
           child: Align(
             alignment: Alignment.centerLeft,
-            child: Text('※ 필터 기능은 추후 추가 예정입니다.',
-                style: TextStyle(color: Colors.grey)),
+            child: Text(
+              '※ 필터 기능은 추후 추가 예정입니다.',
+              style: TextStyle(color: Colors.grey),
+            ),
           ),
         ),
         Expanded(
@@ -520,8 +554,7 @@ class _DriverBoard extends StatelessWidget {
             itemBuilder: (_, i) {
               final o = orders[i];
               return Card(
-                margin:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 child: ListTile(
                   title: Text(
                     o.orderNo.isNotEmpty ? o.orderNo : '오더',
@@ -571,17 +604,20 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(children: [
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
                 Chip(
                   label: const Text('차주'),
                   backgroundColor: c.surfaceContainerHighest,
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: c.primaryContainer,
                     borderRadius: BorderRadius.circular(20),
@@ -591,91 +627,95 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
                     style: TextStyle(color: c.onPrimaryContainer),
                   ),
                 ),
-              ]),
-              const SizedBox(height: 12),
-              Text(o.orderNo.isNotEmpty ? o.orderNo : '오더',
-                  style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 8),
-              Text('${o.departure} → ${o.arrival}'),
-              if (o.createdAt != null) Text('등록: ${_fmt(o.createdAt!)}'),
-              const Spacer(),
-
-              // 마지막 입찰 요약
-              if (_lastSubmitted != null) ...[
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  margin: const EdgeInsets.only(bottom: 8),
-                  decoration: BoxDecoration(
-                    color: c.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Theme.of(context).dividerColor),
-                  ),
-                  child: Text(
-                    '내 최근 입찰: ${_won(_lastSubmitted!.price)}원'
-                    '${_lastSubmitted!.createdAt != null ? ' • ${_m2(_lastSubmitted!.createdAt!)}' : ''}',
-                  ),
-                ),
               ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              o.orderNo.isNotEmpty ? o.orderNo : '오더',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Text('${o.departure} → ${o.arrival}'),
+            if (o.createdAt != null) Text('등록: ${_fmt(o.createdAt!)}'),
+            const Spacer(),
 
-              TextField(
-                controller: _bidC,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: '입찰가(원)',
-                  border: OutlineInputBorder(),
+            // 마지막 입찰 요약
+            if (_lastSubmitted != null) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                  color: c.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Theme.of(context).dividerColor),
+                ),
+                child: Text(
+                  '내 최근 입찰: ${_won(_lastSubmitted!.price)}원'
+                  '${_lastSubmitted!.createdAt != null ? ' • ${_m2(_lastSubmitted!.createdAt!)}' : ''}',
                 ),
               ),
-              const SizedBox(height: 8),
-              FilledButton(
-                onPressed: _submitting
-                    ? null
-                    : () async {
-                        final only =
-                            _bidC.text.replaceAll(RegExp(r'[^0-9]'), '');
-                        if (only.isEmpty) return;
+            ],
 
-                        setState(() => _submitting = true);
-                        try {
-                          final price = int.parse(only);
-                          final submitted =
-                              await _bidRepo.submitBid(o.id, price);
-                          setState(() => _lastSubmitted = submitted);
-
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('입찰 등록 완료')),
-                            );
-                            // 화면 유지 — 상단 카드에서 바로 확인 가능
-                            Navigator.of(context).pop(o);
-                          }
-                        } on DioException catch (e) {
-                          final msg = e.response?.data?.toString() ??
-                              e.message ??
-                              '알 수 없는 오류';
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('입찰 실패: $msg')),
-                            );
-                          }
-                        } catch (e) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('입찰 실패: $e')),
-                            );
-                          }
-                        } finally {
-                          if (mounted) setState(() => _submitting = false);
-                        }
-                      },
-                child: _submitting
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text('입찰하기'),
+            TextField(
+              controller: _bidC,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: '입찰가(원)',
+                border: OutlineInputBorder(),
               ),
-            ]),
+            ),
+            const SizedBox(height: 8),
+            FilledButton(
+              onPressed: _submitting
+                  ? null
+                  : () async {
+                      final only = _bidC.text.replaceAll(RegExp(r'[^0-9]'), '');
+                      if (only.isEmpty) return;
+
+                      setState(() => _submitting = true);
+                      try {
+                        final price = int.parse(only);
+                        final submitted = await _bidRepo.submitBid(o.id, price);
+                        setState(() => _lastSubmitted = submitted);
+
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('입찰 등록 완료')),
+                          );
+                          // 화면 유지 — 상단 카드에서 바로 확인 가능
+                          Navigator.of(context).pop(o);
+                        }
+                      } on DioException catch (e) {
+                        final msg =
+                            e.response?.data?.toString() ??
+                            e.message ??
+                            '알 수 없는 오류';
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('입찰 실패: $msg')),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text('입찰 실패: $e')));
+                        }
+                      } finally {
+                        if (mounted) setState(() => _submitting = false);
+                      }
+                    },
+              child: _submitting
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('입찰하기'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -688,20 +728,22 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
       '${d.month.toString().padLeft(2, '0')}/${d.day.toString().padLeft(2, '0')} '
       '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
 
-  String _won(int v) =>
-      v.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
+  String _won(int v) => v.toString().replaceAllMapped(
+    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+    (m) => '${m[1]},',
+  );
 
-  String _statusK(OrderStatus s) {
+  String _statusK(String s) {
     switch (s) {
-      case OrderStatus.open:
+      case 'OPEN':
         return '진행중';
-      case OrderStatus.assigned:
+      case 'ASSIGNED':
         return '배정';
-      case OrderStatus.completed:
+      case 'COMPLETED':
         return '완료';
-      case OrderStatus.paid:
+      case 'PAID':
         return '결제완료';
-      case OrderStatus.none:
+      case 'NONE':
       default:
         return '없음';
     }
@@ -784,8 +826,9 @@ class _CreateOrderPageState extends State<_CreateOrderPage> {
                 if (_distanceC.text.isNotEmpty)
                   'distance': double.tryParse(_distanceC.text),
                 if (_proposedPriceC.text.isNotEmpty)
-                  'proposedPrice':
-                      int.tryParse(_proposedPriceC.text.replaceAll(',', '')),
+                  'proposedPrice': int.tryParse(
+                    _proposedPriceC.text.replaceAll(',', ''),
+                  ),
                 'status': 'OPEN',
               }..removeWhere((k, v) => v == null);
 
