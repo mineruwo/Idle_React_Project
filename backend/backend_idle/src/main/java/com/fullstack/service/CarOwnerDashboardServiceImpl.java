@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Log4j2
@@ -151,26 +152,52 @@ public class CarOwnerDashboardServiceImpl implements CarOwnerDashboardService {
 	@Transactional(readOnly = true)
 	@Override
 	public List<DeliveryItemDTO> getDeliveries(String ownerId) {
-		Long driverKey = resolveDriverKey(ownerId);
-		if (driverKey == null)
-			return List.of();
+	    Long driverKey = resolveDriverKey(ownerId);
+	    if (driverKey == null) return Collections.emptyList();
 
-		CustomerEntity assignedDriver = customerRepository.findByIdNum(driverKey)
-				.orElseThrow(() -> new AccessDeniedException("Driver not found"));
+	    CustomerEntity assignedDriver = customerRepository.findByIdNum(driverKey)
+	            .orElseThrow(() -> new AccessDeniedException("Driver not found"));
 
-		List<String> statuses = List.of("READY", "ONGOING");
+		List<OrderEntity> orders =
+	            orderRepository.findTop5ByAssignedDriverAndStatusInOrderByUpdatedAtDesc(
+	                    assignedDriver,
+	                    Arrays.asList(OrderStatus.READY, OrderStatus.ONGOING)
+	            );
 
-		return orderRepository
-				.findTop5ByAssignedDriverAndStatusInOrderByUpdatedAtDesc(assignedDriver, OrderStatus.READY,
-						OrderStatus.ONGOING) // ✅ varargs
-				.stream()
-				.map(o -> DeliveryItemDTO.builder().id(o.getId()).deliveryNum(String.valueOf(o.getId()))
-						.status(o.getStatus().name()).transport_type(o.getCargoType()).from(o.getDeparture())
-						.s_date(o.getUpdatedAt() == null ? null : o.getUpdatedAt().toLocalDate().toString())
-						.to(o.getArrival()).build())
-				.toList();
+		return orders.stream()
+	            .map((OrderEntity o) -> DeliveryItemDTO.builder()
+	                    .id(o.getId())
+	                    .deliveryNum(String.valueOf(o.getId()))
+	                    .status(o.getStatus() != null ? o.getStatus().name() : "NONE")
+	                    .transport_type(o.getCargoType())
+	                    .from(o.getDeparture())
+	                    .to(o.getArrival())
+	                    // ✅ 예약일 > 생성일 > 수정일 순으로 YYYY-MM-DD 반환
+	                    .s_date(resolveListDateYmd(o))
+	                    .build()
+	            )
+	            // ✅ JDK 8/11 호환
+	            .collect(Collectors.toList());
 	}
 
+	private static String toYmd(LocalDateTime t) {
+	    return t == null ? null : t.toLocalDate().toString();
+	}
+	
+	private static String toYmdFromString(String s) {
+	    if (s == null || s.isBlank()) return null;
+	    return s.length() >= 10 ? s.substring(0, 10) : s;
+	}
+
+	/** 리스트 표시용 날짜: reservedDate > createdAt > updatedAt */
+	private static String resolveListDateYmd(OrderEntity o) {
+	    String r = toYmdFromString(o.getReservedDate());
+	    if (r != null) return r;
+	    r = toYmd(o.getCreatedAt());
+	    if (r != null) return r;
+	    return toYmd(o.getUpdatedAt());
+	}
+	
 	private static class DateRange {
 		final LocalDate startDate;
 		final LocalDate endDate;
