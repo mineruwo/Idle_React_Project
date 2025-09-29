@@ -9,6 +9,7 @@ import 'package:application/screen/service_screen.dart';
 import 'package:application/screen/shipping_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:application/const/colors.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -36,9 +37,9 @@ class _MainScreenState extends State<MainScreen> {
       case 2: // 배송
         if (!userProvider.isLoggedIn) return const LoginScreen();
         if (userProvider.user?.role == "shipper") {
-          return const ShippingScreen(); // 화주 배송 스크린으로 바꿔주세요
+          return const ShippingScreen();
         } else {
-          return const DeliveryScreen(); // 차주 배송 스크린으로 바꿔주세요
+          return const DeliveryScreen();
         }
 
       case 3: // 서비스
@@ -48,9 +49,9 @@ class _MainScreenState extends State<MainScreen> {
       case 4: // 마이페이지
         if (!userProvider.isLoggedIn) return const LoginScreen();
         if (userProvider.user?.role == "shipper") {
-          return const MypageScreen(); // 화주 마이페이지로 바꿔주세요
+          return const MypageScreen();
         } else {
-          return MyPageScreen(); // 차주 마이페이지로 바꿔주세요
+          return MyPageScreen();
         }
 
       default:
