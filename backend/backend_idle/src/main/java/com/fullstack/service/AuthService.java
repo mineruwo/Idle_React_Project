@@ -1,6 +1,5 @@
 package com.fullstack.service;
 
-import com.fullstack.model.CustomerDTO;
 import com.fullstack.model.LoginRequestDTO;
 import com.fullstack.model.LoginResponseDTO;
 import com.fullstack.model.SignupRequestDTO;

@@ -27,6 +27,9 @@ dependencies:
     json_serializable: ^6.7.1
     webview_flutter: ^4.13.0
     flutter_quill: ^8.6.0 # Rich Text Editor
+    google_sign_in: ^6.1.5 # google login
+    kakao_flutter_sdk_user: ^1.7.0 # kakao login
+    flutter_naver_login: ^1.8.0 # naver login
 
 dev_dependencies:
     build_runner: ^2.4.6

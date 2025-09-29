@@ -92,7 +92,7 @@ class ApiService {
     required String orderId,
     required int rating,
     required String comment,
-    required String targetId,
+    required int? targetId,
   }) async {
     try {
       final body = {

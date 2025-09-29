@@ -19,7 +19,11 @@ class _ShipperStatusState extends State<ShipperStatus> {
   @override
   void initState() {
     super.initState();
-    _ordersFuture = _apiService.fetchMyOrders();
+    _ordersFuture = _apiService.fetchMyOrders().then((orders) {
+      return orders
+          .where((order) => order.status.toUpperCase() != 'COMPLETED')
+          .toList();
+    });
   }
 
   // 날짜와 시간을 포맷하는 함수

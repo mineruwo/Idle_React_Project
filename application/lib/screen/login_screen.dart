@@ -1,5 +1,7 @@
 import 'package:application/provider/user_provider.dart';
 import 'package:application/repository/auth_repository.dart';
+import 'package:application/repository/oauth_repository.dart';
+import 'package:application/screen/home_screen.dart';
 import 'package:application/screen/signup_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -18,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final _formKey = GlobalKey<FormState>();
 
+  final oauthRepository = OAuthRepository();
   final authRepository = AuthRepository();
   final storage = const FlutterSecureStorage();
 
@@ -28,14 +31,19 @@ class _LoginScreenState extends State<LoginScreen> {
           id: _idController.text,
           password: _passwordController.text,
         );
+        if (!mounted) return;
 
         // User 상태 저장
-        Provider.of<UserProvider>(context, listen: false).setUser(res);
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        userProvider.setUser(res);
+        // 홈 탭으로 이동
+        userProvider.setIndex(0);
 
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("로그인 성공")));
       } catch (e) {
+        if (!mounted) return;
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text("로그인 실패")));
@@ -153,19 +161,134 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // SNS 로그인
                   OutlinedButton.icon(
-                    onPressed: () {},
+                    onPressed: () async {
+                      final result = await oauthRepository.loginWithGoogle();
+                      if (result.isEmpty) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("구글 로그인 취소")),
+                        );
+                        return;
+                      }
+
+                      try {
+                        final user = await authRepository.snsLogin(result);
+                        if (!context.mounted) return;
+
+                        final userProvider = Provider.of<UserProvider>(
+                          context,
+                          listen: false,
+                        );
+                        userProvider.setUser(user);
+                        userProvider.setIndex(0);
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("구글 로그인 성공")),
+                        );
+                      } catch (e) {
+                        if (!context.mounted) return;
+
+                        // 신규 가입 분기
+                        final goSignup = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text("신규 회원"),
+                            content: const Text("계정이 없습니다. 회원가입 하시겠습니까?"),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text("취소"),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: const Text("회원가입"),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (goSignup == true && context.mounted) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SignUpScreen(),
+                            ),
+                          );
+                        }
+                      }
+                    },
                     icon: const Icon(Icons.g_mobiledata),
                     label: const Text("구글 로그인"),
                   ),
                   const SizedBox(height: 10),
                   OutlinedButton.icon(
-                    onPressed: () {},
+                    onPressed: () async {
+                      final result = await oauthRepository.loginWithNaver();
+                      if (result.isEmpty) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("네이버 로그인 취소")),
+                        );
+                        return;
+                      }
+
+                      try {
+                        final user = await authRepository.snsLogin(result);
+                        if (!context.mounted) return;
+
+                        final userProvider = Provider.of<UserProvider>(
+                          context,
+                          listen: false,
+                        );
+                        userProvider.setUser(user);
+                        userProvider.setIndex(0);
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("네이버 로그인 성공")),
+                        );
+                      } catch (e) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("네이버 로그인 실패: $e")),
+                        );
+                      }
+                    },
                     icon: const Icon(Icons.person),
                     label: const Text("네이버 로그인"),
                   ),
                   const SizedBox(height: 10),
                   OutlinedButton.icon(
-                    onPressed: () {},
+                    onPressed: () async {
+                      final result = await oauthRepository.loginWithKakao();
+                      if (result.isEmpty) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("카카오 로그인 취소")),
+                        );
+                        return;
+                      }
+
+                      try {
+                        final user = await authRepository.snsLogin(result);
+                        if (!context.mounted) return;
+
+                        final userProvider = Provider.of<UserProvider>(
+                          context,
+                          listen: false,
+                        );
+                        userProvider.setUser(user);
+                        userProvider.setIndex(0);
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("카카오 로그인 성공")),
+                        );
+                      } catch (e) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("카카오 로그인 실패: $e")),
+                        );
+                      }
+                    },
                     icon: const Icon(Icons.chat),
                     label: const Text("카카오 로그인"),
                   ),

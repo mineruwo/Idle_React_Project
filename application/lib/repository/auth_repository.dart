@@ -43,4 +43,46 @@ class AuthRepository {
     final response = await dioClient.dio.get("/auth/me");
     return LoginModel.fromJson(response.data);
   }
+
+  // ID 중복검사 (회원가입)
+  Future<bool> checkIdDuplicate(String id) async {
+    try {
+      final res = await dioClient.dio.get(
+        "/customer/check-id",
+        queryParameters: {"id": id},
+      );
+      return res.data as bool; // 서버에서 true/false 반환한다고 가정
+    } on DioException catch (e) {
+      throw Exception(e.response?.data["message"] ?? "아이디 중복 확인 실패");
+    }
+  }
+
+  // 닉네임 중복검사 (회원가입)
+  Future<bool> checkNicknameDuplicate(String nickname) async {
+    try {
+      final res = await dioClient.dio.get(
+        "/customer/check-nickname",
+        queryParameters: {"nickname": nickname},
+      );
+      return res.data as bool;
+    } on DioException catch (e) {
+      throw Exception(e.response?.data["message"] ?? "닉네임 중복 확인 실패");
+    }
+  }
+
+  // SNS 로그인
+  Future<LoginModel> snsLogin(Map<String, String?> payload) async {
+  try {
+    final res = await dioClient.dio.post("/auth/app-sns", data: payload);
+    return LoginModel.fromJson(res.data);
+  } on DioException catch (e) {
+    if (e.response != null) {
+      throw Exception(e.response?.data["message"] ?? "SNS 로그인 실패");
+    } else {
+      throw Exception("서버와 연결할 수 없습니다");
+    }
+  }
 }
+}
+
+

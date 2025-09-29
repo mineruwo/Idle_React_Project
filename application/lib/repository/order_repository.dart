@@ -24,8 +24,8 @@ class OrderRepository {
     return Order.fromJson(res);
   }
 
-  Future<void> updateStatus(String id, OrderStatus s) async {
-    await _api.updateStatus(id, statusToString(s));
+  Future<void> updateStatus(String id, String s) async {
+    await _api.updateStatus(id, s);
   }
 
   Future<Map<String, dynamic>> fetchAssignment(String id) async {

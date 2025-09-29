@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.fullstack.entity.CustomerEntity;
+import com.fullstack.model.AppSnsLoginRequestDTO;
 import com.fullstack.model.LoginRequestDTO;
 import com.fullstack.model.LoginResponseDTO;
 import com.fullstack.model.OauthLinkExistingDTO;
@@ -26,6 +27,7 @@ import com.fullstack.model.ResetPasswordDTO;
 import com.fullstack.model.TokenDTO;
 import com.fullstack.repository.CustomerRepository;
 import com.fullstack.security.util.TokenCookieUtils;
+import com.fullstack.service.AppSnsService;
 import com.fullstack.service.AuthService;
 import com.fullstack.service.OauthApplicationService;
 import com.fullstack.service.ResetPasswordService;
@@ -48,6 +50,7 @@ public class AuthController {
 	private final CustomerRepository customerRepository;
 	private final ResetPasswordService resetPasswordService;
 	private final OauthApplicationService oauthApplicationService;
+	private final AppSnsService appSnsService;
 	
 	@PostMapping("/login")
 	public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO loginRequestDTO,
@@ -144,6 +147,12 @@ public class AuthController {
             HttpServletResponse response) {
 
         return ResponseEntity.ok(oauthApplicationService.linkExisting(token, dto, response));
+    }
+    
+    @PostMapping("/app-sns")
+    public ResponseEntity<LoginResponseDTO> snsLogin(@RequestBody AppSnsLoginRequestDTO request) {
+        LoginResponseDTO response = appSnsService.handleSnsLogin(request);
+        return ResponseEntity.ok(response);
     }
 
 	

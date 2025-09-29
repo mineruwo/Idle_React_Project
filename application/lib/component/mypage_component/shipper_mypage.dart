@@ -40,11 +40,12 @@ class _ShipperMypageState extends State<ShipperMypage> {
       };
 
       final List<Order> completedOrders = allOrders
-          .where((order) => order.status == 'COMPLETED')
+          .where((order) => order.status.toUpperCase() == 'COMPLETED')
           .toList();
 
       final List<Order> pendingOrders = completedOrders
-          .where((order) => !reviewMap.containsKey(order.id))
+          .where((order) =>
+              !reviewMap.containsKey(order.id) && order.targetId != null)
           .toList();
 
       // Create a list of maps, each containing an order and its review
@@ -77,13 +78,21 @@ class _ShipperMypageState extends State<ShipperMypage> {
     return DateFormat('yyyy.MM.dd').format(dt);
   }
 
-  Future<void> _submitReview(Order order, int rating, String comment) async {
+  Future<void> _submitReview(
+    Order order,
+    int rating,
+    String comment,
+    int? targetId,
+  ) async {
     try {
+      if (targetId == null) {
+        throw Exception('리뷰 대상 ID가 존재하지 않습니다.');
+      }
       await _apiService.submitReview(
         orderId: order.id,
         rating: rating,
         comment: comment,
-        targetId: order.targetId,
+        targetId: targetId,
       );
 
       if (!mounted) return;
@@ -155,7 +164,15 @@ class _ShipperMypageState extends State<ShipperMypage> {
                 ElevatedButton(
                   child: const Text('제출'),
                   onPressed: () {
-                    _submitReview(order, rating, commentController.text);
+                    print(
+                      'Submitting review for order.targetId: ${order.targetId}',
+                    );
+                    _submitReview(
+                      order,
+                      rating,
+                      commentController.text,
+                      order.targetId,
+                    );
                   },
                 ),
               ],

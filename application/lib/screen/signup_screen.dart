@@ -1,7 +1,9 @@
 import 'package:application/component/signup_component/email_verification.dart';
+import 'package:application/provider/user_provider.dart';
 import 'package:application/repository/auth_repository.dart';
 import 'package:application/repository/email_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -19,8 +21,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _nicknameController = TextEditingController();
   final _phoneController = TextEditingController();
 
-  final emailRepo = EmailRepository();
-  final authRepo = AuthRepository();
+  final emailRepository = EmailRepository();
+  final authRepository = AuthRepository();
 
   String _role = "shipper"; // 기본: 화주
 
@@ -46,7 +48,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Image.asset("assets/logo.png", height: 100),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Image.asset("assets/logo.png", height: 80),
+              ),
 
               const SizedBox(height: 16),
               TextFormField(
@@ -171,11 +176,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 onPressed: () async {
                   if (!_formKey.currentState!.validate()) return;
 
+                  final isIdDuplicate = await authRepository.checkIdDuplicate(
+                    _idController.text,
+                  );
+                  if (!context.mounted) return;
+
+                  if (isIdDuplicate) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("이미 사용 중인 ID입니다")),
+                    );
+                    return;
+                  }
+
+                  final isNicknameDuplicate = await authRepository
+                      .checkNicknameDuplicate(_nicknameController.text);
+                  if (!context.mounted) return;
+                  
+                  if (isNicknameDuplicate) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("이미 사용 중인 닉네임입니다")),
+                    );
+                    return;
+                  }
+
+                  if (!context.mounted) return;
                   await showEmailVerification(
                     context: context,
                     email: _idController.text,
-                    onSendCode: emailRepo.sendCode,
-                    onVerifyCode: emailRepo.verifyCode,
+                    onSendCode: emailRepository.sendCode,
+                    onVerifyCode: emailRepository.verifyCode,
                     onVerified: () async {
                       final payload = {
                         "id": _idController.text,
@@ -186,19 +215,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         "role": _role,
                       };
 
-                      try {
-                        final res = await authRepo.signUp(payload);
+                      final messenger = ScaffoldMessenger.of(context);
 
-                        ScaffoldMessenger.of(context).showSnackBar(
+                      try {
+                        await authRepository.signUp(payload);
+                        if (!context.mounted) return;
+
+                        messenger.showSnackBar(
                           const SnackBar(content: Text("회원가입 성공")),
                         );
 
-                        // 로그인 화면으로 이동하거나 pop
+                        // 마이페이지 탭으로 이동
                         Navigator.pop(context);
-                      } catch (e) {
-                        ScaffoldMessenger.of(
+                        final userProvider = Provider.of<UserProvider>(
                           context,
-                        ).showSnackBar(SnackBar(content: Text("회원가입 실패: $e")));
+                          listen: false,
+                        );
+                        userProvider.setIndex(4);
+                      } catch (e) {
+                        if (!mounted) return;
+                        messenger.showSnackBar(
+                          SnackBar(content: Text("회원가입 실패: $e")),
+                        );
                       }
                     },
                   );
