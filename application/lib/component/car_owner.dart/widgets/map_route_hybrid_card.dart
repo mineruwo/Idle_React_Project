@@ -373,7 +373,7 @@ class _MapRouteHybridCardState extends State<MapRouteHybridCard> {
         ),
       };
       _distanceText = '$kmStr km';
-      _etaText = '${minStr}분';
+      _etaText = '$minStr분';
       _err = null;
     });
 
