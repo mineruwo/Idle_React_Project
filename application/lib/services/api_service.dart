@@ -50,10 +50,7 @@ class ApiService {
     required String content,
   }) async {
     try {
-      final body = {
-        'title': title,
-        'content': content,
-      };
+      final body = {'title': title, 'content': content};
       await _dioClient.dio.post('/inquiries', data: body);
     } catch (e) {
       print('Error in createInquiry: $e');
@@ -83,7 +80,7 @@ class ApiService {
     required String orderId,
     required int rating,
     required String comment,
-    required String targetId,
+    required int? targetId,
   }) async {
     try {
       final body = {

@@ -10,7 +10,7 @@ class Order {
   final DateTime? departedAt;
   final DateTime? completedAt;
   final bool hasReview;
-  final String targetId;
+  final int? targetId;
 
   const Order({
     required this.id,
@@ -24,10 +24,11 @@ class Order {
     this.departedAt,
     this.completedAt,
     this.hasReview = false,
-    required this.targetId,
+    this.targetId,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
+    print(json);
     return Order(
       id: json['id']?.toString() ?? '',
       orderNo: json['orderNo']?.toString() ?? '',
@@ -40,7 +41,7 @@ class Order {
       departedAt: DateTime.tryParse(json['departedAt']?.toString() ?? ''),
       completedAt: DateTime.tryParse(json['completedAt']?.toString() ?? ''),
       hasReview: json['hasReview'] == true,
-      targetId: json['targetId']?.toString() ?? '',
+      targetId: (json['assignedDriverId'] ?? json['targetId']) as int?,
     );
   }
 
@@ -72,7 +73,7 @@ class Order {
     DateTime? departedAt,
     DateTime? completedAt,
     bool? hasReview,
-    String? targetId,
+    int? targetId,
   }) {
     return Order(
       id: id ?? this.id,
