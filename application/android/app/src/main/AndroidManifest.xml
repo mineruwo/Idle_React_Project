@@ -6,7 +6,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCiggBb1I_I7pJIatmwz-O6xMvd4pujhoM"/>
+            android:value="AIzaSyCgoqm02hdbf11m1jeTU4OG07sO2C50xKQ"/>
 
         <meta-data
             android:name="com.kakao.sdk.AppKey"
