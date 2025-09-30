@@ -1,3 +1,4 @@
+import 'package:application/component/signup_component/sns_select.dart';
 import 'package:application/provider/user_provider.dart';
 import 'package:application/repository/auth_repository.dart';
 import 'package:application/repository/oauth_repository.dart';
@@ -211,7 +212,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const SignUpScreen(),
+                              builder: (_) => SnsSelect(snsResult: result),
                             ),
                           );
                         }
@@ -248,15 +249,41 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
                       } catch (e) {
                         if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("네이버 로그인 실패: $e")),
+
+                        // 신규 가입 분기
+                        final goSignup = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text("신규 회원"),
+                            content: const Text("계정이 없습니다. 회원가입 하시겠습니까?"),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text("취소"),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: const Text("회원가입"),
+                              ),
+                            ],
+                          ),
                         );
+
+                        if (goSignup == true && context.mounted) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => SnsSelect(snsResult: result),
+                            ),
+                          );
+                        }
                       }
                     },
                     icon: const Icon(Icons.person),
                     label: const Text("네이버 로그인"),
                   ),
                   const SizedBox(height: 10),
+
                   OutlinedButton.icon(
                     onPressed: () async {
                       final result = await oauthRepository.loginWithKakao();
@@ -284,9 +311,34 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
                       } catch (e) {
                         if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("카카오 로그인 실패: $e")),
+                        
+                        // 신규 가입 분기
+                        final goSignup = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text("신규 회원"),
+                            content: const Text("계정이 없습니다. 회원가입 하시겠습니까?"),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text("취소"),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: const Text("회원가입"),
+                              ),
+                            ],
+                          ),
                         );
+
+                        if (goSignup == true && context.mounted) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => SnsSelect(snsResult: result),
+                            ),
+                          );
+                        }
                       }
                     },
                     icon: const Icon(Icons.chat),

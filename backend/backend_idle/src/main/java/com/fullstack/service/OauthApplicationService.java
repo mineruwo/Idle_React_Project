@@ -11,4 +11,9 @@ public interface OauthApplicationService {
 
 	public Map<String, Object> completeSignup(String ticket, OauthSignupRequestDTO dto, HttpServletResponse res);
     public Map<String, Object> linkExisting(String ticket, OauthLinkExistingDTO dto, HttpServletResponse res);
+    public Map<String, Object> completeAppSignup(OauthSignupRequestDTO signupRequestDTO,
+			HttpServletResponse res);
+    public Map<String, Object> appLinkExisting(OauthLinkExistingDTO linkExistingDTO,
+			HttpServletResponse res);
+ 
 }

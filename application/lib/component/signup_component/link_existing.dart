@@ -1,13 +1,17 @@
+import 'package:application/repository/sns_repository.dart';
 import 'package:flutter/material.dart';
 
 class LinkExisting extends StatefulWidget {
-  const LinkExisting({super.key});
+  final Map<String, String?> snsResult;
+  
+  const LinkExisting({super.key, required this.snsResult});
 
   @override
   State<LinkExisting> createState() => _LinkExistingState();
 }
 
 class _LinkExistingState extends State<LinkExisting> {
+  final snsRepository = SnsRepository();
   final _idController = TextEditingController();
   final _pwController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -24,8 +28,13 @@ class _LinkExistingState extends State<LinkExisting> {
     });
 
     try {
-      // TODO: 실제 API 호출 → linkExisting()
-      await Future.delayed(const Duration(seconds: 1));
+      await snsRepository.linkExisting(
+        id: _idController.text,
+        password: _pwController.text,
+        provider: widget.snsResult["provider"]!,
+        providerId: widget.snsResult["providerId"]!,
+      );
+
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("기존 계정 연결 성공")),
@@ -42,6 +51,9 @@ class _LinkExistingState extends State<LinkExisting> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = widget.snsResult["provider"];
+    final providerId = widget.snsResult["providerId"];
+    
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(

@@ -70,4 +70,47 @@ public class OauthApplicationServiceImpl implements OauthApplicationService {
 		return Map.of("id", customer.getId(), "role", customer.getRole(), "atExpiresIn", tokens.getAtExpiresIn(),
 				"rtExpiresIn", tokens.getRtExpiresIn());
 	}
+	
+	@Override
+	public Map<String, Object> completeAppSignup(OauthSignupRequestDTO signupRequestDTO,
+			HttpServletResponse res) {
+
+		OauthSignupDTO ctx = OauthSignupDTO.builder()
+		            .mode("signup")
+		            .provider(signupRequestDTO.getProvider())  
+		            .providerId(signupRequestDTO.getProviderId())
+		            .build();
+
+		CustomerEntity customer = snsOnboardingService.completeSignup(ctx, signupRequestDTO);
+
+		TokenDTO tokenDTO = tokenService.issue(customer.getId(), customer.getRole());
+
+		TokenCookieUtils.setAccessTokenCookie(res, tokenDTO.getAccessToken(), tokenDTO.getAtExpiresIn());
+		TokenCookieUtils.setRefreshTokenCookie(res, tokenDTO.getRefreshToken(), tokenDTO.getRtExpiresIn());
+		TokenCookieUtils.setAuthHintCookie(res, true, tokenDTO.getRtExpiresIn());
+
+		return Map.of("id", customer.getId(), "role", customer.getRole(), "atExpiresIn", tokenDTO.getAtExpiresIn(),
+				"rtExpiresIn", tokenDTO.getRtExpiresIn());
+	}
+
+	@Override
+	public Map<String, Object> appLinkExisting(OauthLinkExistingDTO linkExistingDTO,
+			HttpServletResponse res) {
+		
+		OauthSignupDTO ctx = OauthSignupDTO.builder()
+	            .mode("signup")
+	            .provider(linkExistingDTO.getProvider())  
+	            .providerId(linkExistingDTO.getProviderId())
+	            .build();
+
+		CustomerEntity customer = snsOnboardingService.linkExisting(ctx, linkExistingDTO);
+
+		TokenDTO tokens = tokenService.issue(customer.getId(), customer.getRole());
+		TokenCookieUtils.setAccessTokenCookie(res, tokens.getAccessToken(), tokens.getAtExpiresIn());
+		TokenCookieUtils.setRefreshTokenCookie(res, tokens.getRefreshToken(), tokens.getRtExpiresIn());
+		TokenCookieUtils.setAuthHintCookie(res, true, tokens.getRtExpiresIn());
+
+		return Map.of("id", customer.getId(), "role", customer.getRole(), "atExpiresIn", tokens.getAtExpiresIn(),
+				"rtExpiresIn", tokens.getRtExpiresIn());
+	}
 }

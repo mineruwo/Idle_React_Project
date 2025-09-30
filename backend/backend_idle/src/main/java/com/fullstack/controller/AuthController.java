@@ -154,6 +154,22 @@ public class AuthController {
         LoginResponseDTO response = appSnsService.handleSnsLogin(request);
         return ResponseEntity.ok(response);
     }
+    
+    @PostMapping("/app/complete-signup")
+    public ResponseEntity<Map<String, Object>> completeAppSignup(
+            @Validated @RequestBody OauthSignupRequestDTO dto,
+            HttpServletResponse response) {
+
+        return ResponseEntity.ok(oauthApplicationService.completeAppSignup(dto, response));
+    }
+
+    @PostMapping("/app/link-existing")
+    public ResponseEntity<Map<String, Object>> appLinkExisting(
+            @Validated @RequestBody OauthLinkExistingDTO dto,
+            HttpServletResponse response) {
+
+        return ResponseEntity.ok(oauthApplicationService.appLinkExisting(dto, response));
+    }
 
 	
 }

@@ -1,13 +1,17 @@
+import 'package:application/repository/sns_repository.dart';
 import 'package:flutter/material.dart';
 
 class SnsSignup extends StatefulWidget {
-  const SnsSignup({super.key});
+  final Map<String, String?> snsResult;
+  
+  const SnsSignup({super.key, required this.snsResult});
 
   @override
   State<SnsSignup> createState() => _SnsSignupState();
 }
 
 class _SnsSignupState extends State<SnsSignup> {
+  final snsRepository = SnsRepository();
   final _nameController = TextEditingController();
   final _nicknameController = TextEditingController();
   String _role = "shipper";
@@ -25,8 +29,14 @@ class _SnsSignupState extends State<SnsSignup> {
     });
 
     try {
-      // TODO: 실제 API 호출 → snsSignup()
-      await Future.delayed(const Duration(seconds: 1));
+      await snsRepository.snsSignup(
+        provider: widget.snsResult["provider"]!,
+        providerId: widget.snsResult["providerId"]!,
+        customName: _nameController.text,
+        nickname: _nicknameController.text,
+        role: _role,
+      );
+
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("SNS 회원가입 성공")),
@@ -41,6 +51,9 @@ class _SnsSignupState extends State<SnsSignup> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = widget.snsResult["provider"];
+    final providerId = widget.snsResult["providerId"];
+
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
