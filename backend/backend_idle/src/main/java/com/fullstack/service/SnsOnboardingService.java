@@ -9,4 +9,6 @@ public interface SnsOnboardingService {
 
 	public CustomerEntity completeSignup(OauthSignupDTO oauthSignupDTO, OauthSignupRequestDTO oauthSignupRequestDTO);
 	public CustomerEntity linkExisting(OauthSignupDTO oauthSignupDTO, OauthLinkExistingDTO oauthLinkExistingDTO);
+	public CustomerEntity completeAppSignup(OauthSignupDTO oauthSignupDTO, OauthSignupRequestDTO oauthSignupRequestDTO);
+	public CustomerEntity appLinkExisting(OauthSignupDTO oauthSignupDTO, OauthLinkExistingDTO oauthLinkExistingDTO);
 }

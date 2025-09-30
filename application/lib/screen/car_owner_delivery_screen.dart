@@ -23,6 +23,7 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 50),
+            Text('배송', style: Theme.of(context).textTheme.headlineSmall),
 
             // ✅ 지도(경로 + 거리)
             MapRouteHybridCard(originAddress: _from, destAddress: _to),
