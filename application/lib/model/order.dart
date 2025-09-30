@@ -11,6 +11,7 @@ class Order {
   final DateTime? completedAt;
   final bool hasReview;
   final int? targetId;
+  final int? driverPrice;
 
   const Order({
     required this.id,
@@ -25,6 +26,7 @@ class Order {
     this.completedAt,
     this.hasReview = false,
     this.targetId,
+    this.driverPrice,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
@@ -42,6 +44,7 @@ class Order {
       completedAt: DateTime.tryParse(json['completedAt']?.toString() ?? ''),
       hasReview: json['hasReview'] == true,
       targetId: (json['assignedDriverId'] ?? json['targetId']) as int?,
+      driverPrice: json['driverPrice'] as int?,
     );
   }
 
@@ -58,6 +61,7 @@ class Order {
     'completedAt': completedAt?.toIso8601String(),
     'hasReview': hasReview,
     'targetId': targetId,
+    'driverPrice': driverPrice,
   };
 
   /// 일부만 수정된 새 객체 반환
@@ -74,6 +78,7 @@ class Order {
     DateTime? completedAt,
     bool? hasReview,
     int? targetId,
+    int? driverPrice,
   }) {
     return Order(
       id: id ?? this.id,
@@ -88,6 +93,7 @@ class Order {
       completedAt: completedAt ?? this.completedAt,
       hasReview: hasReview ?? this.hasReview,
       targetId: targetId ?? this.targetId,
+      driverPrice: driverPrice ?? this.driverPrice,
     );
   }
 }
