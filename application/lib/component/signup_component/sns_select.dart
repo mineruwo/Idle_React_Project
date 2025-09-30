@@ -3,10 +3,15 @@ import 'package:application/component/signup_component/sns_signup.dart';
 import 'package:flutter/material.dart';
 
 class SnsSelect extends StatelessWidget {
-  const SnsSelect({super.key});
+  final Map<String, String?> snsResult;
+
+  const SnsSelect({super.key, required this.snsResult});
 
   @override
   Widget build(BuildContext context) {
+    final provider = snsResult["provider"];
+    final providerId = snsResult["providerId"];
+
     return Scaffold(
       appBar: AppBar(title: const Text("SNS 로그인 완료")),
       body: Center(
@@ -42,7 +47,7 @@ class SnsSelect extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const LinkExisting(),
+                            builder: (_) => LinkExisting(snsResult: snsResult),
                           ),
                         );
                       },
@@ -60,7 +65,7 @@ class SnsSelect extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const SnsSignup(),
+                            builder: (_) => SnsSignup(snsResult: snsResult),
                           ),
                         );
                       },

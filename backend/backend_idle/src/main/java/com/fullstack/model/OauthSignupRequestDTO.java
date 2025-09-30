@@ -14,4 +14,8 @@ public class OauthSignupRequestDTO {
 	private String customName;
 	private String nickname;
 	private String role;
+	
+	// 앱에서만 필요한 필드
+    private String provider;
+    private String providerId;
 }

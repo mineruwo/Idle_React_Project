@@ -13,6 +13,7 @@ class OAuthRepository {
     final auth = await account.authentication;
     return {
       "provider": "google",
+      "providerId": account.id,
       "idToken": auth.idToken,
       "accessToken": auth.accessToken,
       "email": account.email,
@@ -26,9 +27,9 @@ class OAuthRepository {
 
     return {
       "provider": "kakao",
+      "providerId": user.id.toString(), 
       "accessToken": token.accessToken,
       "refreshToken": token.refreshToken,
-      "id": user.id.toString(),
       "email": user.kakaoAccount?.email,
     };
   }
@@ -39,9 +40,10 @@ class OAuthRepository {
 
     return {
       "provider": "naver",
-      "accessToken": result.accessToken?.accessToken,
-      "id": result.account?.id,
-      "email": result.account?.email,
+      "providerId": result.account.id,
+      "accessToken": result.accessToken.accessToken,
+      "email": result.account.email,
+
     };
   }
 }
