@@ -78,4 +78,6 @@ public class AuthServiceImpl implements AuthService {
 	public boolean isNicknameDuplicate(String nickname) {
 		return customerRepository.existsByNickname(nickname);
 	}
+	
+	
 }

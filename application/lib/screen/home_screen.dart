@@ -1,7 +1,6 @@
 import 'package:application/const/colors.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:application/component/mainpage/notice_component.dart';
 
 // 각 캐러셀 슬라이드의 데이터를 관리하기 위한 클래스
@@ -146,8 +145,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Fixed notification area
     final Widget notificationArea = Container(
-      height: kToolbarHeight + 34.0, // Combined height for status bar and notification
-      padding: const EdgeInsets.only(top: kToolbarHeight, left: 16.0, right: 16.0), // Padding for status bar
+      height:
+          kToolbarHeight +
+          34.0, // Combined height for status bar and notification
+      padding: const EdgeInsets.only(
+        top: kToolbarHeight,
+        left: 16.0,
+        right: 16.0,
+      ), // Padding for status bar
       color: Colors.white, // Add a background color to the fixed area
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end, // 우측 정렬
@@ -157,10 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
               // TODO: 알람 아이콘 클릭 시 수행할 동작 정의
               print('알람 아이콘 클릭됨!');
             },
-            child: const Icon(
-              Icons.notifications_none,
-              size: 30.0,
-            ), // 벨 아이콘
+            child: const Icon(Icons.notifications_none, size: 30.0), // 벨 아이콘
           ),
         ],
       ),
@@ -171,14 +173,18 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           // Scrollable content
           Padding(
-            padding: EdgeInsets.only(top: kToolbarHeight + 34.0 + 16.0), // Space for fixed notification area + SizedBox
+            padding: EdgeInsets.only(
+              top: kToolbarHeight + 34.0 + 16.0,
+            ), // Space for fixed notification area + SizedBox
             child: SingleChildScrollView(
               child: Column(
                 children: [
                   // The original SizedBox(height: kToolbarHeight) and Container for notification are removed from here
                   // The SizedBox(height: 16.0) after the notification area is also removed from here
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0), // 좌우 여백
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                    ), // 좌우 여백
                     child: Container(
                       decoration: BoxDecoration(
                         border: Border.all(color: THIRD_COLOR, width: 3.0),
@@ -191,7 +197,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: CarouselSlider(
                             items: imageSliders,
                             options: CarouselOptions(
-                              height: double.infinity, // 부모(AspectRatio)의 높이를 꽉 채움
+                              height:
+                                  double.infinity, // 부모(AspectRatio)의 높이를 꽉 채움
                               autoPlay: true,
                               autoPlayInterval: const Duration(seconds: 3),
                               viewportFraction: 1.0,
@@ -301,21 +308,33 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 8.0),
                         Text(
                           '대표: 홍길동 | 사업자등록번호: 123-45-67890',
-                          style: TextStyle(fontSize: 12.0, color: Colors.grey[700]),
+                          style: TextStyle(
+                            fontSize: 12.0,
+                            color: Colors.grey[700],
+                          ),
                         ),
                         Text(
                           '주소: 서울특별시 강남구 테헤란로 123',
-                          style: TextStyle(fontSize: 12.0, color: Colors.grey[700]),
+                          style: TextStyle(
+                            fontSize: 12.0,
+                            color: Colors.grey[700],
+                          ),
                         ),
                         Text(
                           '고객센터: 1588-0000',
-                          style: TextStyle(fontSize: 12.0, color: Colors.grey[700]),
+                          style: TextStyle(
+                            fontSize: 12.0,
+                            color: Colors.grey[700],
+                          ),
                         ),
                         const SizedBox(height: 16.0),
                         const Center(
                           child: Text(
                             '© 2025 Idle Corp. All rights reserved.',
-                            style: TextStyle(fontSize: 10.0, color: Colors.grey),
+                            style: TextStyle(
+                              fontSize: 10.0,
+                              color: Colors.grey,
+                            ),
                           ),
                         ),
                       ],
@@ -326,12 +345,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           // Fixed notification area
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: notificationArea,
-          ),
+          Positioned(top: 0, left: 0, right: 0, child: notificationArea),
         ],
       ),
     );

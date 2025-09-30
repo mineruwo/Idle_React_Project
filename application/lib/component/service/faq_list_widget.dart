@@ -80,7 +80,10 @@ class _FAQListWidgetState extends State<FAQListWidget> {
             final faq = _faqs[index];
             final isExpanded = _expandedFAQId == faq.id;
             return Card(
-              margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+              margin: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 4.0,
+              ),
               elevation: 1,
               child: InkWell(
                 onTap: () => _handleFAQTap(faq.id),
@@ -95,10 +98,17 @@ class _FAQListWidgetState extends State<FAQListWidget> {
                           Expanded(
                             child: Text(
                               faq.question,
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
-                          Icon(isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down),
+                          Icon(
+                            isExpanded
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                          ),
                         ],
                       ),
                       if (isExpanded)
