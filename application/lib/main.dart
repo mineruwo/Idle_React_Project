@@ -13,9 +13,7 @@ void main() async {
 
   runApp(
     MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => userProvider),
-      ],
+      providers: [ChangeNotifierProvider(create: (_) => userProvider)],
       child: const MyApp(),
     ),
   );
@@ -30,7 +28,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primaryColor: PRIMARY_COLOR,
-        scaffoldBackgroundColor: Colors.white, // Using white for main background for readability
+        scaffoldBackgroundColor:
+            Colors.white, // Using white for main background for readability
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
           selectedItemColor: PRIMARY_COLOR,
           unselectedItemColor: FIFTH_COLOR,
@@ -43,9 +42,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
-            foregroundColor: PRIMARY_COLOR,
-          ),
+          style: TextButton.styleFrom(foregroundColor: PRIMARY_COLOR),
         ),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.white,

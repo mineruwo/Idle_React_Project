@@ -1,9 +1,74 @@
 import 'package:application/network/dio_client.dart';
 import '../model/order.dart';
 import '../model/review.dart'; // Import the new Review model
+import '../model/notice.dart'; // Import the Notice model
+import '../model/inquiry.dart'; // Import the Inquiry model
+import '../model/faq.dart'; // Import the FAQ model
 
 class ApiService {
   final DioClient _dioClient = DioClient();
+
+  // Singleton instance
+  static final ApiService _instance = ApiService._internal();
+
+  // Private internal constructor
+  ApiService._internal();
+
+  // Factory constructor to return the singleton instance
+  factory ApiService() {
+    return _instance;
+  }
+
+  // 공지사항 목록 가져오기 (GET /api/public/notices)
+  Future<List<Notice>> fetchNotices() async {
+    try {
+      final response = await _dioClient.dio.get('/public/notices');
+      final List<dynamic> body = response.data;
+      return body.map((dynamic item) => Notice.fromJson(item)).toList();
+    } catch (e) {
+      print('Error in fetchNotices: $e');
+      throw Exception('Failed to load notices: $e');
+    }
+  }
+
+  // FAQ 목록 가져오기 (GET /api/public/faqs)
+  Future<List<FAQ>> fetchFAQs() async {
+    try {
+      final response = await _dioClient.dio.get('/public/faqs');
+      final List<dynamic> body = response.data;
+      return body.map((dynamic item) => FAQ.fromJson(item)).toList();
+    } catch (e) {
+      print('Error in fetchFAQs: $e');
+      throw Exception('Failed to load FAQs: $e');
+    }
+  }
+
+  // 내 문의 목록 가져오기 (GET /api/inquiries/customer/{id})
+  Future<List<Inquiry>> fetchMyInquiries(int userId) async {
+    try {
+      final response = await _dioClient.dio.get('/inquiries/customer/$userId');
+      // The backend returns a Page object, so we need to access the 'content' field.
+      final List<dynamic> body = response.data['content'];
+      return body.map((dynamic item) => Inquiry.fromJson(item)).toList();
+    } catch (e) {
+      print('Error in fetchMyInquiries: $e');
+      throw Exception('Failed to load my inquiries: $e');
+    }
+  }
+
+  // 문의 생성 (POST /api/inquiries)
+  Future<void> createInquiry({
+    required String title,
+    required String content,
+  }) async {
+    try {
+      final body = {'title': title, 'content': content};
+      await _dioClient.dio.post('/inquiries', data: body);
+    } catch (e) {
+      print('Error in createInquiry: $e');
+      throw Exception('Failed to create inquiry: $e');
+    }
+  }
 
   // 내 주문 목록 가져오기 (GET /api/orders/my)
   Future<List<Order>> fetchMyOrders() async {
@@ -27,7 +92,7 @@ class ApiService {
     required String orderId,
     required int rating,
     required String comment,
-    required String targetId,
+    required int? targetId,
   }) async {
     try {
       final body = {

@@ -6,7 +6,6 @@ import 'package:application/services/car_owner_dashboard_service.dart';
 import 'package:flutter/material.dart';
 
 import '../component/car_owner.dart/widgets/section_title.dart';
-import '../component/car_owner.dart/widgets/warmth_card.dart';
 
 class MyPageScreen extends StatelessWidget {
   MyPageScreen({super.key});

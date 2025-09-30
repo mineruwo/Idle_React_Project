@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:dio/dio.dart';
 
 import '../provider/user_provider.dart';
 import '../model/order.dart';
@@ -28,6 +29,7 @@ class _OrderScreenState extends State<OrderScreen> {
   Future<void> _load() async {
     final roleStr = context.read<UserProvider>().user?.role ?? 'shipper';
     final isShipper = roleStr == 'shipper';
+
     setState(() {
       _loading = true;
       _error = null;
@@ -35,8 +37,11 @@ class _OrderScreenState extends State<OrderScreen> {
 
     try {
       final list = await _orderRepo.fetchOrders(isShipper: isShipper);
-      list.sort((a, b) =>
-          (b.createdAt ?? DateTime(1970)).compareTo(a.createdAt ?? DateTime(1970)));
+      list.sort(
+        (a, b) => (b.createdAt ?? DateTime(1970)).compareTo(
+          a.createdAt ?? DateTime(1970),
+        ),
+      );
       setState(() {
         _orders = list;
         _loading = false;
@@ -55,22 +60,25 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   Future<void> _createOrder() async {
-    final createdPayload = await Navigator.of(context).push<Map<String, dynamic>>(
-      MaterialPageRoute(builder: (_) => const _CreateOrderPage()),
-    );
+    final createdPayload = await Navigator.of(context)
+        .push<Map<String, dynamic>>(
+          MaterialPageRoute(builder: (_) => const _CreateOrderPage()),
+        );
     if (createdPayload == null) return;
 
     try {
       final saved = await _orderRepo.createOrderFromPayload(createdPayload);
       setState(() => _orders.insert(0, saved));
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('등록 완료')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('등록 완료')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('등록 실패: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('등록 실패: $e')));
       }
     }
   }
@@ -86,11 +94,14 @@ class _OrderScreenState extends State<OrderScreen> {
     if (_error != null) {
       return Scaffold(
         body: Center(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Text(_error!, textAlign: TextAlign.center),
-            const SizedBox(height: 12),
-            FilledButton(onPressed: _load, child: const Text('다시 시도')),
-          ]),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(_error!, textAlign: TextAlign.center),
+              const SizedBox(height: 12),
+              FilledButton(onPressed: _load, child: const Text('다시 시도')),
+            ],
+          ),
         ),
       );
     }
@@ -98,7 +109,7 @@ class _OrderScreenState extends State<OrderScreen> {
     return Scaffold(
       body: Column(
         children: [
-          // 상단 150px 여백
+          // 상단 150px 빈 여백
           Container(height: 150, color: Colors.transparent),
 
           // 타이틀 + 역할 뱃지
@@ -107,29 +118,32 @@ class _OrderScreenState extends State<OrderScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(isShipper ? '내 오더' : '오더 게시판',
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineSmall
-                        ?.copyWith(fontWeight: FontWeight.w800)),
+                Text(
+                  isShipper ? '내 오더' : '오더 게시판',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
                 Chip(
                   label: Text(isShipper ? '화주' : '차주'),
-                  backgroundColor:
-                      Theme.of(context).colorScheme.surfaceContainerHighest,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest,
                 ),
               ],
             ),
           ),
 
+          // 본문
           Expanded(
             child: isShipper
                 ? _ShipperList(
                     orders: _orders
-                        .where((o) => o.status != OrderStatus.completed)
+                        .where((o) => o.status != 'COMPLETED')
                         .toList(),
                     onConfirm: (order) async {
-                      await _orderRepo.updateStatus(order.id, OrderStatus.completed);
-                      _updateLocal(order.copyWith(status: OrderStatus.completed));
+                      await _orderRepo.updateStatus(order.id, 'COMPLETED');
+                      _updateLocal(order.copyWith(status: 'COMPLETED'));
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('오더 확정 완료')),
@@ -137,17 +151,19 @@ class _OrderScreenState extends State<OrderScreen> {
                       }
                     },
                     onAssigned: (order) async {
-                      await _orderRepo.updateStatus(order.id, OrderStatus.assigned);
-                      _updateLocal(order.copyWith(status: OrderStatus.assigned));
+                      // 입찰 수락 후 배정 상태로 표시
+                      await _orderRepo.updateStatus(order.id, 'ASSIGNED');
+                      _updateLocal(order.copyWith(status: 'ASSIGNED'));
                     },
                   )
                 : _DriverBoard(
                     orders: _orders,
                     onTap: (o) async {
-                      final updated =
-                          await Navigator.of(context).push<Order>(MaterialPageRoute(
-                        builder: (_) => _DriverOrderDetail(order: o),
-                      ));
+                      final updated = await Navigator.of(context).push<Order>(
+                        MaterialPageRoute(
+                          builder: (_) => _DriverOrderDetail(order: o),
+                        ),
+                      );
                       if (updated != null) _updateLocal(updated);
                     },
                   ),
@@ -168,14 +184,18 @@ class _OrderScreenState extends State<OrderScreen> {
 }
 
 /* =========================
-   화주 리스트(카드 확장 + 입찰보기/수락 + 확정하기)
+   화주 리스트 (입찰 보기/수락 포함)
    ========================= */
 class _ShipperList extends StatefulWidget {
   final List<Order> orders;
   final Future<void> Function(Order) onConfirm;
   final Future<void> Function(Order) onAssigned; // 입찰 수락 시 호출
-  const _ShipperList(
-      {required this.orders, required this.onConfirm, required this.onAssigned});
+
+  const _ShipperList({
+    required this.orders,
+    required this.onConfirm,
+    required this.onAssigned,
+  });
 
   @override
   State<_ShipperList> createState() => _ShipperListState();
@@ -208,20 +228,26 @@ class _ShipperListState extends State<_ShipperList> {
               child: InkWell(
                 onTap: () => _toggle(o.id),
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   child: Row(
                     children: [
                       Expanded(
                         child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(o.orderNo.isNotEmpty ? o.orderNo : '오더',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w700)),
-                              const SizedBox(height: 4),
-                              Text('${o.departure} → ${o.arrival}'),
-                            ]),
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              o.orderNo.isNotEmpty ? o.orderNo : '오더',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text('${o.departure} → ${o.arrival}'),
+                          ],
+                        ),
                       ),
                       Row(
                         mainAxisSize: MainAxisSize.min,
@@ -253,13 +279,14 @@ class _ShipperListState extends State<_ShipperList> {
                       margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color:
-                              Theme.of(context).dividerColor.withOpacity(0.4),
+                          color: Theme.of(
+                            context,
+                          ).dividerColor.withOpacity(0.4),
                         ),
                       ),
                       child: Column(
@@ -277,27 +304,30 @@ class _ShipperListState extends State<_ShipperList> {
                                 child: OutlinedButton.icon(
                                   icon: const Icon(Icons.gavel),
                                   label: const Text('입찰 보기'),
-                                  onPressed: () => _openBidsBottomSheet(context, o),
+                                  onPressed: () =>
+                                      _openBidsBottomSheet(context, o),
                                 ),
                               ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: FilledButton.tonal(
-                                  onPressed: (o.status ==
-                                              OrderStatus.completed ||
-                                          _confirming)
+                                  onPressed:
+                                      (o.status == 'COMPLETED' || _confirming)
                                       ? null
                                       : () async {
                                           setState(() => _confirming = true);
                                           try {
                                             await widget.onConfirm(o);
                                             if (mounted) {
-                                              setState(() => _expandedId = null);
+                                              setState(
+                                                () => _expandedId = null,
+                                              );
                                             }
                                           } finally {
                                             if (mounted) {
                                               setState(
-                                                  () => _confirming = false);
+                                                () => _confirming = false,
+                                              );
                                             }
                                           }
                                         },
@@ -306,7 +336,9 @@ class _ShipperListState extends State<_ShipperList> {
                                           height: 20,
                                           width: 20,
                                           child: CircularProgressIndicator(
-                                              strokeWidth: 2))
+                                            strokeWidth: 2,
+                                          ),
+                                        )
                                       : const Text('확정하기'),
                                 ),
                               ),
@@ -336,17 +368,17 @@ class _ShipperListState extends State<_ShipperList> {
       '${d.year.toString().padLeft(4, '0')}.${d.month.toString().padLeft(2, '0')}.${d.day.toString().padLeft(2, '0')} '
       '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
 
-  String _statusK(OrderStatus s) {
+  String _statusK(String s) {
     switch (s) {
-      case OrderStatus.open:
+      case 'OPEN':
         return '진행중';
-      case OrderStatus.assigned:
+      case 'ASSIGNED':
         return '배정';
-      case OrderStatus.completed:
+      case 'COMPLETED':
         return '완료';
-      case OrderStatus.paid:
+      case 'PAID':
         return '결제완료';
-      case OrderStatus.none:
+      case 'NONE':
       default:
         return '없음';
     }
@@ -358,9 +390,9 @@ class _ShipperListState extends State<_ShipperList> {
       child: Row(
         children: [
           SizedBox(
-              width: 110,
-              child:
-                  Text(k, style: const TextStyle(fontWeight: FontWeight.w600))),
+            width: 110,
+            child: Text(k, style: const TextStyle(fontWeight: FontWeight.w600)),
+          ),
           Expanded(child: Text(v, textAlign: TextAlign.right)),
         ],
       ),
@@ -369,7 +401,7 @@ class _ShipperListState extends State<_ShipperList> {
 }
 
 /* =========================
-   입찰 리스트 바텀시트(화주가 수락)
+   입찰 리스트 바텀시트 (화주가 수락)
    ========================= */
 class _BidsSheet extends StatefulWidget {
   final Order order;
@@ -438,21 +470,31 @@ class _BidsSheetState extends State<_BidsSheet> {
                       leading: const Icon(Icons.local_shipping),
                       title: Text('${_won(b.price)}원'),
                       subtitle: Text(
-                        '${b.driverNickname ?? "기사"}'
-                        ' • ${_fmt(b.createdAt ?? DateTime.now())}',
+                        '${b.driverNickname} • ${_fmt(b.createdAt ?? DateTime.now())}',
                       ),
                       trailing: FilledButton(
                         onPressed: () async {
                           try {
-                            await _repo.acceptBid(widget.order.id, b.id);
-                            if (!mounted) return;
-                            Navigator.of(context).pop(); // 바텀시트 닫기
-                            await widget.onAccepted(widget.order);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content:
-                                      Text('입찰 수락 완료: ${_won(b.price)}원')),
-                            );
+                            await _repo.acceptBid(b.id); // ✅ bidId만 전달
+                            if (mounted) {
+                              Navigator.of(context).pop(); // 닫기
+                              await widget.onAccepted(widget.order); // 배정 처리
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('입찰 수락 완료: ${_won(b.price)}원'),
+                                ),
+                              );
+                            }
+                          } on DioException catch (e) {
+                            final msg =
+                                e.response?.data?.toString() ??
+                                e.message ??
+                                '알 수 없는 오류';
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('수락 실패: $msg')),
+                              );
+                            }
                           } catch (e) {
                             if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -478,13 +520,14 @@ class _BidsSheetState extends State<_BidsSheet> {
   String _fmt(DateTime d) =>
       '${d.month.toString().padLeft(2, '0')}/${d.day.toString().padLeft(2, '0')} '
       '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
-  String _won(int v) =>
-      v.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (m) => '${m[1]},');
+  String _won(int v) => v.toString().replaceAllMapped(
+    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+    (m) => '${m[1]},',
+  );
 }
 
 /* =========================
-   차주 게시판
+   차주 게시판 & 상세 (입찰 등록)
    ========================= */
 class _DriverBoard extends StatelessWidget {
   final List<Order> orders;
@@ -499,8 +542,10 @@ class _DriverBoard extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
           child: Align(
             alignment: Alignment.centerLeft,
-            child: Text('※ 필터 기능은 추후 추가 예정입니다.',
-                style: TextStyle(color: Colors.grey)),
+            child: Text(
+              '※ 필터 기능은 추후 추가 예정입니다.',
+              style: TextStyle(color: Colors.grey),
+            ),
           ),
         ),
         Expanded(
@@ -511,8 +556,10 @@ class _DriverBoard extends StatelessWidget {
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 child: ListTile(
-                  title: Text(o.orderNo.isNotEmpty ? o.orderNo : '오더',
-                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                  title: Text(
+                    o.orderNo.isNotEmpty ? o.orderNo : '오더',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
                   subtitle: Text('${o.departure} → ${o.arrival}'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => onTap(o),
@@ -526,9 +573,6 @@ class _DriverBoard extends StatelessWidget {
   }
 }
 
-/* =========================
-   차주 상세(입찰 등록: 서버 전송 + 내 최근 입찰가 유지)
-   ========================= */
 class _DriverOrderDetail extends StatefulWidget {
   final Order order;
   const _DriverOrderDetail({required this.order});
@@ -541,41 +585,16 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
   late Order o;
   final _bidC = TextEditingController();
   final _bidRepo = BidRepository();
-
   bool _submitting = false;
 
-  /// 내 최근 입찰가(서버에서 로드하거나 방금 제출한 값)
-  int _lastSubmitted = 0;
+  // 마지막으로 등록한 입찰 표시
+  Bid? _lastSubmitted;
 
   @override
   void initState() {
     super.initState();
     o = widget.order;
-    _loadMyLastBid(); // 입장 시 서버에서 내 최근 입찰가 로드
   }
-
- Future<void> _loadMyLastBid() async {
-  try {
-    final me = context.read<UserProvider>().user; // LoginModel
-    final bids = await _bidRepo.fetchBids(o.id);  // List<Bid>
-
-    // 내 입찰만 필터링: idNum 또는 id(=이메일) 둘 중 하나라도 일치하면 내 입찰로 간주
-    final myBids = bids.where((b) {
-      final byIdNum   = (me?.idNum != null && b.driverIdNum == me!.idNum);
-      final byEmailId = (me?.id.isNotEmpty == true && b.driverEmail == me!.id);
-      return byIdNum || byEmailId;
-    }).toList()
-      ..sort((a, b) =>
-        (a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0))
-          .compareTo(b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0)));
-
-    if (myBids.isNotEmpty && mounted) {
-      setState(() => _lastSubmitted = myBids.last.price); // 상단 “내 최근 입찰가: …원”
-    }
-  } catch (_) {
-    // 실패해도 조용히 무시 (0원 유지)
-  }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -584,89 +603,119 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
       appBar: AppBar(title: const Text('오더 상세')),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child:
-            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Chip(
-              label: const Text('차주'),
-              backgroundColor: c.surfaceContainerHighest,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Chip(
+                  label: const Text('차주'),
+                  backgroundColor: c.surfaceContainerHighest,
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: c.primaryContainer,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    _statusK(o.status),
+                    style: TextStyle(color: c.onPrimaryContainer),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: c.primaryContainer,
-                borderRadius: BorderRadius.circular(20),
+            const SizedBox(height: 12),
+            Text(
+              o.orderNo.isNotEmpty ? o.orderNo : '오더',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Text('${o.departure} → ${o.arrival}'),
+            if (o.createdAt != null) Text('등록: ${_fmt(o.createdAt!)}'),
+            const Spacer(),
+
+            // 마지막 입찰 요약
+            if (_lastSubmitted != null) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                  color: c.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Theme.of(context).dividerColor),
+                ),
+                child: Text(
+                  '내 최근 입찰: ${_won(_lastSubmitted!.price)}원'
+                  '${_lastSubmitted!.createdAt != null ? ' • ${_m2(_lastSubmitted!.createdAt!)}' : ''}',
+                ),
               ),
-              child: Text(_statusK(o.status),
-                  style: TextStyle(color: c.onPrimaryContainer)),
+            ],
+
+            TextField(
+              controller: _bidC,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: '입찰가(원)',
+                border: OutlineInputBorder(),
+              ),
             ),
-          ]),
-          const SizedBox(height: 12),
-          Text(o.orderNo.isNotEmpty ? o.orderNo : '오더',
-              style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 8),
-          Text('${o.departure} → ${o.arrival}'),
-          if (o.createdAt != null) Text('등록: ${_fmt(o.createdAt!)}'),
-          const SizedBox(height: 12),
-          // ✅ 내 최근 입찰가 표시(서버/로컬 최신)
-          Text('내 최근 입찰가: ${_won(_lastSubmitted)}원',
-              style: TextStyle(
-                  color: c.primary, fontWeight: FontWeight.w600)),
-          const Spacer(),
-          TextField(
-            controller: _bidC,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: '입찰가(원)',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 8),
-          FilledButton(
-            onPressed: _submitting
-                ? null
-                : () async {
-                    final only =
-                        _bidC.text.replaceAll(RegExp(r'[^0-9]'), '');
-                    if (only.isEmpty) return;
+            const SizedBox(height: 8),
+            FilledButton(
+              onPressed: _submitting
+                  ? null
+                  : () async {
+                      final only = _bidC.text.replaceAll(RegExp(r'[^0-9]'), '');
+                      if (only.isEmpty) return;
 
-                    setState(() => _submitting = true);
-                    try {
-                      final price = int.parse(only);
-                      await _bidRepo.submitBid(o.id, price);
+                      setState(() => _submitting = true);
+                      try {
+                        final price = int.parse(only);
+                        final submitted = await _bidRepo.submitBid(o.id, price);
+                        setState(() => _lastSubmitted = submitted);
 
-                      if (!mounted) return;
-
-                      // 팝업 닫지 않고 로컬 반영 + 입력값 클리어
-                      setState(() {
-                        _lastSubmitted = price;
-                        _bidC.clear();
-                      });
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content: Text('입찰 등록 완료: ${_won(price)}원')),
-                      );
-                    } catch (e) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('입찰 실패: $e')),
-                        );
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('입찰 등록 완료')),
+                          );
+                          // 화면 유지 — 상단 카드에서 바로 확인 가능
+                          Navigator.of(context).pop(o);
+                        }
+                      } on DioException catch (e) {
+                        final msg =
+                            e.response?.data?.toString() ??
+                            e.message ??
+                            '알 수 없는 오류';
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('입찰 실패: $msg')),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text('입찰 실패: $e')));
+                        }
+                      } finally {
+                        if (mounted) setState(() => _submitting = false);
                       }
-                    } finally {
-                      if (mounted) setState(() => _submitting = false);
-                    }
-                  },
-            child: _submitting
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2))
-                : const Text('입찰하기'),
-          ),
-        ]),
+                    },
+              child: _submitting
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('입찰하기'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -675,25 +724,30 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
       '${d.year.toString().padLeft(4, '0')}.${d.month.toString().padLeft(2, '0')}.${d.day.toString().padLeft(2, '0')} '
       '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
 
-  String _statusK(OrderStatus s) {
+  String _m2(DateTime d) =>
+      '${d.month.toString().padLeft(2, '0')}/${d.day.toString().padLeft(2, '0')} '
+      '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+
+  String _won(int v) => v.toString().replaceAllMapped(
+    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+    (m) => '${m[1]},',
+  );
+
+  String _statusK(String s) {
     switch (s) {
-      case OrderStatus.open:
+      case 'OPEN':
         return '진행중';
-      case OrderStatus.assigned:
+      case 'ASSIGNED':
         return '배정';
-      case OrderStatus.completed:
+      case 'COMPLETED':
         return '완료';
-      case OrderStatus.paid:
+      case 'PAID':
         return '결제완료';
-      case OrderStatus.none:
+      case 'NONE':
       default:
         return '없음';
     }
   }
-
-  String _won(int v) =>
-      v.toString().replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
 }
 
 /* =========================
@@ -709,8 +763,8 @@ class _CreateOrderPageState extends State<_CreateOrderPage> {
   final _titleC = TextEditingController();
   final _fromC = TextEditingController();
   final _toC = TextEditingController();
-  final _distanceC = TextEditingController(); // 선택
-  final _proposedPriceC = TextEditingController(); // 선택
+  final _distanceC = TextEditingController();
+  final _proposedPriceC = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -772,8 +826,9 @@ class _CreateOrderPageState extends State<_CreateOrderPage> {
                 if (_distanceC.text.isNotEmpty)
                   'distance': double.tryParse(_distanceC.text),
                 if (_proposedPriceC.text.isNotEmpty)
-                  'proposedPrice':
-                      int.tryParse(_proposedPriceC.text.replaceAll(',', '')),
+                  'proposedPrice': int.tryParse(
+                    _proposedPriceC.text.replaceAll(',', ''),
+                  ),
                 'status': 'OPEN',
               }..removeWhere((k, v) => v == null);
 
