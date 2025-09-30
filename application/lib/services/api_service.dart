@@ -8,6 +8,17 @@ import '../model/faq.dart'; // Import the FAQ model
 class ApiService {
   final DioClient _dioClient = DioClient();
 
+  // Singleton instance
+  static final ApiService _instance = ApiService._internal();
+
+  // Private internal constructor
+  ApiService._internal();
+
+  // Factory constructor to return the singleton instance
+  factory ApiService() {
+    return _instance;
+  }
+
   // 공지사항 목록 가져오기 (GET /api/public/notices)
   Future<List<Notice>> fetchNotices() async {
     try {
@@ -32,11 +43,12 @@ class ApiService {
     }
   }
 
-  // 내 문의 목록 가져오기 (GET /api/inquiries/my)
-  Future<List<Inquiry>> fetchMyInquiries() async {
+  // 내 문의 목록 가져오기 (GET /api/inquiries/customer/{id})
+  Future<List<Inquiry>> fetchMyInquiries(int userId) async {
     try {
-      final response = await _dioClient.dio.get('/inquiries/my');
-      final List<dynamic> body = response.data;
+      final response = await _dioClient.dio.get('/inquiries/customer/$userId');
+      // The backend returns a Page object, so we need to access the 'content' field.
+      final List<dynamic> body = response.data['content'];
       return body.map((dynamic item) => Inquiry.fromJson(item)).toList();
     } catch (e) {
       print('Error in fetchMyInquiries: $e');

@@ -6,7 +6,7 @@ class DioClient {
   final storage = const FlutterSecureStorage();
 
   DioClient() {
-    dio.options.baseUrl = "http://10.0.2.2:8080/api";          
+    dio.options.baseUrl = "http://10.0.2.2:8080/api";
 
     dio.interceptors.add(
       InterceptorsWrapper(
@@ -41,19 +41,46 @@ class DioClient {
               try {
                 final refreshDio = Dio()..options.baseUrl = dio.options.baseUrl;
                 // Refresh 요청 (baseUrl이 있으므로 상대 경로 사용 가능)
+                // The server returns an empty body but sets new tokens in cookies.
+                // We need to parse the 'Set-Cookie' header from the response.
                 final refreshResponse = await refreshDio.post(
                   "/auth/refresh",
-                  data: {"refreshToken": refreshToken},
+                  options: Options(
+                    headers: {
+                      // The backend expects the refresh token in a cookie.
+                      'Cookie': 'refreshToken=$refreshToken',
+                    },
+                  ),
                 );
+                final setCookieHeaders = refreshResponse.headers['set-cookie'];
+                String? newAccess;
 
-                final newAccess = refreshResponse.data["accessToken"];
-                final newRefresh = refreshResponse.data["refreshToken"];
+                if (setCookieHeaders != null) {
+                  // Find the accessToken cookie specifically.
+                  final accessTokenCookie = setCookieHeaders.firstWhere(
+                    (c) => c.startsWith('accessToken='),
+                    orElse: () => '',
+                  );
+
+                  if (accessTokenCookie.isNotEmpty) {
+                    // Parse the cookie string 'accessToken=value;...'
+                    newAccess = accessTokenCookie
+                        .split(';')
+                        .first
+                        .split('=')
+                        .last;
+                  }
+                }
+
+                if (newAccess == null) {
+                  // If we couldn't get a new access token, the refresh is considered failed.
+                  throw Exception(
+                    'Failed to extract new accessToken from refresh response headers.',
+                  );
+                }
 
                 // 새 토큰 저장
                 await storage.write(key: "accessToken", value: newAccess);
-                if (newRefresh != null) {
-                  await storage.write(key: "refreshToken", value: newRefresh);
-                }
 
                 // 실패했던 요청에 새 토큰 붙여서 재시도
                 e.requestOptions.headers["Authorization"] = "Bearer $newAccess";
@@ -61,7 +88,14 @@ class DioClient {
 
                 return handler.resolve(retryResponse);
               } catch (refreshError) {
-                print('Token refresh failed: $refreshError'); // Added logging
+                print(
+                  'Token refresh failed. The refresh token may be expired or invalid. Error: $refreshError',
+                );
+                if (refreshError is DioException) {
+                  print(
+                    'Refresh failed response: ${refreshError.response?.data}',
+                  );
+                }
                 // Refresh 실패 → 로그아웃 처리 필요
                 await storage.delete(key: "accessToken");
                 await storage.delete(key: "refreshToken");

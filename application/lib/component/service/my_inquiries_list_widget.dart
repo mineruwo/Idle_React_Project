@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:application/model/inquiry.dart';
 import 'package:application/services/api_service.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:provider/provider.dart';
+import 'package:application/provider/user_provider.dart';
 
 class MyInquiriesListWidget extends StatefulWidget {
   final int? inquiryListKey; // Used to force refresh
@@ -16,7 +18,7 @@ class _MyInquiriesListWidgetState extends State<MyInquiriesListWidget> {
   List<Inquiry> _inquiries = [];
   bool _isLoading = true;
   String? _error;
-  int? _expandedInquiryId;
+  String? _expandedInquiryId; // Changed from int? to String?
 
   @override
   void initState() {
@@ -37,22 +39,39 @@ class _MyInquiriesListWidgetState extends State<MyInquiriesListWidget> {
       _isLoading = true;
       _error = null;
     });
+
+    // Access UserProvider and get the user's ID
+    final userProvider = context.read<UserProvider>();
+    final userId = userProvider.user?.idNum;
+
+    if (userId == null) {
+      setState(() {
+        _error = "로그인이 필요합니다.";
+        _isLoading = false;
+      });
+      return;
+    }
+
     try {
       final apiService = ApiService();
-      final fetchedInquiries = await apiService.fetchMyInquiries();
-      setState(() {
-        _inquiries = fetchedInquiries;
-        _isLoading = false;
-      });
+      final fetchedInquiries = await apiService.fetchMyInquiries(userId);
+      if (mounted) { // Check if the widget is still in the tree
+        setState(() {
+          _inquiries = fetchedInquiries;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _isLoading = false;
-      });
+      if (mounted) { // Check if the widget is still in the tree
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 
-  void _handleInquiryTap(int id) {
+  void _handleInquiryTap(String id) {
     setState(() {
       if (_expandedInquiryId == id) {
         _expandedInquiryId = null;
