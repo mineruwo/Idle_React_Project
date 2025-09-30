@@ -72,17 +72,21 @@ class AuthRepository {
 
   // SNS 로그인
   Future<LoginModel> snsLogin(Map<String, String?> payload) async {
-  try {
-    final res = await dioClient.dio.post("/auth/app-sns", data: payload);
-    return LoginModel.fromJson(res.data);
-  } on DioException catch (e) {
-    if (e.response != null) {
-      throw Exception(e.response?.data["message"] ?? "SNS 로그인 실패");
-    } else {
-      throw Exception("서버와 연결할 수 없습니다");
+    try {
+      final res = await dioClient.dio.post("/auth/app-sns", data: payload);
+
+      final model = LoginModel.fromJson(res.data);
+      // 토큰 저장
+      await storage.write(key: "accessToken", value: model.accessToken);
+      await storage.write(key: "refreshToken", value: model.refreshToken);
+      return model;
+      
+    } on DioException catch (e) {
+      if (e.response != null) {
+        throw Exception(e.response?.data["message"] ?? "SNS 로그인 실패");
+      } else {
+        throw Exception("서버와 연결할 수 없습니다");
+      }
     }
   }
 }
-}
-
-

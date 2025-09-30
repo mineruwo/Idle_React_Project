@@ -11,9 +11,11 @@ import com.fullstack.repository.CustomerRepository;
 import com.fullstack.security.oauth.AppSnsVerifier;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class AppSnsServiceImpl implements AppSnsService {
 
 	private final CustomerRepository customerRepository;
@@ -23,7 +25,7 @@ public class AppSnsServiceImpl implements AppSnsService {
 	@Override
 	public LoginResponseDTO handleSnsLogin(AppSnsLoginRequestDTO request) {
 		String provider = request.getProvider();
-
+		
 		JsonNode userInfo;
 
 		try {

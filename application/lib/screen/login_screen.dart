@@ -180,6 +180,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           context,
                           listen: false,
                         );
+                        print("여기");
+                        print(user.accessToken);
                         userProvider.setUser(user);
                         userProvider.setIndex(0);
 
