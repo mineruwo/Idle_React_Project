@@ -475,7 +475,7 @@ class _BidsSheetState extends State<_BidsSheet> {
                       trailing: FilledButton(
                         onPressed: () async {
                           try {
-                            await _repo.acceptBid(b.id); // ✅ bidId만 전달
+                            await _repo.acceptBid(widget.order.id ,b.id); // ✅ bidId만 전달
                             if (mounted) {
                               Navigator.of(context).pop(); // 닫기
                               await widget.onAccepted(widget.order); // 배정 처리
