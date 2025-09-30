@@ -40,10 +40,9 @@ class OAuthRepository {
 
     return {
       "provider": "naver",
-      "providerId": result.account.id,
-      "accessToken": result.accessToken.accessToken,
-      "email": result.account.email,
-
+      "providerId": result.account!.id,
+      "accessToken": result.accessToken!.accessToken,
+      "email": result.account!.email,
     };
   }
 }
