@@ -180,8 +180,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           context,
                           listen: false,
                         );
-                        print("여기");
-                        print(user.accessToken);
                         userProvider.setUser(user);
                         userProvider.setIndex(0);
 
@@ -224,6 +222,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     label: const Text("구글 로그인"),
                   ),
                   const SizedBox(height: 10),
+                  
                   OutlinedButton.icon(
                     onPressed: () async {
                       final result = await oauthRepository.loginWithNaver();
@@ -234,6 +233,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
                         return;
                       }
+
+                      print(result);
 
                       try {
                         final user = await authRepository.snsLogin(result);
@@ -288,6 +289,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   OutlinedButton.icon(
                     onPressed: () async {
+                      print("1");
                       final result = await oauthRepository.loginWithKakao();
                       if (result.isEmpty) {
                         if (!context.mounted) return;

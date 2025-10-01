@@ -17,7 +17,7 @@ class OAuthRepository {
     return {
       "provider": "google",
       "providerId": account.id,
-      "idToken": auth.idToken, // idToken
+      "idToken": auth.idToken,
       "accessToken": auth.accessToken,
       "email": account.email,
     };
@@ -25,7 +25,9 @@ class OAuthRepository {
 
   // Kakao
   Future<Map<String, String?>> loginWithKakao() async {
+    print("2");
     OAuthToken token = await UserApi.instance.loginWithKakaoAccount();
+    print("3");
     final user = await UserApi.instance.me();
 
     return {
@@ -43,9 +45,9 @@ class OAuthRepository {
 
     return {
       "provider": "naver",
-      "providerId": result.account!.id,
-      "accessToken": result.accessToken!.accessToken,
-      "email": result.account!.email,
+      "providerId": result.account.id,
+      "accessToken": result.accessToken.accessToken,
+      "email": result.account.email,
     };
   }
 }

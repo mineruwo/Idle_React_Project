@@ -16,7 +16,10 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
+
+import lombok.extern.log4j.Log4j2;
 @Component
+@Log4j2
 public class AppSnsVerifier {
 
 	private final RestTemplate restTemplate = new RestTemplate();
@@ -66,6 +69,8 @@ public class AppSnsVerifier {
 	public JsonNode verifyNaver(String accessToken) throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", "Bearer " + accessToken);
+		
+		log.info("네이버 accessToken: {}", accessToken);
 
 		HttpEntity<String> entity = new HttpEntity<>(headers);
 

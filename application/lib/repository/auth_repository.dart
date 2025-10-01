@@ -79,8 +79,9 @@ class AuthRepository {
       // 토큰 저장
       await storage.write(key: "accessToken", value: model.accessToken);
       await storage.write(key: "refreshToken", value: model.refreshToken);
-      return model;
       
+      return model;
+
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(e.response?.data["message"] ?? "SNS 로그인 실패");

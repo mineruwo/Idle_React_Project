@@ -22,7 +22,7 @@ class SnsRepository {
     required String providerId,
   }) async {
     final response = await _dio.post(
-      "/app/auth/link-existing",
+      "/auth/app/link-existing",
       data: {
         "id": id,
         "passwordEnc": password,
@@ -42,7 +42,7 @@ class SnsRepository {
     required String providerId,
   }) async {
     final response = await _dio.post(
-      "/app/auth/complete-signup",
+      "/auth/app/complete-signup",
       data: {
         "customName": customName,
         "nickname": nickname,
