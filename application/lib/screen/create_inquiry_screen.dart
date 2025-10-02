@@ -92,19 +92,19 @@ class _CreateInquiryScreenState extends State<CreateInquiryScreen> {
           ),
         ],
       ),
-      body: Padding( // Apply padding once to the whole body content
+      body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column( // Main Column for the screen content
+        child: Column(
           children: [
-            TextField( // Fixed height
+            TextField(
               controller: _titleController,
               decoration: const InputDecoration(
                 labelText: '제목',
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16), // Fixed height
-            Expanded( // Flexible height for the editor
+            const SizedBox(height: 16),
+            Expanded(
               child: quill.QuillProvider(
                 configurations: quill.QuillConfigurations(
                   controller: _contentController,
@@ -112,32 +112,21 @@ class _CreateInquiryScreenState extends State<CreateInquiryScreen> {
                     locale: Locale('ko'),
                   ),
                 ),
-                child: Column( // Column for QuillToolbar and QuillEditor
-                  mainAxisSize: MainAxisSize.max, // Ensure it takes max space
-                  children: [
-                    const quill.QuillToolbar(), // Fixed height
-                    const SizedBox(height: 8), // Fixed height
-                    Expanded( // Flexible height for the editor
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade300),
-                          borderRadius: BorderRadius.circular(4.0),
-                        ),
-                        child: SingleChildScrollView( // Make the editor area scrollable
-                          child: quill.QuillEditor.basic(
-                            configurations: quill.QuillEditorConfigurations(
-                              readOnly: false,
-                              scrollable: true, // QuillEditor itself is scrollable
-                              padding: EdgeInsets.zero,
-                              expands: false,
-                            ),
-                            focusNode: _editorFocusNode,
-                            scrollController: _editorScrollController,
-                          ),
-                        ),
-                      ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(4.0),
+                  ),
+                  child: quill.QuillEditor.basic(
+                    configurations: const quill.QuillEditorConfigurations(
+                      readOnly: false,
+                      scrollable: true,
+                      padding: EdgeInsets.all(8.0),
+                      expands: false,
                     ),
-                  ],
+                    focusNode: _editorFocusNode,
+                    scrollController: _editorScrollController,
+                  ),
                 ),
               ),
             ),
