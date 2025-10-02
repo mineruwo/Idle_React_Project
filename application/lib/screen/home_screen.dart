@@ -45,17 +45,17 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<_CarouselItem> carouselData = [
     _CarouselItem(
       imagePath: 'assets/banner/banner1.jpg',
-      text: '첫 번째 배너',
+      text: '가장 빠르고 안전한 화물 운송,\nNaviLogistics에서 시작하세요.',
       textColor: Colors.white,
     ),
     _CarouselItem(
       imagePath: 'assets/banner/banner2.jpg',
-      text: '두 번째 배너',
+      text: '터치 몇 번으로 끝내는\n가장 간편한 운송 예약',
       textColor: Colors.white,
     ),
     _CarouselItem(
       imagePath: 'assets/banner/banner3.png',
-      text: '세 번째 배너(검은 글씨)',
+      text: '내 손안에서 실시간 화물 추적',
       textColor: Colors.black,
     ),
   ];
@@ -63,37 +63,37 @@ class _HomeScreenState extends State<HomeScreen> {
   // 회사 소개 섹션 데이터
   final List<_CompanyIntroItem> companyIntroData = [
     _CompanyIntroItem(
-      icon: Icons.lightbulb_outline,
-      boldText: '혁신적인 아이디어',
-      regularText: '새로운 가치를 창출합니다.',
+      icon: Icons.handshake,
+      boldText: '화주 차주 매칭',
+      regularText: '화주·차주 연결',
       backgroundColor: PRIMARY_COLOR,
       textColor: Colors.white,
     ),
     _CompanyIntroItem(
-      icon: Icons.people_outline,
-      boldText: '최고의 팀',
-      regularText: '전문성과 열정으로 함께합니다.',
+      icon: Icons.gavel,
+      boldText: '입찰 서비스',
+      regularText: '다중 견적 경쟁',
       backgroundColor: SECOND_COLOR,
       textColor: Colors.black,
     ),
     _CompanyIntroItem(
-      icon: Icons.security,
-      boldText: '안전한 서비스',
-      regularText: '고객의 신뢰를 최우선으로 합니다.',
+      icon: Icons.tune,
+      boldText: '고객 맞춤 신청',
+      regularText: '차종·시간 커스터마이즈',
       backgroundColor: THIRD_COLOR,
       textColor: Colors.black,
     ),
     _CompanyIntroItem(
-      icon: Icons.support_agent,
-      boldText: '24/7 고객 지원',
-      regularText: '언제든 도움을 드립니다.',
+      icon: Icons.reviews,
+      boldText: '따땃함 시스템',
+      regularText: '차주 운송 피드백',
       backgroundColor: FOURTH_COLOR,
       textColor: Colors.black,
     ),
     _CompanyIntroItem(
-      icon: Icons.star_outline,
-      boldText: '고객 만족',
-      regularText: '최고의 경험을 선사합니다.',
+      icon: Icons.local_shipping,
+      boldText: '운송 현황',
+      regularText: '실시간 진행 상황',
       backgroundColor: FIFTH_COLOR,
       textColor: Colors.white,
     ),
@@ -118,6 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Positioned(
                 bottom: 16.0,
                 left: 16.0,
+                right: 16.0,
                 child: Text(
                   item.text,
                   style: TextStyle(
@@ -159,7 +160,6 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           InkWell(
             onTap: () {
-              // TODO: 알람 아이콘 클릭 시 수행할 동작 정의
               print('알람 아이콘 클릭됨!');
             },
             child: const Icon(Icons.notifications_none, size: 30.0), // 벨 아이콘
@@ -179,8 +179,6 @@ class _HomeScreenState extends State<HomeScreen> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  // The original SizedBox(height: kToolbarHeight) and Container for notification are removed from here
-                  // The SizedBox(height: 16.0) after the notification area is also removed from here
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16.0,

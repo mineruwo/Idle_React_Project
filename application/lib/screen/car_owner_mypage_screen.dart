@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:application/provider/user_provider.dart';
 import 'package:application/screen/main_screen.dart';
 import 'package:flutter/material.dart';

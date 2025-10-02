@@ -318,15 +318,17 @@ class _ShipperListState extends State<_ShipperList> {
                                           setState(() => _confirming = true);
                                           try {
                                             await widget.onConfirm(o);
-                                            if (mounted)
+                                            if (mounted) {
                                               setState(
                                                 () => _expandedId = null,
                                               );
+                                            }
                                           } finally {
-                                            if (mounted)
+                                            if (mounted) {
                                               setState(
                                                 () => _confirming = false,
                                               );
+                                            }
                                           }
                                         },
                                   child: _confirming

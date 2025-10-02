@@ -2,7 +2,6 @@ import 'package:application/const/colors.dart';
 import 'package:application/provider/user_provider.dart';
 import 'package:application/screen/splash_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 
 void main() async {

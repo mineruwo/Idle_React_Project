@@ -2,7 +2,6 @@ import 'package:application/component/signup_component/sns_select.dart';
 import 'package:application/provider/user_provider.dart';
 import 'package:application/repository/auth_repository.dart';
 import 'package:application/repository/oauth_repository.dart';
-import 'package:application/screen/home_screen.dart';
 import 'package:application/screen/signup_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -311,7 +310,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
                       } catch (e) {
                         if (!context.mounted) return;
-                        
+
                         // 신규 가입 분기
                         final goSignup = await showDialog<bool>(
                           context: context,
