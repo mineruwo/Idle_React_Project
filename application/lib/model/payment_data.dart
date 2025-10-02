@@ -1,6 +1,6 @@
 class PaymentData {
   final String pg; // PG사
-  final String payMethod; // 결제수단
+  final String? payMethod; // 결제수단
   final String name; // 주문명
   final String merchantUid; // 주문번호
   final int amount; // 결제금액
@@ -11,7 +11,7 @@ class PaymentData {
 
   PaymentData({
     required this.pg,
-    this.payMethod = 'card', // 웹 코드에서 'card'로 고정되어 있었음
+    this.payMethod,
     required this.name,
     required this.merchantUid,
     required this.amount,
@@ -23,17 +23,14 @@ class PaymentData {
 
   // PortOne JS 라이브러리에 맞게 Map으로 변환
   Map<String, dynamic> toJson() => {
-        'pg': pg,
-        'pay_method': payMethod,
-        'name': name,
-        'merchant_uid': merchantUid,
-        'amount': amount,
-        'buyer_name': buyerName,
-        'buyer_tel': buyerTel,
-        'buyer_email': buyerEmail,
-        'app_scheme': appScheme,
-        // 웹 코드에 있던 하드코딩된 값들 추가
-        'buyer_addr': '서울특별시 강남구 삼성동',
-        'buyer_postcode': '123-456',
-      };
+    'pg': pg,
+    if (payMethod != null) 'pay_method': payMethod!,
+    'name': name,
+    'merchant_uid': merchantUid,
+    'amount': amount,
+    'buyer_name': buyerName,
+    'buyer_tel': buyerTel,
+    'buyer_email': buyerEmail,
+    'app_scheme': appScheme,
+  };
 }

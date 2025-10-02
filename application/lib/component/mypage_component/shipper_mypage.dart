@@ -8,8 +8,12 @@ import 'package:provider/provider.dart';
 import 'package:application/model/order.dart';
 import 'package:application/services/api_service.dart';
 import 'package:application/model/review.dart';
+import 'package:application/model/payment_data.dart';
+import 'package:application/screen/payment_screen.dart';
+import 'package:application/screen/payment_success_screen.dart';
+import 'package:application/screen/payment_failure_screen.dart';
 
-enum ReviewFilter { pending, reviewed }
+enum ReviewFilter { pending, reviewed, paymentPending }
 
 class ShipperMypage extends StatefulWidget {
   const ShipperMypage({super.key});
@@ -44,8 +48,10 @@ class _ShipperMypageState extends State<ShipperMypage> {
           .toList();
 
       final List<Order> pendingOrders = completedOrders
-          .where((order) =>
-              !reviewMap.containsKey(order.id) && order.targetId != null)
+          .where(
+            (order) =>
+                !reviewMap.containsKey(order.id) && order.targetId != null,
+          )
           .toList();
 
       // Create a list of maps, each containing an order and its review
@@ -61,7 +67,16 @@ class _ShipperMypageState extends State<ShipperMypage> {
         return reviewB.createdAt.compareTo(reviewA.createdAt);
       });
 
-      return {'pending': pendingOrders, 'reviewed': reviewedItems};
+      // Filter for payment pending orders
+      final List<Order> paymentPendingOrders = allOrders
+          .where((order) => order.status.toUpperCase() == 'PAYMENT_PENDING')
+          .toList();
+
+      return {
+        'pending': pendingOrders,
+        'reviewed': reviewedItems,
+        'paymentPending': paymentPendingOrders,
+      };
     } catch (e) {
       print('Error loading review data: $e');
       throw Exception('Failed to load review data: $e');
@@ -238,11 +253,17 @@ class _ShipperMypageState extends State<ShipperMypage> {
           final List<Order> pendingOrders = snapshot.data!['pending']!;
           final List<Map<String, dynamic>> reviewedItems =
               snapshot.data!['reviewed']!;
+          final List<Order> paymentPendingOrders =
+              snapshot.data!['paymentPending']!;
 
-          final List<dynamic> displayList = // Changed to dynamic list
-          _selectedFilter == ReviewFilter.pending
-              ? pendingOrders
-              : reviewedItems;
+          final List<dynamic> displayList;
+          if (_selectedFilter == ReviewFilter.pending) {
+            displayList = pendingOrders;
+          } else if (_selectedFilter == ReviewFilter.reviewed) {
+            displayList = reviewedItems;
+          } else {
+            displayList = paymentPendingOrders;
+          }
 
           return Padding(
             padding: const EdgeInsets.only(top: 50),
@@ -280,6 +301,12 @@ class _ShipperMypageState extends State<ShipperMypage> {
                             ButtonSegment<ReviewFilter>(
                               value: ReviewFilter.reviewed,
                               label: Text('리뷰 완료 (${reviewedItems.length})'),
+                            ),
+                            ButtonSegment<ReviewFilter>(
+                              value: ReviewFilter.paymentPending,
+                              label: Text(
+                                '결제 대기 (${paymentPendingOrders.length})',
+                              ),
                             ),
                           ],
                           selected: <ReviewFilter>{_selectedFilter},
@@ -353,7 +380,7 @@ class _ShipperMypageState extends State<ShipperMypage> {
                             ),
                           ),
                         );
-                      } else {
+                      } else if (_selectedFilter == ReviewFilter.reviewed) {
                         // Reviewed items
                         final item = displayList[index] as Map<String, dynamic>;
                         final review = item['review'] as Review;
@@ -399,6 +426,129 @@ class _ShipperMypageState extends State<ShipperMypage> {
                                 Text(
                                   review.content,
                                   style: const TextStyle(fontSize: 14),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      } else {
+                        // ReviewFilter.paymentPending
+                        final order = displayList[index] as Order;
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                            vertical: 4.0,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                              vertical: 12.0,
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '결제 대기 주문번호: ${order.orderNo}',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.orange,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${order.departure} → ${order.arrival}',
+                                      ),
+                                      Text(
+                                        '상태: ${order.status}',
+                                        style: const TextStyle(
+                                          color: Colors.redAccent,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: (order.driverPrice ?? 0) <= 0
+                                          ? null // driverPrice가 없거나 0이하이면 버튼 비활성화
+                                          : () async {
+                                              final int actualAmount =
+                                                  order.driverPrice!;
+
+                                              // 현재 로그인한 사용자 정보를 UserProvider에서 가져옵니다.
+                                              final userProvider =
+                                                  Provider.of<UserProvider>(
+                                                    context,
+                                                    listen: false,
+                                                  );
+                                              final currentUser =
+                                                  userProvider.user;
+
+                                              final String merchantUid =
+                                                  'mid_${DateTime.now().millisecondsSinceEpoch}';
+
+                                              final paymentData = PaymentData(
+                                                pg: 'kakaopay',
+                                                name: '화물 운송 서비스',
+                                                amount: actualAmount,
+                                                merchantUid: merchantUid,
+                                                buyerName:
+                                                    currentUser?.nickname ??
+                                                    '구매자',
+                                                buyerTel: '010-1222-2222',
+                                                buyerEmail:
+                                                    currentUser?.id ??
+                                                    'test@example.com',
+                                                appScheme: 'idlemobile',
+                                              );
+
+                                              final result =
+                                                  await Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          PaymentScreen(
+                                                            paymentData:
+                                                                paymentData,
+                                                          ),
+                                                    ),
+                                                  );
+
+                                              if (result != null &&
+                                                  result['success'] == true) {
+                                                // 결제 성공 시
+                                                if (!mounted) return;
+                                                Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        const PaymentSuccessScreen(),
+                                                  ),
+                                                );
+                                                _refreshReviewData(); // 결제 완료 후 데이터 새로고침
+                                              } else {
+                                                // 결제 실패 또는 취소 시
+                                                if (!mounted) return;
+                                                Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        PaymentFailureScreen(
+                                                          errorMessage:
+                                                              result?['error_msg'],
+                                                        ),
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                      child: const Text('결제하기'),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
