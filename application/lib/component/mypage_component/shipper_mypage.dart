@@ -495,6 +495,8 @@ class _ShipperMypageState extends State<ShipperMypage> {
                                                   'mid_${DateTime.now().millisecondsSinceEpoch}';
 
                                               final paymentData = PaymentData(
+                                                storeId:
+                                                    'store-413f21a9-62f9-46b3-8f73-90005f9afce4',
                                                 pg: 'kakaopay',
                                                 name: '화물 운송 서비스',
                                                 amount: actualAmount,
@@ -506,7 +508,9 @@ class _ShipperMypageState extends State<ShipperMypage> {
                                                 buyerEmail:
                                                     currentUser?.id ??
                                                     'test@example.com',
-                                                appScheme: 'idlemobile',
+                                                mRedirectUrl:
+                                                    'http://10.0.2.2:3000/iamport_callback',
+                                                appScheme: '',
                                               );
 
                                               final result =
