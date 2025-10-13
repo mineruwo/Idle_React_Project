@@ -30,7 +30,7 @@ dependencies:
     flutter_quill: ^8.6.0
     google_sign_in: ^6.1.5 # google login
     kakao_flutter_sdk_user: ^1.7.0 # kakao login
-    flutter_naver_login: ^1.8.0 # naver login
+    flutter_naver_login: ^2.1.0 # naver login
     flutter_dotenv: ^5.1.0
 
 dev_dependencies:

@@ -296,16 +296,23 @@ class _ShipperMypageState extends State<ShipperMypage> {
                           segments: <ButtonSegment<ReviewFilter>>[
                             ButtonSegment<ReviewFilter>(
                               value: ReviewFilter.pending,
-                              label: Text('리뷰 대기 (${pendingOrders.length})'),
+                              label: Text(
+                                '리뷰 대기 (${pendingOrders.length})',
+                                style: TextStyle(fontSize: 12),
+                              ),
                             ),
                             ButtonSegment<ReviewFilter>(
                               value: ReviewFilter.reviewed,
-                              label: Text('리뷰 완료 (${reviewedItems.length})'),
+                              label: Text(
+                                '리뷰 완료 (${reviewedItems.length})',
+                                style: TextStyle(fontSize: 12),
+                              ),
                             ),
                             ButtonSegment<ReviewFilter>(
                               value: ReviewFilter.paymentPending,
                               label: Text(
                                 '결제 대기 (${paymentPendingOrders.length})',
+                                style: TextStyle(fontSize: 12),
                               ),
                             ),
                           ],
