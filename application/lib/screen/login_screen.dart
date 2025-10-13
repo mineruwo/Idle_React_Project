@@ -221,6 +221,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     label: const Text("구글 로그인"),
                   ),
                   const SizedBox(height: 10),
+                  
                   OutlinedButton.icon(
                     onPressed: () async {
                       final result = await oauthRepository.loginWithNaver();

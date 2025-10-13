@@ -5,9 +5,12 @@ import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 class OAuthRepository {
   // Google
    Future<Map<String, String?>> loginWithGoogle() async {
-    final GoogleSignIn googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
+    final GoogleSignIn _googleSignIn = GoogleSignIn(
+      scopes: ['email', 'profile'],
+      clientId: "460030575434-rjiu30hvm4p8evkcdd6k0niu93ve13t0.apps.googleusercontent.com",
+      );
 
-    final account = await googleSignIn.signIn();
+    final account = await _googleSignIn.signIn();
     if (account == null) return {};
 
     final auth = await account.authentication;
@@ -37,6 +40,9 @@ class OAuthRepository {
   // Naver
    Future<Map<String, String?>> loginWithNaver() async {
     final result = await FlutterNaverLogin.logIn();
+
+    print("엑세스토큰");
+    print(result.accessToken);
 
     return {
       "provider": "naver",

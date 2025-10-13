@@ -8,7 +8,7 @@ class SnsRepository {
   SnsRepository() {
     _dio.options.baseUrl = const String.fromEnvironment(
       "API_BASE_URL",
-      defaultValue: "http://localhost:8080", // 배포 시 변경
+      defaultValue: "http://10.0.2.2:8080/api", // 배포 시 변경
     );
     _dio.options.headers['Content-Type'] = 'application/json';
     _dio.interceptors.add(LogInterceptor(responseBody: true));
@@ -22,7 +22,7 @@ class SnsRepository {
     required String providerId,
   }) async {
     final response = await _dio.post(
-      "/app/auth/link-existing",
+      "/auth/app/link-existing",
       data: {
         "id": id,
         "passwordEnc": password,
@@ -42,7 +42,7 @@ class SnsRepository {
     required String providerId,
   }) async {
     final response = await _dio.post(
-      "/app/auth/complete-signup",
+      "/auth/app/complete-signup",
       data: {
         "customName": customName,
         "nickname": nickname,

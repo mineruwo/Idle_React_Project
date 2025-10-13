@@ -151,7 +151,7 @@ public class AuthController {
     
     @PostMapping("/app-sns")
     public ResponseEntity<LoginResponseDTO> snsLogin(@RequestBody AppSnsLoginRequestDTO request) {
-        LoginResponseDTO response = appSnsService.handleSnsLogin(request);
+    	LoginResponseDTO response = appSnsService.handleSnsLogin(request);
         return ResponseEntity.ok(response);
     }
     

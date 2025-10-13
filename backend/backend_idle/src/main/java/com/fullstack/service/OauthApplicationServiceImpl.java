@@ -103,14 +103,14 @@ public class OauthApplicationServiceImpl implements OauthApplicationService {
 	            .providerId(linkExistingDTO.getProviderId())
 	            .build();
 
-		CustomerEntity customer = snsOnboardingService.linkExisting(ctx, linkExistingDTO);
+		CustomerEntity customer = snsOnboardingService.appLinkExisting(ctx, linkExistingDTO);
 
-		TokenDTO tokens = tokenService.issue(customer.getId(), customer.getRole());
-		TokenCookieUtils.setAccessTokenCookie(res, tokens.getAccessToken(), tokens.getAtExpiresIn());
-		TokenCookieUtils.setRefreshTokenCookie(res, tokens.getRefreshToken(), tokens.getRtExpiresIn());
-		TokenCookieUtils.setAuthHintCookie(res, true, tokens.getRtExpiresIn());
+		TokenDTO tokenDTO = tokenService.issue(customer.getId(), customer.getRole());
+		TokenCookieUtils.setAccessTokenCookie(res, tokenDTO.getAccessToken(), tokenDTO.getAtExpiresIn());
+		TokenCookieUtils.setRefreshTokenCookie(res, tokenDTO.getRefreshToken(), tokenDTO.getRtExpiresIn());
+		TokenCookieUtils.setAuthHintCookie(res, true, tokenDTO.getRtExpiresIn());
 
-		return Map.of("id", customer.getId(), "role", customer.getRole(), "atExpiresIn", tokens.getAtExpiresIn(),
-				"rtExpiresIn", tokens.getRtExpiresIn());
+		return Map.of("id", customer.getId(), "role", customer.getRole(), "atExpiresIn", tokenDTO.getAtExpiresIn(),
+				"rtExpiresIn", tokenDTO.getRtExpiresIn());
 	}
 }

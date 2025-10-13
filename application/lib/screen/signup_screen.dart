@@ -1,7 +1,9 @@
 import 'package:application/component/signup_component/email_verification.dart';
+import 'package:application/component/signup_component/sns_select.dart';
 import 'package:application/provider/user_provider.dart';
 import 'package:application/repository/auth_repository.dart';
 import 'package:application/repository/email_repository.dart';
+import 'package:application/repository/oauth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -23,6 +25,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   final emailRepository = EmailRepository();
   final authRepository = AuthRepository();
+  final oauthRepository = OAuthRepository();
 
   String _role = "shipper"; // 기본: 화주
 
@@ -191,7 +194,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   final isNicknameDuplicate = await authRepository
                       .checkNicknameDuplicate(_nicknameController.text);
                   if (!context.mounted) return;
-                  
+
                   if (isNicknameDuplicate) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text("이미 사용 중인 닉네임입니다")),
@@ -257,8 +260,62 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 20),
 
               OutlinedButton.icon(
-                onPressed: () {
-                  // 구글 OAuth
+                onPressed: () async {
+                  final result = await oauthRepository.loginWithGoogle();
+                  if (result.isEmpty) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text("구글 로그인 취소")));
+                    return;
+                  }
+
+                  try {
+                    final user = await authRepository.snsLogin(result);
+                    if (!context.mounted) return;
+
+                    final userProvider = Provider.of<UserProvider>(
+                      context,
+                      listen: false,
+                    );
+                    Navigator.pop(context);
+                    userProvider.setUser(user);
+                    userProvider.setIndex(0);
+
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text("구글 로그인 성공")));
+                  } catch (e) {
+                    if (!context.mounted) return;
+
+                    // 신규 가입 분기
+                    final goSignup = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text("신규 회원"),
+                        content: const Text("계정이 없습니다. 회원가입 하시겠습니까?"),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: const Text("취소"),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            child: const Text("회원가입"),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (goSignup == true && context.mounted) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => SnsSelect(snsResult: result),
+                        ),
+                      );
+                    }
+                  }
                 },
                 icon: const Icon(Icons.g_mobiledata),
                 label: const Text("구글 가입"),
@@ -266,17 +323,123 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 10),
 
               OutlinedButton.icon(
-                onPressed: () {
-                  // 네이버 OAuth
+                onPressed: () async {
+                  final result = await oauthRepository.loginWithNaver();
+                  if (result.isEmpty) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text("네이버 로그인 취소")));
+                    return;
+                  }
+
+                  try {
+                    final user = await authRepository.snsLogin(result);
+                    if (!context.mounted) return;
+
+                    final userProvider = Provider.of<UserProvider>(
+                      context,
+                      listen: false,
+                    );
+                    userProvider.setUser(user);
+                    userProvider.setIndex(0);
+
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text("네이버 로그인 성공")));
+                  } catch (e) {
+                    if (!context.mounted) return;
+
+                    // 신규 가입 분기
+                    final goSignup = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text("신규 회원"),
+                        content: const Text("계정이 없습니다. 회원가입 하시겠습니까?"),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: const Text("취소"),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            child: const Text("회원가입"),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (goSignup == true && context.mounted) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => SnsSelect(snsResult: result),
+                        ),
+                      );
+                    }
+                  }
                 },
-                icon: const Icon(Icons.language),
+                icon: const Icon(Icons.person),
                 label: const Text("네이버 가입"),
               ),
               const SizedBox(height: 10),
 
               OutlinedButton.icon(
-                onPressed: () {
-                  // 카카오 OAuth
+                onPressed: () async {
+                  final result = await oauthRepository.loginWithKakao();
+                  if (result.isEmpty) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text("카카오 로그인 취소")));
+                    return;
+                  }
+
+                  try {
+                    final user = await authRepository.snsLogin(result);
+                    if (!context.mounted) return;
+
+                    final userProvider = Provider.of<UserProvider>(
+                      context,
+                      listen: false,
+                    );
+                    userProvider.setUser(user);
+                    userProvider.setIndex(0);
+
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text("카카오 로그인 성공")));
+                  } catch (e) {
+                    if (!context.mounted) return;
+
+                    // 신규 가입 분기
+                    final goSignup = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text("신규 회원"),
+                        content: const Text("계정이 없습니다. 회원가입 하시겠습니까?"),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: const Text("취소"),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            child: const Text("회원가입"),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (goSignup == true && context.mounted) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => SnsSelect(snsResult: result),
+                        ),
+                      );
+                    }
+                  }
                 },
                 icon: const Icon(Icons.chat),
                 label: const Text("카카오 가입"),
