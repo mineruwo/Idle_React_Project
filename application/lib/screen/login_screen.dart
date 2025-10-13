@@ -234,8 +234,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         return;
                       }
 
-                      print(result);
-
                       try {
                         final user = await authRepository.snsLogin(result);
                         if (!context.mounted) return;
@@ -289,7 +287,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   OutlinedButton.icon(
                     onPressed: () async {
-                      print("1");
                       final result = await oauthRepository.loginWithKakao();
                       if (result.isEmpty) {
                         if (!context.mounted) return;

@@ -37,6 +37,7 @@ public class AppSnsServiceImpl implements AppSnsService {
 				userInfo = appSnsVerifier.verifyKakao(request.getAccessToken());
 				break;
 			case "naver":
+				log.info("네이버 요청에서 받은 Access Token: {}", request.getAccessToken());
 				userInfo = appSnsVerifier.verifyNaver(request.getAccessToken());
 				break;
 			default:
