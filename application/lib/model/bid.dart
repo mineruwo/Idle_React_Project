@@ -1,35 +1,51 @@
-// lib/model/bid.dart
 class Bid {
-  final String id;           // offerId
-  final String orderId;      // 대상 오더 id
-  final int price;           // 입찰가
-  final String? driverId;    // 드라이버 idNum(문자/숫자 대응)
+  final String id;
+  final int price;
+
   final String? driverNickname;
-  final bool accepted;       // 수락 여부(서버 필드가 없으면 false)
+  final int? driverIdNum;    // 본인 입찰 식별자(숫자)
+  final String? driverEmail; // 대안 식별자(문자열)
   final DateTime? createdAt;
 
-  const Bid({
+  Bid({
     required this.id,
-    required this.orderId,
     required this.price,
-    this.driverId,
     this.driverNickname,
-    this.accepted = false,
+    this.driverIdNum,
+    this.driverEmail,
     this.createdAt,
   });
 
   factory Bid.fromJson(Map<String, dynamic> json) {
+    // 다양한 키로 오는 가격 방어
+    final rawPrice =
+        json['price'] ?? json['driverPrice'] ?? json['bidPrice'] ?? 0;
+    final p =
+        rawPrice is num ? rawPrice.toInt() : int.tryParse(rawPrice.toString()) ?? 0;
+
+    // createdAt 파싱(문자열/epoch millis 모두 방어)
+    DateTime? dt;
+    final ca = json['createdAt'];
+    if (ca != null) {
+      if (ca is String) {
+        dt = DateTime.tryParse(ca);
+      } else if (ca is int) {
+        dt = DateTime.fromMillisecondsSinceEpoch(ca);
+      }
+    }
+
+    int? toIntOrNull(dynamic v) {
+      if (v is num) return v.toInt();
+      return int.tryParse(v?.toString() ?? '');
+    }
+
     return Bid(
-      id: json['id']?.toString() ?? json['offerId']?.toString() ?? '',
-      orderId: json['orderId']?.toString() ?? '',
-      price: json['price'] is num
-          ? (json['price'] as num).toInt()
-          : int.tryParse('${json['price'] ?? ''}') ?? 0,
-      driverId: json['driverId']?.toString() ?? json['driverIdNum']?.toString(),
+      id: (json['id'] ?? '').toString(),
+      price: p,
       driverNickname: json['driverNickname']?.toString(),
-      accepted: json['accepted'] == true ||
-          (json['status']?.toString().toUpperCase() == 'ACCEPTED'),
-      createdAt: DateTime.tryParse('${json['createdAt'] ?? ''}'),
+      driverIdNum: toIntOrNull(json['driverIdNum']),
+      driverEmail: json['driverEmail']?.toString(),
+      createdAt: dt,
     );
   }
 }

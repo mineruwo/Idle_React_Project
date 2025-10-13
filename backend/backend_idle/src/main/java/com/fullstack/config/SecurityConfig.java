@@ -63,7 +63,7 @@ public class SecurityConfig {
                 		//"/api/offers/**",  // 입찰 API (필요하면 주석 제거)
                         //"/api/payment/**", // (필요하면 주석 제거)
                 		"/api/reviews/target/**", // 특정 대상의 리뷰 목록 조회는 누구나 가능
-                		"/api/inquiries/**", // 일반 문의 관련 API 허용 (InquiryController)
+                		//"/api/inquiries/**", // 일반 문의 관련 API 허용 (InquiryController)
                 		"/api/admin/**", // admin
                         "/api/email/**", // email
                 		"/ws/**", "/ws-chat/**" // 웹소켓 경로

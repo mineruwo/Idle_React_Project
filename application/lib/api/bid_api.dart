@@ -1,31 +1,41 @@
+import 'dart:convert';
+import 'package:dio/dio.dart';
 import '../network/dio_client.dart';
-import '../model/bid.dart';
 
 class BidApi {
-  final _dio = DioClient().dio;
+  final Dio _dio = DioClient().dio;
 
-  /// (차주) 입찰 등록
-  Future<Bid> submit(String orderId, int price) async {
+  // 입찰 등록
+  Future<Map<String, dynamic>> submit(String orderId, int price) async {
     final res = await _dio.post(
-      "/offers/add",
+      '/offers/add',
       data: {
-        "orderId": orderId,
-        "price": price,
+        'orderId': int.tryParse(orderId) ?? orderId, // 서버 타입에 맞춰 전달
+        'price': price,
       },
     );
-    return Bid.fromJson(res.data as Map<String, dynamic>);
+    final data = res.data;
+    if (data is Map<String, dynamic>) return data;
+    if (data is String && data.isNotEmpty) return jsonDecode(data);
+    return <String, dynamic>{};
   }
 
-  /// (공통) 오더별 입찰 목록
-  Future<List<Bid>> list(String orderId) async {
-    final res = await _dio.get("/offers/order/$orderId");
-    final data = res.data as List;
-    return data.map((e) => Bid.fromJson(e as Map<String, dynamic>)).toList();
+  // 오더별 입찰 목록
+  Future<List<Map<String, dynamic>>> list(String orderId) async {
+    final res = await _dio.get('/offers/order/$orderId');
+    final data = res.data;
+    if (data is List) {
+      return data.map<Map<String, dynamic>>((e) {
+        if (e is Map<String, dynamic>) return e;
+        if (e is String && e.isNotEmpty) return jsonDecode(e);
+        return <String, dynamic>{};
+      }).toList();
+    }
+    return <Map<String, dynamic>>[];
   }
 
-  /// (화주) 입찰 수락 — ✅ bidId(=offerId)만 path에, Body 없음
-  Future<void> accept(String bidId) async {
-    final id = Uri.encodeComponent(bidId);
-    await _dio.post("/offers/$id/accept");
+  // 입찰 수락
+  Future<void> accept(String orderId, String bidId) async {
+    await _dio.post('/offers/$bidId/accept');
   }
 }

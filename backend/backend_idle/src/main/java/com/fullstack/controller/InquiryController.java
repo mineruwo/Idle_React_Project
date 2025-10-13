@@ -60,7 +60,7 @@ public class InquiryController {
 
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<Page<InquiryDTO>> getInquiriesByCustomerId(
-            @PathVariable Long customerId,
+            @PathVariable("customerId") Long customerId,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<InquiryDTO> inquiries = inquiryService.getInquiriesByCustomerId(customerId, pageable);
         return ResponseEntity.ok(inquiries);

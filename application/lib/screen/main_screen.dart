@@ -19,7 +19,8 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  // 분기 처리
+  int _selectedIndex = 0;
+
   Widget _widgetOptions(BuildContext context, int index) {
     final userProvider = Provider.of<UserProvider>(context);
 
@@ -59,30 +60,102 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    const fabSize = 84.0;
+    const bottomBarHeight = 60.0;
 
-    return Scaffold(
-      body: _widgetOptions(context, userProvider.selectedIndex),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
-          BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: '오더'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.local_shipping),
-            label: '배송',
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: PRIMARY_COLOR,
+          body: _widgetOptions(context, _selectedIndex),
+          bottomNavigationBar: Container(
+            decoration: const BoxDecoration(
+              border: Border(top: BorderSide(color: SECOND_COLOR, width: 3.0)),
+            ),
+            child: BottomAppBar(
+              color: PRIMARY_COLOR,
+              shape: const CircularNotchedRectangle(),
+              notchMargin: 8.0,
+              child: SizedBox(
+                height: bottomBarHeight,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    _buildNavItem(0, Icons.home, '홈'),
+                    _buildNavItem(1, Icons.receipt_long, '오더'),
+                    const SizedBox(width: 86.0),
+                    _buildNavItem(3, Icons.build, '서비스'),
+                    _buildNavItem(4, Icons.person, '마이페이지'),
+                  ],
+                ),
+              ),
+            ),
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.build), label: '서비스'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: '마이페이지'),
-        ],
-        currentIndex: userProvider.selectedIndex,
-        selectedItemColor: Colors.blueAccent,
-        unselectedItemColor: Colors.grey,
-        onTap: (index) {
-          userProvider.setIndex(index); // ✅ Provider 상태 변경
-        },
-        type: BottomNavigationBarType.fixed, // 탭이 4개 이상일 때 필요
+        ),
+        Positioned(
+          left: (screenWidth / 2) - (fabSize / 2),
+          bottom: 33.0,
+          child: SizedBox(
+            width: fabSize,
+            height: fabSize,
+            child: FloatingActionButton(
+              heroTag: "shipping_fab",
+              onPressed: () => _onItemTapped(2),
+              backgroundColor: PRIMARY_COLOR,
+              shape: CircleBorder(
+                side: BorderSide(
+                  color: _selectedIndex == 2 ? THIRD_COLOR : SECOND_COLOR,
+                  width: 3.0,
+                ),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.local_shipping,
+                    color: _selectedIndex == 2 ? THIRD_COLOR : FOURTH_COLOR,
+                    size: 36.0,
+                  ),
+                  Text(
+                    '배송',
+                    style: TextStyle(
+                      color: _selectedIndex == 2 ? THIRD_COLOR : FOURTH_COLOR,
+                      fontSize: 12.0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNavItem(int index, IconData icon, String label) {
+    final bool isSelected = _selectedIndex == index;
+    final Color itemColor = isSelected ? THIRD_COLOR : FOURTH_COLOR;
+
+    return Expanded(
+      child: InkWell(
+        onTap: () => _onItemTapped(index),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: itemColor),
+            Text(label, style: TextStyle(color: itemColor, fontSize: 12.0)),
+          ],
+        ),
       ),
     );
   }

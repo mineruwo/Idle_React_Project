@@ -9,8 +9,10 @@ class OAuthRepository {
       scopes: ['email', 'profile'],
       clientId: "460030575434-rjiu30hvm4p8evkcdd6k0niu93ve13t0.apps.googleusercontent.com",
       );
-
-    final account = await _googleSignIn.signIn();
+      /*
+    final GoogleSignIn googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
+*/
+    final account = await googleSignIn.signIn();
     if (account == null) return {};
 
     final auth = await account.authentication;
@@ -45,9 +47,9 @@ class OAuthRepository {
 
     return {
       "provider": "naver",
-      "providerId": result.account.id,
-      "accessToken": result.accessToken.accessToken,
-      "email": result.account.email,
+      "providerId": result.account!.id,
+      "accessToken": result.accessToken!.accessToken,
+      "email": result.account!.email,
     };
   }
 }

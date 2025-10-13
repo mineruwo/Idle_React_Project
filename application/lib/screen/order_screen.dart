@@ -109,10 +109,7 @@ class _OrderScreenState extends State<OrderScreen> {
     return Scaffold(
       body: Column(
         children: [
-          // 상단 150px 빈 여백
-          Container(height: 150, color: Colors.transparent),
-
-          // 타이틀 + 역할 뱃지
+          Container(height: 75, color: Colors.transparent),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
@@ -133,8 +130,6 @@ class _OrderScreenState extends State<OrderScreen> {
               ],
             ),
           ),
-
-          // 본문
           Expanded(
             child: isShipper
                 ? _ShipperList(
@@ -151,7 +146,6 @@ class _OrderScreenState extends State<OrderScreen> {
                       }
                     },
                     onAssigned: (order) async {
-                      // 입찰 수락 후 배정 상태로 표시
                       await _orderRepo.updateStatus(order.id, 'ASSIGNED');
                       _updateLocal(order.copyWith(status: 'ASSIGNED'));
                     },
@@ -170,8 +164,6 @@ class _OrderScreenState extends State<OrderScreen> {
           ),
         ],
       ),
-
-      // 화주만 등록 버튼
       floatingActionButton: isShipper
           ? FloatingActionButton.extended(
               onPressed: _createOrder,
@@ -189,7 +181,7 @@ class _OrderScreenState extends State<OrderScreen> {
 class _ShipperList extends StatefulWidget {
   final List<Order> orders;
   final Future<void> Function(Order) onConfirm;
-  final Future<void> Function(Order) onAssigned; // 입찰 수락 시 호출
+  final Future<void> Function(Order) onAssigned;
 
   const _ShipperList({
     required this.orders,
@@ -268,7 +260,6 @@ class _ShipperListState extends State<_ShipperList> {
                 ),
               ),
             ),
-
             // ▼ 상세 패널
             AnimatedSize(
               duration: const Duration(milliseconds: 220),
@@ -292,12 +283,21 @@ class _ShipperListState extends State<_ShipperList> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // 상단 기본 정보(주문번호/경로/상태/등록일) — 유지
                           _kv('주문번호', o.orderNo),
                           _kv('경로', '${o.departure} → ${o.arrival}'),
                           _kv('상태', _statusK(o.status)),
                           if (o.createdAt != null)
                             _kv('등록일', _fmt(o.createdAt!)),
+
                           const SizedBox(height: 12),
+
+                          // 🔹 화물 상세 카드 (차주 화면과 동일한 디자인)
+                          CargoDetailCard(order: o),
+
+                          const SizedBox(height: 12),
+
+                          // 액션 버튼 영역 — 기존 로직 그대로
                           Row(
                             children: [
                               Expanded(
@@ -318,17 +318,15 @@ class _ShipperListState extends State<_ShipperList> {
                                           setState(() => _confirming = true);
                                           try {
                                             await widget.onConfirm(o);
-                                            if (mounted) {
+                                            if (mounted)
                                               setState(
                                                 () => _expandedId = null,
                                               );
-                                            }
                                           } finally {
-                                            if (mounted) {
+                                            if (mounted)
                                               setState(
                                                 () => _confirming = false,
                                               );
-                                            }
                                           }
                                         },
                                   child: _confirming
@@ -470,15 +468,15 @@ class _BidsSheetState extends State<_BidsSheet> {
                       leading: const Icon(Icons.local_shipping),
                       title: Text('${_won(b.price)}원'),
                       subtitle: Text(
-                        '${b.driverNickname} • ${_fmt(b.createdAt ?? DateTime.now())}',
+                        '${b.driverNickname ?? '익명'} • ${_fmt(b.createdAt ?? DateTime.now())}',
                       ),
                       trailing: FilledButton(
                         onPressed: () async {
                           try {
-                            await _repo.acceptBid(b.id); // ✅ bidId만 전달
+                            await _repo.acceptBid(widget.order.id, b.id);
                             if (mounted) {
-                              Navigator.of(context).pop(); // 닫기
-                              await widget.onAccepted(widget.order); // 배정 처리
+                              Navigator.of(context).pop();
+                              await widget.onAccepted(widget.order);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text('입찰 수락 완료: ${_won(b.price)}원'),
@@ -573,6 +571,27 @@ class _DriverBoard extends StatelessWidget {
   }
 }
 
+/* =========================
+   차주 상세 (깔끔 + 화물상세 + 최근 내 입찰 유지)
+   ========================= */
+
+// 한글 매핑 테이블 (영문 코드 → 한글)
+const cargoTypeMap = {'box': '박스', 'pallet': '파렛트', 'etc': '기타'};
+const cargoSizeMap = {'small': '소형', 'medium': '중형', 'large': '대형'};
+const vehicleMap = {
+  '1ton': '1톤',
+  '2.5ton': '2.5톤',
+  '5ton': '5톤',
+  '11ton': '11톤',
+  'trailer': '트레일러',
+};
+const packingMap = {
+  'normal': '일반포장',
+  'special': '특수포장',
+  'expensive': '고가화물',
+  'fragile': '파손위험',
+};
+
 class _DriverOrderDetail extends StatefulWidget {
   final Order order;
   const _DriverOrderDetail({required this.order});
@@ -587,135 +606,223 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
   final _bidRepo = BidRepository();
   bool _submitting = false;
 
-  // 마지막으로 등록한 입찰 표시
+  // 서버 조회 기반 최근 내 입찰
+  Future<Bid?>? _myLastBidFuture;
+  // 즉시 반영용 캐시
   Bid? _lastSubmitted;
 
   @override
   void initState() {
     super.initState();
     o = widget.order;
+    _myLastBidFuture = _fetchMyLastBid();
+  }
+
+  Future<Bid?> _fetchMyLastBid() async {
+    try {
+      final me = context.read<UserProvider>().user;
+      final myId = me?.idNum;
+      if (myId == null) return null;
+
+      final list = await _bidRepo.fetchBids(o.id);
+
+      final mine = list.where((b) => b.driverIdNum == myId).toList()
+        ..sort(
+          (a, b) => (b.createdAt ?? DateTime(0)).compareTo(
+            a.createdAt ?? DateTime(0),
+          ),
+        );
+
+      return mine.isNotEmpty ? mine.first : null;
+    } catch (_) {
+      return null;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(title: const Text('오더 상세')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               children: [
-                Chip(
-                  label: const Text('차주'),
-                  backgroundColor: c.surfaceContainerHighest,
+                Row(
+                  children: [
+                    Chip(
+                      label: const Text('차주'),
+                      backgroundColor: c.surfaceContainerHighest,
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: c.primaryContainer,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        _statusK(o.status),
+                        style: TextStyle(color: c.onPrimaryContainer),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
+                const SizedBox(height: 12),
+                Text(
+                  o.orderNo.isNotEmpty ? o.orderNo : '오더',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '${o.departure} → ${o.arrival}',
+                  style: const TextStyle(color: Colors.black54),
+                ),
+                if (o.createdAt != null)
+                  Text(
+                    '등록: ${_fmt(o.createdAt!)}',
+                    style: const TextStyle(color: Colors.black45),
                   ),
-                  decoration: BoxDecoration(
-                    color: c.primaryContainer,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    _statusK(o.status),
-                    style: TextStyle(color: c.onPrimaryContainer),
-                  ),
+                const SizedBox(height: 12),
+
+                // 화물 상세 카드
+                CargoDetailCard(order: o),
+
+                // 최근 내 입찰 (서버조회 + 즉시 캐시 반영)
+                FutureBuilder<Bid?>(
+                  future: _myLastBidFuture,
+                  builder: (_, snap) {
+                    final bid = _lastSubmitted ?? snap.data;
+                    if (snap.connectionState != ConnectionState.done &&
+                        _lastSubmitted == null) {
+                      return const SizedBox(height: 8);
+                    }
+                    if (bid == null) return const SizedBox.shrink();
+                    return Container(
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(top: 12),
+                      decoration: BoxDecoration(
+                        color: c.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Theme.of(context).dividerColor,
+                        ),
+                      ),
+                      child: Text(
+                        '내 최근 입찰: ${_won(bid.price)}원'
+                        '${bid.createdAt != null ? ' • ${_m2(bid.createdAt!)}' : ''}',
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            Text(
-              o.orderNo.isNotEmpty ? o.orderNo : '오더',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Text('${o.departure} → ${o.arrival}'),
-            if (o.createdAt != null) Text('등록: ${_fmt(o.createdAt!)}'),
-            const Spacer(),
+          ),
 
-            // 마지막 입찰 요약
-            if (_lastSubmitted != null) ...[
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.only(bottom: 8),
-                decoration: BoxDecoration(
-                  color: c.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Theme.of(context).dividerColor),
-                ),
-                child: Text(
-                  '내 최근 입찰: ${_won(_lastSubmitted!.price)}원'
-                  '${_lastSubmitted!.createdAt != null ? ' • ${_m2(_lastSubmitted!.createdAt!)}' : ''}',
-                ),
+          // 하단 고정 액션
+          SafeArea(
+            top: false,
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
               ),
-            ],
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _bidC,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: '입찰가(원)',
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: _submitting
+                        ? null
+                        : () async {
+                            final only = _bidC.text.replaceAll(
+                              RegExp(r'[^0-9]'),
+                              '',
+                            );
+                            if (only.isEmpty) return;
 
-            TextField(
-              controller: _bidC,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: '입찰가(원)',
-                border: OutlineInputBorder(),
+                            setState(() => _submitting = true);
+                            try {
+                              final price = int.parse(only);
+                              final submitted = await _bidRepo.submitBid(
+                                o.id,
+                                price,
+                              );
+
+                              setState(() {
+                                _lastSubmitted = submitted; // 즉시 표시
+                                _myLastBidFuture = Future.value(
+                                  submitted,
+                                ); // 재진입 없이 동일 상태
+                                _bidC.clear();
+                              });
+
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('입찰 등록 완료')),
+                                );
+                              }
+                            } on DioException catch (e) {
+                              final msg =
+                                  e.response?.data?.toString() ??
+                                  e.message ??
+                                  '알 수 없는 오류';
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('입찰 실패: $msg')),
+                                );
+                              }
+                            } catch (e) {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('입찰 실패: $e')),
+                                );
+                              }
+                            } finally {
+                              if (mounted) setState(() => _submitting = false);
+                            }
+                          },
+                    child: _submitting
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('입찰하기'),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            FilledButton(
-              onPressed: _submitting
-                  ? null
-                  : () async {
-                      final only = _bidC.text.replaceAll(RegExp(r'[^0-9]'), '');
-                      if (only.isEmpty) return;
-
-                      setState(() => _submitting = true);
-                      try {
-                        final price = int.parse(only);
-                        final submitted = await _bidRepo.submitBid(o.id, price);
-                        setState(() => _lastSubmitted = submitted);
-
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('입찰 등록 완료')),
-                          );
-                          // 화면 유지 — 상단 카드에서 바로 확인 가능
-                          Navigator.of(context).pop(o);
-                        }
-                      } on DioException catch (e) {
-                        final msg =
-                            e.response?.data?.toString() ??
-                            e.message ??
-                            '알 수 없는 오류';
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('입찰 실패: $msg')),
-                          );
-                        }
-                      } catch (e) {
-                        if (mounted) {
-                          ScaffoldMessenger.of(
-                            context,
-                          ).showSnackBar(SnackBar(content: Text('입찰 실패: $e')));
-                        }
-                      } finally {
-                        if (mounted) setState(() => _submitting = false);
-                      }
-                    },
-              child: _submitting
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('입찰하기'),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -723,16 +830,13 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
   String _fmt(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}.${d.month.toString().padLeft(2, '0')}.${d.day.toString().padLeft(2, '0')} '
       '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
-
   String _m2(DateTime d) =>
       '${d.month.toString().padLeft(2, '0')}/${d.day.toString().padLeft(2, '0')} '
       '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
-
   String _won(int v) => v.toString().replaceAllMapped(
     RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
     (m) => '${m[1]},',
   );
-
   String _statusK(String s) {
     switch (s) {
       case 'OPEN':
@@ -747,6 +851,87 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
       default:
         return '없음';
     }
+  }
+}
+
+/* =========================
+   화물 상세 카드 (한글 매핑 적용)
+   ========================= */
+class CargoDetailCard extends StatelessWidget {
+  final Order order;
+  const CargoDetailCard({super.key, required this.order});
+
+  @override
+  Widget build(BuildContext context) {
+    final divider = Divider(
+      color: Theme.of(context).dividerColor.withOpacity(.4),
+      height: 16,
+    );
+
+    // Order 클래스에 추가된 필드(옵셔널) 사용
+    final distance = order.distance != null
+        ? '${order.distance!.toStringAsFixed(1)} km'
+        : '-';
+    final type = cargoTypeMap[order.cargoType] ?? order.cargoType ?? '-';
+    final size = cargoSizeMap[order.cargoSize] ?? order.cargoSize ?? '-';
+    final weight = order.weight ?? '-';
+    final vehicle = vehicleMap[order.vehicle] ?? order.vehicle ?? '-';
+    final pack = packingMap[order.packingOption] ?? order.packingOption ?? '-';
+    final ship = order.isImmediate == null
+        ? '-'
+        : (order.isImmediate! ? '즉시배송' : '예약배송');
+    final rsv = order.reservedDate ?? '-';
+
+    return Card(
+      elevation: 1.5,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '화물 상세정보',
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 8),
+            _row('거리', distance),
+            divider,
+            _row('화물 종류', type),
+            _row('화물 크기', size),
+            _row('무게', weight),
+            divider,
+            _row('차량', vehicle),
+            _row('포장 방식', pack),
+            divider,
+            _row('배송', ship),
+            _row('예약일', rsv),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _row(String k, String v) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              k,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Colors.black54,
+              ),
+            ),
+          ),
+          Text(v, style: const TextStyle(fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
   }
 }
 
