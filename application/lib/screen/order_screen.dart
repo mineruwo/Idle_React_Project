@@ -38,9 +38,8 @@ class _OrderScreenState extends State<OrderScreen> {
     try {
       final list = await _orderRepo.fetchOrders(isShipper: isShipper);
       list.sort(
-        (a, b) => (b.createdAt ?? DateTime(1970)).compareTo(
-          a.createdAt ?? DateTime(1970),
-        ),
+        (a, b) => (b.createdAt ?? DateTime(1970))
+            .compareTo(a.createdAt ?? DateTime(1970)),
       );
       setState(() {
         _orders = list;
@@ -62,23 +61,21 @@ class _OrderScreenState extends State<OrderScreen> {
   Future<void> _createOrder() async {
     final createdPayload = await Navigator.of(context)
         .push<Map<String, dynamic>>(
-          MaterialPageRoute(builder: (_) => const _CreateOrderPage()),
-        );
+      MaterialPageRoute(builder: (_) => const _CreateOrderPage()),
+    );
     if (createdPayload == null) return;
 
     try {
       final saved = await _orderRepo.createOrderFromPayload(createdPayload);
       setState(() => _orders.insert(0, saved));
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('등록 완료')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('등록 완료')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('등록 실패: $e')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('등록 실패: $e')));
       }
     }
   }
@@ -118,14 +115,13 @@ class _OrderScreenState extends State<OrderScreen> {
                 Text(
                   isShipper ? '내 오더' : '오더 게시판',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+                        fontWeight: FontWeight.w800,
+                      ),
                 ),
                 Chip(
                   label: Text(isShipper ? '화주' : '차주'),
-                  backgroundColor: Theme.of(
-                    context,
-                  ).colorScheme.surfaceContainerHighest,
+                  backgroundColor:
+                      Theme.of(context).colorScheme.surfaceContainerHighest,
                 ),
               ],
             ),
@@ -133,17 +129,12 @@ class _OrderScreenState extends State<OrderScreen> {
           Expanded(
             child: isShipper
                 ? _ShipperList(
-                    orders: _orders
-                        .where((o) => o.status != 'COMPLETED')
-                        .toList(),
+                    orders:
+                        _orders.where((o) => o.status != 'COMPLETED').toList(),
                     onConfirm: (order) async {
+                      // 필요시 다른 곳에서 사용할 수 있으니 남겨둠 (결제하기에서는 호출 안 함)
                       await _orderRepo.updateStatus(order.id, 'COMPLETED');
                       _updateLocal(order.copyWith(status: 'COMPLETED'));
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('오더 확정 완료')),
-                        );
-                      }
                     },
                     onAssigned: (order) async {
                       await _orderRepo.updateStatus(order.id, 'ASSIGNED');
@@ -195,7 +186,6 @@ class _ShipperList extends StatefulWidget {
 
 class _ShipperListState extends State<_ShipperList> {
   String? _expandedId;
-  bool _confirming = false;
 
   void _toggle(String id) =>
       setState(() => _expandedId = (_expandedId == id) ? null : id);
@@ -220,10 +210,8 @@ class _ShipperListState extends State<_ShipperList> {
               child: InkWell(
                 onTap: () => _toggle(o.id),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
-                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   child: Row(
                     children: [
                       Expanded(
@@ -232,9 +220,8 @@ class _ShipperListState extends State<_ShipperList> {
                           children: [
                             Text(
                               o.orderNo.isNotEmpty ? o.orderNo : '오더',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                              ),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w700),
                             ),
                             const SizedBox(height: 4),
                             Text('${o.departure} → ${o.arrival}'),
@@ -270,20 +257,18 @@ class _ShipperListState extends State<_ShipperList> {
                       margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.surfaceContainerHighest,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Theme.of(
-                            context,
-                          ).dividerColor.withOpacity(0.4),
+                          color: Theme.of(context).dividerColor.withOpacity(0.4),
                         ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // 상단 기본 정보(주문번호/경로/상태/등록일) — 유지
+                          // 상단 기본 정보
                           _kv('주문번호', o.orderNo),
                           _kv('경로', '${o.departure} → ${o.arrival}'),
                           _kv('상태', _statusK(o.status)),
@@ -292,12 +277,12 @@ class _ShipperListState extends State<_ShipperList> {
 
                           const SizedBox(height: 12),
 
-                          // 🔹 화물 상세 카드 (차주 화면과 동일한 디자인)
+                          // 화물 상세 카드
                           CargoDetailCard(order: o),
 
                           const SizedBox(height: 12),
 
-                          // 액션 버튼 영역 — 기존 로직 그대로
+                          // ▼ 버튼들: 동일 사이즈/스타일(OutlinedButton.icon)로 통일
                           Row(
                             children: [
                               Expanded(
@@ -310,36 +295,17 @@ class _ShipperListState extends State<_ShipperList> {
                               ),
                               const SizedBox(width: 8),
                               Expanded(
-                                child: FilledButton.tonal(
-                                  onPressed:
-                                      (o.status == 'COMPLETED' || _confirming)
-                                      ? null
-                                      : () async {
-                                          setState(() => _confirming = true);
-                                          try {
-                                            await widget.onConfirm(o);
-                                            if (mounted) {
-                                              setState(
-                                                () => _expandedId = null,
-                                              );
-                                            }
-                                          } finally {
-                                            if (mounted) {
-                                              setState(
-                                                () => _confirming = false,
-                                              );
-                                            }
-                                          }
-                                        },
-                                  child: _confirming
-                                      ? const SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                          ),
-                                        )
-                                      : const Text('확정하기'),
+                                child: OutlinedButton.icon(
+                                  icon: const Icon(Icons.payments_outlined),
+                                  label: const Text('결제하기'),
+                                  onPressed: () {
+                                    // ✅ 결제 안내만, 확정/상태변경 없음
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content:
+                                              Text('결제 화면으로 이동합니다.')),
+                                    );
+                                  },
                                 ),
                               ),
                             ],
@@ -378,7 +344,6 @@ class _ShipperListState extends State<_ShipperList> {
         return '완료';
       case 'PAID':
         return '결제완료';
-      case 'NONE':
       default:
         return '없음';
     }
@@ -478,32 +443,29 @@ class _BidsSheetState extends State<_BidsSheet> {
                             await _repo.acceptBid(widget.order.id, b.id);
                             if (mounted) {
                               Navigator.of(context).pop();
-                              await widget.onAccepted(widget.order);
+                              await widget.onAccepted(widget.order); // 상태 갱신
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('입찰 수락 완료: ${_won(b.price)}원'),
-                                ),
+                                const SnackBar(content: Text('확정완료')),
                               );
                             }
                           } on DioException catch (e) {
-                            final msg =
-                                e.response?.data?.toString() ??
+                            final msg = e.response?.data?.toString() ??
                                 e.message ??
                                 '알 수 없는 오류';
                             if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('수락 실패: $msg')),
+                                SnackBar(content: Text('확정 실패: $msg')),
                               );
                             }
                           } catch (e) {
                             if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('수락 실패: $e')),
+                                SnackBar(content: Text('확정 실패: $e')),
                               );
                             }
                           }
                         },
-                        child: const Text('수락'),
+                        child: const Text('확정하기'),
                       ),
                     );
                   },
@@ -520,10 +482,9 @@ class _BidsSheetState extends State<_BidsSheet> {
   String _fmt(DateTime d) =>
       '${d.month.toString().padLeft(2, '0')}/${d.day.toString().padLeft(2, '0')} '
       '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
-  String _won(int v) => v.toString().replaceAllMapped(
-    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-    (m) => '${m[1]},',
-  );
+  String _won(int v) =>
+      v.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (m) => '${m[1]},');
 }
 
 /* =========================
@@ -630,9 +591,8 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
 
       final mine = list.where((b) => b.driverIdNum == myId).toList()
         ..sort(
-          (a, b) => (b.createdAt ?? DateTime(0)).compareTo(
-            a.createdAt ?? DateTime(0),
-          ),
+          (a, b) => (b.createdAt ?? DateTime(0))
+              .compareTo(a.createdAt ?? DateTime(0)),
         );
 
       return mine.isNotEmpty ? mine.first : null;
@@ -661,10 +621,8 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
                         color: c.primaryContainer,
                         borderRadius: BorderRadius.circular(20),
@@ -679,9 +637,10 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
                 const SizedBox(height: 12),
                 Text(
                   o.orderNo.isNotEmpty ? o.orderNo : '오더',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -714,9 +673,8 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
                       decoration: BoxDecoration(
                         color: c.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Theme.of(context).dividerColor,
-                        ),
+                        border:
+                            Border.all(color: Theme.of(context).dividerColor),
                       ),
                       child: Text(
                         '내 최근 입찰: ${_won(bid.price)}원'
@@ -753,10 +711,8 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
                       decoration: const InputDecoration(
                         labelText: '입찰가(원)',
                         border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                       ),
                     ),
                   ),
@@ -765,25 +721,20 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
                     onPressed: _submitting
                         ? null
                         : () async {
-                            final only = _bidC.text.replaceAll(
-                              RegExp(r'[^0-9]'),
-                              '',
-                            );
+                            final only =
+                                _bidC.text.replaceAll(RegExp(r'[^0-9]'), '');
                             if (only.isEmpty) return;
 
                             setState(() => _submitting = true);
                             try {
                               final price = int.parse(only);
-                              final submitted = await _bidRepo.submitBid(
-                                o.id,
-                                price,
-                              );
+                              final submitted =
+                                  await _bidRepo.submitBid(o.id, price);
 
                               setState(() {
                                 _lastSubmitted = submitted; // 즉시 표시
-                                _myLastBidFuture = Future.value(
-                                  submitted,
-                                ); // 재진입 없이 동일 상태
+                                _myLastBidFuture =
+                                    Future.value(submitted); // 재진입 없이 유지
                                 _bidC.clear();
                               });
 
@@ -793,8 +744,7 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
                                 );
                               }
                             } on DioException catch (e) {
-                              final msg =
-                                  e.response?.data?.toString() ??
+                              final msg = e.response?.data?.toString() ??
                                   e.message ??
                                   '알 수 없는 오류';
                               if (mounted) {
@@ -836,9 +786,9 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
       '${d.month.toString().padLeft(2, '0')}/${d.day.toString().padLeft(2, '0')} '
       '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
   String _won(int v) => v.toString().replaceAllMapped(
-    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-    (m) => '${m[1]},',
-  );
+        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+        (m) => '${m[1]},',
+      );
   String _statusK(String s) {
     switch (s) {
       case 'OPEN':
@@ -849,7 +799,6 @@ class _DriverOrderDetailState extends State<_DriverOrderDetail> {
         return '완료';
       case 'PAID':
         return '결제완료';
-      case 'NONE':
       default:
         return '없음';
     }
@@ -870,18 +819,15 @@ class CargoDetailCard extends StatelessWidget {
       height: 16,
     );
 
-    // Order 클래스에 추가된 필드(옵셔널) 사용
-    final distance = order.distance != null
-        ? '${order.distance!.toStringAsFixed(1)} km'
-        : '-';
+    final distance =
+        order.distance != null ? '${order.distance!.toStringAsFixed(1)} km' : '-';
     final type = cargoTypeMap[order.cargoType] ?? order.cargoType ?? '-';
     final size = cargoSizeMap[order.cargoSize] ?? order.cargoSize ?? '-';
     final weight = order.weight ?? '-';
     final vehicle = vehicleMap[order.vehicle] ?? order.vehicle ?? '-';
     final pack = packingMap[order.packingOption] ?? order.packingOption ?? '-';
-    final ship = order.isImmediate == null
-        ? '-'
-        : (order.isImmediate! ? '즉시배송' : '예약배송');
+    final ship =
+        order.isImmediate == null ? '-' : (order.isImmediate! ? '즉시배송' : '예약배송');
     final rsv = order.reservedDate ?? '-';
 
     return Card(
@@ -894,9 +840,10 @@ class CargoDetailCard extends StatelessWidget {
           children: [
             Text(
               '화물 상세정보',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 8),
             _row('거리', distance),
@@ -1013,9 +960,8 @@ class _CreateOrderPageState extends State<_CreateOrderPage> {
                 if (_distanceC.text.isNotEmpty)
                   'distance': double.tryParse(_distanceC.text),
                 if (_proposedPriceC.text.isNotEmpty)
-                  'proposedPrice': int.tryParse(
-                    _proposedPriceC.text.replaceAll(',', ''),
-                  ),
+                  'proposedPrice':
+                      int.tryParse(_proposedPriceC.text.replaceAll(',', '')),
                 'status': 'OPEN',
               }..removeWhere((k, v) => v == null);
 

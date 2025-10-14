@@ -87,7 +87,7 @@ export const saveOrder = async (orderData) => {
  * - 없으면 최신순 전체
  */
 export const fetchOrders = async (q) => {
-    const { data } = await publicClient.get("/orders", {
+    const { data } = await authClient.get("/orders", {
         // axios가 알아서 ?q=... 구성
         params: q && String(q).trim() ? { q: String(q).trim() } : undefined,
     });
