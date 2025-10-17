@@ -85,4 +85,47 @@ public class SnsOnboardingServiceImpl implements SnsOnboardingService{
         }
         return base + "-" + System.currentTimeMillis();
     }
+    
+    @Override
+    public CustomerEntity completeAppSignup(OauthSignupDTO oauthSignupDTO, OauthSignupRequestDTO oauthSignupRequestDTO) {
+        customerRepository.findBySnsLoginProviderAndSnsProviderId(
+        		oauthSignupDTO.getProvider(), oauthSignupDTO.getProviderId()
+        ).ifPresent(u -> { throw new IllegalStateException("already linked"); });
+
+        String loginId = generateLoginId(oauthSignupDTO.getProvider(), oauthSignupDTO.getProviderId());
+
+        CustomerEntity user = new CustomerEntity();
+        user.setId(loginId);
+        user.setPasswordEnc(null);        
+        user.setCustomName(oauthSignupRequestDTO.getCustomName());    
+        user.setNickname(oauthSignupRequestDTO.getNickname());          
+        user.setSnsLoginProvider(oauthSignupDTO.getProvider());
+        user.setSnsProviderId(oauthSignupDTO.getProviderId());
+        user.setCreatedAt(LocalDateTime.now());
+        user.setIsLefted(false);
+        user.setUserPoint(0);
+        user.setRole(oauthSignupRequestDTO.getRole());
+
+        return customerRepository.save(user);
+    }
+
+    @Override
+    public CustomerEntity appLinkExisting(OauthSignupDTO oauthSignupDTO, OauthLinkExistingDTO oauthLinkExistingDTO) {
+        customerRepository.findBySnsLoginProviderAndSnsProviderId(
+        		oauthSignupDTO.getProvider(), oauthSignupDTO.getProviderId()
+        ).ifPresent(u -> { throw new IllegalStateException("already linked"); });
+
+        CustomerEntity existing = customerRepository.findById(oauthLinkExistingDTO.getId())
+                .orElseThrow(() -> new IllegalArgumentException("user not found"));
+
+        if (existing.getPasswordEnc() == null ||
+            !passwordEncoder.matches(oauthLinkExistingDTO.getPasswordEnc(), existing.getPasswordEnc())) {
+            throw new IllegalArgumentException("bad credentials");
+        }
+
+        existing.setSnsLoginProvider(oauthSignupDTO.getProvider());
+        existing.setSnsProviderId(oauthSignupDTO.getProviderId());
+
+        return customerRepository.save(existing);
+    }
 }

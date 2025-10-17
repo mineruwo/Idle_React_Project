@@ -38,7 +38,12 @@ public class AuthServiceImpl implements AuthService {
 			throw new BadCredentialsException("아이디 또는 비밀번호가 올바르지 않습니다.");
 		}
 
-		return new LoginResponseDTO(customer.getId(), customer.getNickname(), customer.getRole(), customer.getIdNum());
+		 return LoginResponseDTO.builder()
+		            .id(customer.getId())
+		            .nickname(customer.getNickname())
+		            .role(customer.getRole())
+		            .idNum(customer.getIdNum())
+		            .build();
 	}
 
 	// 회원가입
@@ -73,4 +78,6 @@ public class AuthServiceImpl implements AuthService {
 	public boolean isNicknameDuplicate(String nickname) {
 		return customerRepository.existsByNickname(nickname);
 	}
+	
+	
 }

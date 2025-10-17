@@ -12,4 +12,8 @@ import lombok.NoArgsConstructor;
 public class OauthLinkExistingDTO {
 	private String id;
 	private String passwordEnc;
+	
+	private String provider;
+	private String providerId;
+	
 }

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,8 +25,9 @@ public class InquiryController {
     private final InquiryService inquiryService;
 
     @PostMapping
-    public ResponseEntity<InquiryDTO> createInquiry(@RequestBody InquiryDTO inquiryDTO) {
-        InquiryDTO createdInquiry = inquiryService.createInquiry(inquiryDTO);
+    public ResponseEntity<InquiryDTO> createInquiry(@RequestBody InquiryDTO inquiryDTO, Authentication authentication) {
+        String username = authentication.getName(); // Get username from security context
+        InquiryDTO createdInquiry = inquiryService.createInquiry(inquiryDTO, username);
         return new ResponseEntity<>(createdInquiry, HttpStatus.CREATED);
     }
 
@@ -60,7 +62,7 @@ public class InquiryController {
 
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<Page<InquiryDTO>> getInquiriesByCustomerId(
-            @PathVariable Long customerId,
+            @PathVariable("customerId") Long customerId,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<InquiryDTO> inquiries = inquiryService.getInquiriesByCustomerId(customerId, pageable);
         return ResponseEntity.ok(inquiries);

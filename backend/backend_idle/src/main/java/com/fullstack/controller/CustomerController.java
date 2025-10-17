@@ -6,7 +6,9 @@ import com.fullstack.service.AuthService;
 import com.fullstack.service.CustomerService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/customer")
+@Log4j2
 public class CustomerController {
 
     @Autowired
@@ -26,9 +29,9 @@ public class CustomerController {
     
     // 회원가입
     @PostMapping("/signup")
-    public ResponseEntity<Void> signup(@RequestBody SignupRequestDTO signupRequestDTO) {
+    public ResponseEntity<Map<String, String>> signup(@RequestBody SignupRequestDTO signupRequestDTO) {   	
     	authService.register(signupRequestDTO);
-    	return ResponseEntity.ok().build();
+    	return ResponseEntity.ok(Collections.singletonMap("message", "success"));
     }
     
     // 아이디 중복 확인

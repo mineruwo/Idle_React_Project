@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface InquiryService {
-    InquiryDTO createInquiry(InquiryDTO inquiryDTO);
+    InquiryDTO createInquiry(InquiryDTO inquiryDTO, String username);
     InquiryDTO getInquiryById(UUID id);
     Page<InquiryDTO> getAllInquiries(Pageable pageable, InquiryStatus status, String searchQuery);
     InquiryDTO updateInquiry(UUID id, InquiryDTO inquiryDTO);
@@ -30,14 +30,12 @@ public interface InquiryService {
     default InquiryEntity dtoToEntity(InquiryDTO dto) {
         return InquiryEntity.builder()
                 .inquiryId(dto.getInquiryId())
-                .customer(CustomerEntity.builder().idNum(dto.getCustomerIdNum().intValue()).build())
+                // Customer is now set in the implementation
                 .inquiryTitle(dto.getInquiryTitle())
                 .inquiryContent(dto.getInquiryContent())
                 .inquiryAnswer(dto.getInquiryAnswer())
                 .createdAt(dto.getCreatedAt())
                 .answeredAt(dto.getAnsweredAt())
-                
-                
                 .status(dto.getStatus())
                 .reInquiryId(dto.getReInquiryId())
                 .build();

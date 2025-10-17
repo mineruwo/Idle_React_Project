@@ -26,23 +26,22 @@ public class BackendIdleApplication {
         return new RestTemplate();
     }
 
-    // 애플리케이션 시작 시 기본 관리자 계정 생성
-    @Bean
-    public CommandLineRunner initData(AdminRepository adminRepository, PasswordEncoder passwordEncoder) {
-        return args -> {
-            if (adminRepository.findByAdminIdAndIsDelFalse("admin").isEmpty()) {
-                AdminEntity admin = AdminEntity.builder()
-                        .adminId("admin")
-                        .password(passwordEncoder.encode("admin1234")) // 안전한 비밀번호로 변경 권장
-                        .name("기본 관리자")
-                        .role(AdminRole.ALL_PERMISSION) // 모든 권한 부여
-                        .emplId("EMP001")
-                        .regDate(LocalDateTime.now())
-                        .isDel(false)
-                        .build();
-                adminRepository.save(admin);
-                System.out.println("기본 관리자 계정 생성: admin/admin1234");
-            }
-        };
-    }
+//    @Bean
+//    public CommandLineRunner initData(AdminRepository adminRepository, PasswordEncoder passwordEncoder) {
+//        return args -> {
+//            if (adminRepository.findByAdminIdAndIsDelFalse("admin").isEmpty()) {
+//                AdminEntity admin = AdminEntity.builder()
+//                        .adminId("admin")
+//                        .password(passwordEncoder.encode("admin1234")) // 안전한 비밀번호로 변경 권장
+//                        .name("기본 관리자")
+//                        .role(AdminRole.ALL_PERMISSION) // 모든 권한 부여
+//                        .emplId("EMP001")
+//                        .regDate(LocalDateTime.now())
+//                        .isDel(false)
+//                        .build();
+//                adminRepository.save(admin);
+//                System.out.println("기본 관리자 계정 생성: admin/admin1234");
+//            }
+//        };
+//    }
 }

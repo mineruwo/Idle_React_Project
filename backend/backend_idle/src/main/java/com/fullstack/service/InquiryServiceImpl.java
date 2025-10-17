@@ -32,20 +32,17 @@ public class InquiryServiceImpl implements InquiryService {
     private final CustomerRepository customerRepository; // Added
 
     @Override
-    public InquiryDTO createInquiry(InquiryDTO inquiryDTO) {
+    public InquiryDTO createInquiry(InquiryDTO inquiryDTO, String username) {
+        CustomerEntity customer = customerRepository.findById(username)
+                .orElseThrow(() -> new RuntimeException("Authenticated user not found: " + username));
+
         InquiryEntity inquiry = dtoToEntity(inquiryDTO);
+        inquiry.setCustomer(customer);
         inquiry.setCreatedAt(LocalDateTime.now());
         if (inquiry.getStatus() == null) {
             inquiry.setStatus(InquiryStatus.INQUIRY_PENDING);
         }
-        // Fetch AdminEntity if adminId is provided in DTO
-        if (inquiryDTO.getAdminId() != null) {
-            adminRepository.findByAdminId(inquiryDTO.getAdminId()).ifPresent(inquiry::setAdmin);
-        }
-        // Fetch CustomerEntity if customerIdNum is provided in DTO
-        if (inquiryDTO.getCustomerIdNum() != null) {
-            customerRepository.findByIdNum(inquiryDTO.getCustomerIdNum()).ifPresent(inquiry::setCustomer);
-        }
+
         InquiryEntity savedInquiry = inquiryRepository.save(inquiry);
         return entityToDto(savedInquiry);
     }
